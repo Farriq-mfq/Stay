@@ -1,16 +1,31 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PresensiModule } from './presensi/presensi.module';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { GatewaysModule } from './gateways/gateways.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { TelegramModule } from './telegram/telegram.module';
-import { GatewayModule } from './gateway/gateway.module';
+import { UsersModule } from './users/users.module';
+
+import { CustomPrismaModule } from 'nestjs-prisma';
+import { extendedPrismaClient } from './prisma.extension';
 
 @Module({
-  imports: [PresensiModule, AuthModule, UsersModule, SiswaModule, TelegramModule, GatewayModule],
+  imports: [
+    CustomPrismaModule.forRootAsync({
+      name: 'PrismaService',
+      isGlobal: true,
+      useFactory: () => {
+        return extendedPrismaClient;
+      },
+    }),
+    AuthModule,
+    UsersModule,
+    SiswaModule,
+    TelegramModule,
+    GatewaysModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

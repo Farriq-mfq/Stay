@@ -53,6 +53,8 @@ model gateways {
   presence_sessionsId BigInt?
 }
 
+// only role presences are allowed
+
 model presence_sessions {
   id        BigInt     @id @default(autoincrement())
   name      String // example : PAI - AKIDAH DAN AKHLAK

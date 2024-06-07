@@ -1,34 +1,34 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { GatewayService } from './gateway.service';
+import { GatewaysService } from './gateways.service';
 import { CreateGatewayDto } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 
-@Controller('gateway')
-export class GatewayController {
-  constructor(private readonly gatewayService: GatewayService) {}
+@Controller('gateways')
+export class GatewaysController {
+  constructor(private readonly gatewaysService: GatewaysService) { }
 
   @Post()
   create(@Body() createGatewayDto: CreateGatewayDto) {
-    return this.gatewayService.create(createGatewayDto);
+    return this.gatewaysService.create(createGatewayDto);
   }
 
   @Get()
-  findAll() {
-    return this.gatewayService.findAll();
+  async findAll() {
+    return await this.gatewaysService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.gatewayService.findOne(+id);
+    return this.gatewaysService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateGatewayDto: UpdateGatewayDto) {
-    return this.gatewayService.update(+id, updateGatewayDto);
+    return this.gatewaysService.update(+id, updateGatewayDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.gatewayService.remove(+id);
+    return this.gatewaysService.remove(+id);
   }
 }
