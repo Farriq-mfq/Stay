@@ -9,6 +9,8 @@ import { UsersModule } from './users/users.module';
 
 import { CustomPrismaModule } from 'nestjs-prisma';
 import { extendedPrismaClient } from './prisma.extension';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -18,6 +20,17 @@ import { extendedPrismaClient } from './prisma.extension';
       useFactory: () => {
         return extendedPrismaClient;
       },
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,

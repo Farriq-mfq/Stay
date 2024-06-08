@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { GatewaysService } from './gateways.service';
-import { GatewaysController } from './gateways.controller';
 import { TokenService } from 'src/services/token.service';
+import { GatewaysController } from './gateways.controller';
+import { GatewaysService } from './gateways.service';
 
 @Module({
   controllers: [GatewaysController],

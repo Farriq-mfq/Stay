@@ -5,11 +5,15 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
   ) {
 
   }
@@ -95,5 +99,22 @@ export class GatewaysService {
         }
       })
     })
+  }
+
+  async generateSecureToken(id: number) {
+    const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+      where: {
+        id: id
+      }
+    })
+    const updated = await this.prismaService.client.gateways.update({
+      where: {
+        id: gateway.id
+      },
+      data: {
+        token: await this.tokenService.generateRandomToken(16)
+      }
+    })
+    return await this.jwtService.sign(updated.token)
   }
 }

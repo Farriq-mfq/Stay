@@ -32,6 +32,11 @@ export class GatewaysController {
     }
   }
 
+  @Post(':id/token')
+  async generateToken(@Param('id', new ParseIntPipe()) id: string) {
+    return await this.gatewaysService.generateSecureToken(+id)
+  }
+
   @Patch(':id')
   update(@Param('id', new ParseIntPipe()) id: string, @Body() updateGatewayDto: UpdateGatewayDto) {
     return this.gatewaysService.update(+id, updateGatewayDto);
