@@ -7,6 +7,8 @@ import { CreateGatewayDto } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ScannedDto } from './dto/scanned.dto';
+import { Socket } from 'socket.io';
 @Injectable()
 export class GatewaysService {
   constructor(
@@ -116,5 +118,23 @@ export class GatewaysService {
       }
     })
     return await this.jwtService.sign(updated.token)
+  }
+
+
+  async handleScanned(
+    data: ScannedDto,
+    client: Socket
+  ) {
+    const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+      where: {
+        ip: data.ip
+      }
+    })
+    if (gateway.role === 'register' && gateway.presence_sessionsId === null) {
+      client.emit(`READER_${gateway.ip}`, data.scan)
+    } else {
+      console.log('the role is presence')
+    }
+
   }
 }
