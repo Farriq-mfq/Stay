@@ -45,7 +45,7 @@ model gateways {
   location            String
   name                String
   role                GatewayRole
-  status              Boolean
+  status              Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   presences           presences[]
@@ -58,6 +58,7 @@ model gateways {
 model presence_sessions {
   id        BigInt     @id @default(autoincrement())
   name      String // example : PAI - AKIDAH DAN AKHLAK
+  status    Boolean
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   gateways  gateways[]

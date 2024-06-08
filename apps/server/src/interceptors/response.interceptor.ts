@@ -11,7 +11,6 @@ export interface Response<T> {
 export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
     intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
         const statusCode = context.switchToHttp().getResponse().statusCode
-        console.log(statusCode)
         return next.handle().pipe(map(data => ({
             statusCode,
             data
