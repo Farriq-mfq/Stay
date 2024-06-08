@@ -11,6 +11,7 @@ import { CustomPrismaModule } from 'nestjs-prisma';
 import { extendedPrismaClient } from './prisma.extension';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
       inject: [ConfigService],
     }),
+    EventsModule,
     AuthModule,
     UsersModule,
     SiswaModule,
