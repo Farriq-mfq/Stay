@@ -3,7 +3,7 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
-import { CreateGatewayDto } from './dto/create-gateway.dto';
+import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -34,8 +34,11 @@ export class GatewaysService {
 
   async findAll(
     page?: number,
-    limit?: number
+    limit?: number,
+    search?: string,
+    role?: RoleGatewayType
   ) {
+
     const [items, meta] = await this.prismaService.client.gateways.paginate({
       select: {
         name: true,
@@ -43,6 +46,26 @@ export class GatewaysService {
         location: true,
         role: true,
         status: true,
+      },
+      where: {
+        ...search && {
+          OR: [
+            {
+              name: {
+                contains: search
+              },
+            },
+            {
+              ip: {
+                contains: search
+              },
+            }
+          ],
+        },
+
+        ...role && {
+          role
+        }
       }
     }).withPages({
       limit: limit || 10,

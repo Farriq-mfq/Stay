@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res } from '@nestjs/common';
-import { CreateGatewayDto } from './dto/create-gateway.dto';
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, Patch, Post, Query, Res } from '@nestjs/common';
+import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { GatewaysService } from './gateways.service';
 import { Response } from 'express';
@@ -15,9 +15,11 @@ export class GatewaysController {
   @Get()
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+    @Query('role', new ParseEnumPipe(RoleGatewayType, { optional: true })) role?: RoleGatewayType
   ) {
-    return await this.gatewaysService.findAll(page, limit);
+    return await this.gatewaysService.findAll(page, limit, search, role);
   }
 
   @Get(':id')
