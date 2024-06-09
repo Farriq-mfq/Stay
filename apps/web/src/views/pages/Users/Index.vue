@@ -1,5 +1,5 @@
 <template>
-  <p>slkdfnlskndf</p>
+  <p>Ini users page</p>
 </template>
 
 <script>

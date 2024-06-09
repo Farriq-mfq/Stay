@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res } from '@nestjs/common';
 import { CreateGatewayDto } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { GatewaysService } from './gateways.service';
@@ -13,8 +13,11 @@ export class GatewaysController {
   }
 
   @Get()
-  async findAll() {
-    return await this.gatewaysService.findAll();
+  async findAll(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number
+  ) {
+    return await this.gatewaysService.findAll(page, limit);
   }
 
   @Get(':id')

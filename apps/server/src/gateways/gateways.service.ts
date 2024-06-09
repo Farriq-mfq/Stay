@@ -36,7 +36,15 @@ export class GatewaysService {
     page?: number,
     limit?: number
   ) {
-    const [items, meta] = await this.prismaService.client.gateways.paginate().withPages({
+    const [items, meta] = await this.prismaService.client.gateways.paginate({
+      select: {
+        name: true,
+        ip: true,
+        location: true,
+        role: true,
+        status: true,
+      }
+    }).withPages({
       limit: limit || 10,
       includePageCount: true,
       page: page || 1
@@ -51,6 +59,13 @@ export class GatewaysService {
     return await this.prismaService.client.gateways.findUniqueOrThrow({
       where: {
         id: id
+      },
+      select: {
+        name: true,
+        ip: true,
+        location: true,
+        role: true,
+        status: true,
       }
     });
   }

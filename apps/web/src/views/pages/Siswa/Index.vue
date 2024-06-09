@@ -1,5 +1,5 @@
 <template>
-  <p>slkdfnlskndf</p>
+  <p>ini halaman siswa</p>
 </template>
 
 <script>

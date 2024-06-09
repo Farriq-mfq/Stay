@@ -1,5 +1,5 @@
 <template>
-  <p>slkdfnlskndf</p>
+  <p>Ini halaman report</p>
 </template>
 
 <script>

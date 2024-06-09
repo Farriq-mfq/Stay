@@ -1,5 +1,7 @@
 <template>
-  <p>slkdfnlskndf</p>
+  <p>
+    ini halaman presensi
+  </p>
 </template>
 
 <script>

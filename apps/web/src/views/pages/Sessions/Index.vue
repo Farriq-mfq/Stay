@@ -1,5 +1,5 @@
 <template>
-  <p>slkdfnlskndf</p>
+  <p>Ini Halaman sesssion</p>
 </template>
 
 <script>
