@@ -57,22 +57,25 @@ model gateways {
 // only role presences are allowed
 
 model presence_sessions {
-  id        BigInt     @id @default(autoincrement())
+  id        BigInt      @id @default(autoincrement())
   name      String // example : PAI - AKIDAH DAN AKHLAK
   status    Boolean
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   gateways  gateways[]
+  presences presences[]
 }
 
 model presences {
-  id         BigInt    @id @default(autoincrement())
-  siswa      siswa     @relation(fields: [siswaId], references: [id], onDelete: Cascade)
-  siswaId    BigInt
-  gateway    gateways? @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
-  gatewaysId BigInt?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id                  BigInt            @id @default(autoincrement())
+  siswa               siswa             @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  siswaId             BigInt
+  gateway             gateways?         @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
+  gatewaysId          BigInt?
+  session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  presence_sessionsId BigInt?
 }
 
 model telegram_account {

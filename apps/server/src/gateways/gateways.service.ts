@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
@@ -168,10 +168,16 @@ export class GatewaysService {
         ip: data.ip
       }
     })
-    if (gateway.role === 'register' && gateway.presence_sessionsId === null) {
-      client.emit(`READER_${gateway.ip}`, data.scan)
-    } else {
-      console.log('the role is presence')
+
+    switch (gateway.role) {
+      case 'presence':
+        console.log('the role is presence')
+        break;
+      case 'register':
+        client.emit(`READER_${gateway.ip}`, data.scan)
+        break;
+      default:
+        throw new InternalServerErrorException('Role not registered')
     }
 
   }

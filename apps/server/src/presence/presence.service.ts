@@ -1,0 +1,22 @@
+import { Injectable } from '@nestjs/common';
+import { CreatePresenceDto } from './dto/create-presence.dto';
+import { UpdatePresenceDto } from './dto/update-presence.dto';
+
+@Injectable()
+export class PresenceService {
+  create(createPresenceDto: CreatePresenceDto) {
+    return 'This action adds a new presence';
+  }
+
+  findAll() {
+    return `This action returns all presence`;
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} presence`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} presence`;
+  }
+}

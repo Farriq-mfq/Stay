@@ -12,6 +12,7 @@ import { extendedPrismaClient } from './prisma.extension';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { EventsModule } from './events/events.module';
+import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EventsModule } from './events/events.module';
     SiswaModule,
     TelegramModule,
     GatewaysModule,
+    PresenceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
