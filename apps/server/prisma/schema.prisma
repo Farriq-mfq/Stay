@@ -23,14 +23,15 @@ model siswa {
 }
 
 model users {
-  id                 BigInt           @id @default(autoincrement())
+  id                 BigInt            @id @default(autoincrement())
   name               String
-  username           String           @db.VarChar(255)
-  password           String           @db.VarChar(255)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  telegram_accounts  telegram_account @relation(fields: [telegram_accountId], references: [id])
-  telegram_accountId BigInt           @unique
+  username           String            @unique @db.VarChar(255)
+  password           String            @db.VarChar(255)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  refreshToken       String?           @db.Text
+  telegram_accounts  telegram_account? @relation(fields: [telegram_accountId], references: [id], onDelete: Cascade)
+  telegram_accountId BigInt?           @unique
 }
 
 // fitur data
@@ -67,14 +68,14 @@ model presence_sessions {
 }
 
 model presences {
-  id                  BigInt            @id @default(autoincrement())
-  siswa               siswa             @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  id                  BigInt             @id @default(autoincrement())
+  siswa               siswa              @relation(fields: [siswaId], references: [id], onDelete: Cascade)
   siswaId             BigInt
-  gateway             gateways?         @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
+  gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
   gatewaysId          BigInt?
   session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   presence_sessionsId BigInt?
 }
 

@@ -1,18 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { UsersModule } from './users/users.module';
 
-import { CustomPrismaModule } from 'nestjs-prisma';
-import { extendedPrismaClient } from './prisma.extension';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { CustomPrismaModule } from 'nestjs-prisma';
 import { EventsModule } from './events/events.module';
 import { PresenceModule } from './presence/presence.module';
+import { extendedPrismaClient } from './prisma.extension';
 
 @Module({
   imports: [
@@ -42,7 +40,5 @@ import { PresenceModule } from './presence/presence.module';
     GatewaysModule,
     PresenceModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule { }
