@@ -1,13 +1,7 @@
+<script setup>
+
+
+</script>
 <template>
   <p>slkdfnlskndf</p>
 </template>
-
-<script>
-export default {
-
-}
-</script>
-
-<style>
-
-</style>
