@@ -23,6 +23,10 @@ async function bootstrap() {
   // interceptor response
   app.useGlobalInterceptors(new ResponseInterceptor())
 
+  app.enableCors({
+    origin: ['http://localhost:5173'],
+  })
+
   await app.listen(3000);
 }
 bootstrap();

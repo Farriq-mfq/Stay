@@ -73,15 +73,15 @@ export class AuthService {
     }
 
 
-    async refreshTokens(userId: string, refreshToken: string) {
+    async refreshTokens(userId: string) {
         const user = await this.userService.find(userId);
         if (!user || !user.refreshToken)
             throw new UnauthorizedException();
-        const refreshTokenMatches = await verify(
-            user.refreshToken,
-            refreshToken,
-        );
-        if (!refreshTokenMatches) throw new UnauthorizedException();
+        // const refreshTokenMatches = await verify(
+        //     user.refreshToken,
+        //     refreshToken,
+        // );
+        // if (!refreshTokenMatches) throw new UnauthorizedException();
         const tokens = await this.getTokens(user.id.toString(), user.username);
         await this.userService.updateToken(user.id.toString(), tokens.refreshToken);
         return tokens;

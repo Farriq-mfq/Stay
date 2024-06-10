@@ -2,6 +2,8 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import auth from './plugins/auth'
+import http from './plugins/http'
 
 import PrimeVue from 'primevue/config';
 import AutoComplete from 'primevue/autocomplete';
@@ -113,7 +115,9 @@ import '@/assets/styles.scss';
 
 const app = createApp(App);
 
+app.use(http);
 app.use(router);
+app.use(auth);
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(DialogService);

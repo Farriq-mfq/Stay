@@ -25,12 +25,12 @@ export class AuthController {
     return await this.authService.logout(req['user'] as JwtPayload)
   }
 
-  @UseGuards(RefreshTokenGuard)
+  @UseGuards(AccessTokenGuard)
   @Post('refresh')
   refreshTokens(@Req() req: Request) {
     const userId = req.user['sub'];
-    const refreshToken = req.user['refreshToken'];
-    return this.authService.refreshTokens(userId, refreshToken);
+    // const refreshToken = req.user['refreshToken'];
+    return this.authService.refreshTokens(userId);
   }
 
   @UseGuards(AccessTokenGuard)
