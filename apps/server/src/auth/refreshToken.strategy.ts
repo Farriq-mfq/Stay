@@ -9,9 +9,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     Strategy,
     'jwt-refresh',
 ) {
-    constructor(
-        private readonly configService: ConfigService,
-    ) {
+    constructor() {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.JWT_REFRESH_SECRET,

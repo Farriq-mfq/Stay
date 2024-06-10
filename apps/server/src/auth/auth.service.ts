@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import argon2, { verify } from 'argon2'
-import { AuthDto } from './dto/auth.dto';
-import { JwtService } from '@nestjs/jwt';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { verify } from 'argon2';
+import { UsersService } from 'src/users/users.service';
+import { JwtPayload } from './accessToken.strategy';
+import { AuthDto } from './dto/auth.dto';
 @Injectable()
 export class AuthService {
     constructor(
@@ -63,4 +64,31 @@ export class AuthService {
             refreshToken
         }
     }
+
+
+    async logout(payload: JwtPayload) {
+        const user = await this.userService.find(payload.sub.toString());
+        if (!user || !user.refreshToken) throw new UnauthorizedException()
+        return await this.userService.updateToken(payload.sub.toString(), null)
+    }
+
+
+    async refreshTokens(userId: string, refreshToken: string) {
+        const user = await this.userService.find(userId);
+        if (!user || !user.refreshToken)
+            throw new UnauthorizedException();
+        const refreshTokenMatches = await verify(
+            user.refreshToken,
+            refreshToken,
+        );
+        if (!refreshTokenMatches) throw new UnauthorizedException();
+        const tokens = await this.getTokens(user.id.toString(), user.username);
+        await this.userService.updateToken(user.id.toString(), tokens.refreshToken);
+        return tokens;
+    }
+
+    async getMe(payload: JwtPayload) {
+        return await this.userService.find(payload.sub.toString())
+    }
+
 }
