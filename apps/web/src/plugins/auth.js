@@ -1,5 +1,4 @@
 import { createAuth } from '@websanova/vue-auth/src/v3.js';
-import driverAuthBearer from '@websanova/vue-auth/src/drivers/auth/bearer.js';
 import driverHttpAxios from '@websanova/vue-auth/src/drivers/http/axios.1.x.js';
 import driverRouterVueRouter from '@websanova/vue-auth/src/drivers/router/vue-router.2.x.js';
 
@@ -11,13 +10,16 @@ export default (app) => {
         },
         drivers: {
             http: driverHttpAxios,
-            // auth: driverAuthBearer,
             auth: {
                 request: function (req, token) {
                     this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + token })
                 },
                 response: function (res) {
-                    return res.data.data.accessToken;
+                    if ('data' in res.data) {
+                        return res.data.data.accessToken;
+                    }
+                    
+                    return res.data
                 },
             },
             router: driverRouterVueRouter,
@@ -32,6 +34,7 @@ export default (app) => {
             logoutData: {
                 url: '/auth/logout',
                 method: 'POST',
+                makeRequest: true,
             },
             fetchData: {
                 url: '/auth/me',

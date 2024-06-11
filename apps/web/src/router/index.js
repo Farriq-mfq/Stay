@@ -22,7 +22,10 @@ const router = createRouter({
                 {
                     path: '/gateways',
                     name: 'gateways',
-                    component: () => import('@/views/Gateways/Index.vue')
+                    component: () => import('@/views/Gateways/Index.vue'),
+                    meta: {
+                        title: "Gateways",
+                    }
                 },
                 {
                     path: '/sessions',
@@ -56,13 +59,17 @@ const router = createRouter({
             name: 'login',
             component: Login,
             meta: {
-                auth: false
+                auth: false,
+                title: "login"
             }
         },
         {
             path: '/:pathNotFound(.*)*',
             name: 'not-found',
-            component: NotFound
+            component: NotFound,
+            meta: {
+                title: "404"
+            }
         }
 
     ]
@@ -70,6 +77,13 @@ const router = createRouter({
 
 
 export default (app) => {
+    router.beforeEach((to, from, next) => {
+        const title = to.meta.title;
+        if (title) {
+            document.title = `${title} - STAY`;
+        }
+        next();
+    });
     app.router = router
     app.use(router)
 }

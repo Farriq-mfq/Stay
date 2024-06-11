@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 
@@ -60,6 +60,15 @@ const showDialogLogout = ref(false)
 const hanldeShowDialogLogout = () => {
     showDialogLogout.value = true
 }
+
+const $auth = inject('auth')
+
+const handleLogout = () => {
+    return $auth.logout({
+        redirect: { name: 'login' },
+    })
+}
+
 </script>
 
 <template>
@@ -83,15 +92,14 @@ const hanldeShowDialogLogout = () => {
         </div>
 
 
-        <Dialog v-model:visible="showDialogLogout" modal header="Confirmation" :style="{ width: '50rem' }">
+        <Dialog v-model:visible="showDialogLogout" modal header="Confirmation" :style="{ width: '30rem' }">
             <p class="m-0">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                ex ea commodo consequat.
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                laborum.
+                Yakin ingin keluar dari aplikasi ?
             </p>
+            <div class="flex justify-content-end gap-2">
+                <Button type="button" label="Batal" severity="secondary" @click="showDialogLogout = false"></Button>
+                <Button type="button" severity="danger" @click.prevent="handleLogout" label="Keluar"></Button>
+            </div>
         </Dialog>
     </div>
 </template>

@@ -41,6 +41,7 @@ export class GatewaysService {
 
     const [items, meta] = await this.prismaService.client.gateways.paginate({
       select: {
+        id: true,
         name: true,
         ip: true,
         location: true,
@@ -84,6 +85,7 @@ export class GatewaysService {
         id: id
       },
       select: {
+        id: true,
         name: true,
         ip: true,
         location: true,
