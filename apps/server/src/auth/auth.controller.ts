@@ -1,34 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { AuthDto } from './dto/auth.dto';
+import { Request } from 'express';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
+import { JwtPayload } from './accessToken.strategy';
+import { RefreshTokenGuard } from 'src/guards/refreshToken.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('/login')
+  async login(
+    @Body() auth: AuthDto
+  ) {
+    return await this.authService.login(auth)
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @UseGuards(AccessTokenGuard)
+  @Post('/logout')
+  @HttpCode(200)
+  async logout(@Req() req: Request) {
+    return await this.authService.logout(req['user'] as JwtPayload)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @UseGuards(AccessTokenGuard)
+  @Post('refresh')
+  refreshTokens(@Req() req: Request) {
+    const userId = req.user['sub'];
+    // const refreshToken = req.user['refreshToken'];
+    return this.authService.refreshTokens(userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @UseGuards(AccessTokenGuard)
+  @Get('me')
+  getMe(@Req() req: Request) {
+    return this.authService.getMe(req['user'] as JwtPayload)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
 }

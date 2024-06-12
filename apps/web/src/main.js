@@ -1,6 +1,12 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import auth from './plugins/auth'
+import http from './plugins/http'
+import queryClient from './plugins/query-client'
+import socket from './plugins/socket'
+import vueDebounce from 'vue-debounce'
 
 import PrimeVue from 'primevue/config';
 import AutoComplete from 'primevue/autocomplete';
@@ -112,7 +118,12 @@ import '@/assets/styles.scss';
 
 const app = createApp(App);
 
+app.use(http);
 app.use(router);
+app.use(auth);
+app.use(queryClient);
+app.use(socket);
+app.directive('debounce', vueDebounce({ lock: true }))
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(DialogService);
@@ -220,5 +231,7 @@ app.component('TreeSelect', TreeSelect);
 app.component('TreeTable', TreeTable);
 app.component('TriStateCheckbox', TriStateCheckbox);
 app.component('VirtualScroller', VirtualScroller);
+
+app.use(VueQueryPlugin)
 
 app.mount('#app');

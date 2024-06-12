@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 
@@ -23,10 +23,6 @@ const logoUrl = computed(() => {
 
 const onTopBarMenuButton = () => {
     topbarMenuActive.value = !topbarMenuActive.value;
-};
-const onSettingsClick = () => {
-    topbarMenuActive.value = false;
-    router.push('/documentation');
 };
 const topbarMenuClasses = computed(() => {
     return {
@@ -58,13 +54,28 @@ const isOutsideClicked = (event) => {
 
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
+
+
+const showDialogLogout = ref(false)
+const hanldeShowDialogLogout = () => {
+    showDialogLogout.value = true
+}
+
+const $auth = inject('auth')
+
+const handleLogout = () => {
+    return $auth.logout({
+        redirect: { name: 'login' },
+    })
+}
+
 </script>
 
 <template>
     <div class="layout-topbar">
         <router-link to="/" class="layout-topbar-logo">
-            <img :src="logoUrl" alt="logo" />
-            <span>SAKAI</span>
+            <!-- <img :src="logoUrl" alt="logo" /> -->
+            <span>STAY</span>
         </router-link>
 
         <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
@@ -76,19 +87,20 @@ const isOutsideClicked = (event) => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
-            </button>
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-user"></i>
-                <span>Profile</span>
-            </button>
-            <button @click="onSettingsClick()" class="p-link layout-topbar-button">
-                <i class="pi pi-cog"></i>
-                <span>Settings</span>
-            </button>
+            <Button icon="pi pi-sign-out p-link" @click="hanldeShowDialogLogout" severity="danger"
+                :label="topbarMenuActive ? 'Logout' : ''" />
         </div>
+
+
+        <Dialog v-model:visible="showDialogLogout" modal header="Confirmation" :style="{ width: '30rem' }">
+            <p class="m-0">
+                Yakin ingin keluar dari aplikasi ?
+            </p>
+            <div class="flex justify-content-end gap-2">
+                <Button type="button" label="Batal" severity="secondary" @click="showDialogLogout = false"></Button>
+                <Button type="button" severity="danger" @click.prevent="handleLogout" label="Keluar"></Button>
+            </div>
+        </Dialog>
     </div>
 </template>
 

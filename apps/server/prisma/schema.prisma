@@ -14,6 +14,7 @@ model siswa {
   name                String
   nisn                Int
   nis                 Int
+  rfid_token          String?
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   presences           presences[]
@@ -22,14 +23,15 @@ model siswa {
 }
 
 model users {
-  id                 BigInt           @id @default(autoincrement())
+  id                 BigInt            @id @default(autoincrement())
   name               String
-  username           String           @db.VarChar(255)
-  password           String           @db.VarChar(255)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  telegram_accounts  telegram_account @relation(fields: [telegram_accountId], references: [id])
-  telegram_accountId BigInt           @unique
+  username           String            @unique @db.VarChar(255)
+  password           String            @db.VarChar(255)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  refreshToken       String?           @db.Text
+  telegram_accounts  telegram_account? @relation(fields: [telegram_accountId], references: [id], onDelete: Cascade)
+  telegram_accountId BigInt?           @unique
 }
 
 // fitur data
@@ -40,12 +42,12 @@ enum GatewayRole {
 
 model gateways {
   id                  BigInt             @id @default(autoincrement())
-  token               String             @db.VarChar()
+  token               String             @unique @db.VarChar()
   ip                  String             @unique @db.VarChar()
   location            String
   name                String
   role                GatewayRole
-  status              Boolean
+  status              Boolean            @default(true)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   presences           presences[]
@@ -56,21 +58,25 @@ model gateways {
 // only role presences are allowed
 
 model presence_sessions {
-  id        BigInt     @id @default(autoincrement())
+  id        BigInt      @id @default(autoincrement())
   name      String // example : PAI - AKIDAH DAN AKHLAK
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  status    Boolean
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   gateways  gateways[]
+  presences presences[]
 }
 
 model presences {
-  id         BigInt    @id @default(autoincrement())
-  siswa      siswa     @relation(fields: [siswaId], references: [id], onDelete: Cascade)
-  siswaId    BigInt
-  gateway    gateways? @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
-  gatewaysId BigInt?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id                  BigInt             @id @default(autoincrement())
+  siswa               siswa              @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  siswaId             BigInt
+  gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
+  gatewaysId          BigInt?
+  session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  presence_sessionsId BigInt?
 }
 
 model telegram_account {
