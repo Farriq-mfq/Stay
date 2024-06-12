@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, inject } from 'vue';
 import AppTopbar from './AppTopbar.vue';
 import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
@@ -54,6 +54,8 @@ const isOutsideClicked = (event) => {
 
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
+
+const auth = inject('auth')
 </script>
 
 <template>
@@ -64,7 +66,10 @@ const isOutsideClicked = (event) => {
         </div>
         <div class="layout-main-container">
             <div class="layout-main">
-                <router-view></router-view>
+                <div v-if="auth.ready()">
+                    <router-view></router-view>
+                </div>
+                <p v-if="!auth.ready()">Loading...</p>
             </div>
             <app-footer></app-footer>
         </div>

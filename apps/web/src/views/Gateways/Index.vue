@@ -1,7 +1,7 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref, watch } from 'vue';
+import { capitalize, getCurrentInstance, ref, watch } from 'vue';
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -83,6 +83,139 @@ const handleDebounceFilter = (val) => {
     refetch()
 }
 
+
+// add gateways
+const addGatewayDialog = ref(false)
+
+const addGateway = ref({
+    name: '',
+    ip: '',
+    location: '',
+    role: ''
+})
+
+const errorsAddGateways = ref(null)
+
+const addGatewayService = async (data) => {
+    return await axios.post('gateways', data)
+}
+
+const { mutateAsync: mutateGateway, isPending: pendingAddGateway } = useMutation({
+    mutationKey: ['addGateway'],
+    mutationFn: addGatewayService
+})
+
+const addGatewayStore = () => {
+    mutateGateway(addGateway.value, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Gateway berhasil ditambahkan',
+                life: 3000
+            })
+            addGatewayDialog.value = false
+            addGateway.value = {
+                name: '',
+                ip: '',
+                location: '',
+                role: ''
+            }
+            errorsAddGateways.value = {}
+            refetch()
+        },
+        onError(err) {
+            if (err.response.status === 400) {
+                errorsAddGateways.value = err.response.data
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Gateway gagal ditambahkan',
+                    life: 3000
+                })
+            }
+        }
+    })
+
+
+}
+
+// update status
+
+const updateStatusGateway = async (data) => {
+    return await axios.patch(`/gateways/${data.id}`, { status: !data.status })
+}
+
+const { mutateAsync: mutateUpdateStatusGateway, isPending: pendingUpdateStatusGateway } = useMutation({
+    mutationKey: ['updateStatusGateway'],
+    mutationFn: updateStatusGateway
+})
+
+const handleUpdateStatus = (id, status) => {
+    mutateUpdateStatusGateway({ id, status }, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Status gateway berhasil diubah',
+                life: 3000
+            })
+            refetch()
+        },
+        onError() {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Status gateway gagal diubah',
+                life: 3000
+            })
+        }
+    })
+}
+
+
+// remove gateway
+const showDialogRemoveGateway = ref(false)
+const removeGateway = ref(null)
+const handleShowDialogRemoveGateway = (data) => {
+    removeGateway.value = data
+    showDialogRemoveGateway.value = true
+}
+
+const removeGatewayService = async (data) => {
+    return await axios.delete(`/gateways/${data.id}`)
+}
+
+const { mutateAsync: removeGatewayMutate, isPending: removeGatewayPending } = useMutation({
+    mutationKey: ['removeGateway'],
+    mutationFn: removeGatewayService
+})
+
+
+const handleRemoveGateway = () => {
+    removeGatewayMutate(removeGateway.value, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Gateway berhasil dihapus',
+                life: 3000
+            })
+            showDialogRemoveGateway.value = false
+            removeGateway.value = null
+            refetch()
+        },
+        onError() {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Gateway gagal dihapus',
+                life: 3000
+            })
+        }
+    })
+}
 </script>
 
 <template>
@@ -92,9 +225,8 @@ const handleDebounceFilter = (val) => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
-                            sdfknsfdlkn
-                            {{ expandedRows }}
-                            {{ filters }}
+                            <Button label="Tambah gateway" icon="pi pi-plus" class="mr-2"
+                                @click.prevent="addGatewayDialog = true" />
                         </div>
                     </template>
                 </Toolbar>
@@ -129,10 +261,11 @@ const handleDebounceFilter = (val) => {
                         </template>
                     </Column>
                     <Column headerStyle="width:4rem">
-                        <template #body>
-                            <div class="flex gap-3 mt-1">
+                        <template #body="{ data }">
+                            <div class="flex gap-2 mt-1">
                                 <Button icon="pi pi-pencil" />
-                                <Button severity="danger" icon="pi pi-power-off" />
+                                <Button outlined :loading="pendingUpdateStatusGateway" :disabled="pendingUpdateStatusGateway" :severity="data.status ? 'danger' : 'success'"
+                                    @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
                             </div>
                         </template>
                     </Column>
@@ -153,7 +286,9 @@ const handleDebounceFilter = (val) => {
                                         </th>
                                         <td>:</td>
                                         <td>
-                                            {{ data.role }}
+                                           <Tag>
+                                            {{ capitalize(data.role) }}
+                                           </Tag>
                                         </td>
                                     </tr>
                                 </table>
@@ -165,13 +300,81 @@ const handleDebounceFilter = (val) => {
                                         @click.prevent="handleTestConnection(data.id)" />
                                     <Button label="Generate Token Baru" outlined icon="pi pi-key"
                                         @click.prevent="handleTestConnection(data.id)" />
-                                    <Button label="Hapus" outlined severity="danger" icon="pi pi-trash" />
+                                    <Button label="Hapus" outlined severity="danger"
+                                        @click.prevent="handleShowDialogRemoveGateway(data)" icon="pi pi-trash" />
                                 </div>
                             </template>
                         </Card>
                     </template>
                 </DataTable>
             </div>
+
+
+            <Dialog v-model:visible="addGatewayDialog" :style="{ width: '450px' }" header="Tambah Gateway Baru"
+                :modal="true" class="p-fluid">
+                <div class="field">
+
+                    <label for="name">Nama</label>
+                    <InputText id="name" :disabled="pendingAddGateway"
+                        :invalid="errorsAddGateways && errorsAddGateways.name" required="true" autofocus
+                        v-model="addGateway.name" />
+                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.name">
+                        {{ errorsAddGateways.name[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="ip">IP</label>
+                    <InputText id="ip" :disabled="pendingAddGateway" required="true"
+                        :invalid="errorsAddGateways && errorsAddGateways.ip" v-model="addGateway.ip" />
+                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.ip">
+                        {{ errorsAddGateways.ip[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="location">Lokasi</label>
+                    <InputText id="location" :disabled="pendingAddGateway"
+                        :invalid="errorsAddGateways && errorsAddGateways.location" required="true"
+                        v-model="addGateway.location" />
+                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.location">
+                        {{ errorsAddGateways.location[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label class="mb-3">Role</label>
+                    <div class="formgrid grid">
+                        <div class="field-radiobutton col-3">
+                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role"
+                                :disabled="pendingAddGateway" id="presence" v-model="addGateway.role" name="presence"
+                                value="presence" />
+                            <label for="presence">Presensi</label>
+                        </div>
+                        <div class="field-radiobutton col-3">
+                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role"
+                                :disabled="pendingAddGateway" id="register" v-model="addGateway.role" name="register"
+                                value="register" />
+                            <label for="register">Register</label>
+                        </div>
+                    </div>
+                </div>
+
+                <template #footer>
+                    <Button label="Batal" :disabled="pendingAddGateway" severity="danger" icon="pi pi-times" outlined
+                        @click.prevent="addGatewayDialog = false" />
+                    <Button label="Simpan" :loading="pendingAddGateway" :disabled="pendingAddGateway" icon="pi pi-link"
+                        @click="addGatewayStore" />
+                </template>
+            </Dialog>
+
+            <Dialog v-model:visible="showDialogRemoveGateway" :style="{ width: '450px' }" header="Confirm"
+                :modal="true">
+                <div class="flex align-items-center justify-content-center">
+                    <span>Yakin ingin menghapus gateway ini ?</span>
+                </div>
+                <template #footer>
+                    <!-- <Button label="Batalkan" outlined @click="deleteProductsDialog = false" /> -->
+                    <Button label="Hapus" outlined severity="danger" :disabled="removeGatewayPending" :loading="removeGatewayPending" @click="handleRemoveGateway" />
+                </template>
+            </Dialog>
         </div>
     </div>
 </template>
