@@ -6,6 +6,7 @@ import auth from './plugins/auth'
 import http from './plugins/http'
 import queryClient from './plugins/query-client'
 import socket from './plugins/socket'
+import vueDebounce from 'vue-debounce'
 
 import PrimeVue from 'primevue/config';
 import AutoComplete from 'primevue/autocomplete';
@@ -122,7 +123,7 @@ app.use(router);
 app.use(auth);
 app.use(queryClient);
 app.use(socket);
-
+app.directive('debounce', vueDebounce({ lock: true }))
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(DialogService);

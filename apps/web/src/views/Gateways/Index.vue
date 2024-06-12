@@ -1,50 +1,54 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref } from 'vue';
+import { getCurrentInstance, ref, watch } from 'vue';
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
-
+// the datatable queries server side
 const expandedRows = ref({});
-const filters = ref({
-    'name': { value: '', matchMode: 'contains' },
-    'country.name': { value: '', matchMode: 'contains' },
-    'company': { value: '', matchMode: 'contains' },
-    'representative.name': { value: '', matchMode: 'contains' },
-});
+const filters = ref(null);
 const first = ref(0);
 const queryParams = ref({
-    page: 1,
-    perpage: 1,
     first: 0,
     rows: 10,
-    sortField: null,
-    sortOrder: null,
-    filters: filters.value
 })
 const totalRecords = ref(0);
 const dt = ref()
 
 
-const onPage = (event) => {
-    state.value = event;
-};
-
 const getAllGateways = async () => {
-    return await axios.get('/gateways')
+    const queries = {
+        page: (queryParams.value.first / queryParams.value.rows) + 1,
+        perpage: queryParams.value.rows,
+        ...filters.value && { search: filters.value }
+    }
+
+    const params = new URLSearchParams(queries)
+
+    return await axios.get(`/gateways?${params}`)
 }
 
 
-const { data: gateways, isLoading } = useQuery({
-    queryKey: ['gateways', state.value],
-    queryFn: getAllGateways
+const { data: gateways, isLoading, refetch } = useQuery({
+    queryKey: ['gateways', queryParams.value],
+    queryFn: getAllGateways,
+    keepPreviousData: true,
 })
 
-if (gateways.value) {
-    totalRecords.value = gateways.value.data.data.meta.totalCount
-}
 
+const onPage = (event) => {
+    queryParams.value = event;
+    refetch()
+};
+
+watch(gateways, () => {
+    if (gateways.value) {
+        totalRecords.value = gateways.value.data.data.meta.totalCount
+    }
+})
+
+// mutation for testing connection gateway
 const testingGateway = async (id) => {
     return await axios.post(`/gateways/${id}/ping`)
 }
@@ -74,6 +78,11 @@ const handleTestConnection = (id) => {
     })
 }
 
+const handleDebounceFilter = (val) => {
+    filters.value = val;
+    refetch()
+}
+
 </script>
 
 <template>
@@ -85,6 +94,7 @@ const handleTestConnection = (id) => {
                         <div class="my-2">
                             sdfknsfdlkn
                             {{ expandedRows }}
+                            {{ filters }}
                         </div>
                     </template>
                 </Toolbar>
@@ -102,7 +112,8 @@ const handleTestConnection = (id) => {
                             </h5>
                             <IconField iconPosition="left" class="block mt-2 md:mt-0">
                                 <InputIcon class="pi pi-search" />
-                                <InputText class="w-full sm:w-auto" placeholder="Search..." />
+                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
+                                    placeholder="Search..." />
                             </IconField>
                         </div>
                     </template>
@@ -119,7 +130,10 @@ const handleTestConnection = (id) => {
                     </Column>
                     <Column headerStyle="width:4rem">
                         <template #body>
-                            <Button icon="pi pi-pencil" />
+                            <div class="flex gap-3 mt-1">
+                                <Button icon="pi pi-pencil" />
+                                <Button severity="danger" icon="pi pi-power-off" />
+                            </div>
                         </template>
                     </Column>
                     <template #expansion="{ data }">

@@ -149,7 +149,7 @@ importers:
         version: 6.3.4
       ts-jest:
         specifier: ^29.1.0
-        version: 29.1.4(jest@29.7.0)(typescript@5.3.3)
+        version: 29.1.4(@babel/core@7.24.7)(jest@29.7.0)(typescript@5.3.3)
       ts-loader:
         specifier: ^9.4.3
         version: 9.5.1(typescript@5.3.3)(webpack@5.91.0)
@@ -192,6 +192,9 @@ importers:
       vue:
         specifier: ^3.2.41
         version: 3.4.27
+      vue-debounce:
+        specifier: ^5.0.0
+        version: 5.0.0(vue@3.4.27)
       vue-router:
         specifier: ^4.1.5
         version: 4.3.2(vue@3.4.27)
@@ -8044,7 +8047,7 @@ packages:
       typescript: 5.3.3
     dev: true
 
-  /ts-jest@29.1.4(jest@29.7.0)(typescript@5.3.3):
+  /ts-jest@29.1.4(@babel/core@7.24.7)(jest@29.7.0)(typescript@5.3.3):
     resolution: {integrity: sha512-YiHwDhSvCiItoAgsKtoLFCuakDzDsJ1DLDnSouTaTmdOcOwIkSzbLXduaQ6M5DRVhuZC/NYaaZ/mtHbWMv/S6Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -8068,6 +8071,7 @@ packages:
       esbuild:
         optional: true
     dependencies:
+      '@babel/core': 7.24.7
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       jest: 29.7.0(@types/node@20.11.24)(ts-node@10.9.1)
@@ -8461,6 +8465,14 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
+
+  /vue-debounce@5.0.0(vue@3.4.27):
+    resolution: {integrity: sha512-heIPTbmFC6Hghhnwbfjw0nYRBYH+YFp/d9xGQ/rDRPUfU6NBIndbJz+i0pHVii4BXXRi1CaljT6H3fDSbbPMvg==}
+    peerDependencies:
+      vue: '>= 3.0.0'
+    dependencies:
+      vue: 3.4.27
+    dev: false
 
   /vue-demi@0.14.8(vue@3.4.27):
     resolution: {integrity: sha512-Uuqnk9YE9SsWeReYqK2alDI5YzciATE0r2SkA6iMAtuXvNTMNACJLJEXNXaEy94ECuBe4Sk6RzRU80kjdbIo1Q==}
