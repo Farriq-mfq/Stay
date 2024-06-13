@@ -7,8 +7,9 @@ const queryClient = new QueryClient({
     },
 })
 
-
-
-export default (app) => {
-    app.use('queryClient', queryClient)
+export default {
+    install: (app) => {
+        app.use('queryClient', queryClient)
+        app.config.globalProperties.queryClient = queryClient;
+    }
 }
