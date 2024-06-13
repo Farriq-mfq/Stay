@@ -2,6 +2,7 @@
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 import { capitalize, getCurrentInstance, ref, watch } from 'vue';
+import { useClipboard } from '@vueuse/core'
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -216,6 +217,127 @@ const handleRemoveGateway = () => {
         }
     })
 }
+
+// update gateways
+const showDialogUpdateGateway = ref(false)
+const newToken = ref(null)
+
+const updateGateway = async (data) => {
+    return await axios.patch(`/gateways/${data.id}`, data)
+}
+
+const editGateway = ref({
+    id: '',
+    name: '',
+    ip: '',
+    location: '',
+    role: ''
+})
+
+const errorsUpdateGateway = ref(null)
+
+const { mutateAsync: mutateUpdateGateway, isPending: pendingUpdateGateway } = useMutation({
+    mutationKey: ['updateGateway'],
+    mutationFn: updateGateway
+})
+
+const updateGatewayAction = () => {
+    mutateUpdateGateway(editGateway.value, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Gateway berhasil diubah',
+                life: 3000
+            })
+            showDialogUpdateGateway.value = false
+            clearUpdateState()
+            refetch()
+        },
+        onError(err) {
+            if (err.response.status === 400) {
+                errorsUpdateGateway.value = err.response.data
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Gateway gagal diubah',
+                    life: 3000
+                })
+            }
+        }
+    })
+}
+
+const handleShowDialogEditGateway = (data) => {
+    editGateway.value = {
+        id: data.id,
+        name: data.name,
+        ip: data.ip,
+        location: data.location,
+        role: data.role
+    }
+    showDialogUpdateGateway.value = true
+}
+
+const clearUpdateState = () => {
+    editGateway.value = {
+        id: '',
+        name: '',
+        ip: '',
+        location: '',
+        role: ''
+    }
+    errorsUpdateGateway.value = null
+}
+
+// generate new token
+const showDialogGenerateToken = ref(false)
+const refIdnewToken = ref(null)
+const generateNewTokenGateway = async (id) => {
+    return await axios.post(`/gateways/${id}/token`)
+}
+
+const { mutateAsync: generateNewTokenMutate, isPending: generateNewTokenPending, isSuccess: generateNewTokenSuccess } = useMutation({
+    mutationKey: ['generateNewTokenGateway'],
+    mutationFn: generateNewTokenGateway
+})
+
+const handleGenerateToken = () => {
+    generateNewTokenMutate(refIdnewToken.value, {
+        onSuccess(data) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Token berhasil diubah',
+                life: 3000
+            })
+            showDialogGenerateToken.value = false
+            newToken.value = data.data.data
+            refetch()
+        },
+        onError() {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Token gagal diubah',
+                life: 3000
+            })
+        }
+    })
+}
+
+const handleShowDialogNewToken = (id) => {
+    refIdnewToken.value = id
+    showDialogGenerateToken.value = true
+}
+
+const clearGenerateTokenState = () => {
+    refIdnewToken.value = null
+}
+
+// copy text
+const { text, copy, copied, isSupported } = useClipboard({ source: newToken.value })
 </script>
 
 <template>
@@ -263,8 +385,10 @@ const handleRemoveGateway = () => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" />
-                                <Button outlined :loading="pendingUpdateStatusGateway" :disabled="pendingUpdateStatusGateway" :severity="data.status ? 'danger' : 'success'"
+                                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogEditGateway(data)" />
+                                <Button outlined :loading="pendingUpdateStatusGateway"
+                                    :disabled="pendingUpdateStatusGateway"
+                                    :severity="data.status ? 'danger' : 'success'"
                                     @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
                             </div>
                         </template>
@@ -286,9 +410,9 @@ const handleRemoveGateway = () => {
                                         </th>
                                         <td>:</td>
                                         <td>
-                                           <Tag>
-                                            {{ capitalize(data.role) }}
-                                           </Tag>
+                                            <Tag>
+                                                {{ capitalize(data.role) }}
+                                            </Tag>
                                         </td>
                                     </tr>
                                 </table>
@@ -299,7 +423,7 @@ const handleRemoveGateway = () => {
                                         :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
                                         @click.prevent="handleTestConnection(data.id)" />
                                     <Button label="Generate Token Baru" outlined icon="pi pi-key"
-                                        @click.prevent="handleTestConnection(data.id)" />
+                                        @click.prevent="handleShowDialogNewToken(data.id)" />
                                     <Button label="Hapus" outlined severity="danger"
                                         @click.prevent="handleShowDialogRemoveGateway(data)" icon="pi pi-trash" />
                                 </div>
@@ -364,6 +488,60 @@ const handleRemoveGateway = () => {
                         @click="addGatewayStore" />
                 </template>
             </Dialog>
+            <!-- Testing showdialog update -->
+            <Dialog v-model:visible="showDialogUpdateGateway" @after-hide="clearUpdateState" :style="{ width: '450px' }"
+                header="Edit Gateway" :modal="true" class="p-fluid">
+                <div class="field">
+                    <label for="name">Nama</label>
+                    <InputText id="name" :disabled="pendingUpdateGateway"
+                        :invalid="errorsUpdateGateway && errorsUpdateGateway.name" required="true" autofocus
+                        v-model="editGateway.name" />
+                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.name">
+                        {{ errorsUpdateGateway.name[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="ip">IP</label>
+                    <InputText id="ip" :disabled="pendingUpdateGateway" required="true"
+                        :invalid="errorsUpdateGateway && errorsUpdateGateway.ip" v-model="editGateway.ip" />
+                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.ip">
+                        {{ errorsUpdateGateway.ip[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="location">Lokasi</label>
+                    <InputText id="location" :disabled="pendingUpdateGateway"
+                        :invalid="errorsUpdateGateway && errorsUpdateGateway.location" required="true"
+                        v-model="editGateway.location" />
+                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.location">
+                        {{ errorsUpdateGateway.location[0] }}
+                    </small>
+                </div>
+                <div class="field">
+                    <label class="mb-3">Role</label>
+                    <div class="formgrid grid">
+                        <div class="field-radiobutton col-3">
+                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role"
+                                :disabled="pendingUpdateGateway" id="presence" v-model="editGateway.role"
+                                name="presence" value="presence" />
+                            <label for="presence">Presensi</label>
+                        </div>
+                        <div class="field-radiobutton col-3">
+                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role"
+                                :disabled="pendingUpdateGateway" id="register" v-model="editGateway.role"
+                                name="register" value="register" />
+                            <label for="register">Register</label>
+                        </div>
+                    </div>
+                </div>
+
+                <template #footer>
+                    <Button label="Batal" :disabled="pendingUpdateGateway" severity="danger" icon="pi pi-times" outlined
+                        @click.prevent="showDialogUpdateGateway = false" />
+                    <Button label="Update" :loading="pendingUpdateGateway" :disabled="pendingUpdateGateway"
+                        icon="pi pi-link" @click="updateGatewayAction" />
+                </template>
+            </Dialog>
 
             <Dialog v-model:visible="showDialogRemoveGateway" :style="{ width: '450px' }" header="Confirm"
                 :modal="true">
@@ -371,9 +549,31 @@ const handleRemoveGateway = () => {
                     <span>Yakin ingin menghapus gateway ini ?</span>
                 </div>
                 <template #footer>
-                    <!-- <Button label="Batalkan" outlined @click="deleteProductsDialog = false" /> -->
-                    <Button label="Hapus" outlined severity="danger" :disabled="removeGatewayPending" :loading="removeGatewayPending" @click="handleRemoveGateway" />
+                    <Button label="Batalkan" outlined @click="showDialogRemoveGateway = false" />
+                    <Button label="Hapus" outlined severity="danger" :disabled="removeGatewayPending"
+                        :loading="removeGatewayPending" @click="handleRemoveGateway" />
                 </template>
+            </Dialog>
+            <Dialog v-model:visible="showDialogGenerateToken" @after-hide="clearGenerateTokenState"
+                :style="{ width: '450px' }" header="Confirm" :modal="true">
+                <div class="flex align-items-center justify-content-center">
+                    <span>Yakin ingin membuat token baru ?</span>
+                </div>
+                <template #footer>
+                    <Button label="Batalkan" outlined @click="showDialogGenerateToken = false" />
+                    <Button label="Generate" icon="pi pi-sync" outlined severity="danger"
+                        :disabled="generateNewTokenPending" :loading="generateNewTokenPending"
+                        @click="handleGenerateToken" />
+                </template>
+            </Dialog>
+            <Dialog v-model:visible="newToken" :style="{ width: '450px' }" header="Success"
+                :modal="true">
+                <div class="flex gap-2 flex-wrap">
+                    <Tag style="white-space: pre-wrap;">
+                        {{ newToken }}
+                    </Tag>
+                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied':'Copy'" @click.prevent="copy(newToken)" v-if="isSupported" />
+                </div>
             </Dialog>
         </div>
     </div>
