@@ -379,7 +379,7 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                         </div>
                     </template>
                     <Column expander />
-                    <Column field="name" header="Name">
+                    <Column field="name" header="Nama">
                     </Column>
                     <Column field="ip" alignFrozen="right" :frozen="true" header="IP">
                     </Column>
@@ -449,26 +449,26 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                     <InputText id="name" :disabled="pendingAddGateway"
                         :invalid="errorsAddGateways && errorsAddGateways.name" required="true" autofocus
                         v-model="addGateway.name" />
-                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.name">
+                    <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.name">
                         {{ errorsAddGateways.name[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label for="ip">IP</label>
                     <InputText id="ip" :disabled="pendingAddGateway" required="true"
                         :invalid="errorsAddGateways && errorsAddGateways.ip" v-model="addGateway.ip" />
-                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.ip">
+                    <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.ip">
                         {{ errorsAddGateways.ip[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label for="location">Lokasi</label>
                     <InputText id="location" :disabled="pendingAddGateway"
                         :invalid="errorsAddGateways && errorsAddGateways.location" required="true"
                         v-model="addGateway.location" />
-                    <small class="p-invalid" v-if="errorsAddGateways && errorsAddGateways.location">
+                    <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.location">
                         {{ errorsAddGateways.location[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label class="mb-3">Role</label>
@@ -503,26 +503,26 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                     <InputText id="name" :disabled="pendingUpdateGateway"
                         :invalid="errorsUpdateGateway && errorsUpdateGateway.name" required="true" autofocus
                         v-model="editGateway.name" />
-                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.name">
+                    <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.name">
                         {{ errorsUpdateGateway.name[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label for="ip">IP</label>
                     <InputText id="ip" :disabled="pendingUpdateGateway" required="true"
                         :invalid="errorsUpdateGateway && errorsUpdateGateway.ip" v-model="editGateway.ip" />
-                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.ip">
+                    <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.ip">
                         {{ errorsUpdateGateway.ip[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label for="location">Lokasi</label>
                     <InputText id="location" :disabled="pendingUpdateGateway"
                         :invalid="errorsUpdateGateway && errorsUpdateGateway.location" required="true"
                         v-model="editGateway.location" />
-                    <small class="p-invalid" v-if="errorsUpdateGateway && errorsUpdateGateway.location">
+                    <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.location">
                         {{ errorsUpdateGateway.location[0] }}
-                    </small>
+                    </p>
                 </div>
                 <div class="field">
                     <label class="mb-3">Role</label>

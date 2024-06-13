@@ -17,12 +17,53 @@ export class SiswaService {
     });
   }
 
-  async findAll() {
-    return await this.prismaService.client.siswa.paginate().withPages({
-      limit: 10,
+  async findAll(
+    page?: number,
+    limit?: number,
+    search?: string,
+  ) {
+    const [items, meta] = await this.prismaService.client.siswa.paginate({
+      where: {
+        ...search && {
+          OR: [
+            {
+              name: {
+                contains: search
+              },
+            },
+            {
+              notelp: {
+                contains: search
+              },
+            },
+            {
+              nisn: {
+                contains: search
+              },
+            },
+            {
+              nis: {
+                contains: search
+              },
+            },
+            {
+              rombel: {
+                contains: search
+              },
+            },
+          ],
+        },
+
+      }
+    }).withPages({
+      limit: limit || 10,
       includePageCount: true,
-      page: 1
+      page: page || 1
     });
+    return {
+      items,
+      meta
+    }
   }
 
   async findOne(id: number) {
@@ -50,7 +91,7 @@ export class SiswaService {
     });
   }
 
-  async import(){
+  async import() {
     return 'import'
   }
 }
