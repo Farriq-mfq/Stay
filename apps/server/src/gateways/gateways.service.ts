@@ -2,7 +2,7 @@ import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common
 import { JwtService } from '@nestjs/jwt';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
@@ -161,7 +161,7 @@ export class GatewaysService {
 
   async handleScanned(
     data: ScannedDto,
-    client: Socket
+    client: Server
   ) {
     const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
       where: {
@@ -174,7 +174,9 @@ export class GatewaysService {
         console.log('the role is presence')
         break;
       case 'register':
+        console.log(data.scan)
         client.emit(`READER_${gateway.ip}`, data.scan)
+        // console.log(client.emit(`READER`, data.scan))
         break;
       default:
         throw new InternalServerErrorException('Role not registered')

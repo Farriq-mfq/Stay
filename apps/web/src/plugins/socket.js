@@ -10,6 +10,9 @@ const socket = io(`ws://localhost:3000/`, {
     // }
 });
 
-export default (app) => {
-    app.use('socket', socket)
+export default {
+    install: (app) => {
+        app.use('socket', socket)
+        app.config.globalProperties.socket = socket;
+    }
 }

@@ -28,7 +28,6 @@ export class GatewaysGuard implements CanActivate {
                 where: {
                     token,
                     ip: data.ip,
-                    status: true
                 }
             })
 

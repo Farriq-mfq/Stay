@@ -2,6 +2,8 @@ import { UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
 import {
     ConnectedSocket,
     MessageBody,
+    OnGatewayConnection,
+    OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
@@ -18,11 +20,17 @@ import { GatewaysService } from 'src/gateways/gateways.service';
         origin: '*',
     },
 })
-export class EventsGateway {
+export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     constructor(
         private readonly gatewaysService: GatewaysService
     ) {
 
+    }
+    handleConnection(client: any, ...args: any[]) {
+        console.log("connected")
+    }
+    afterInit(server: any) {
+        console.log("connected")
     }
     @WebSocketServer()
     server: Server;
@@ -35,7 +43,7 @@ export class EventsGateway {
         await this.gatewaysService.handleScanned({
             ip: data.ip,
             scan: data.scan
-        }, client)
+        }, this.server)
     }
 
 
