@@ -128,6 +128,13 @@ const addGatewayStore = () => {
         onError(err) {
             if (err.response.status === 400) {
                 errorsAddGateways.value = err.response.data
+            } else if (err.response.status === 409) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Gateway sudah ada',
+                    life: 3000
+                })
             } else {
                 toast.add({
                     severity: 'error',
@@ -545,9 +552,9 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
 
             <Dialog v-model:visible="showDialogRemoveGateway" :style="{ width: '450px' }" header="Confirm"
                 :modal="true">
-                <div class="flex align-items-center justify-content-center">
-                    <span>Yakin ingin menghapus gateway ini ?</span>
-                </div>
+                <p class="m-0">
+                    Yakin ingin menghapus gateway ini ?
+                </p>
                 <template #footer>
                     <Button label="Batalkan" outlined @click="showDialogRemoveGateway = false" />
                     <Button label="Hapus" outlined severity="danger" :disabled="removeGatewayPending"
@@ -556,9 +563,9 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
             </Dialog>
             <Dialog v-model:visible="showDialogGenerateToken" @after-hide="clearGenerateTokenState"
                 :style="{ width: '450px' }" header="Confirm" :modal="true">
-                <div class="flex align-items-center justify-content-center">
-                    <span>Yakin ingin membuat token baru ?</span>
-                </div>
+                <p class="m-0">
+                    Yakin ingin membuat token baru ?
+                </p>
                 <template #footer>
                     <Button label="Batalkan" outlined @click="showDialogGenerateToken = false" />
                     <Button label="Generate" icon="pi pi-sync" outlined severity="danger"
@@ -566,14 +573,17 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                         @click="handleGenerateToken" />
                 </template>
             </Dialog>
-            <Dialog v-model:visible="newToken" :style="{ width: '450px' }" header="Success"
-                :modal="true">
-                <div class="flex gap-2 flex-wrap">
-                    <Tag style="white-space: pre-wrap;">
-                        {{ newToken }}
+            <Dialog v-model:visible="newToken" header="Success" :modal="true">
+                    <p>
+                        Silahkan masukan token ini ketika script device diupload!
+                    </p>
+                    <Tag class="p-5 text-lg">
+                        <code>{{ newToken }}</code>
                     </Tag>
-                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied':'Copy'" @click.prevent="copy(newToken)" v-if="isSupported" />
-                </div>
+                <template #footer>
+                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
+                        @click.prevent="copy(newToken)" v-if="isSupported" />
+                </template>
             </Dialog>
         </div>
     </div>

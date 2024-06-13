@@ -9,17 +9,18 @@ datasource db {
 
 // master data
 model siswa {
-  id                  BigInt           @id @default(autoincrement())
-  notelp              Int              @unique
+  id                  BigInt            @id @default(autoincrement())
+  notelp              String            @unique
   name                String
-  nisn                Int
-  nis                 Int
+  nisn                String            @unique
+  rombel              String
+  nis                 String?           @unique
   rfid_token          String?
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   presences           presences[]
-  telegram            telegram_account @relation(fields: [telegram_accountsId], references: [id])
-  telegram_accountsId BigInt           @unique
+  telegram            telegram_account? @relation(fields: [telegram_accountsId], references: [id])
+  telegram_accountsId BigInt?           @unique
 }
 
 model users {

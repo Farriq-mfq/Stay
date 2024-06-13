@@ -1,21 +1,19 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
+import { Socket } from 'socket.io';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
-import { UpdateGatewayDto } from './dto/update-gateway.dto';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { ScannedDto } from './dto/scanned.dto';
-import { Socket } from 'socket.io';
+import { UpdateGatewayDto } from './dto/update-gateway.dto';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
   ) {
 
   }

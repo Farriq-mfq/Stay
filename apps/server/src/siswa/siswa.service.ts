@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
+import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { CustomPrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class SiswaService {
-  create(createSiswaDto: CreateSiswaDto) {
-    return 'This action adds a new siswa';
+  constructor(
+    @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+  ) {
+
+  }
+  async create(createSiswaDto: CreateSiswaDto) {
+    return await this.prismaService.client.siswa.create({
+      data: createSiswaDto
+    });
   }
 
-  findAll() {
-    return `This action returns all siswa`;
+  async findAll() {
+    return await this.prismaService.client.siswa.paginate().withPages({
+      limit: 10,
+      includePageCount: true,
+      page: 1
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} siswa`;
+  async findOne(id: number) {
+    return await this.prismaService.client.siswa.findUniqueOrThrow({
+      where: {
+        id
+      }
+    });
   }
 
-  update(id: number, updateSiswaDto: UpdateSiswaDto) {
-    return `This action updates a #${id} siswa`;
+  async update(id: number, updateSiswaDto: UpdateSiswaDto) {
+    return await this.prismaService.client.siswa.update({
+      where: {
+        id
+      },
+      data: updateSiswaDto
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} siswa`;
+  async remove(id: number) {
+    return await this.prismaService.client.siswa.delete({
+      where: {
+        id
+      }
+    });
+  }
+
+  async import(){
+    return 'import'
   }
 }

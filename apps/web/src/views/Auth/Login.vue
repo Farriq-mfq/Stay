@@ -11,17 +11,19 @@ const state = reactive({
         fetchUser: true,
         staySignedIn: false,
         errors: {},
-        loading: false
+        loading: false,
+        unauthorized: false
     }
 });
 
 
 function errors(res) {
-    console.log(res.status)
     if (res.status === 401) {
-        state.form.errors = ["Unautorized"]
+        state.form.errors = {
+            username: ["Invalid Credentials"]
+        }
     } else if (res.status === 400) {
-        state.form.errors = res.data.message
+        state.form.errors = res.data
     }
 }
 
@@ -57,32 +59,36 @@ function handleLogin() {
                             Silahkan login untuk melanjutkan
                         </span>
                     </div>
-
-                    <Message severity="error" :closable="false" v-for="err in state.form.errors" :key="err">
-                        {{ err }}
-                    </Message>
-
-                    <div>
+                    <div class="mb-4">
                         <label for="username" class="block text-900 text-xl font-medium mb-2">
                             Username
                         </label>
-                        <InputText :disabled="state.form.loading" id="username" type="text" placeholder="Username" class="w-full md:w-30rem mb-5"
+                        <InputText :disabled="state.form.loading" id="username" type="text" placeholder="Username"
+                            class="w-full md:w-30rem" :invalid="state.form.errors && state.form.errors.username"
                             style="padding: 1rem" v-model="state.form.body.username" />
-
-                        <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
-                        <Password :disabled="state.form.loading" :feedback="false" id="password1" v-model="state.form.body.password"
-                            placeholder="Password" :toggleMask="true" class="w-full mb-3" inputClass="w-full"
-                            :inputStyle="{ padding: '1rem' }"></Password>
-
-                        <div class="flex align-items-center justify-content-between mb-5 gap-5">
-                            <div class="flex align-items-center">
-                                <Checkbox :disabled="state.form.loading" v-model="state.form.remember" id="rememberme1" binary class="mr-2"></Checkbox>
-                                <label for="rememberme1">Remember me</label>
-                            </div>
-                        </div>
-                        <Button :disabled="state.form.loading" type="submit" :label="state.form.loading ? 'Loading...':'Sign In'"
-                            class="w-full p-3 text-xl"></Button>
+                        <p class="text-red-500" v-if="state.form.errors && state.form.errors.username">
+                            {{ state.form.errors.username[0] }}
+                        </p>
                     </div>
+                    <div class="mb-4">
+                        <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
+                        <Password :disabled="state.form.loading" :invalid="state.form.errors && state.form.errors.password" :feedback="false" id="password1"
+                            v-model="state.form.body.password" placeholder="Password" :toggleMask="true"
+                            class="w-full" inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
+                        <p class="text-red-500" v-if="state.form.errors && state.form.errors.password">
+                            {{ state.form.errors.password[0] }}
+                        </p>
+                    </div>
+
+                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
+                        <div class="flex align-items-center">
+                            <Checkbox :disabled="state.form.loading" v-model="state.form.remember" id="rememberme1"
+                                binary class="mr-2"></Checkbox>
+                            <label for="rememberme1">Remember me</label>
+                        </div>
+                    </div>
+                    <Button :disabled="state.form.loading" type="submit"
+                        :label="state.form.loading ? 'Loading...' : 'Sign In'" class="w-full p-3 text-xl"></Button>
                 </div>
             </div>
         </form>
