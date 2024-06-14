@@ -1,19 +1,17 @@
 import { UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
-    ConnectedSocket,
     MessageBody,
     OnGatewayConnection,
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
-    WebSocketServer,
-    WsResponse
+    WebSocketServer
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { WsExceptionFilter } from 'src/exceptions/wsExceptionFilter';
-import { ScanDto } from './dto/scan.dto';
 import { GatewaysGuard } from 'src/gateways/gateways.guard';
 import { GatewaysService } from 'src/gateways/gateways.service';
+import { ScanDto } from './dto/scan.dto';
 
 @WebSocketGateway({
     cors: {
@@ -39,7 +37,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     @UseFilters(WsExceptionFilter)
     @UseGuards(GatewaysGuard)
     @SubscribeMessage('SCAN')
-    async onHandleScan(@MessageBody() data: ScanDto, @ConnectedSocket() client: Socket): Promise<void> {
+    async onHandleScan(@MessageBody() data: ScanDto): Promise<void> {
         await this.gatewaysService.handleScanned({
             ip: data.ip,
             scan: data.scan

@@ -203,6 +203,25 @@ const handleSubmitUpdateSiswa = () => {
       dataUpdateSiswa.value = null
       refetch()
     },
+    onError(err) {
+      if (err.response.status === 400) {
+        errorsUpdateSiswa.value = err.response.data
+      } else if (err.response.status === 409) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Data siswa sudah ada',
+          life: 3000
+        })
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Data siswa gagal diubah',
+          life: 3000
+        })
+      }
+    }
   })
 }
 
@@ -326,6 +345,21 @@ const handleSelectedGateway = (val) => {
   scannedToken.value = null
 }
 
+
+// show qrCode
+const showDialogQrcode = ref(false)
+const qrCode = ref({
+  nis: '',
+  nisn: '',
+  notelp: '',
+  name: '',
+  rombel: ''
+})
+const handleShowDialogQrcode = (data) => {
+  qrCode.value = data
+  showDialogQrcode.value = true
+}
+
 </script>
 
 <template>
@@ -336,6 +370,8 @@ const handleSelectedGateway = (val) => {
           <template v-slot:start>
             <div class="my-2">
               <Button label="Tambah Siswa" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddSiswa = true" />
+              <Button label="Import Siswa" icon="pi pi-arrow-up" severity="success" class="mr-2"
+                @click.prevent="showDialogAddSiswa = true" />
             </div>
           </template>
         </Toolbar>
@@ -385,7 +421,37 @@ const handleSelectedGateway = (val) => {
             </template>
           </Column>
           <template #expansion="{ data }">
-            {{ data }}
+            <Card>
+              <template #content>
+                <table style="border-spacing: 0.6rem;">
+                  <tr>
+                    <th>
+                      ID Kartu
+                    </th>
+                    <td>:</td>
+                    <td>
+                      <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      Telegram
+                    </th>
+                    <td>:</td>
+                    <td>
+                      .
+                    </td>
+                  </tr>
+                </table>
+              </template>
+              <template #footer>
+                <div class="flex gap-2">
+                  <Button label="Lihat QRCode" icon="pi pi-qrcode" outlined
+                    @click.prevent="handleShowDialogQrcode(data)" />
+                  <Button label="Reset Kartu" icon="pi pi-id-card" outlined severity="danger" />
+                </div>
+              </template>
+            </Card>
           </template>
         </DataTable>
       </div>
@@ -510,9 +576,10 @@ const handleSelectedGateway = (val) => {
       </Message>
       <SelectGateway role="register" @input="handleSelectedGateway" />
       <div v-if="selectedGateway && !scannedToken"
-        class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4">
-        <span class="text-2xl text-center font-bold underline">
-          SILAHKAN SCAN KARTU
+        class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4 ">
+        <span class="text-2xl text-center font-bold">
+          SILAHKAN SCAN KARTU <i
+            class="pi pi-circle bg-red-500 border-circle ml-3 fadeout animation-duration-1000 animation-iteration-infinite"></i>
         </span>
       </div>
       <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
@@ -527,6 +594,39 @@ const handleSelectedGateway = (val) => {
           @click="scannedToken = null" />
         <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
           @click.prevent="handleSubmitRegisterCard" />
+      </template>
+    </Dialog>
+    <Dialog v-model:visible="showDialogQrcode" @after-hide="clearRemoveState" :style="{ width: '450px' }" :modal="true"
+      :closable="false">
+      <div
+        class="w-full border-round border-dotted bg-primary p-3 mt-4 flex justify-content-between align-items-center">
+        <table>
+          <tr>
+            <td>Nama</td>
+            <td>:</td>
+            <td>{{ qrCode.name }}</td>
+          </tr>
+          <tr>
+            <td>NIS</td>
+            <td>:</td>
+            <td>{{ qrCode.nis }}</td>
+          </tr>
+          <tr>
+            <td>NISN</td>
+            <td>:</td>
+            <td>{{ qrCode.nisn }}</td>
+          </tr>
+          <tr>
+            <td>Rombel</td>
+            <td>:</td>
+            <td>{{ qrCode.rombel }}</td>
+          </tr>
+        </table>
+        <vue-qrcode :value="qrCode.nisn" :options="{ width: 100 }"></vue-qrcode>
+      </div>
+      <template #footer>
+        <Button label="Batalkan" outlined severity="danger" @click="showDialogQrcode = false" />
+        <Button label="Cetak" outlined icon="pi pi-print" />
       </template>
     </Dialog>
   </div>
