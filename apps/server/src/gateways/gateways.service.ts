@@ -169,14 +169,14 @@ export class GatewaysService {
       }
     })
 
+    console.log(gateway)
+
     switch (gateway.role) {
       case 'presence':
         console.log('the role is presence')
         break;
       case 'register':
-        console.log(data.scan)
         client.emit(`READER_${gateway.ip}`, data.scan)
-        // console.log(client.emit(`READER`, data.scan))
         break;
       default:
         throw new InternalServerErrorException('Role not registered')

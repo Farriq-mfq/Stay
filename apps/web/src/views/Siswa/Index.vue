@@ -1,12 +1,14 @@
 <script setup>
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref, watch } from 'vue';
+import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import SelectGateway from '@/components/SelectGateway.vue'
-
+import { useConfirm } from "primevue/useconfirm";
+import { useStorage } from '@vueuse/core'
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const toast = useToast();
+const confirm = useConfirm();
 
 // show data siswa
 const expandedRows = ref({});
@@ -285,6 +287,9 @@ const handleShowDialogRegisterCard = (data) => {
   }
 
   showDialogRegisterCard.value = true
+  if (defaultGateway.value) {
+    selectedGateway.value = JSON.parse(defaultGateway.value)
+  }
 }
 
 const handleSubmitRegisterCard = () => {
@@ -301,7 +306,6 @@ const handleSubmitRegisterCard = () => {
       refetch()
     },
     onError(err) {
-      console.log(err)
       if (err.response.status === 400) {
         errorsRegisterCard.value = err.response.data
       } else {
@@ -336,6 +340,7 @@ watch(() => [showDialogRegisterCard.value, selectedGateway.value], (val) => {
   if (val && selectedGateway.value) {
     socket.on(`READER_${selectedGateway.value.ip}`, (data) => {
       scannedToken.value = data.toString()
+      socket.off(`READER_${selectedGateway.value.ip}`);
     })
   }
 })
@@ -359,6 +364,69 @@ const handleShowDialogQrcode = (data) => {
   qrCode.value = data
   showDialogQrcode.value = true
 }
+// reset rfid token
+const resetTokenRfid = async (id) => {
+  return await axios.delete(`/siswa/${id}/rfid-token`)
+}
+const {
+  mutateAsync: resetToken,
+  isPending: resetTokenPending,
+} = useMutation({
+  mutationKey: ['resetTokenRfid'],
+  mutationFn: resetTokenRfid,
+})
+
+
+const confirmResetRFID = (event, data) => {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Yakin ingin reset kartu RFID ?',
+    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+    acceptClass: 'p-button-sm p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Reset',
+    accept: () => {
+      resetToken(data.id, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'RFID card berhasil didaftarkan',
+            life: 3000
+          })
+          showDialogRegisterCard.value = false
+          dataRegisterCard.value = null
+          refetch()
+        },
+        onError() {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'RFID card gagal didaftarkan',
+            life: 3000
+          })
+        }
+      })
+    },
+  });
+};
+
+// set default gateway
+const defaultGateway = useStorage('default-gateway', selectedGateway.value)
+
+const setDefaultGateway = () => {
+  if (selectedGateway.value) {
+    localStorage.setItem('default-gateway', JSON.stringify(selectedGateway.value))
+  } else {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Gateway belum dipilih',
+      life: 3000
+    })
+  }
+}
+
 
 </script>
 
@@ -424,7 +492,7 @@ const handleShowDialogQrcode = (data) => {
             <Card>
               <template #content>
                 <table style="border-spacing: 0.6rem;">
-                  <tr>
+                  <tr v-if="data.rfid_token">
                     <th>
                       ID Kartu
                     </th>
@@ -448,7 +516,8 @@ const handleShowDialogQrcode = (data) => {
                 <div class="flex gap-2">
                   <Button label="Lihat QRCode" icon="pi pi-qrcode" outlined
                     @click.prevent="handleShowDialogQrcode(data)" />
-                  <Button label="Reset Kartu" icon="pi pi-id-card" outlined severity="danger" />
+                  <Button label="Reset Kartu" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined
+                    severity="danger" />
                 </div>
               </template>
             </Card>
@@ -575,6 +644,7 @@ const handleShowDialogQrcode = (data) => {
         {{ errorsRegisterCard.token[0] }}
       </Message>
       <SelectGateway role="register" @input="handleSelectedGateway" />
+      <Button label="Setel sebagai default gateway" outlined class="my-2" @click.prevent="setDefaultGateway" />
       <div v-if="selectedGateway && !scannedToken"
         class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4 ">
         <span class="text-2xl text-center font-bold">
@@ -583,6 +653,7 @@ const handleShowDialogQrcode = (data) => {
         </span>
       </div>
       <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
+        {{ selectedGateway }}
         <h3 class="text-white text-lg underline mt-2">
           Scan Kartu Berhasil
         </h3>
@@ -596,8 +667,7 @@ const handleShowDialogQrcode = (data) => {
           @click.prevent="handleSubmitRegisterCard" />
       </template>
     </Dialog>
-    <Dialog v-model:visible="showDialogQrcode" @after-hide="clearRemoveState" :style="{ width: '450px' }" :modal="true"
-      :closable="false">
+    <Dialog v-model:visible="showDialogQrcode" :style="{ width: '450px' }" :modal="true" :closable="false">
       <div
         class="w-full border-round border-dotted bg-primary p-3 mt-4 flex justify-content-between align-items-center">
         <table>
@@ -626,8 +696,9 @@ const handleShowDialogQrcode = (data) => {
       </div>
       <template #footer>
         <Button label="Batalkan" outlined severity="danger" @click="showDialogQrcode = false" />
-        <Button label="Cetak" outlined icon="pi pi-print" />
+        <Button label="Cetak" outlined icon="pi pi-print" :loading="resetTokenPending" :disabled="resetTokenPending" />
       </template>
     </Dialog>
+    <ConfirmPopup></ConfirmPopup>
   </div>
 </template>

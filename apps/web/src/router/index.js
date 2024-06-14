@@ -50,7 +50,10 @@ const router = createRouter({
                 {
                     path: '/siswa',
                     name: 'siswa',
-                    component: () => import('@/views/Siswa/Index.vue')
+                    component: () => import('@/views/Siswa/Index.vue'),
+                    meta: {
+                        title: "Siswa",
+                    }
                 },
             ]
         },

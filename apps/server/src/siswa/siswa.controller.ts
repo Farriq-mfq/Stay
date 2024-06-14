@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto'
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as xlsx from 'xlsx';
+import { siswa } from '@prisma/client';
 
 @Controller('siswa')
 export class SiswaController {
@@ -40,5 +43,27 @@ export class SiswaController {
   @Post(':id/rfid-token')
   async registerRfid(@Param('id') id: string, @Body() updateToken: UpdateTokenDto) {
     return await this.siswaService.registerRfid(+id, updateToken)
+  }
+  @Delete(':id/rfid-token')
+  async resetTokenRFID(@Param('id') id: string) {
+    return this.siswaService.resetTokenRFID(+id)
+  }
+
+  @Post('/import')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async import(@UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST
+      }),
+  ) file: Express.Multer.File) {
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data: siswa[] = xlsx.utils.sheet_to_json(worksheet);
+    return await this.siswaService.import(data);
   }
 }
