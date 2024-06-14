@@ -2,6 +2,8 @@
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance, ref, watch } from 'vue';
+import SelectGateway from '@/components/SelectGateway.vue'
+
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const toast = useToast();
@@ -273,8 +275,25 @@ const clearRegisterCard = () => {
     rombel: ''
   }
   errorsRegisterCard.value = null
+  scannedToken.value = null
 }
 
+const scannedToken = ref(null)
+const socket = proxy.socket
+const selectedGateway = ref()
+
+watch(() => [showDialogRegisterCard.value, selectedGateway.value], (val) => {
+  if (val && selectedGateway.value) {
+    socket.on(`READER_${selectedGateway.value.ip}`, (data) => {
+      scannedToken.value = data.toString()
+    })
+  }
+})
+
+const handleSelectedGateway = (val) => {
+  selectedGateway.value = val
+  scannedToken.value = null
+}
 
 </script>
 
@@ -455,42 +474,23 @@ const clearRegisterCard = () => {
     </Dialog>
     <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }"
       :modal="true" :closable="false">
-      <!-- <div class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center">
+      <SelectGateway role="register" @input="handleSelectedGateway" />
+      <div v-if="!scannedToken && selectedGateway"
+        class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4">
         <span class="text-2xl text-center font-bold underline">
           SILAHKAN SCAN KARTU
         </span>
-      </div> -->
-      <div
-        class="w-full border-round border-dotted h-15rem bg-primary p-3">
+      </div>
+      <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
         <h3 class="text-white text-lg underline mt-2">
-          Scanned Berhasil
+          Scan Kartu Berhasil
         </h3>
-        <div class="w-full flex align-items-center justify-content-between">
-          <table style="border-spacing: 0.3rem;">
-            <tr>
-              <td>Nama</td>
-              <td>: </td>
-              <td></td>
-              <td class="white-space-nowrap overflow-hidden text-overflow-ellipsis w-2rem">sdaffffffffffffffffffffffffffffffffff</td>
-            </tr>
-            <tr>
-              <td>Rombel</td>
-              <td>: </td>
-              <td></td>
-              <td>sdfasdf</td>
-            </tr>
-            <tr>
-              <td>RFID Token</td>
-              <td>: </td>
-              <td></td>
-              <td>sdfasdf</td>
-            </tr>
-          </table>
-          <Avatar icon="pi pi-user" class="mr-2 h-8rem w-8rem" size="xlarge" />
-        </div>
+        <pre class="app-code"><code>ID: {{ scannedToken }}</code></pre>
       </div>
       <template #footer>
         <Button label="Batalkan" severity="danger" outlined @click="showDialogRegisterCard = false" />
+        <Button v-if="scannedToken && selectedGateway" label="Ulangi" severity="warning" outlined
+          @click="scannedToken = null" />
         <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
           @click.prevent="handleSubmitRegisterCard" />
       </template>

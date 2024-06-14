@@ -1,12 +1,12 @@
 <script setup>
-import { getCurrentInstance } from 'vue';
-
-const { proxy } = getCurrentInstance()
-const socket = proxy.socket
-socket.on('READER_192.168.12.12', (data) => {
-  alert(data)
-})
+import SelectGateway from '@/components/SelectGateway.vue'
+const handleChange = (val) => {
+  alert(val)
+}
 </script>
 <template>
-  <p>slkdfnlskndf</p>
+  <div>
+    <SelectGateway role="register" @input="handleChange" />
+    <p>slkdfnlskndf</p>
+  </div>
 </template>
