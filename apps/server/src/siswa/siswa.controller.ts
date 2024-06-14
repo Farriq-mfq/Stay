@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe 
 import { SiswaService } from './siswa.service';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
+import { UpdateTokenDto } from './dto/update-token.dto'
 
 @Controller('siswa')
 export class SiswaController {
@@ -34,5 +35,10 @@ export class SiswaController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.siswaService.remove(+id);
+  }
+
+  @Post(':id/rfid-token')
+  async registerRfid(@Param('id') id: string, @Body() updateToken: UpdateTokenDto) {
+    return await this.siswaService.registerRfid(+id, updateToken)
   }
 }

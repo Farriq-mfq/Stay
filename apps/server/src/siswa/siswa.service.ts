@@ -3,6 +3,7 @@ import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CustomPrismaService } from 'nestjs-prisma';
+import { UpdateTokenDto } from './dto/update-token.dto'
 
 @Injectable()
 export class SiswaService {
@@ -93,5 +94,16 @@ export class SiswaService {
 
   async import() {
     return 'import'
+  }
+
+  async registerRfid(id: number, updateToken: UpdateTokenDto) {
+    return await this.prismaService.client.siswa.update({
+      where: {
+        id
+      },
+      data: {
+        rfid_token: updateToken.token
+      }
+    })
   }
 }

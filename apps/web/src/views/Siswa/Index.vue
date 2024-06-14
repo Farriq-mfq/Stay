@@ -233,16 +233,21 @@ const clearUpdateState = () => {
 
 const showDialogRegisterCard = ref(false)
 const errorsRegisterCard = ref(null)
+const scannedToken = ref(null)
+
 const dataRegisterCard = ref({
   nis: '',
   nisn: '',
   notelp: '',
   name: '',
-  rombel: ''
+  rombel: '',
+  token: ''
 })
 
 const registerCardService = async (data) => {
-  return await axios.post('/rfid', data)
+  return await axios.post(`/siswa/${data.id}/rfid-token`, {
+    token: scannedToken.value
+  })
 }
 
 const { mutateAsync: registerCardMutate, isPending: registerCardPending } = useMutation({
@@ -252,18 +257,44 @@ const { mutateAsync: registerCardMutate, isPending: registerCardPending } = useM
 
 const handleShowDialogRegisterCard = (data) => {
   dataRegisterCard.value = {
+    id: data.id,
     nis: data.nis,
     nisn: data.nisn,
     notelp: data.notelp,
     name: data.name,
-    rombel: data.rombel
+    rombel: data.rombel,
   }
 
   showDialogRegisterCard.value = true
 }
 
 const handleSubmitRegisterCard = () => {
-  alert('ok')
+  registerCardMutate(dataRegisterCard.value, {
+    onSuccess() {
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'RFID card berhasil didaftarkan',
+        life: 3000
+      })
+      showDialogRegisterCard.value = false
+      dataRegisterCard.value = null
+      refetch()
+    },
+    onError(err) {
+      console.log(err)
+      if (err.response.status === 400) {
+        errorsRegisterCard.value = err.response.data
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'RFID card gagal didaftarkan',
+          life: 3000
+        })
+      }
+    }
+  })
 }
 
 const clearRegisterCard = () => {
@@ -276,9 +307,9 @@ const clearRegisterCard = () => {
   }
   errorsRegisterCard.value = null
   scannedToken.value = null
+  selectedGateway.value = null
 }
 
-const scannedToken = ref(null)
 const socket = proxy.socket
 const selectedGateway = ref()
 
@@ -474,8 +505,11 @@ const handleSelectedGateway = (val) => {
     </Dialog>
     <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }"
       :modal="true" :closable="false">
+      <Message severity="error" v-if="errorsRegisterCard && errorsRegisterCard.token">
+        {{ errorsRegisterCard.token[0] }}
+      </Message>
       <SelectGateway role="register" @input="handleSelectedGateway" />
-      <div v-if="!scannedToken && selectedGateway"
+      <div v-if="selectedGateway && !scannedToken"
         class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4">
         <span class="text-2xl text-center font-bold underline">
           SILAHKAN SCAN KARTU
