@@ -24,7 +24,7 @@ const dt = ref()
 const getAllGateways = async () => {
     const queries = {
         page: (queryParams.value.first / queryParams.value.rows) + 1,
-        perpage: queryParams.value.rows,
+        limit: queryParams.value.rows,
         ...filters.value && { search: filters.value }
     }
 
@@ -384,6 +384,14 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                             </IconField>
                         </div>
                     </template>
+                    <template #empty>
+                        <div class="flex justify-content-center p-4 gap-3 align-items-center">
+                            <i class="pi pi-folder-open"></i>
+                            <span>
+                                Data gateway masih kosong
+                            </span>
+                        </div>
+                    </template>
                     <Column expander />
                     <Column field="name" header="Nama">
                     </Column>
@@ -435,7 +443,8 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                                     <Button :disabled="loadingTesting" :loading="loadingTesting"
                                         :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
                                         @click.prevent="handleTestConnection(data.id)" />
-                                    <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending" :disabled="generateNewTokenPending" icon="pi pi-key"
+                                    <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending"
+                                        :disabled="generateNewTokenPending" icon="pi pi-key"
                                         @click.prevent="confirmGenerateNewToken(data.id)" />
                                     <Button label="Hapus" outlined severity="danger"
                                         @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
@@ -560,7 +569,7 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                     Note : Silahkan masukan token ini ketika script diupload ke device!
                 </p>
                 <div class="text-lg field grid px-2">
-                        <InputText class="flex-1" readonly :value="newToken" />
+                    <InputText class="flex-1" readonly :value="newToken" />
                 </div>
                 <template #footer>
                     <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"

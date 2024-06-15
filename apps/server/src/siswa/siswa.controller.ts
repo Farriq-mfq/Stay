@@ -66,12 +66,13 @@ export class SiswaController {
         fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       })
       .build({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
       }),
   ) file: Express.Multer.File) {
     const workbook = xlsx.read(file.buffer, { type: 'buffer' });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const keys = xlsx.utils.sheet_to_json(worksheet, { header: 1 })[0];
     const data: siswa[] = xlsx.utils.sheet_to_json(worksheet);
-    return await this.siswaService.import(data);
+    return await this.siswaService.import(data, keys);
   }
 }

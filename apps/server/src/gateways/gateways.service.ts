@@ -67,9 +67,9 @@ export class GatewaysService {
         }
       }
     }).withPages({
-      limit: limit || 10,
+      limit: limit ?? 10,
       includePageCount: true,
-      page: page || 1
+      page: page ?? 1
     });
     return {
       items,

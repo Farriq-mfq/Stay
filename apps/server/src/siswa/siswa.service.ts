@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { CustomPrismaService } from 'nestjs-prisma';
@@ -64,9 +64,9 @@ export class SiswaService {
 
       }
     }).withPages({
-      limit: limit || 10,
+      limit: limit ?? 10,
       includePageCount: true,
-      page: page || 1
+      page: page ?? 1
     });
     return {
       items,
@@ -99,44 +99,55 @@ export class SiswaService {
     });
   }
 
-  async import(data) {
+  async import(data, keys) {
+    const requiredKeys = ['notelp', 'nama', 'nis', 'nisn', 'rombel'];
     try {
-      let allData = []
-      for (const row of data) {
-        const rowData = {
-          ...row.notelp && {
-            notelp: row.notelp.toString()
-          },
-          ...row.nama && {
-            name: row.nama.toString(),
-          },
-          ...row.nisn && {
-            nisn: row.nisn.toString(),
-          },
-          ...row.nis && {
-            nis: row.nis.toString(),
-          },
-          ...row.rombel && {
-            rombel: row.rombel.toString().toUpperCase(),
-          },
-        }
-        const createSiswaDto = plainToClass(ImportSiswaDto, rowData);
-        const errors = await validate(createSiswaDto)
-
-        if (!(errors.length > 0)) {
-          const created = await this.prismaService.client.siswa.upsert({
-            where: {
-              nisn: rowData.nisn,
+      const isValid = requiredKeys.every(key => keys.includes(key));
+      if (isValid) {
+        let allData = []
+        for (const row of data) {
+          const rowData = {
+            ...row.notelp && {
+              notelp: row.notelp.toString()
             },
-            create: rowData,
-            update: rowData
-          })
-          allData.push(created)
+            ...row.nama && {
+              name: row.nama.toString(),
+            },
+            ...row.nisn && {
+              nisn: row.nisn.toString(),
+            },
+            ...row.nis && {
+              nis: row.nis.toString(),
+            },
+            ...row.rombel && {
+              rombel: row.rombel.toString().toUpperCase(),
+            },
+          }
+          const createSiswaDto = plainToClass(ImportSiswaDto, rowData);
+          const errors = await validate(createSiswaDto)
+
+          if (!(errors.length > 0)) {
+            const created = await this.prismaService.client.siswa.upsert({
+              where: {
+                nisn: rowData.nisn,
+              },
+              create: rowData,
+              update: rowData
+            })
+            allData.push(created)
+          }
         }
+        return allData
+      } else {
+        throw new BadRequestException()
       }
-      return allData
+
     } catch (e) {
-      throw new InternalServerErrorException()
+      if (e instanceof BadRequestException) {
+        throw new BadRequestException()
+      } else {
+        throw new InternalServerErrorException()
+      }
     }
   }
 

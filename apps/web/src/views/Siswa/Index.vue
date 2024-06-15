@@ -24,7 +24,7 @@ const totalRecords = ref(0)
 const getAllSiswa = async () => {
   const queries = {
     page: (queryParams.value.first / queryParams.value.rows) + 1,
-    perpage: queryParams.value.rows,
+    limit: queryParams.value.rows,
     ...filters.value && { search: filters.value }
   }
 
@@ -470,10 +470,60 @@ const confirmResetSiswa = () => {
 };
 
 // import siswa
-
+const fileImport = ref(null)
 const showDialogImportsiswa = ref(false)
-const onUpload = (e) => {
-  console.log(e)
+const handleChangeImport = (e) => {
+  fileImport.value = e.target.files[0]
+}
+
+const importSiswaService = async (data) => {
+  const headers = { 'Content-Type': 'multipart/form-data' };
+  return await axios.post('siswa/import', data, {
+    headers
+  })
+}
+
+const {
+  mutateAsync: importSiswa,
+  isPending: importSiswaPending,
+} = useMutation({
+  mutationKey: ['importSiswaService'],
+  mutationFn: importSiswaService,
+})
+
+const handleImportSiswa = () => {
+  let formdata = new FormData()
+  formdata.append('file', fileImport.value)
+  importSiswa(formdata, {
+    onSuccess() {
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Data siswa berhasil diimport',
+        life: 3000
+      })
+      showDialogImportsiswa.value = false
+      fileImport.value = null
+      refetch()
+    },
+    onError(err) {
+      if (err.response.status === 400) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Pastikan format import sesuai',
+          life: 3000
+        })
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Data siswa gagal diimport',
+          life: 3000
+        })
+      }
+    }
+  })
 }
 
 </script>
@@ -484,12 +534,13 @@ const onUpload = (e) => {
       <div class="card">
         <Toolbar class="mb-4">
           <template v-slot:start>
-            <div class="my-2">
+            <div class="my-2 gap-1 flex flex-wrap">
               <Button label="Tambah Siswa" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddSiswa = true" />
               <Button label="Import Siswa" icon="pi pi-arrow-up" severity="success" class="mr-2"
                 @click.prevent="showDialogImportsiswa = true" />
               <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" />
+              <Button label="Download Format" icon="pi pi-download" class="mr-2" />
             </div>
           </template>
         </Toolbar>
@@ -508,6 +559,14 @@ const onUpload = (e) => {
                 <InputIcon class="pi pi-search" />
                 <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto" placeholder="Search..." />
               </IconField>
+            </div>
+          </template>
+          <template #empty>
+            <div class="flex justify-content-center p-4 gap-3 align-items-center">
+              <i class="pi pi-folder-open"></i>
+              <span>
+                Data siswa masih kosong
+              </span>
             </div>
           </template>
           <Column expander />
@@ -750,15 +809,16 @@ const onUpload = (e) => {
         <Button label="Cetak" outlined icon="pi pi-print" :loading="resetTokenPending" :disabled="resetTokenPending" />
       </template>
     </Dialog>
-    <Dialog v-model:visible="showDialogImportsiswa" :style="{ width: '450px' }" :modal="true">
+    <Dialog :closable="!importSiswaPending" :header="importSiswaPending ? 'Loading...' : 'Import siswa'"
+      v-model:visible="showDialogImportsiswa" :style="{ width: '450px' }" :modal="true">
 
-      <!-- <FileUpload mode="basic" name="demo[]" url="http://localhost:3000/siswa/import" :multiple="false" accept="image/*" :maxFileSize="1000000"
-        @upload="onUpload" /> -->
-        <Input type="file" />
+      <Input type="file" :disabled="importSiswaPending" @change="handleChangeImport"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
       <template #footer>
-        <Button label="Batalkan" outlined severity="danger" @click="showDialogImportsiswa = false" />
-        <Button label="Import" outlined icon="pi pi-upload" :loading="resetTokenPending"
-          :disabled="resetTokenPending" />
+        <Button label="Batalkan" :loading="importSiswaPending" :disabled="importSiswaPending" outlined severity="danger"
+          @click="showDialogImportsiswa = false" />
+        <Button label="Import" :loading="importSiswaPending" :disabled="importSiswaPending" outlined icon="pi pi-upload"
+          @click.prevent="handleImportSiswa" />
       </template>
     </Dialog>
     <ConfirmDialog></ConfirmDialog>
