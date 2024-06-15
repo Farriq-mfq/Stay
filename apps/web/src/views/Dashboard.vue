@@ -1,7 +1,7 @@
 <script setup>
 import SelectGateway from '@/components/SelectGateway.vue'
 const handleChange = (val) => {
-  alert(val)
+  // alert(val)
 }
 </script>
 <template>

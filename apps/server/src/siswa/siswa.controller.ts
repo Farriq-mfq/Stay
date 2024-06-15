@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
@@ -6,8 +6,10 @@ import { UpdateTokenDto } from './dto/update-token.dto'
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as xlsx from 'xlsx';
 import { siswa } from '@prisma/client';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
 @Controller('siswa')
+@UseGuards(AccessTokenGuard)
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) { }
 
@@ -35,6 +37,11 @@ export class SiswaController {
     return await this.siswaService.update(+id, updateSiswaDto);
   }
 
+  @Delete('/reset')
+  async reset() {
+    return await this.siswaService.reset()
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.siswaService.remove(+id);
@@ -44,9 +51,10 @@ export class SiswaController {
   async registerRfid(@Param('id') id: string, @Body() updateToken: UpdateTokenDto) {
     return await this.siswaService.registerRfid(+id, updateToken)
   }
+
   @Delete(':id/rfid-token')
   async resetTokenRFID(@Param('id') id: string) {
-    return this.siswaService.resetTokenRFID(+id)
+    return await this.siswaService.resetTokenRFID(+id)
   }
 
   @Post('/import')

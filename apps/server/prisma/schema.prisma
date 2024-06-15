@@ -10,11 +10,11 @@ datasource db {
 // master data
 model siswa {
   id                  BigInt            @id @default(autoincrement())
-  notelp              String            @unique
-  name                String
-  nisn                String            @unique
+  notelp              String?           @unique @db.VarChar()
+  name                String            @db.VarChar()
+  nisn                String            @unique @db.VarChar()
   rombel              String
-  nis                 String?           @unique
+  nis                 String?           @unique @db.VarChar()
   rfid_token          String?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt

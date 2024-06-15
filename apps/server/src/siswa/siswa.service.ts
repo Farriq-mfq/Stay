@@ -1,12 +1,11 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateSiswaDto } from './dto/create-siswa.dto';
-import { UpdateSiswaDto } from './dto/update-siswa.dto';
-import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { UpdateTokenDto } from './dto/update-token.dto'
-import { siswa } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
+import { UpdateSiswaDto } from './dto/update-siswa.dto';
+import { UpdateTokenDto } from './dto/update-token.dto';
 
 @Injectable()
 export class SiswaService {
@@ -102,43 +101,47 @@ export class SiswaService {
 
   async import(data) {
     try {
+      let allData = []
       for (const row of data) {
-        const createSiswaDto = plainToClass(CreateSiswaDto, {
-          notelp: row.notelp,
-          name: row.nama,
-          rombel: row.rombel,
-          nisn: row.nisn,
-          nis: row.nis,
-        });
+        const rowData = {
+          ...row.notelp && {
+            notelp: row.notelp.toString()
+          },
+          ...row.nama && {
+            name: row.nama.toString(),
+          },
+          ...row.nisn && {
+            nisn: row.nisn.toString(),
+          },
+          ...row.nis && {
+            nis: row.nis.toString(),
+          },
+          ...row.rombel && {
+            rombel: row.rombel.toString().toUpperCase(),
+          },
+        }
+        const createSiswaDto = plainToClass(ImportSiswaDto, rowData);
         const errors = await validate(createSiswaDto)
 
-
         if (!(errors.length > 0)) {
-          const siswa = await this.prismaService.client.siswa.findUnique({
+          const created = await this.prismaService.client.siswa.upsert({
             where: {
-              nisn: row.nisn.toString(),
-              nis: row.nis.toString(),
-              notelp: row.notelp.toString()
-            }
+              nisn: rowData.nisn,
+            },
+            create: rowData,
+            update: rowData
           })
-
-          if (!siswa) {
-            await this.prismaService.client.siswa.create({
-              data: {
-                notelp: row.notelp.toString(),
-                name: row.nama.toString(),
-                rombel: row.rombel.toString().toUpperCase(),
-                nisn: row.nisn.toString(),
-                nis: row.nis.toString(),
-              }
-            })
-          }
+          allData.push(created)
         }
       }
+      return allData
     } catch (e) {
-      console.log(e)
       throw new InternalServerErrorException()
     }
+  }
+
+  async reset() {
+    return await this.prismaService.client.$queryRaw`TRUNCATE TABLE "siswa" CASCADE`
   }
 
   async registerRfid(id: number, updateToken: UpdateTokenDto) {

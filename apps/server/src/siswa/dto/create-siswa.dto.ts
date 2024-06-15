@@ -1,8 +1,29 @@
-import { IsNotEmpty, IsNumberString, IsString } from "class-validator"
+import { IsNotEmpty, IsNumberString, IsOptional, IsString, IsUppercase } from "class-validator"
 
 export class CreateSiswaDto {
     @IsNumberString()
     @IsNotEmpty()
+    notelp: string
+    @IsString()
+    @IsNotEmpty()
+    name: string
+    @IsString()
+    @IsNotEmpty()
+    @IsUppercase()
+    rombel: string
+    @IsNumberString()
+    @IsNotEmpty()
+    nisn: string
+    @IsNumberString()
+    @IsNotEmpty()
+    nis: string
+}
+
+
+
+export class ImportSiswaDto {
+    @IsNumberString()
+    @IsOptional()
     notelp: string
     @IsString()
     @IsNotEmpty()
@@ -14,6 +35,5 @@ export class CreateSiswaDto {
     @IsNotEmpty()
     nisn: string
     @IsNumberString()
-    @IsNotEmpty()
     nis: string
 }

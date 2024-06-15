@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { GatewaysService } from './gateways.service';
 import { Response } from 'express';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 @Controller('gateways')
+@UseGuards(AccessTokenGuard)
 export class GatewaysController {
   constructor(private readonly gatewaysService: GatewaysService) { }
 

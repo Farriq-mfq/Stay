@@ -3,9 +3,12 @@ import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 import { capitalize, getCurrentInstance, ref, watch } from 'vue';
 import { useClipboard } from '@vueuse/core'
+import { useConfirm } from "primevue/useconfirm";
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
+const confirm = useConfirm();
+
 // the datatable queries server side
 const expandedRows = ref({});
 const filters = ref(null);
@@ -184,13 +187,6 @@ const handleUpdateStatus = (id, status) => {
 
 
 // remove gateway
-const showDialogRemoveGateway = ref(false)
-const removeGateway = ref(null)
-const handleShowDialogRemoveGateway = (data) => {
-    removeGateway.value = data
-    showDialogRemoveGateway.value = true
-}
-
 const removeGatewayService = async (data) => {
     return await axios.delete(`/gateways/${data.id}`)
 }
@@ -200,30 +196,39 @@ const { mutateAsync: removeGatewayMutate, isPending: removeGatewayPending } = us
     mutationFn: removeGatewayService
 })
 
-
-const handleRemoveGateway = () => {
-    removeGatewayMutate(removeGateway.value, {
-        onSuccess() {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Gateway berhasil dihapus',
-                life: 3000
+const confirmDeleteGateway = (data) => {
+    confirm.require({
+        message: 'Yakin ingin menghapus gateway ini ?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        rejectLabel: 'Batalkan',
+        acceptLabel: 'Hapus',
+        accept: () => {
+            removeGatewayMutate(data, {
+                onSuccess() {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Gateway berhasil dihapus',
+                        life: 3000
+                    })
+                    refetch()
+                },
+                onError() {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Gateway gagal dihapus',
+                        life: 3000
+                    })
+                }
             })
-            showDialogRemoveGateway.value = false
-            removeGateway.value = null
-            refetch()
         },
-        onError() {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Gateway gagal dihapus',
-                life: 3000
-            })
-        }
-    })
-}
+    });
+};
+
 
 // update gateways
 const showDialogUpdateGateway = ref(false)
@@ -299,49 +304,50 @@ const clearUpdateState = () => {
 }
 
 // generate new token
-const showDialogGenerateToken = ref(false)
-const refIdnewToken = ref(null)
 const generateNewTokenGateway = async (id) => {
     return await axios.post(`/gateways/${id}/token`)
 }
 
-const { mutateAsync: generateNewTokenMutate, isPending: generateNewTokenPending, isSuccess: generateNewTokenSuccess } = useMutation({
+const { mutateAsync: generateNewTokenMutate, isPending: generateNewTokenPending } = useMutation({
     mutationKey: ['generateNewTokenGateway'],
     mutationFn: generateNewTokenGateway
 })
 
-const handleGenerateToken = () => {
-    generateNewTokenMutate(refIdnewToken.value, {
-        onSuccess(data) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Token berhasil diubah',
-                life: 3000
+const confirmGenerateNewToken = (data) => {
+    confirm.require({
+        message: ' Yakin ingin membuat token baru ?',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        rejectLabel: 'Batalkan',
+        acceptLabel: 'Generate',
+        accept: () => {
+            generateNewTokenMutate(data, {
+                onSuccess(data) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Token berhasil diubah',
+                        life: 3000
+                    })
+                    newToken.value = data.data.data
+                    refetch()
+                },
+                onError() {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Token gagal diubah',
+                        life: 3000
+                    })
+                }
             })
-            showDialogGenerateToken.value = false
-            newToken.value = data.data.data
-            refetch()
         },
-        onError() {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Token gagal diubah',
-                life: 3000
-            })
-        }
-    })
-}
+    });
+};
 
-const handleShowDialogNewToken = (id) => {
-    refIdnewToken.value = id
-    showDialogGenerateToken.value = true
-}
 
-const clearGenerateTokenState = () => {
-    refIdnewToken.value = null
-}
 
 // copy text
 const { text, copy, copied, isSupported } = useClipboard({ source: newToken.value })
@@ -429,10 +435,10 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                                     <Button :disabled="loadingTesting" :loading="loadingTesting"
                                         :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
                                         @click.prevent="handleTestConnection(data.id)" />
-                                    <Button label="Generate Token Baru" outlined icon="pi pi-key"
-                                        @click.prevent="handleShowDialogNewToken(data.id)" />
+                                    <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending" :disabled="generateNewTokenPending" icon="pi pi-key"
+                                        @click.prevent="confirmGenerateNewToken(data.id)" />
                                     <Button label="Hapus" outlined severity="danger"
-                                        @click.prevent="handleShowDialogRemoveGateway(data)" icon="pi pi-trash" />
+                                        @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
                                 </div>
                             </template>
                         </Card>
@@ -549,42 +555,20 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                         icon="pi pi-link" @click="updateGatewayAction" />
                 </template>
             </Dialog>
-
-            <Dialog v-model:visible="showDialogRemoveGateway" :style="{ width: '450px' }" header="Confirm"
-                :modal="true">
-                <p class="m-0">
-                    Yakin ingin menghapus gateway ini ?
+            <Dialog v-model:visible="newToken" :modal="true">
+                <p>
+                    Note : Silahkan masukan token ini ketika script diupload ke device!
                 </p>
-                <template #footer>
-                    <Button label="Batalkan" outlined @click="showDialogRemoveGateway = false" />
-                    <Button label="Hapus" outlined severity="danger" :disabled="removeGatewayPending"
-                        :loading="removeGatewayPending" @click="handleRemoveGateway" />
-                </template>
-            </Dialog>
-            <Dialog v-model:visible="showDialogGenerateToken" @after-hide="clearGenerateTokenState"
-                :style="{ width: '450px' }" header="Confirm" :modal="true">
-                <p class="m-0">
-                    Yakin ingin membuat token baru ?
-                </p>
-                <template #footer>
-                    <Button label="Batalkan" outlined @click="showDialogGenerateToken = false" />
-                    <Button label="Generate" icon="pi pi-sync" outlined severity="danger"
-                        :disabled="generateNewTokenPending" :loading="generateNewTokenPending"
-                        @click="handleGenerateToken" />
-                </template>
-            </Dialog>
-            <Dialog v-model:visible="newToken" header="Success" :modal="true">
-                    <p>
-                        Silahkan masukan token ini ketika script device diupload!
-                    </p>
-                    <Tag class="p-5 text-lg">
-                        <code>{{ newToken }}</code>
-                    </Tag>
+                <div class="text-lg field grid px-2">
+                        <InputText class="flex-1" readonly :value="newToken" />
+                </div>
                 <template #footer>
                     <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
                         @click.prevent="copy(newToken)" v-if="isSupported" />
                 </template>
             </Dialog>
+            <ConfirmDialog></ConfirmDialog>
+
         </div>
     </div>
 </template>

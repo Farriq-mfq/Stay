@@ -1,7 +1,7 @@
 <script setup>
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, onMounted, ref, watch } from 'vue';
+import { getCurrentInstance, ref, watch } from 'vue';
 import SelectGateway from '@/components/SelectGateway.vue'
 import { useConfirm } from "primevue/useconfirm";
 import { useStorage } from '@vueuse/core'
@@ -56,7 +56,6 @@ const handleDebounceFilter = (val) => {
 }
 
 // add siswa
-
 const showDialogAddSiswa = ref(false)
 const errorsAddSiswa = ref(null)
 
@@ -97,7 +96,6 @@ const handleSubmitAddSiswa = () => {
       refetch()
     },
     onError(err) {
-      console.log(err)
       if (err.response.status === 400) {
         errorsAddSiswa.value = err.response.data
       } else if (err.response.status === 409) {
@@ -119,13 +117,6 @@ const handleSubmitAddSiswa = () => {
   })
 }
 // remove
-const showdialogRemoveSiswa = ref(false)
-const siswaRemove = ref(null)
-const handleShowDialogSiswaRemove = (data) => {
-  siswaRemove.value = data
-  showdialogRemoveSiswa.value = true
-}
-
 const removeSiswaService = async (data) => {
   return await axios.delete(`/siswa/${data.id}`)
 }
@@ -135,41 +126,39 @@ const { mutateAsync: removeSiswaMutate, isPending: removeSiswaPending } = useMut
   mutationFn: removeSiswaService,
 })
 
-
-const handleSiswaRemove = () => {
-  removeSiswaMutate(siswaRemove.value, {
-    onSuccess() {
-      toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Data siswa berhasil dihapus',
-        life: 3000
+const confirmRemoveSiswa = (data) => {
+  confirm.require({
+    message: 'Yakin ingin reset data siswa ?',
+    header: 'Confirmation',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Hapus',
+    accept: () => {
+      console.log(data)
+      removeSiswaMutate(data, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Data siswa berhasil dihapus',
+            life: 3000
+          })
+          refetch()
+        },
+        onError() {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Data siswa gagal dihapus',
+            life: 3000
+          })
+        }
       })
-      showdialogRemoveSiswa.value = false
-      siswaRemove.value = null
-      refetch()
     },
-    onError() {
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Data siswa gagal dihapus',
-        life: 3000
-      })
-    }
-  })
-}
-
-
-const clearRemoveState = () => {
-  siswaRemove.value = {
-    nis: '',
-    nisn: '',
-    notelp: '',
-    name: '',
-    rombel: ''
-  }
-}
+  });
+};
 // update data siswa
 
 const showDialogUpdateSiswa = ref(false)
@@ -183,7 +172,6 @@ const dataUpdateSiswa = ref({
 })
 
 const updateSiswaService = async (data) => {
-  console.log(data)
   return await axios.patch(`/siswa/${data.id}`, data)
 }
 
@@ -336,8 +324,8 @@ const clearRegisterCard = () => {
 const socket = proxy.socket
 const selectedGateway = ref()
 
-watch(() => [showDialogRegisterCard.value, selectedGateway.value], (val) => {
-  if (val && selectedGateway.value) {
+watch(() => [showDialogRegisterCard.value, selectedGateway.value], (dialog, gateway) => {
+  if (dialog && selectedGateway.value) {
     socket.on(`READER_${selectedGateway.value.ip}`, (data) => {
       scannedToken.value = data.toString()
       socket.off(`READER_${selectedGateway.value.ip}`);
@@ -381,6 +369,7 @@ const confirmResetRFID = (event, data) => {
   confirm.require({
     target: event.currentTarget,
     message: 'Yakin ingin reset kartu RFID ?',
+    icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',
     rejectLabel: 'Batalkan',
@@ -416,7 +405,7 @@ const defaultGateway = useStorage('default-gateway', selectedGateway.value)
 
 const setDefaultGateway = () => {
   if (selectedGateway.value) {
-    localStorage.setItem('default-gateway', JSON.stringify(selectedGateway.value))
+    defaultGateway.value = JSON.stringify(selectedGateway.value)
   } else {
     toast.add({
       severity: 'error',
@@ -427,6 +416,65 @@ const setDefaultGateway = () => {
   }
 }
 
+const resetDefaultGateway = () => {
+  defaultGateway.value = null
+  socket.off(`READER_${selectedGateway.value.ip}`);
+  selectedGateway.value = null
+}
+
+
+// reset data siswa
+const resetService = async () => {
+  return await axios.delete('siswa/reset')
+}
+
+const {
+  mutateAsync: resetDataSiswa,
+  isPending: resetDataSiswaPending,
+} = useMutation({
+  mutationKey: ['resetDataSiswa'],
+  mutationFn: resetService,
+})
+
+const confirmResetSiswa = () => {
+  confirm.require({
+    message: 'Yakin ingin reset data siswa ?',
+    header: 'Confirmation',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Reset',
+    accept: () => {
+      resetDataSiswa({}, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Data siswa berhasil direset',
+            life: 3000
+          })
+          refetch()
+        },
+        onError() {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Data siswa gagal direset',
+            life: 3000
+          })
+        }
+      })
+    },
+  });
+};
+
+// import siswa
+
+const showDialogImportsiswa = ref(false)
+const onUpload = (e) => {
+  console.log(e)
+}
 
 </script>
 
@@ -439,14 +487,16 @@ const setDefaultGateway = () => {
             <div class="my-2">
               <Button label="Tambah Siswa" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddSiswa = true" />
               <Button label="Import Siswa" icon="pi pi-arrow-up" severity="success" class="mr-2"
-                @click.prevent="showDialogAddSiswa = true" />
+                @click.prevent="showDialogImportsiswa = true" />
+              <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
+                :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" />
             </div>
           </template>
         </Toolbar>
         <DataTable ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows" :loading="isLoading"
           :value="isLoading ? [] : siswa.data.data.items" dataKey="id" paginator :rows="10" :filters="filters" lazy
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rowsPerPageOptions="[5, 10, 25]"
+          :rowsPerPageOptions="[10, 25, 50]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa" :first="first"
           @page="onPage($event)">
           <template #header>
@@ -483,7 +533,8 @@ const setDefaultGateway = () => {
             <template #body="{ data }">
               <div class="flex gap-2 mt-1">
                 <Button icon="pi pi-pencil" @click.prevent="handleShowDialogUpdateSiswa(data)" />
-                <Button severity="danger" icon="pi pi-trash" @click.prevent="handleShowDialogSiswaRemove(data)" />
+                <Button severity="danger" icon="pi pi-trash" :loading="removeSiswaPending"
+                  :disabled="removeSiswaPending" @click.prevent="confirmRemoveSiswa(data)" />
                 <Button icon="pi pi-id-card" @click.prevent="handleShowDialogRegisterCard(data)" />
               </div>
             </template>
@@ -626,34 +677,34 @@ const setDefaultGateway = () => {
           @click="handleSubmitUpdateSiswa" />
       </template>
     </Dialog>
-    <!-- delete -->
-    <Dialog v-model:visible="showdialogRemoveSiswa" @after-hide="clearRemoveState" :style="{ width: '450px' }"
-      header="Confirm" :modal="true">
-      <p class="m-0">
-        Yakin ingin menghapus siswa ini ?
-      </p>
-      <template #footer>
-        <Button label="Batalkan" outlined @click="showdialogRemoveSiswa = false" />
-        <Button label="Hapus" outlined severity="danger" :disabled="removeSiswaPending" :loading="removeSiswaPending"
-          @click.prevent="handleSiswaRemove" />
-      </template>
-    </Dialog>
+
     <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }"
       :modal="true" :closable="false">
       <Message severity="error" v-if="errorsRegisterCard && errorsRegisterCard.token">
         {{ errorsRegisterCard.token[0] }}
       </Message>
-      <SelectGateway role="register" @input="handleSelectedGateway" />
-      <Button label="Setel sebagai default gateway" outlined class="my-2" @click.prevent="setDefaultGateway" />
+      <SelectGateway v-if="!defaultGateway" role="register" @input="handleSelectedGateway" />
+      <div v-else class="flex align-items-center gap-3 border-solid py-3 px-2 border-round border-1 border-200">
+        <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`">
+        </div>
+        <div class="flex flex-column gap-2">
+          <span>{{ selectedGateway.name }} - {{ selectedGateway.location }}</span>
+          <Tag class="w-fit">{{ selectedGateway.ip }}</Tag>
+        </div>
+      </div>
+
+      <Button v-if="!defaultGateway" label="Setel sebagai default gateway" outlined class="my-2"
+        @click.prevent="setDefaultGateway" />
+      <Button v-else label="Pilih gateway" severity="danger" outlined class="my-2"
+        @click.prevent="resetDefaultGateway" />
       <div v-if="selectedGateway && !scannedToken"
-        class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-4 ">
+        class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
         <span class="text-2xl text-center font-bold">
           SILAHKAN SCAN KARTU <i
             class="pi pi-circle bg-red-500 border-circle ml-3 fadeout animation-duration-1000 animation-iteration-infinite"></i>
         </span>
       </div>
       <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
-        {{ selectedGateway }}
         <h3 class="text-white text-lg underline mt-2">
           Scan Kartu Berhasil
         </h3>
@@ -699,6 +750,17 @@ const setDefaultGateway = () => {
         <Button label="Cetak" outlined icon="pi pi-print" :loading="resetTokenPending" :disabled="resetTokenPending" />
       </template>
     </Dialog>
-    <ConfirmPopup></ConfirmPopup>
+    <Dialog v-model:visible="showDialogImportsiswa" :style="{ width: '450px' }" :modal="true">
+
+      <!-- <FileUpload mode="basic" name="demo[]" url="http://localhost:3000/siswa/import" :multiple="false" accept="image/*" :maxFileSize="1000000"
+        @upload="onUpload" /> -->
+        <Input type="file" />
+      <template #footer>
+        <Button label="Batalkan" outlined severity="danger" @click="showDialogImportsiswa = false" />
+        <Button label="Import" outlined icon="pi pi-upload" :loading="resetTokenPending"
+          :disabled="resetTokenPending" />
+      </template>
+    </Dialog>
+    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
