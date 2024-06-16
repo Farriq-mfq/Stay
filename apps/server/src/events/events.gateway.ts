@@ -38,6 +38,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     @UseGuards(GatewaysGuard)
     @SubscribeMessage('SCAN')
     async onHandleScan(@MessageBody() data: ScanDto): Promise<void> {
+        console.log(data)
         await this.gatewaysService.handleScanned({
             ip: data.ip,
             scan: data.scan

@@ -8,12 +8,18 @@ import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
+import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf } from 'telegraf';
+import { Context } from 'src/interfaces/context.interface';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
+    @InjectBot(AppChannel1) private bot: Telegraf<Context>
+
   ) {
 
   }
@@ -173,6 +179,26 @@ export class GatewaysService {
 
     switch (gateway.role) {
       case 'presence':
+        await this.bot.telegram.sendMessage(1308936952, `**Keterangan Presensi**
+
+Saya yang bertanda tangan di bawah ini menyatakan bahwa saya telah melakukan presensi untuk hari ini.
+
+**Nama:** [Nama Anda]
+
+**Tanggal:** [Tanggal Presensi]
+
+**Waktu Presensi:** [Waktu Presensi]
+
+**Keterangan Tambahan:**
+- [Tambahan 1]
+- [Tambahan 2]
+
+---
+
+Terima kasih.
+`, {
+          parse_mode: 'Markdown'
+        })
         console.log('the role is presence')
         break;
       case 'register':

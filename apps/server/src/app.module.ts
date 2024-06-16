@@ -12,8 +12,8 @@ import { EventsModule } from './events/events.module';
 import { telegrafSessionMiddleware } from './middlewares/telegraf.session';
 import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
+import { AppChannel1 } from './telegram/channel1/app-channel1.contants';
 import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
-import { AppChannel } from './telegram/channel1/app-channel1.contants';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -35,7 +35,7 @@ import { AppChannel } from './telegram/channel1/app-channel1.contants';
       inject: [ConfigService],
     }),
     TelegrafModule.forRootAsync({
-      botName: AppChannel,
+      botName: AppChannel1,
       useFactory: (configService: ConfigService) => {
         return ({
           token: configService.get<string>('TELEGRAM_BOT_TOKEN'),

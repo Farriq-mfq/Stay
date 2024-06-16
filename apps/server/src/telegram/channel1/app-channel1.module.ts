@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { AppChannel1Update } from './app-channel1.update';
 import { RegisterSiswaWizard } from './wizard/register-siswa.wizard';
 
+@Global()
 @Module({
     providers: [AppChannel1Update, RegisterSiswaWizard],
 })
