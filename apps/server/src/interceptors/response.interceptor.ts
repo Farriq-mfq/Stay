@@ -1,4 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,11 +10,23 @@ export interface Response<T> {
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
+    constructor(private reflector: Reflector) { }
     intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
-        const statusCode = context.switchToHttp().getResponse().statusCode
-        return next.handle().pipe(map(data => ({
-            statusCode,
-            data
-        })));
+        const bypassInterceptor = this.reflector.getAllAndOverride(
+            'bypassInterceptor',
+            [context.getHandler(), context.getClass()]
+        );
+
+        if (bypassInterceptor) {
+            return next.handle();
+        } else {
+            const statusCode = context.switchToHttp().getResponse().statusCode
+            return next.handle().pipe(map(data => ({
+                statusCode,
+                data
+            })));
+        }
+
+
     }
 }

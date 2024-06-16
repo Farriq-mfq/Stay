@@ -70,6 +70,7 @@ void handleRfid()
 
     StaticJsonDocument<200> doc;
     doc["ip"] = ipAddress;
+    doc['token'] = 'xxxxx';
     doc["scan"] = uuid;
 
     String jsonString;

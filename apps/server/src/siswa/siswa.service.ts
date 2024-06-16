@@ -6,13 +6,11 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
-
 @Injectable()
 export class SiswaService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {
-
   }
   async create(createSiswaDto: CreateSiswaDto) {
     return await this.prismaService.client.siswa.create({

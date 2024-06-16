@@ -1,5 +1,5 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
@@ -31,7 +31,7 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   // interceptor response
-  app.useGlobalInterceptors(new ResponseInterceptor())
+  app.useGlobalInterceptors(new ResponseInterceptor(new Reflector()))
 
   app.enableCors({
     origin: ['http://localhost:5173'],
