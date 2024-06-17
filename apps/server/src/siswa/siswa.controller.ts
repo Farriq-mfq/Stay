@@ -75,4 +75,11 @@ export class SiswaController {
     const data: siswa[] = xlsx.utils.sheet_to_json(worksheet);
     return await this.siswaService.import(data, keys);
   }
+
+  @Delete(':id/reset-telegram')
+  async resetTelegram(
+    @Param('id', new ParseIntPipe()) id: number
+  ) {
+    return await this.siswaService.resetTelegram(id)
+  }
 }

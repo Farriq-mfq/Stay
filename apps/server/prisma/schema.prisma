@@ -9,30 +9,28 @@ datasource db {
 
 // master data
 model siswa {
-  id                  Int               @id @default(autoincrement())
-  notelp              String?           @unique @db.VarChar()
-  name                String            @db.VarChar()
-  nisn                String            @unique @db.VarChar()
-  rombel              String
-  nis                 String?           @unique @db.VarChar()
-  rfid_token          String?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  presences           presences[]
-  telegram_account    telegram_account? @relation(fields: [telegram_accountsId], references: [id])
-  telegram_accountsId Int?              @unique
+  id               Int                @id @default(autoincrement())
+  notelp           String?            @unique @db.VarChar()
+  name             String             @db.VarChar()
+  nisn             String             @unique @db.VarChar()
+  rombel           String
+  nis              String?            @unique @db.VarChar()
+  rfid_token       String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  presences        presences[]
+  telegram_account telegram_account[]
 }
 
 model users {
-  id                 Int               @id @default(autoincrement())
+  id                 Int      @id @default(autoincrement())
   name               String
-  username           String            @unique @db.VarChar(255)
-  password           String            @db.VarChar(255)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  refreshToken       String?           @db.Text
-  telegram_accounts  telegram_account? @relation(fields: [telegram_accountId], references: [id], onDelete: Cascade)
-  telegram_accountId Int?              @unique
+  username           String   @unique @db.VarChar(255)
+  password           String   @db.VarChar(255)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  refreshToken       String?  @db.Text
+  telegram_accountId Int?     @unique
 }
 
 // fitur data
@@ -60,8 +58,8 @@ model gateways {
 
 model presence_sessions {
   id        Int         @id @default(autoincrement())
-  name      String // example : PAI - AKIDAH DAN AKHLAK
-  status    Boolean
+  name      String // example : PRESENSI SHOLAT
+  status    Boolean     @default(true)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   gateways  gateways[]
@@ -87,7 +85,6 @@ model telegram_account {
   chat_id   String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  siswaId   Int      @unique
-  siswa     siswa?
-  users     users?
+  siswa     siswa?   @relation(fields: [siswaId], references: [id])
+  siswaId   Int?     @unique
 }

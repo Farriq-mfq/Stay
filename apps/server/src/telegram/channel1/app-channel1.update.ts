@@ -60,16 +60,14 @@ export class AppChannel1Update {
                 where: {
                     chat_id: id.toString()
                 },
+                include: {
+                    siswa: true
+                }
             })
 
-            if (telegram) {
-                const siswa = await this.prismaService.client.siswa.findUnique({
-                    where: {
-                        id: telegram.siswaId
-                    }
-                })
-                const qrCodeFilePath = await this.generateQRCode(siswa.nisn)
-                await ctx.replyWithPhoto({ source: fs.createReadStream(qrCodeFilePath) }, { caption: `QRCODE ✅ ${siswa.name}` })
+            if (telegram && telegram.siswa) {
+                const qrCodeFilePath = await this.generateQRCode(telegram.siswa.nisn)
+                await ctx.replyWithPhoto({ source: fs.createReadStream(qrCodeFilePath) }, { caption: `QRCODE ✅ ${telegram.siswa.name}` })
                 fs.unlink(qrCodeFilePath, (err) => {
                     if (err) {
                         throw new InternalServerErrorException('Terjadi kesalahan')

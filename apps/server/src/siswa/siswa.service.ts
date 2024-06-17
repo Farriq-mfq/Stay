@@ -60,6 +60,9 @@ export class SiswaService {
           ],
         },
 
+      },
+      include: {
+        telegram_account: true
       }
     }).withPages({
       limit: limit ?? 10,
@@ -173,6 +176,14 @@ export class SiswaService {
       data: {
         rfid_token: null
       }
+    })
+  }
+
+  async resetTelegram(id: number) {
+    return await this.prismaService.client.telegram_account.delete({
+      where: {
+        siswaId: id,
+      },
     })
   }
 }

@@ -14,6 +14,7 @@ import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
 import { AppChannel1 } from './telegram/channel1/app-channel1.contants';
 import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
+import { SessionsModule } from './sessions/sessions.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -52,6 +53,7 @@ import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
     SiswaModule,
     GatewaysModule,
     PresenceModule,
+    SessionsModule,
   ],
 })
 export class AppModule { }

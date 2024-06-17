@@ -380,18 +380,16 @@ const confirmResetRFID = (event, data) => {
           toast.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'RFID card berhasil didaftarkan',
+            detail: 'Kartu RFID berhasil direset',
             life: 3000
           })
-          showDialogRegisterCard.value = false
-          dataRegisterCard.value = null
           refetch()
         },
         onError() {
           toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'RFID card gagal didaftarkan',
+            detail: 'Kartu RFID gagal direset',
             life: 3000
           })
         }
@@ -526,6 +524,62 @@ const handleImportSiswa = () => {
   })
 }
 
+// reset telegram
+const resetTelegramService = async (id) => {
+  return await axios.delete(`/siswa/${id}/reset-telegram`)
+}
+
+const {
+  mutateAsync: resetTelegram,
+  isPending: resetTelegramServicePending,
+} = useMutation({
+  mutationKey: ['resetTelegramService'],
+  mutationFn: resetTelegramService,
+})
+
+const confirmResetTelegram = (event, data) => {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Yakin ingin reset Telegram ?',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+    acceptClass: 'p-button-sm p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Reset',
+    accept: () => {
+      resetTelegram(data.id, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Akun Telegram berhasil direset',
+            life: 3000
+          })
+          refetch()
+        },
+        onError(err) {
+          if (err.response.status === 404) {
+            toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Akun Telegram belum diregistrasi',
+              life: 3000
+            })
+          } else {
+            toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Akun Telegram gagal direset',
+              life: 3000
+            })
+          }
+        }
+      })
+    },
+  });
+};
+
+
 </script>
 
 <template>
@@ -611,13 +665,33 @@ const handleImportSiswa = () => {
                       <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
                     </td>
                   </tr>
-                  <tr>
+                  <tr v-if="data.telegram_account.length">
                     <th>
                       Telegram
                     </th>
                     <td>:</td>
                     <td>
-                      .
+                      <Tag class="p-2">
+                        <table>
+                          <tr>
+                            <th>Nama</th>
+                            <td>:</td>
+                            <td>
+                              {{ data.telegram_account[0].name }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th>Username</th>
+                            <td>:</td>
+                            <td>{{ data.telegram_account[0].username }}</td>
+                          </tr>
+                          <tr>
+                            <th>Chat id</th>
+                            <td>:</td>
+                            <td>{{ data.telegram_account[0].chat_id }}</td>
+                          </tr>
+                        </table>
+                      </Tag>
                     </td>
                   </tr>
                 </table>
@@ -628,6 +702,9 @@ const handleImportSiswa = () => {
                     @click.prevent="handleShowDialogQrcode(data)" />
                   <Button label="Reset Kartu" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined
                     severity="danger" />
+                  <Button label="Reset Telegram" :loading="resetTelegramServicePending"
+                    :disabled="resetTelegramServicePending" @click="confirmResetTelegram($event, data)"
+                    icon="pi pi-telegram" outlined severity="danger" />
                 </div>
               </template>
             </Card>

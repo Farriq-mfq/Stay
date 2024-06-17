@@ -18,7 +18,7 @@ export class GatewaysGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const client: Socket = context.switchToWs().getClient<Socket>();
         const data = context.switchToWs().getData() as ScanDto;
-
+        console.log(data)
         try {
             const token = await this.jwtService.verify(data.token, {
                 ignoreExpiration: true
