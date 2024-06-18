@@ -6,7 +6,7 @@ const handleChange = (val) => {
 </script>
 <template>
   <div>
-    <SelectGateway role="register" @input="handleChange" />
-    <p>slkdfnlskndf</p>
+    <SelectGateway role="register" multiple @input="handleChange" />
+    <!-- <p>slkdfnlskndf</p> -->
   </div>
 </template>

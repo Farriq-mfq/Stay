@@ -57,12 +57,14 @@ export class GatewaysService {
           OR: [
             {
               name: {
-                contains: search
+                contains: search,
+                mode: 'insensitive'
               },
             },
             {
               ip: {
-                contains: search
+                contains: search,
+                mode: 'insensitive'
               },
             }
           ],

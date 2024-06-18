@@ -576,8 +576,6 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                         @click.prevent="copy(newToken)" v-if="isSupported" />
                 </template>
             </Dialog>
-            <ConfirmDialog></ConfirmDialog>
-
         </div>
     </div>
 </template>

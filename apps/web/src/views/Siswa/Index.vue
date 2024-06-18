@@ -369,6 +369,7 @@ const confirmResetRFID = (event, data) => {
   confirm.require({
     target: event.currentTarget,
     message: 'Yakin ingin reset kartu RFID ?',
+    header: 'Confirmation',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',
@@ -540,6 +541,7 @@ const {
 const confirmResetTelegram = (event, data) => {
   confirm.require({
     target: event.currentTarget,
+    header: 'Confirmation',
     message: 'Yakin ingin reset Telegram ?',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
@@ -898,6 +900,5 @@ const confirmResetTelegram = (event, data) => {
           @click.prevent="handleImportSiswa" />
       </template>
     </Dialog>
-    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
