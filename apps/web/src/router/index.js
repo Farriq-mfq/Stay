@@ -10,9 +10,9 @@ const router = createRouter({
         {
             path: '/',
             component: AppLayout,
-            // meta: {
-            //     auth: true
-            // },
+            meta: {
+                auth: true
+            },
             children: [
                 {
                     path: '/',

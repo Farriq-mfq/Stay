@@ -231,6 +231,9 @@ importers:
       vue-router:
         specifier: ^4.1.5
         version: 4.3.2(vue@3.4.27)
+      vue3-print-nb:
+        specifier: ^0.1.4
+        version: 0.1.4
     devDependencies:
       '@rushstack/eslint-patch':
         specifier: ^1.1.4
@@ -8912,6 +8915,14 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.6.3
       vue: 3.4.27
+    dev: false
+
+  /vue3-print-nb@0.1.4:
+    resolution: {integrity: sha512-LExI7viEzplR6ZKQ2b+V4U0cwGYbVD4fut/XHvk3UPGlT5CcvIGs6VlwGp107aKgk6P8Pgx4rco3Rehv2lti3A==}
+    dependencies:
+      vue: 3.4.27
+    transitivePeerDependencies:
+      - typescript
     dev: false
 
   /vue@3.4.27:

@@ -58,7 +58,8 @@ model gateways {
 
 model presence_sessions {
   id        Int         @id @default(autoincrement())
-  name      String // example : PRESENSI SHOLAT
+  name      String
+  qrcode    String      @unique @default(cuid())
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   gateways  gateways[]

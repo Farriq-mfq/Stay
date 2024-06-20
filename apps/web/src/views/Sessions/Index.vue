@@ -252,7 +252,26 @@ const handlePushCamera = (id) => {
     }
   })
 }
-
+// qrcode
+const showdialogQrCode = ref(false)
+const dataQr = ref({
+  qrcode: '',
+  name: ''
+})
+const handleShowQrCode = (data) => {
+  showdialogQrCode.value = true
+  dataQr.value = {
+    qrcode: data.qrcode,
+    name: data.name
+  }
+}
+const clearDialogQrCode = () => {
+  showdialogQrCode.value = false
+  dataQr.value = {
+    qrcode: '',
+    name: ''
+  }
+}
 </script>
 <template>
   <div class="grid">
@@ -308,6 +327,7 @@ const handlePushCamera = (id) => {
                 <Button :loading="deleteSessionPending" :disabled="deleteSessionPending" severity="danger"
                   @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
                 <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
+                <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" />
               </div>
             </template>
           </Column>
@@ -369,6 +389,20 @@ const handlePushCamera = (id) => {
             @click.prevent="showDialogUpdateSession = false" />
           <Button label="Update" :loading="updateSessionLoading" :disabled="updateSessionLoading" icon="pi pi-link"
             @click="handleSubmitUpdateSesion" />
+        </template>
+      </Dialog>
+      <Dialog v-model:visible="showdialogQrCode" :modal="true" class="p-fluid" @after-hide="clearDialogQrCode">
+        <div :id="`qrsession-${dataQr.qrcode}`" class="text-center">
+          <h1 class="text-6xl font-bold underline">
+            {{ dataQr.name }}
+          </h1>
+          <vue-qrcode :value="dataQr.qrcode" :options="{ width: 800 }"></vue-qrcode>
+        </div>
+
+        <template #footer>
+          <Button label="Batal" severity="danger" icon="pi pi-times" outlined
+            @click.prevent="showdialogQrCode = false" />
+          <Button label="Cetak" v-print="`#qrsession-${dataQr.qrcode}`" icon="pi pi-print" />
         </template>
       </Dialog>
     </div>
