@@ -1,10 +1,10 @@
 <script setup>
-import { ref, getCurrentInstance, watch } from "vue";
+import { ref, getCurrentInstance, watch, onMounted } from "vue";
 import { useQuery } from '@tanstack/vue-query'
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios;
 const filters = ref(null);
-const { role, multiple } = defineProps({
+const { role, multiple, defaultValue } = defineProps({
     multiple: {
         type: Boolean,
         default: false
@@ -12,6 +12,13 @@ const { role, multiple } = defineProps({
     role: {
         type: String,
         default: null
+    },
+    defaultValue: {
+        default: null,
+        required: false,
+        validator: (value) => {
+            return value !== null
+        },
     }
 })
 const emit = defineEmits(['input'])
@@ -29,14 +36,15 @@ const getAllGateways = async () => {
 }
 
 const selectedGateway = ref();
-const selectAll = ref(true);
 const { data: gateways, isLoading, refetch } = useQuery({
     queryKey: ["selectGateways", filters.value],
     queryFn: getAllGateways,
 })
 
 watch(() => selectedGateway.value, (val) => {
-    emit('input', val)
+    if (val) {
+        emit('input', val)
+    }
 })
 
 const handleFilter = (events) => {
@@ -45,6 +53,13 @@ const handleFilter = (events) => {
     refetch()
 }
 
+onMounted(() => {
+    if (defaultValue) {
+        selectedGateway.value = defaultValue
+    } else {
+        selectedGateway.value = null
+    }
+})
 
 </script>
 <template>

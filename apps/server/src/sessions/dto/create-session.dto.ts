@@ -1,15 +1,12 @@
-import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator"
+import { Transform, TransformFnParams } from "class-transformer"
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 
 export class CreateSessionDto {
     @IsNotEmpty()
     @IsString()
+    @Transform(({ value }: TransformFnParams) => value?.trim())
     name: string
-    @IsNotEmpty()
-    @IsBoolean()
-    @IsOptional()
-    status: boolean
     @IsArray()
-    // @ValidateNested({ each: true })
     @IsNumber({}, { each: true })
     @IsOptional()
     gateways: number[]

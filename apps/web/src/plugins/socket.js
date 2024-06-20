@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { config } from "../config";
 
-const socket = io(`ws://localhost:3000/`, {
+const socket = io(`${config.backend_ssl ? 'wss' : 'ws'}://${config.backend_host}/`, {
     reconnectionDelayMax: 10000,
     // auth: {
     //     token: "123"

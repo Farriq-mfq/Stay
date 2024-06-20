@@ -10,9 +10,9 @@ const router = createRouter({
         {
             path: '/',
             component: AppLayout,
-            meta: {
-                auth: true
-            },
+            // meta: {
+            //     auth: true
+            // },
             children: [
                 {
                     path: '/',
@@ -30,18 +30,37 @@ const router = createRouter({
                 {
                     path: '/sessions',
                     name: 'sessions',
-                    component: () => import('@/views/Sessions/Index.vue')
+                    component: () => import('@/views/Sessions/Index.vue'),
+                    meta: {
+                        title: "Sessions",
+                    }
+                },
+                {
+                    path: '/camera',
+                    name: 'camera',
+                    component: () => import('@/views/Camera/Index.vue'),
+                    meta: {
+                        title: "Camera",
+                    }
+                },
+                {
+                    path: '/camera/:id/scan',
+                    name: 'camera-scan',
+                    component: () => import('@/views/Camera/Scan.vue'),
+                    meta: {
+                        title: "Scan",
+                    }
                 },
                 {
                     path: '/presences',
                     name: 'presences',
                     component: () => import('@/views/Presences/Index.vue')
                 },
-                {
-                    path: '/reports',
-                    name: 'reports',
-                    component: () => import('@/views/Reports/Index.vue')
-                },
+                // {
+                //     path: '/reports',
+                //     name: 'reports',
+                //     component: () => import('@/views/Reports/Index.vue')
+                // },
                 {
                     path: '/users',
                     name: 'users',
@@ -88,5 +107,7 @@ export default (app) => {
         next();
     });
     app.router = router
+    app.config.globalProperties.$router = router;
+
     app.use(router)
 }

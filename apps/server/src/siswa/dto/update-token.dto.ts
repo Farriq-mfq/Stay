@@ -1,3 +1,4 @@
+import { Transform, TransformFnParams } from "class-transformer";
 import { IsNotEmpty, IsString } from "class-validator";
 
 export class UpdateTokenDto {
@@ -7,5 +8,6 @@ export class UpdateTokenDto {
     @IsNotEmpty({
         message: "Mohon scan kartu terlebih dahulu"
     })
+    @Transform(({ value }: TransformFnParams) => value?.trim())
     token: string
 }

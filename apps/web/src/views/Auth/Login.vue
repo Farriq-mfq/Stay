@@ -1,6 +1,7 @@
 <script setup>
+import { useToast } from 'primevue/usetoast';
 import { inject, reactive } from 'vue';
-
+const toast = useToast()
 const state = reactive({
     form: {
         body: {
@@ -18,12 +19,19 @@ const state = reactive({
 
 
 function errors(res) {
-    if (res.status === 401) {
+    if (res && res.status === 401) {
         state.form.errors = {
             username: ["Invalid Credentials"]
         }
-    } else if (res.status === 400) {
+    } else if (res && res.status === 400) {
         state.form.errors = res.data
+    } else {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: "Internal server error",
+            life: 3000
+        })
     }
 }
 
@@ -72,9 +80,10 @@ function handleLogin() {
                     </div>
                     <div class="mb-4">
                         <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
-                        <Password :disabled="state.form.loading" :invalid="state.form.errors && state.form.errors.password" :feedback="false" id="password1"
-                            v-model="state.form.body.password" placeholder="Password" :toggleMask="true"
-                            class="w-full" inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
+                        <Password :disabled="state.form.loading"
+                            :invalid="state.form.errors && state.form.errors.password" :feedback="false" id="password1"
+                            v-model="state.form.body.password" placeholder="Password" :toggleMask="true" class="w-full"
+                            inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
                         <p class="text-red-500" v-if="state.form.errors && state.form.errors.password">
                             {{ state.form.errors.password[0] }}
                         </p>

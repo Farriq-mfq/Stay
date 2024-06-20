@@ -148,7 +148,7 @@ const confirmDeleteSession = (id) => {
           })
           refetch()
         },
-        onError(err) {
+        onError() {
           toast.add({
             severity: 'error',
             summary: 'Error',
@@ -160,6 +160,99 @@ const confirmDeleteSession = (id) => {
     },
   });
 };
+// update
+const showDialogUpdateSession = ref(false)
+const dataUpdateSession = ref({
+  name: '',
+  gateways: []
+})
+const errorsUpdateSession = ref({})
+
+const updateService = async (data) => {
+  return await axios.patch(`/sessions/${data.id}`, {
+    name: data.name,
+    ...data.gateways.length && {
+      gateways: data.gateways
+    }
+  })
+}
+
+const handleChangeUpdateSessionGateway = (val) => {
+  const gateways = val.map((gateway) => gateway.id)
+  dataUpdateSession.value.gateways = gateways
+}
+
+const {
+  isPending: updateSessionLoading,
+  mutateAsync: updateSession,
+} = useMutation({
+  mutationKey: ['updateSession'],
+  mutationFn: updateService,
+})
+
+const handleShowDialogUpdateSesion = (data) => {
+  showDialogUpdateSession.value = true
+  dataUpdateSession.value = {
+    id: data.id,
+    name: data.name,
+    gateways: data.gateways
+  }
+}
+
+const clearUpdateSession = () => {
+  dataUpdateSession.value = {
+    name: '',
+    gateways: []
+  }
+
+  showDialogUpdateSession.value = false
+}
+
+const handleSubmitUpdateSesion = () => {
+  updateSession(dataUpdateSession.value, {
+    onSuccess() {
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Session berhasil diupdate',
+        life: 3000
+      })
+      clearUpdateSession()
+      refetch()
+    },
+    onError: (err) => {
+      if (err.response.status === 400) {
+        errorsAddSession.value = err.response.data
+      } else if (err.response.status === 404) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Gateway sudah digunakan atau belum tersedia',
+          life: 3000,
+        });
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Session gagal diupdate',
+          life: 3000,
+        });
+      }
+    }
+  })
+}
+
+// camera
+const router = proxy.$router;
+const handlePushCamera = (id) => {
+  router.push({
+    name: 'camera-scan',
+    params: {
+      id
+    }
+  })
+}
+
 </script>
 <template>
   <div class="grid">
@@ -208,21 +301,13 @@ const confirmDeleteSession = (id) => {
               </Badge>
             </template>
           </Column>
-          <Column header="Status">
-            <template #body="{ data }">
-              <Tag v-if="data.status" value="Aktif" severity="primary" />
-              <Tag v-else value="Tidak aktif" severity="danger" />
-            </template>
-          </Column>
           <Column headerStyle="width:4rem">
             <template #body="{ data }">
               <div class="flex gap-2 mt-1">
-                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogEditGateway(data)" />
-                <Button outlined :loading="pendingUpdateStatusGateway" :disabled="pendingUpdateStatusGateway"
-                  :severity="data.status ? 'danger' : 'success'"
-                  @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
+                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogUpdateSesion(data)" />
                 <Button :loading="deleteSessionPending" :disabled="deleteSessionPending" severity="danger"
                   @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
+                <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
               </div>
             </template>
           </Column>
@@ -231,8 +316,10 @@ const confirmDeleteSession = (id) => {
           </template>
         </DataTable>
       </div>
+      <!-- create -->
       <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Tambah Session Baru" :modal="true"
         class="p-fluid">
+
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.name"
@@ -254,6 +341,34 @@ const confirmDeleteSession = (id) => {
             @click.prevent="addSessionDialog = false" />
           <Button label="Simpan" :loading="addSessionLoading" :disabled="addSessionLoading" icon="pi pi-link"
             @click="handleAddSession" />
+        </template>
+      </Dialog>
+      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Tambah Session Baru"
+        :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
+        {{ dataUpdateSession.gateways }}
+        <div class="field">
+          <label for="name">Nama</label>
+          <InputText id="name" :disabled="updateSessionLoading"
+            :invalid="errorsUpdateSession && errorsUpdateSession.name" required="true" autofocus
+            v-model="dataUpdateSession.name" />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.name">
+            {{ errorsUpdateSession.name[0] }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="gateways">Gateway (Optional)</label>
+          <SelectGateway role="presence" :defaultValue="dataUpdateSession.gateways" multiple
+            @input="handleChangeUpdateSessionGateway" />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.gateways">
+            {{ errorsUpdateSession.gateways[0] }}
+          </p>
+        </div>
+
+        <template #footer>
+          <Button label="Batal" :disabled="updateSessionLoading" severity="danger" icon="pi pi-times" outlined
+            @click.prevent="showDialogUpdateSession = false" />
+          <Button label="Update" :loading="updateSessionLoading" :disabled="updateSessionLoading" icon="pi pi-link"
+            @click="handleSubmitUpdateSesion" />
         </template>
       </Dialog>
     </div>

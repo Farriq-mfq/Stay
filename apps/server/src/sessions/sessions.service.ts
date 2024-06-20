@@ -14,48 +14,50 @@ export class SessionsService {
   }
 
   async create(createSessionDto: CreateSessionDto) {
-    const session = await this.prismaService.client.presence_sessions.create({
-      data: {
-        name: createSessionDto.name,
-        ...createSessionDto.status && {
-          status: createSessionDto.status,
-        }
-      },
-    })
-
-    const unplugGateway = await this.prismaService.client.gateways.findMany({
-      where: {
-        id: {
-          in: createSessionDto.gateways
-        },
-        role: 'presence'
-      },
-      include: {
-        presence_sessions: true
-      }
-    })
-
-
     if (createSessionDto.gateways && createSessionDto.gateways.length) {
-      for (const gateway of unplugGateway) {
-        if (gateway.presence_sessions) {
-          throw new NotFoundException()
-        } else {
-          await this.prismaService.client.gateways.updateMany({
-            where: {
-              id: {
-                in: createSessionDto.gateways
-              }
-            },
-            data: {
-              presence_sessionsId: session.id
-            }
-          })
+      // check the gateway has a session of presences
+      const gatewaysHasSession = await this.prismaService.client.gateways.findMany({
+        where: {
+          id: {
+            in: createSessionDto.gateways
+          },
+          role: 'presence'
+        },
+        include: {
+          presence_sessions: true
         }
+      })
+
+      const isHaveGateway = gatewaysHasSession.every(gateway => gateway.presence_sessionsId === null)
+      if (!isHaveGateway) {
+        throw new NotFoundException()
+      } else {
+        const session = await this.prismaService.client.presence_sessions.create({
+          data: {
+            name: createSessionDto.name,
+          },
+        })
+        return await this.prismaService.client.gateways.updateMany({
+          data: {
+            presence_sessionsId: session.id
+          },
+          where: {
+            id: {
+              in: createSessionDto.gateways
+            }
+          }
+        })
       }
+
+    } else {
+      const session = await this.prismaService.client.presence_sessions.create({
+        data: {
+          name: createSessionDto.name,
+        },
+      })
+      return session
     }
 
-    return session
   }
 
   async findAll(
@@ -78,7 +80,7 @@ export class SessionsService {
       },
       include: {
         gateways: {
-          select:{
+          select: {
             id: true,
             name: true,
             ip: true,
@@ -101,58 +103,99 @@ export class SessionsService {
   }
 
   async findOne(id: number) {
-    return await this.prismaService.client.presence_sessions.findUnique({
+    return await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id
       }
     })
   }
 
+  /**
+   * TODO:
+   * Belum fix di bagian update
+   * jika gateway di pakai maka gateway  tidak bisa
+   */
   async update(id: number, updateSessionDto: UpdateSessionDto) {
-    const session = await this.prismaService.client.presence_sessions.update({
-      where: {
-        id,
-      },
-      data: {
-        name: updateSessionDto.name,
-        ...updateSessionDto.status && {
-          status: updateSessionDto.status,
-        }
-      },
-    })
 
-    const unplugGateway = await this.prismaService.client.gateways.findMany({
+    const currentSession = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
-        id: {
-          in: updateSessionDto.gateways
-        },
-        role: 'presence'
+        id
       },
       include: {
-        presence_sessions: true
+        gateways: true
       }
     })
-
-
     if (updateSessionDto.gateways && updateSessionDto.gateways.length) {
-      for (const gateway of unplugGateway) {
-        if (gateway.presence_sessions) {
-          throw new NotFoundException()
-        } else {
-          await this.prismaService.client.gateways.updateMany({
-            where: {
-              id: {
-                in: updateSessionDto.gateways
-              }
-            },
-            data: {
-              presence_sessionsId: session.id
-            }
-          })
+      // check the gateway has a session of presences
+      const gatewaysHasSession = await this.prismaService.client.gateways.findMany({
+        where: {
+          id: {
+            in: updateSessionDto.gateways
+          },
+          role: 'presence',
+          presence_sessionsId: null
+        },
+        include: {
+          presence_sessions: true
         }
+      })
+
+      const isHaveGateway = gatewaysHasSession.every(gateway => gateway.presence_sessionsId === null)
+      if (!isHaveGateway) {
+        throw new NotFoundException()
+      } else {
+        await this.prismaService.client.gateways.updateMany({
+          data: {
+            presence_sessionsId: null
+          },
+          where: {
+            id: {
+              in: currentSession.gateways.map(gateway => gateway.id)
+            },
+          }
+        })
+        const session = await this.prismaService.client.presence_sessions.update({
+          where: {
+            id
+          },
+          data: {
+            name: updateSessionDto.name,
+          },
+        })
+        await this.prismaService.client.gateways.updateMany({
+          data: {
+            presence_sessionsId: session.id
+          },
+          where: {
+            id: {
+              in: updateSessionDto.gateways
+            }
+          }
+        })
+        return session
       }
+    } else {
+      const session = await this.prismaService.client.presence_sessions.update({
+        where: {
+          id
+        },
+        data: {
+          name: updateSessionDto.name,
+        },
+      })
+
+      await this.prismaService.client.gateways.updateMany({
+        data: {
+          presence_sessionsId: null
+        },
+        where: {
+          id: {
+            in: currentSession.gateways.map(gateway => gateway.id)
+          },
+        }
+      })
+      return session
     }
-    return session;
   }
 
   async remove(id: number) {

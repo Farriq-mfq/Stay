@@ -59,7 +59,6 @@ model gateways {
 model presence_sessions {
   id        Int         @id @default(autoincrement())
   name      String // example : PRESENSI SHOLAT
-  status    Boolean     @default(true)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   gateways  gateways[]
