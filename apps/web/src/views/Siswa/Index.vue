@@ -1,7 +1,7 @@
 <script setup>
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref, watch } from 'vue';
+import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import SelectGateway from '@/components/SelectGateway.vue'
 import { useConfirm } from "primevue/useconfirm";
 import { useStorage } from '@vueuse/core'
@@ -326,10 +326,15 @@ const selectedGateway = ref()
 
 watch(() => [showDialogRegisterCard.value, selectedGateway.value], (dialog, gateway) => {
   if (dialog && selectedGateway.value) {
+    if (!socket.connected) {
+      socket.connect();
+    }
     socket.on(`READER_${selectedGateway.value.ip}`, (data) => {
       scannedToken.value = data.toString()
       socket.off(`READER_${selectedGateway.value.ip}`);
     })
+  } else {
+    socket.disconnect();
   }
 })
 
@@ -420,6 +425,7 @@ const resetDefaultGateway = () => {
   socket.off(`READER_${selectedGateway.value.ip}`);
   selectedGateway.value = null
 }
+
 
 
 // reset data siswa
@@ -849,9 +855,9 @@ const confirmResetTelegram = (event, data) => {
         <pre class="app-code"><code>ID: {{ scannedToken }}</code></pre>
       </div>
       <template #footer>
-        <Button label="Batalkan" severity="danger" outlined @click="showDialogRegisterCard = false" />
-        <Button v-if="scannedToken && selectedGateway" label="Ulangi" severity="warning" outlined
-          @click="scannedToken = null" />
+        <Button label="Batalkan" severity="danger" outlined @click.prevent="showDialogRegisterCard = false" />
+        <!-- <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined
+          @click.prevent="scannedToken = null" /> -->
         <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
           @click.prevent="handleSubmitRegisterCard" />
       </template>

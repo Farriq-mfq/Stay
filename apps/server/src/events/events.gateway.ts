@@ -13,10 +13,17 @@ import { GatewaysGuard } from 'src/gateways/gateways.guard';
 import { GatewaysService } from 'src/gateways/gateways.service';
 import { ScanDto } from './dto/scan.dto';
 
+
+// solve with socket io not connected to esp32: 
+// https://stackoverflow.com/questions/54800516/socketio-server-not-connecting-to-esp8266
 @WebSocketGateway({
     cors: {
         origin: '*',
     },
+    methods: ["GET", "POST"],
+    transports: ["websocket", "polling"],
+    credentials: true,
+    allowEIO3: true
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     constructor(
@@ -38,7 +45,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     @UseGuards(GatewaysGuard)
     @SubscribeMessage('SCAN')
     async onHandleScan(@MessageBody() data: ScanDto): Promise<void> {
-        console.log(data)
         await this.gatewaysService.handleScanned({
             ip: data.ip,
             scan: data.scan

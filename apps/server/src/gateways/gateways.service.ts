@@ -1,25 +1,21 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { PresenceService } from 'src/presence/presence.service';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
-import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
-import { InjectBot } from 'nestjs-telegraf';
-import { Telegraf } from 'telegraf';
-import { Context } from 'src/interfaces/context.interface';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    @InjectBot(AppChannel1) private bot: Telegraf<Context>
-
+    private readonly presenceService: PresenceService
   ) {
 
   }
@@ -171,43 +167,29 @@ export class GatewaysService {
     data: ScannedDto,
     client: Server
   ) {
-    const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
-      where: {
-        ip: data.ip
+    try {
+      const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+        where: {
+          ip: data.ip
+        },
+      })
+
+      switch (gateway.role) {
+        case 'presence':
+          // await this.bot.telegram.sendMessage(1308936952, `<b>Testing</b>\nGateway: ${gateway.name}\nip: ${gateway.ip}\nLokasi :${gateway.location}`, {
+          //   parse_mode: 'HTML'
+          // })
+          await this.presenceService.createPresenceByScanned(data, gateway, client)
+          // console.log('the role is presence')
+          break;
+        case 'register':
+          client.emit(`READER_${gateway.ip}`, data.scan)
+          break;
+        default:
+          throw new InternalServerErrorException('Role not registered')
       }
-    })
-
-    console.log(gateway)
-
-    switch (gateway.role) {
-      case 'presence':
-        await this.bot.telegram.sendMessage(1308936952, `**Keterangan Presensi**
-
-Saya yang bertanda tangan di bawah ini menyatakan bahwa saya telah melakukan presensi untuk hari ini.
-
-**Nama:** [Nama Anda]
-
-**Tanggal:** [Tanggal Presensi]
-
-**Waktu Presensi:** [Waktu Presensi]
-
-**Keterangan Tambahan:**
-- [Tambahan 1]
-- [Tambahan 2]
-
----
-
-Terima kasih.
-`, {
-          parse_mode: 'Markdown'
-        })
-        console.log('the role is presence')
-        break;
-      case 'register':
-        client.emit(`READER_${gateway.ip}`, data.scan)
-        break;
-      default:
-        throw new InternalServerErrorException('Role not registered')
+    } catch (err) {
+      Logger.error(err)
     }
 
   }
