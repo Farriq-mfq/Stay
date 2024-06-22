@@ -616,6 +616,18 @@ const confirmResetTelegram = (event, data) => {
     },
   });
 };
+// download template
+const downloadTemplateService = async () => {
+  const response = await axios.get(`/siswa/download`, {
+    responseType: 'blob',
+  })
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'siswa-template.xlsx');
+  document.body.appendChild(link);
+  link.click();
+}
 
 
 </script>
@@ -632,7 +644,8 @@ const confirmResetTelegram = (event, data) => {
                 @click.prevent="showDialogImportsiswa = true" />
               <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" />
-              <Button label="Download Format" icon="pi pi-download" class="mr-2" />
+              <Button label="Download Format" @click.prevent="downloadTemplateService" icon="pi pi-download"
+                class="mr-2" />
             </div>
           </template>
         </Toolbar>
