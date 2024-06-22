@@ -1,4 +1,4 @@
-import { UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
     MessageBody,
     OnGatewayConnection,
@@ -50,7 +50,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
             scan: data.scan
         }, this.server)
     }
-
 
 
 }

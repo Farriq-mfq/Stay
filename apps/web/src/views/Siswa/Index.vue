@@ -323,18 +323,15 @@ const clearRegisterCard = () => {
 
 const socket = proxy.socket
 const selectedGateway = ref()
+const isListening = ref(false);
 
-watch(() => [showDialogRegisterCard.value, selectedGateway.value], (dialog, gateway) => {
-  if (dialog && selectedGateway.value) {
-    if (!socket.connected) {
-      socket.connect();
-    }
-    socket.on(`READER_${selectedGateway.value.ip}`, (data) => {
-      scannedToken.value = data.toString()
-      socket.off(`READER_${selectedGateway.value.ip}`);
-    })
-  } else {
-    socket.disconnect();
+watch(selectedGateway, (newGateway, oldGateway) => {
+  if (oldGateway) {
+    turnOffListener();
+  }
+
+  if (newGateway) {
+    turnOnListener();
   }
 })
 
@@ -342,6 +339,39 @@ const handleSelectedGateway = (val) => {
   selectedGateway.value = val
   scannedToken.value = null
 }
+
+// socket switch on & off 
+const handleGatewayUpdate = (data) => {
+  if (showDialogRegisterCard.value) {
+    scannedToken.value = data.toString()
+    turnOffListener();
+    setTimeout(turnOnListener, 100);
+  } else {
+    turnOffListener();
+  }
+};
+
+const turnOnListener = () => {
+  if (!isListening.value && selectedGateway.value) {
+    socket.once(`READER_${selectedGateway.value.ip}`, handleGatewayUpdate);
+    isListening.value = true;
+    console.log('Listening on')
+  }
+};
+
+const turnOffListener = () => {
+  if (isListening.value && selectedGateway.value) {
+    socket.off(`READER_${selectedGateway.value.ip}`, handleGatewayUpdate);
+    isListening.value = false;
+    console.log('Listening off')
+  }
+};
+
+onMounted(() => {
+  if (selectedGateway.value) {
+    turnOnListener();
+  }
+});
 
 
 // show qrCode
@@ -827,6 +857,7 @@ const confirmResetTelegram = (event, data) => {
       <Message severity="error" v-if="errorsRegisterCard && errorsRegisterCard.token">
         {{ errorsRegisterCard.token[0] }}
       </Message>
+      <!-- {{ `READER_${selectedGateway.ip}` }} -->
       <SelectGateway v-if="!defaultGateway" role="register" @input="handleSelectedGateway" />
       <div v-else class="flex align-items-center gap-3 border-solid py-3 px-2 border-round border-1 border-200">
         <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`">
@@ -845,7 +876,7 @@ const confirmResetTelegram = (event, data) => {
         class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
         <span class="text-2xl text-center font-bold">
           SILAHKAN SCAN KARTU <i
-            class="pi pi-circle bg-red-500 border-circle ml-3 fadeout animation-duration-1000 animation-iteration-infinite"></i>
+            :class="`pi pi-circle bg-red-500 border-circle ml-3 ${isListening ? 'fadeout animation-duration-1000 animation-iteration-infinite' : ''}`"></i>
         </span>
       </div>
       <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
@@ -856,8 +887,7 @@ const confirmResetTelegram = (event, data) => {
       </div>
       <template #footer>
         <Button label="Batalkan" severity="danger" outlined @click.prevent="showDialogRegisterCard = false" />
-        <!-- <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined
-          @click.prevent="scannedToken = null" /> -->
+        <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined @click.prevent="scannedToken = null" />
         <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
           @click.prevent="handleSubmitRegisterCard" />
       </template>

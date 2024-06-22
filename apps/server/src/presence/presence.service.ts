@@ -1,15 +1,16 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { gateways } from '@prisma/client';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale'
 import { CustomPrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
+import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { Context } from 'src/interfaces/context.interface';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
 import { Telegraf } from 'telegraf';
 import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
-import { gateways } from '@prisma/client';
-import { Server } from 'socket.io';
-
 @Injectable()
 export class PresenceService {
   constructor(
@@ -105,12 +106,12 @@ export class PresenceService {
         }
       })
 
-      if (checkPresenceAlready) {
-        await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `Anda sudah melakukan presensi hari ini dengan`, {
-          parse_mode: 'HTML'
-        })
-        return;
-      }
+      // if (checkPresenceAlready) {
+      //   await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `Anda sudah melakukan presensi hari ini dengan`, {
+      //     parse_mode: 'HTML'
+      //   })
+      //   return;
+      // }
 
       const presence = await this.prismaService.client.presences.create({
         data: {
@@ -121,15 +122,8 @@ export class PresenceService {
       })
       if (presence) {
         // notify socket io
-        client.emit(`SESSION_${session.id}`, JSON.stringify(presence))
-        const htmlContent = `
-        Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :.\n
-        <strong>Nama : </strong> ${siswa.name}\n
-        <strong>Tanggal : </strong> ${presence.createdAt}\n
-        <strong>Lokasi : </strong> ${gateway.location}\n
-        <strong>Sesi : </strong> ${session.name}\n
-        <strong>Metode : </strong> Di Scan\n
-        Terima kasih.
+        client.emit(`PRESENCE_UPDATED_${session.id}`, true)
+        const htmlContent = `<strong>Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(presence.createdAt), 'Y/m/d', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> Di Scan.
         `;
         await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, htmlContent, {
           parse_mode: 'HTML'
@@ -139,6 +133,70 @@ export class PresenceService {
           parse_mode: 'HTML'
         })
       }
+    }
+  }
+
+  async findAll(
+    sessionId: string,
+    page?: number,
+    limit?: number,
+    search?: string,
+  ) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
+      }
+    })
+    const [items, meta] = await this.prismaService.client.presences.paginate({
+      select: {
+        id: true,
+        presence_sessionsId: true,
+        gatewaysId: true,
+        siswaId: true,
+        createdAt: true,
+        updatedAt: true,
+        gateway: true,
+        siswa: true,
+        session: true
+      },
+      where: {
+        ...search && {
+          OR: [
+            {
+              siswa: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              },
+              gateway: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              },
+              session: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              }
+            },
+          ],
+        },
+        presence_sessionsId: session.id,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    }).withPages({
+      limit: limit ?? 10,
+      includePageCount: true,
+      page: page ?? 1
+    });
+    return {
+      items,
+      meta
     }
   }
 }

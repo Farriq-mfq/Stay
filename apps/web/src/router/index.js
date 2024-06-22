@@ -54,7 +54,28 @@ const router = createRouter({
                 {
                     path: '/presences',
                     name: 'presences',
-                    component: () => import('@/views/Presences/Index.vue')
+                    redirect: {
+                        name: 'presences-all'
+                    },
+                    component: () => import('@/views/Presences/Index.vue'),
+                    children: [
+                        {
+                            path: '/presences/all',
+                            name: 'presences-all',
+                            component: () => import('@/views/Presences/All.vue'),
+                            meta: {
+                                title: "All Presences",
+                            },
+                        },
+                        {
+                            path: '/presences/recap',
+                            name: 'presences-recap',
+                            component: () => import('@/views/Presences/Recap.vue'),
+                            meta: {
+                                title: "Recap Presences",
+                            },
+                        }
+                    ]
                 },
                 // {
                 //     path: '/reports',

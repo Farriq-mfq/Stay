@@ -176,11 +176,7 @@ export class GatewaysService {
 
       switch (gateway.role) {
         case 'presence':
-          // await this.bot.telegram.sendMessage(1308936952, `<b>Testing</b>\nGateway: ${gateway.name}\nip: ${gateway.ip}\nLokasi :${gateway.location}`, {
-          //   parse_mode: 'HTML'
-          // })
           await this.presenceService.createPresenceByScanned(data, gateway, client)
-          // console.log('the role is presence')
           break;
         case 'register':
           client.emit(`READER_${gateway.ip}`, data.scan)
