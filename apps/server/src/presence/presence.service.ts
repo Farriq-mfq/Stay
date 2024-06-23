@@ -53,7 +53,8 @@ export class PresenceService {
       const presence = await this.prismaService.client.presences.create({
         data: {
           siswaId: siswa.id,
-          presence_sessionsId: session.id
+          presence_sessionsId: session.id,
+          method: 'qrcode'
         }
       })
       const htmlContent = `
@@ -117,13 +118,14 @@ export class PresenceService {
         data: {
           siswaId: siswa.id,
           presence_sessionsId: gateway.presence_sessionsId,
-          gatewaysId: gateway.id
+          gatewaysId: gateway.id,
+          method: 'card'
         }
       })
       if (presence) {
         // notify socket io
         client.emit(`PRESENCE_UPDATED_${session.id}`, true)
-        const htmlContent = `<strong>Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(presence.createdAt), 'Y/m/d', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> Di Scan.
+        const htmlContent = `<strong>Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${presence.method}.
         `;
         await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, htmlContent, {
           parse_mode: 'HTML'
@@ -157,7 +159,8 @@ export class PresenceService {
         updatedAt: true,
         gateway: true,
         siswa: true,
-        session: true
+        session: true,
+        method:true
       },
       where: {
         ...search && {
