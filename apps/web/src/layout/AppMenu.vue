@@ -13,8 +13,9 @@ const model = ref([
         items: [
             { label: 'Gateways', icon: 'pi pi-fw pi-link', to: '/gateways' },
             { label: 'Sessions', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
+            { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
             { label: 'Presences', icon: 'pi pi-fw pi-database', to: '/presences' },
-            { label: 'Reports', icon: 'pi pi-fw pi-book', to: '/reports' },
+            // { label: 'Reports', icon: 'pi pi-fw pi-book', to: '/reports' },
         ]
     },
     {

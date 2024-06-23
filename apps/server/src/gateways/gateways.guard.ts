@@ -13,13 +13,11 @@ export class GatewaysGuard implements CanActivate {
 
     }
 
-    // this guard for verify the token and ip
+    // this guard for verify the token , ip and status
     // and how to know the device has been registered in the database
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const client: Socket = context.switchToWs().getClient<Socket>();
         const data = context.switchToWs().getData() as ScanDto;
-        // console.log('Client data in guard:', data);
-
         try {
             const token = await this.jwtService.verify(data.token, {
                 ignoreExpiration: true
@@ -27,7 +25,7 @@ export class GatewaysGuard implements CanActivate {
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
                     token,
-                    ip: data.ip
+                    ip: data.ip,
                 }
             })
 

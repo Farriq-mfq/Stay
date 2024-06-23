@@ -18,8 +18,6 @@ export default (app) => {
                     if ('data' in res.data) {
                         return res.data.data.accessToken;
                     }
-                    
-                    return res.data
                 },
             },
             router: driverRouterVueRouter,
@@ -46,8 +44,8 @@ export default (app) => {
                 method: 'POST',
                 enabled: true,
             },
-            stores: ['cookie', 'storage'],
-            tokenDefaultKey: "@stay/token"
+            // stores: ['cookie', 'storage'],
+            // tokenDefaultKey: "@stay/token"
             // rolesKey: 'type',
             // notFoundRedirect: { name: 'not-found' },
         },

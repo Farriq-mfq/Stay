@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { config } from '../config';
 
-axios.defaults.baseURL = `http://localhost:3000`;
+axios.defaults.baseURL = `${config.backend_ssl ? 'https' : 'http'}://${config.backend_host}`;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.timeout = 10000
 

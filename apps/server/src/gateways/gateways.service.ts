@@ -1,21 +1,21 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
+import { Server } from 'socket.io';
+import { PresenceService } from 'src/presence/presence.service';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
-import { UpdateGatewayDto } from './dto/update-gateway.dto';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { ScannedDto } from './dto/scanned.dto';
-import { Socket } from 'socket.io';
+import { UpdateGatewayDto } from './dto/update-gateway.dto';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly presenceService: PresenceService
   ) {
 
   }
@@ -53,12 +53,14 @@ export class GatewaysService {
           OR: [
             {
               name: {
-                contains: search
+                contains: search,
+                mode: 'insensitive'
               },
             },
             {
               ip: {
-                contains: search
+                contains: search,
+                mode: 'insensitive'
               },
             }
           ],
@@ -69,9 +71,9 @@ export class GatewaysService {
         }
       }
     }).withPages({
-      limit: limit || 10,
+      limit: limit ?? 10,
       includePageCount: true,
-      page: page || 1
+      page: page ?? 1
     });
     return {
       items,
@@ -163,23 +165,27 @@ export class GatewaysService {
 
   async handleScanned(
     data: ScannedDto,
-    client: Socket
+    client: Server
   ) {
-    const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
-      where: {
-        ip: data.ip
-      }
-    })
+    try {
+      const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+        where: {
+          ip: data.ip
+        },
+      })
 
-    switch (gateway.role) {
-      case 'presence':
-        console.log('the role is presence')
-        break;
-      case 'register':
-        client.emit(`READER_${gateway.ip}`, data.scan)
-        break;
-      default:
-        throw new InternalServerErrorException('Role not registered')
+      switch (gateway.role) {
+        case 'presence':
+          await this.presenceService.createPresenceByScanned(data, gateway, client)
+          break;
+        case 'register':
+          client.emit(`READER_${gateway.ip}`, data.scan)
+          break;
+        default:
+          throw new InternalServerErrorException('Role not registered')
+      }
+    } catch (err) {
+      Logger.error(err)
     }
 
   }

@@ -1,28 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { CreatePresenceDto } from './dto/create-presence.dto';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
 
 @Controller('presence')
 export class PresenceController {
-  constructor(private readonly presenceService: PresenceService) {}
+  constructor(private readonly presenceService: PresenceService) { }
 
-  @Post()
-  create(@Body() createPresenceDto: CreatePresenceDto) {
-    return this.presenceService.create(createPresenceDto);
+  @Post('/qr')
+  async createPresenceByQR(@Body() CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
+    return await this.presenceService.createPresenceByQR(CreatePresenceByQRDTO);
   }
 
-  @Get()
-  findAll() {
-    return this.presenceService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.presenceService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.presenceService.remove(+id);
+  @Get('/:sessionId')
+  async findAll(
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+  ) {
+    return await this.presenceService.findAll(
+      sessionId,
+      page,
+      limit,
+      search,
+    )
   }
 }

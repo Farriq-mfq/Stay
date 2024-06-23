@@ -30,18 +30,58 @@ const router = createRouter({
                 {
                     path: '/sessions',
                     name: 'sessions',
-                    component: () => import('@/views/Sessions/Index.vue')
+                    component: () => import('@/views/Sessions/Index.vue'),
+                    meta: {
+                        title: "Sessions",
+                    }
+                },
+                {
+                    path: '/camera',
+                    name: 'camera',
+                    component: () => import('@/views/Camera/Index.vue'),
+                    meta: {
+                        title: "Camera",
+                    }
+                },
+                {
+                    path: '/camera/:id/scan',
+                    name: 'camera-scan',
+                    component: () => import('@/views/Camera/Scan.vue'),
+                    meta: {
+                        title: "Scan",
+                    }
                 },
                 {
                     path: '/presences',
                     name: 'presences',
-                    component: () => import('@/views/Presences/Index.vue')
+                    redirect: {
+                        name: 'presences-all'
+                    },
+                    component: () => import('@/views/Presences/Index.vue'),
+                    children: [
+                        {
+                            path: '/presences/all',
+                            name: 'presences-all',
+                            component: () => import('@/views/Presences/All.vue'),
+                            meta: {
+                                title: "All Presences",
+                            },
+                        },
+                        {
+                            path: '/presences/recap',
+                            name: 'presences-recap',
+                            component: () => import('@/views/Presences/Recap.vue'),
+                            meta: {
+                                title: "Recap Presences",
+                            },
+                        }
+                    ]
                 },
-                {
-                    path: '/reports',
-                    name: 'reports',
-                    component: () => import('@/views/Reports/Index.vue')
-                },
+                // {
+                //     path: '/reports',
+                //     name: 'reports',
+                //     component: () => import('@/views/Reports/Index.vue')
+                // },
                 {
                     path: '/users',
                     name: 'users',
@@ -50,7 +90,10 @@ const router = createRouter({
                 {
                     path: '/siswa',
                     name: 'siswa',
-                    component: () => import('@/views/Siswa/Index.vue')
+                    component: () => import('@/views/Siswa/Index.vue'),
+                    meta: {
+                        title: "Siswa",
+                    }
                 },
             ]
         },
@@ -85,5 +128,7 @@ export default (app) => {
         next();
     });
     app.router = router
+    app.config.globalProperties.$router = router;
+
     app.use(router)
 }

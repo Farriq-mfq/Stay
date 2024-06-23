@@ -9,29 +9,28 @@ datasource db {
 
 // master data
 model siswa {
-  id                  BigInt           @id @default(autoincrement())
-  notelp              Int              @unique
-  name                String
-  nisn                Int
-  nis                 Int
-  rfid_token          String?
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  presences           presences[]
-  telegram            telegram_account @relation(fields: [telegram_accountsId], references: [id])
-  telegram_accountsId BigInt           @unique
+  id               Int                @id @default(autoincrement())
+  notelp           String?            @unique @db.VarChar()
+  name             String             @db.VarChar()
+  nisn             String             @unique @db.VarChar()
+  rombel           String
+  nis              String?            @unique @db.VarChar()
+  rfid_token       String?            @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  presences        presences[]
+  telegram_account telegram_account[]
 }
 
 model users {
-  id                 BigInt            @id @default(autoincrement())
+  id                 Int      @id @default(autoincrement())
   name               String
-  username           String            @unique @db.VarChar(255)
-  password           String            @db.VarChar(255)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  refreshToken       String?           @db.Text
-  telegram_accounts  telegram_account? @relation(fields: [telegram_accountId], references: [id], onDelete: Cascade)
-  telegram_accountId BigInt?           @unique
+  username           String   @unique @db.VarChar(255)
+  password           String   @db.VarChar(255)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  refreshToken       String?  @db.Text
+  telegram_accountId Int?     @unique
 }
 
 // fitur data
@@ -41,7 +40,7 @@ enum GatewayRole {
 }
 
 model gateways {
-  id                  BigInt             @id @default(autoincrement())
+  id                  Int                @id @default(autoincrement())
   token               String             @unique @db.VarChar()
   ip                  String             @unique @db.VarChar()
   location            String
@@ -52,41 +51,47 @@ model gateways {
   updatedAt           DateTime           @updatedAt
   presences           presences[]
   presence_sessions   presence_sessions? @relation(fields: [presence_sessionsId], references: [id])
-  presence_sessionsId BigInt?
+  presence_sessionsId Int?
 }
 
 // only role presences are allowed
 
 model presence_sessions {
-  id        BigInt      @id @default(autoincrement())
-  name      String // example : PAI - AKIDAH DAN AKHLAK
-  status    Boolean
+  id        Int         @id @default(autoincrement())
+  name      String
+  qrcode    String      @unique @default(cuid())
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   gateways  gateways[]
   presences presences[]
 }
 
+enum PresenceMethod {
+  card
+  qrcode
+  other
+}
+
 model presences {
-  id                  BigInt             @id @default(autoincrement())
+  id                  Int                @id @default(autoincrement())
   siswa               siswa              @relation(fields: [siswaId], references: [id], onDelete: Cascade)
-  siswaId             BigInt
+  siswaId             Int
   gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
-  gatewaysId          BigInt?
+  gatewaysId          Int?
   session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
-  presence_sessionsId BigInt?
+  presence_sessionsId Int?
+  method              PresenceMethod     @default(other)
 }
 
 model telegram_account {
-  id        BigInt   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   username  String
   name      String
-  chat_id   String
+  chat_id   String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  siswaId   BigInt   @unique
-  siswa     siswa?
-  users     users?
+  siswa     siswa?   @relation(fields: [siswaId], references: [id])
+  siswaId   Int?     @unique
 }
