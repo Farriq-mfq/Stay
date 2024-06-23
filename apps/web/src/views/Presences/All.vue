@@ -76,7 +76,7 @@ const handlePresenceUpdate = (data) => {
     severity: 'info',
     summary: 'Presensi Baru',
     detail: `Presensi Baru Berhasil ditambahkan`,
-    life: 3000
+    life: 500,
   })
   refetch();
   turnOffListener();
@@ -116,12 +116,35 @@ const handleChangeSelectSession = (val) => {
   sessionId.value = val.id
 }
 
+// export
+const handleExportService = async () => {
+  if (sessionId.value) {
+    const queries = {
+      ...filters.value && { search: filters.value }
+    }
+
+    const params = new URLSearchParams(queries)
+
+    const response = await axios.get(`/presence/export/${sessionId.value}?${params}`, {
+      responseType: 'blob',
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+  } else {
+    throw new Error()
+  }
+}
 </script>
 <template>
   <div>
     <div class="field">
       <select-session @input="handleChangeSelectSession" />
-      <Button icon="pi pi-file-excel" label="Export" class="mt-3" v-if="sessionId" />
+      <Button icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3"
+        v-if="sessionId" />
     </div>
     <DataTable v-if="sessionId" ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
       :loading="isLoading" :value="isLoading ? [] : presences.data.data.items" dataKey="id" paginator :rows="10"
@@ -185,54 +208,6 @@ const handleChangeSelectSession = (val) => {
           {{ format(new Date(data.createdAt), 'EEEE, d MMMM yyyy', { locale: id }) }}
         </template>
       </Column>
-      <!-- <Column headerStyle="width:4rem">
-            <template #body="{ data }">
-              <div class="flex gap-2 mt-1">
-                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogEditGateway(data)" />
-                <Button outlined :loading="pendingUpdateStatusGateway" :disabled="pendingUpdateStatusGateway"
-                  :severity="data.status ? 'danger' : 'success'"
-                  @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
-              </div>
-            </template>
-          </Column> -->
-      <!-- <template #expansion="{ data }">
-            <Card>
-              <template #content>
-                <table style="border-spacing: 0.6rem;">
-                  <tr style="width: 4rem;">
-                    <th style="width: 4rem;">
-                      Lokasi
-                    </th>
-                    <td>:</td>
-                    <td>{{ data.location }}</td>
-                  </tr>
-                  <tr>
-                    <th style="width: 4rem;">
-                      Role
-                    </th>
-                    <td>:</td>
-                    <td>
-                      <Tag>
-                        {{ capitalize(data.role) }}
-                      </Tag>
-                    </td>
-                  </tr>
-                </table>
-              </template>
-              <template #footer>
-                <div class="flex gap-3 mt-1">
-                  <Button :disabled="loadingTesting" :loading="loadingTesting"
-                    :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
-                    @click.prevent="handleTestConnection(data.id)" />
-                  <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending"
-                    :disabled="generateNewTokenPending" icon="pi pi-key"
-                    @click.prevent="confirmGenerateNewToken(data.id)" />
-                  <Button label="Hapus" outlined severity="danger" @click.prevent="confirmDeleteGateway(data)"
-                    icon="pi pi-trash" />
-                </div>
-              </template>
-            </Card>
-          </template> -->
     </DataTable>
   </div>
 </template>

@@ -332,7 +332,21 @@ const clearDialogQrCode = () => {
             </template>
           </Column>
           <template #expansion="{ data }">
-            {{ data.gateways }}
+            <!-- {{ data.gateways }} -->
+            <DataView :value="data.gateways">
+              <template #list="slotProps">
+                <div class="card" v-for="(item, index) in slotProps.items" :key="index">
+                  <div class="flex align-items-center gap-3">
+                    <div :class="`${item.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`">
+                    </div>
+                    <div class="flex flex-column gap-2">
+                      <span>{{ item.name }} - {{ item.location }}</span>
+                      <Tag class="w-fit">{{ item.ip }}</Tag>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </DataView>
           </template>
         </DataTable>
       </div>
@@ -365,7 +379,6 @@ const clearDialogQrCode = () => {
       </Dialog>
       <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Tambah Session Baru"
         :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
-        {{ dataUpdateSession.gateways }}
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
@@ -391,14 +404,14 @@ const clearDialogQrCode = () => {
             @click="handleSubmitUpdateSesion" />
         </template>
       </Dialog>
-      <Dialog v-model:visible="showdialogQrCode" :modal="true" class="p-fluid" @after-hide="clearDialogQrCode">
-        <div :id="`qrsession-${dataQr.qrcode}`" class="text-center">
+      <Dialog v-model:visible="showdialogQrCode" :modal="true" @after-hide="clearDialogQrCode">
+        <div class="w-full flex flex-column justify-content-center align-items-center text-center"
+          :id="`qrsession-${dataQr.qrcode}`">
           <h1 class="text-6xl font-bold underline">
             {{ dataQr.name }}
           </h1>
           <vue-qrcode :value="dataQr.qrcode" :options="{ width: 800 }"></vue-qrcode>
         </div>
-
         <template #footer>
           <Button label="Batal" severity="danger" icon="pi pi-times" outlined
             @click.prevent="showdialogQrCode = false" />

@@ -15,8 +15,12 @@ export default (app) => {
                     this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + token })
                 },
                 response: function (res) {
-                    if ('data' in res.data) {
-                        return res.data.data.accessToken;
+                    try {
+                        if ('data' in res.data) {
+                            return res.data.data.accessToken;
+                        }
+                    } catch (err) {
+                        throw err
                     }
                 },
             },

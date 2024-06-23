@@ -1,13 +1,16 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
-import { useRouter } from 'vue-router';
+import { useConfirm } from "primevue/useconfirm";
 
 const { layoutConfig, onMenuToggle } = useLayout();
 
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
-const router = useRouter();
+
+import { config } from '../config';
+
+const confirm = useConfirm();
 
 onMounted(() => {
     bindOutsideClickListener();
@@ -56,11 +59,6 @@ const isOutsideClicked = (event) => {
 };
 
 
-const showDialogLogout = ref(false)
-const hanldeShowDialogLogout = () => {
-    showDialogLogout.value = true
-}
-
 const $auth = inject('auth')
 
 const handleLogout = () => {
@@ -68,14 +66,30 @@ const handleLogout = () => {
         redirect: { name: 'login' },
     })
 }
-
+const confirmLogout = () => {
+    confirm.require({
+        target: event.currentTarget,
+        header: 'Confirmation',
+        message: 'Yakin ingin keluar dari aplikasi ?',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-sm p-button-danger',
+        rejectLabel: 'Batalkan',
+        acceptLabel: 'Logout',
+        accept: () => {
+            handleLogout()
+        },
+    });
+};
 </script>
 
 <template>
     <div class="layout-topbar">
         <router-link to="/" class="layout-topbar-logo">
             <!-- <img :src="logoUrl" alt="logo" /> -->
-            <span>STAY</span>
+            <span>
+                {{ config.app_name }}
+            </span>
         </router-link>
 
         <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
@@ -87,20 +101,11 @@ const handleLogout = () => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <Button icon="pi pi-sign-out p-link" @click="hanldeShowDialogLogout" severity="danger"
+            <Button icon="pi pi-sign-out p-link" @click="confirmLogout" severity="danger"
                 :label="topbarMenuActive ? 'Logout' : ''" />
         </div>
 
 
-        <Dialog v-model:visible="showDialogLogout" modal header="Confirmation" :style="{ width: '30rem' }">
-            <p class="m-0">
-                Yakin ingin keluar dari aplikasi ?
-            </p>
-            <div class="flex justify-content-end gap-2">
-                <Button type="button" label="Batal" severity="secondary" @click="showDialogLogout = false"></Button>
-                <Button type="button" severity="danger" @click.prevent="handleLogout" label="Keluar"></Button>
-            </div>
-        </Dialog>
     </div>
 </template>
 

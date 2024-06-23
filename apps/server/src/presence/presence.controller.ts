@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
 import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
+import { Response } from 'express';
+import { format } from 'date-fns';
 
 @Controller('presence')
 export class PresenceController {
@@ -11,6 +13,23 @@ export class PresenceController {
     return await this.presenceService.createPresenceByQR(CreatePresenceByQRDTO);
   }
 
+  @Get('/export/:sessionId')
+  async export(
+    @Res() res: Response,
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('search') search?: string,
+  ) {
+    const buffer = await this.presenceService.exportData(
+      sessionId,
+      search,
+    )
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename=${format(new Date(),'yyyy-MM-dd')}-presences.xlsx`,
+    });
+    res.send(buffer);
+  }
   @Get('/:sessionId')
   async findAll(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,

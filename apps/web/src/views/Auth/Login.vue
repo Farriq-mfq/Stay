@@ -61,10 +61,10 @@ function handleLogin() {
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
                         <div class="text-900 text-3xl font-medium mb-3">
-                            Selamat datang DI APLIKASI STAY
+                            Selamat datang
                         </div>
                         <span class="text-600 font-medium">
-                            Silahkan login untuk melanjutkan
+                            Silahkan login 
                         </span>
                     </div>
                     <div class="mb-4">

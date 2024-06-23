@@ -32,10 +32,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
 
     }
     handleConnection(client: any, ...args: any[]) {
-        console.log("connected")
+        Logger.debug(`Connected client: ${client.id}`);
     }
     afterInit(server: any) {
-        console.log("connected")
+        Logger.debug(`Connected client: ${server}`);
     }
     @WebSocketServer()
     server: Server;

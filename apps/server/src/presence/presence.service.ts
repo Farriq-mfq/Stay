@@ -11,6 +11,7 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
 import { Telegraf } from 'telegraf';
 import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
+import * as xlsx from 'xlsx';
 @Injectable()
 export class PresenceService {
   constructor(
@@ -160,7 +161,7 @@ export class PresenceService {
         gateway: true,
         siswa: true,
         session: true,
-        method:true
+        method: true
       },
       where: {
         ...search && {
@@ -170,20 +171,32 @@ export class PresenceService {
                 name: {
                   contains: search,
                   mode: 'insensitive'
-                }
+                },
               },
+            },
+            {
+              siswa: {
+                rombel: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              }
+            },
+            {
               gateway: {
                 name: {
                   contains: search,
                   mode: 'insensitive'
                 }
               },
-              session: {
-                name: {
+            },
+            {
+              gateway: {
+                location: {
                   contains: search,
                   mode: 'insensitive'
                 }
-              }
+              },
             },
           ],
         },
@@ -201,5 +214,91 @@ export class PresenceService {
       items,
       meta
     }
+  }
+
+  async exportData(
+    sessionId: string,
+    search?: string,
+  ) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
+      }
+    })
+
+    const presences = await this.prismaService.client.presences.findMany({
+      select: {
+        id: true,
+        presence_sessionsId: true,
+        gatewaysId: true,
+        siswaId: true,
+        createdAt: true,
+        updatedAt: true,
+        gateway: true,
+        siswa: true,
+        session: true,
+        method: true
+      },
+      where: {
+        ...search && {
+          OR: [
+            {
+              siswa: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                },
+              },
+            },
+            {
+              siswa: {
+                rombel: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              }
+            },
+            {
+              gateway: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              },
+            },
+            {
+              gateway: {
+                location: {
+                  contains: search,
+                  mode: 'insensitive'
+                }
+              },
+            },
+          ],
+        },
+        presence_sessionsId: session.id,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    const mappingPresences = presences.map(presence => ({
+      Nama: presence.siswa.name,
+      NISN: presence.siswa.nisn,
+      NIS: presence.siswa.nis,
+      Rombel: presence.siswa.rombel,
+      Session: presence.session.name,
+      Location: presence.gateway.location,
+      Metode: presence.method,
+      Tanggal: presence.createdAt
+    }))
+
+
+    const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
+    const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    return buffer;
   }
 }

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
 import Login from '@/views/Auth/Login.vue';
 import NotFound from '@/views/Errors/NotFound.vue';
+import { config } from '../config';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -123,7 +124,7 @@ export default (app) => {
     router.beforeEach((to, from, next) => {
         const title = to.meta.title;
         if (title) {
-            document.title = `${title} - STAY`;
+            document.title = `${title} - ${config.app_name}`;
         }
         next();
     });

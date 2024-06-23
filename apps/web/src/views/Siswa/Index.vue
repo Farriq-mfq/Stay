@@ -905,36 +905,17 @@ const downloadTemplateService = async () => {
           @click.prevent="handleSubmitRegisterCard" />
       </template>
     </Dialog>
-    <Dialog v-model:visible="showDialogQrcode" :style="{ width: '450px' }" :modal="true" :closable="false">
-      <div
-        class="w-full border-round border-dotted bg-primary p-3 mt-4 flex justify-content-between align-items-center">
-        <table>
-          <tr>
-            <td>Nama</td>
-            <td>:</td>
-            <td>{{ qrCode.name }}</td>
-          </tr>
-          <tr>
-            <td>NIS</td>
-            <td>:</td>
-            <td>{{ qrCode.nis }}</td>
-          </tr>
-          <tr>
-            <td>NISN</td>
-            <td>:</td>
-            <td>{{ qrCode.nisn }}</td>
-          </tr>
-          <tr>
-            <td>Rombel</td>
-            <td>:</td>
-            <td>{{ qrCode.rombel }}</td>
-          </tr>
-        </table>
-        <vue-qrcode :value="qrCode.nisn" :options="{ width: 100 }"></vue-qrcode>
+    <Dialog v-model:visible="showDialogQrcode" :modal="true" :closable="false">
+      <div class="w-full flex flex-column justify-content-center align-items-center" :id="`qrcode-siswa-${qrCode.nisn}`">
+        <h1 class="text-6xl font-bold underline">
+            {{ qrCode.name }}
+          </h1>
+        <vue-qrcode :value="qrCode.nisn" :options="{ width: 800 }"></vue-qrcode>
       </div>
       <template #footer>
         <Button label="Batalkan" outlined severity="danger" @click="showDialogQrcode = false" />
-        <Button label="Cetak" outlined icon="pi pi-print" :loading="resetTokenPending" :disabled="resetTokenPending" />
+        <Button label="Cetak" outlined v-print="`#qrcode-siswa-${qrCode.nisn}`" icon="pi pi-print"
+          :loading="resetTokenPending" :disabled="resetTokenPending" />
       </template>
     </Dialog>
     <Dialog :closable="!importSiswaPending" :header="importSiswaPending ? 'Loading...' : 'Import siswa'"
