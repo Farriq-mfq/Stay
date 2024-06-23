@@ -6,6 +6,8 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 @Injectable()
 export class SiswaService {
   constructor(
@@ -185,5 +187,9 @@ export class SiswaService {
         siswaId: id,
       },
     })
+  }
+
+  async downloadTemplate() {
+    return readFileSync(join(process.cwd(), 'templates/siswa-template.xlsx'))
   }
 }

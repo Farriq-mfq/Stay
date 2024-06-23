@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards, Res, StreamableFile, Header } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
@@ -7,6 +7,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import * as xlsx from 'xlsx';
 import { siswa } from '@prisma/client';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
+import { Response } from 'express';
 
 @Controller('siswa')
 @UseGuards(AccessTokenGuard)
@@ -25,6 +26,14 @@ export class SiswaController {
     @Query('search') search?: string,
   ) {
     return await this.siswaService.findAll(page, limit, search);
+  }
+
+  @Get('/download')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
+  async downloadFileTemplate(@Res() res: Response) {
+    const file = await this.siswaService.downloadTemplate();
+    res.send(file);
   }
 
   @Get(':id')
