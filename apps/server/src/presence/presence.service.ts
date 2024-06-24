@@ -289,7 +289,7 @@ export class PresenceService {
       NIS: presence.siswa.nis,
       Rombel: presence.siswa.rombel,
       Session: presence.session.name,
-      Location: presence.gateway.location,
+      Location: presence.gateway ? presence.gateway.location : '-',
       Metode: presence.method,
       Tanggal: presence.createdAt
     }))

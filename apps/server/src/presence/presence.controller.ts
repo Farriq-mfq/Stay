@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
 import { Response } from 'express';
 import { format } from 'date-fns';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
 @Controller('presence')
+@UseGuards(AccessTokenGuard)
 export class PresenceController {
   constructor(private readonly presenceService: PresenceService) { }
 

@@ -1,7 +1,7 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { capitalize, getCurrentInstance, ref, watch } from 'vue';
+import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
 const toast = useToast();
 const { proxy } = getCurrentInstance()
@@ -288,7 +288,7 @@ const clearDialogQrCode = () => {
         <DataTable ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows" :loading="isLoading"
           :value="isLoading ? [] : sessions.data.data.items" dataKey="id" paginator :rows="10" :filters="filters" lazy
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rowsPerPageOptions="[5, 10, 25]"
+          :rowsPerPageOptions="[10, 25, 50]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} sessions" :first="first"
           @page="onPage($event)">
           <template #header>

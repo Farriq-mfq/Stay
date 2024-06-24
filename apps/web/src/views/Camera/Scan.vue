@@ -218,19 +218,16 @@ const switchCamera = () => {
 
 // validate session is not error
 const getSessionServiceByOne = async ({ queryKey }) => {
-    try {
-        const [_key, id] = queryKey;
-        return await axios.get(`/sessions/${id}`)
-    } catch (err) {
-        throw err
-    }
+    const [_key, id] = queryKey;
+    const response = await axios.get(`/sessions/${id}`)
+    return response.data;
 }
 
 // todo: error handling
 const {
-    status,
     data,
-    isError
+    isError,
+    isLoading
 } = useQuery({
     queryKey: ['getSessionServiceByOne', route.params.id],
     queryFn: getSessionServiceByOne,
@@ -251,7 +248,8 @@ onMounted(() => {
 
 </script>
 <template>
-    <Card>
+    <Card v-if="!isLoading">
+        {{ isError }}
         <template #title>
             <router-link :to="{ name: 'camera' }"
                 class="block mt-2 text-sm border-1 w-fit p-2 bg-primary border-round">Kembali</router-link>

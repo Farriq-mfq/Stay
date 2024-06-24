@@ -1,3 +1,23 @@
+<script setup>
+import AppConfig from '@/layout/AppConfig.vue';
+</script>
 <template>
-    <p>Page not found</p>
+    <div
+        class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+        <div class="flex flex-column align-items-center justify-content-center">
+            <div
+                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, rgba(33, 150, 243, 0.4) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full surface-card py-8 px-5 sm:px-8 flex flex-column align-items-center"
+                    style="border-radius: 53px">
+                    <span class="text-blue-500 font-bold text-3xl">404</span>
+                    <h1 class="text-900 font-bold text-3xl lg:text-5xl mb-2">Not Found</h1>
+                    <div class="text-600 mb-5">Halaman yang anda tidak ada.</div>
+                    <router-link to="/" class="w-full flex justify-content-center align-items-center mb-5 py-5 text-center">
+                        <span class="text-900 lg:text-xl font-medium mb-0">Kembali</span>
+                    </router-link>
+                </div>
+            </div>
+        </div>
+    </div>
+    <AppConfig simple />
 </template>

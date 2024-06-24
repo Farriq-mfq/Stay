@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
-
+const auth = inject('auth')
 const model = ref([
     {
         label: 'Home',
@@ -15,17 +15,18 @@ const model = ref([
             { label: 'Sessions', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
             { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
             { label: 'Presences', icon: 'pi pi-fw pi-database', to: '/presences' },
-            // { label: 'Reports', icon: 'pi pi-fw pi-book', to: '/reports' },
+            { label: 'Change Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
         ]
     },
     {
         label: 'Master',
         items: [
+            // auth.check('admin')
             { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' },
             { label: 'Siswa', icon: 'pi pi-fw pi-id-card', to: '/siswa' },
         ]
     },
-        
+
 ]);
 </script>
 

@@ -1,6 +1,8 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
 import { inject, reactive } from 'vue';
+import AppConfig from '@/layout/AppConfig.vue';
+
 const toast = useToast()
 const state = reactive({
     form: {
@@ -55,10 +57,9 @@ function handleLogin() {
 <template>
     <div
         class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
-        <form @submit.prevent="handleLogin" class="flex flex-column align-items-center justify-content-center">
-            <div
-                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-                <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
+        <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5">
+            <div>
+                <div class="w-full card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
                         <div class="text-900 text-3xl font-medium mb-3">
                             Selamat datang
@@ -72,7 +73,7 @@ function handleLogin() {
                             Username
                         </label>
                         <InputText :disabled="state.form.loading" id="username" type="text" placeholder="Username"
-                            class="w-full md:w-30rem" :invalid="state.form.errors && state.form.errors.username"
+                            class="w-full" :invalid="state.form.errors && state.form.errors.username"
                             style="padding: 1rem" v-model="state.form.body.username" />
                         <p class="text-red-500" v-if="state.form.errors && state.form.errors.username">
                             {{ state.form.errors.username[0] }}
@@ -101,5 +102,6 @@ function handleLogin() {
                 </div>
             </div>
         </form>
+        <app-config></app-config>
     </div>
 </template>

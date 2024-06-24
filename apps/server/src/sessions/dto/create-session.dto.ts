@@ -1,8 +1,10 @@
 import { Transform, TransformFnParams } from "class-transformer"
-import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 
 export class CreateSessionDto {
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Nama Session Harus diisi"
+    })
     @IsString()
     @Transform(({ value }: TransformFnParams) => value?.trim())
     name: string

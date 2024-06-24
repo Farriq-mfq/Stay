@@ -15,12 +15,8 @@ export default (app) => {
                     this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + token })
                 },
                 response: function (res) {
-                    try {
-                        if ('data' in res.data) {
-                            return res.data.data.accessToken;
-                        }
-                    } catch (err) {
-                        throw err
+                    if ('data' in res.data) {
+                        return res.data.data.accessToken;
                     }
                 },
             },
@@ -48,10 +44,10 @@ export default (app) => {
                 method: 'POST',
                 enabled: true,
             },
-            // stores: ['cookie', 'storage'],
-            // tokenDefaultKey: "@stay/token"
-            // rolesKey: 'type',
-            // notFoundRedirect: { name: 'not-found' },
+            stores: ['cookie', 'storage'],
+            tokenDefaultKey: "@stay/token",
+            rolesKey: 'role',
+            notFoundRedirect: { name: 'not-found' },
         },
     }));
 }

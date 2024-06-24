@@ -22,6 +22,11 @@ model siswa {
   telegram_account telegram_account[]
 }
 
+enum RoleUser {
+  admin
+  user
+}
+
 model users {
   id                 Int      @id @default(autoincrement())
   name               String
@@ -30,6 +35,7 @@ model users {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   refreshToken       String?  @db.Text
+  role               RoleUser @default(user)
   telegram_accountId Int?     @unique
 }
 

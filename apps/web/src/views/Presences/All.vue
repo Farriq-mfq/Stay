@@ -117,7 +117,9 @@ const handleChangeSelectSession = (val) => {
 }
 
 // export
+const loadingExport = ref(false)
 const handleExportService = async () => {
+  loadingExport.value = true;
   if (sessionId.value) {
     const queries = {
       ...filters.value && { search: filters.value }
@@ -134,7 +136,9 @@ const handleExportService = async () => {
     link.setAttribute('download', `${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`);
     document.body.appendChild(link);
     link.click();
+    loadingExport.value = false;
   } else {
+    loadingExport.value = false;
     throw new Error()
   }
 }
@@ -143,8 +147,8 @@ const handleExportService = async () => {
   <div>
     <div class="field">
       <select-session @input="handleChangeSelectSession" />
-      <Button icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3"
-        v-if="sessionId" />
+      <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export"
+        @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
     </div>
     <DataTable v-if="sessionId" ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
       :loading="isLoading" :value="isLoading ? [] : presences.data.data.items" dataKey="id" paginator :rows="10"

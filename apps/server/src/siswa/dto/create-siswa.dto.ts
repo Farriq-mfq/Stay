@@ -3,24 +3,34 @@ import { IsNotEmpty, IsNumberString, IsOptional, IsString, IsUppercase } from "c
 
 export class CreateSiswaDto {
     @IsNumberString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Notelp harus diisi"
+    })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     notelp: string
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Nama harus diisi"
+    })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     name: string
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Rombel harus diisi"
+    })
     @IsUppercase()
     @Transform(({ value }: TransformFnParams) => value?.trim())
     rombel: string
     @IsNumberString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "NISN harus diisi"
+    })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     nisn: string
     @IsNumberString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "NIS harus diisi"
+    })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     nis: string
 }

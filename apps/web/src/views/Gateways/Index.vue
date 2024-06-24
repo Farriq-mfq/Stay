@@ -369,7 +369,7 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                     :loading="isLoading" :value="isLoading ? [] : gateways.data.data.items" dataKey="id" paginator
                     :rows="10" :filters="filters" lazy
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[5, 10, 25]"
+                    :rowsPerPageOptions="[10, 25, 50]"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} gateways" :first="first"
                     @page="onPage($event)">
                     <template #header>

@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
-import Login from '@/views/Auth/Login.vue';
-import NotFound from '@/views/Errors/NotFound.vue';
 import { config } from '../config';
 
 const router = createRouter({
@@ -18,7 +16,10 @@ const router = createRouter({
                 {
                     path: '/',
                     name: 'dashboard',
-                    component: () => import('@/views/Dashboard.vue')
+                    component: () => import('@/views/Dashboard.vue'),
+                    meta: {
+                        title: "Dashboard",
+                    }
                 },
                 {
                     path: '/gateways',
@@ -78,15 +79,22 @@ const router = createRouter({
                         }
                     ]
                 },
-                // {
-                //     path: '/reports',
-                //     name: 'reports',
-                //     component: () => import('@/views/Reports/Index.vue')
-                // },
+                {
+                    path: '/change-password',
+                    name: 'change-password',
+                    component: () => import('@/views/Auth/ChangePassword.vue'),
+                    meta: {
+                        title: "Change Password",
+                    }
+                },
                 {
                     path: '/users',
                     name: 'users',
-                    component: () => import('@/views/Users/Index.vue')
+                    component: () => import('@/views/Users/Index.vue'),
+                    meta: {
+                        title: "Users",
+                        auth: "admin"
+                    }
                 },
                 {
                     path: '/siswa',
@@ -101,21 +109,28 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: Login,
+            component: import('@/views/Auth/Login.vue'),
             meta: {
                 auth: false,
                 title: "login"
             }
         },
         {
+            path: '/403',
+            name: 'forbidden',
+            component: import('@/views/Errors/Forbidden.vue'),
+            meta: {
+                title: "403"
+            }
+        },
+        {
             path: '/:pathNotFound(.*)*',
             name: 'not-found',
-            component: NotFound,
+            component: import('@/views/Errors/NotFound.vue'),
             meta: {
                 title: "404"
             }
         }
-
     ]
 });
 

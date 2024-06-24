@@ -5,6 +5,7 @@ import { verify } from 'argon2';
 import { UsersService } from 'src/users/users.service';
 import { JwtPayload } from './accessToken.strategy';
 import { AuthDto } from './dto/auth.dto';
+import { RoleUser } from '@prisma/client';
 @Injectable()
 export class AuthService {
     constructor(
@@ -25,7 +26,10 @@ export class AuthService {
             throw new UnauthorizedException()
         }
 
-        const tokens = await this.getTokens(user.id.toString(), user.username)
+        const tokens = await this.getTokens(user.id.toString(), {
+            username: user.username,
+            role: user.role
+        })
 
         await this.userService.updateToken(user.id.toString(), tokens.refreshToken)
 
@@ -35,7 +39,13 @@ export class AuthService {
 
 
 
-    protected async getTokens(userId: string, username: string): Promise<
+    protected async getTokens(userId: string, {
+        username,
+        role
+    }: {
+        username: string,
+        role: RoleUser
+    }): Promise<
         {
             accessToken: string,
             refreshToken: string
@@ -43,7 +53,8 @@ export class AuthService {
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync({
                 sub: userId,
-                username
+                username,
+                role
             }, {
                 secret: this.configService.get<string>('JWT_SECRET'),
                 expiresIn: '1d',
@@ -51,7 +62,8 @@ export class AuthService {
             ),
             this.jwtService.signAsync({
                 sub: userId,
-                username
+                username,
+                role
             }, {
                 secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
                 expiresIn: '7d',
@@ -82,7 +94,10 @@ export class AuthService {
         //     refreshToken,
         // );
         // if (!refreshTokenMatches) throw new UnauthorizedException();
-        const tokens = await this.getTokens(user.id.toString(), user.username);
+        const tokens = await this.getTokens(user.id.toString(), {
+            username: user.username,
+            role: user.role
+        });
         await this.userService.updateToken(user.id.toString(), tokens.refreshToken);
         return tokens;
     }

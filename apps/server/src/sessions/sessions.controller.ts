@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
 @Controller('sessions')
+@UseGuards(AccessTokenGuard)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) { }
 
