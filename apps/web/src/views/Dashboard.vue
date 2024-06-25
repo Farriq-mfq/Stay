@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch, getCurrentInstance } from 'vue';
+import { onMounted, inject, reactive, ref, watch, getCurrentInstance } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useQuery } from '@tanstack/vue-query'
 const { proxy } = getCurrentInstance()
@@ -120,6 +120,8 @@ const {
   queryFn: getAllStatsService,
 })
 
+const auth = inject('auth')
+
 </script>
 <template>
   <div class="grid">
@@ -184,7 +186,7 @@ const {
         </router-link>
       </div>
     </div>
-    <div class="col-12 lg:col-6 xl:col-3" v-if="!statsCountLoading">
+    <div class="col-12 lg:col-6 xl:col-3" v-if="!statsCountLoading && auth.check('admin')">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">
           <div>

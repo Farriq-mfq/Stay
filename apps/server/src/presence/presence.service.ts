@@ -59,12 +59,7 @@ export class PresenceService {
         }
       })
       const htmlContent = `
-      Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :.\n
-      <strong>Nama:</strong> ${siswa.name}\n
-      <strong>Tanggal:</strong> ${presence.createdAt}\n
-      <strong>Sesi:</strong> ${session.name}\n
-      <strong>Metode:</strong> QRCode\n
-      Terima kasih.
+      Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
       `;
       await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, htmlContent, {
         parse_mode: 'HTML'
@@ -108,12 +103,12 @@ export class PresenceService {
         }
       })
 
-      // if (checkPresenceAlready) {
-      //   await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `Anda sudah melakukan presensi hari ini dengan`, {
-      //     parse_mode: 'HTML'
-      //   })
-      //   return;
-      // }
+      if (checkPresenceAlready) {
+        await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `Anda sudah melakukan presensi hari ini dengan`, {
+          parse_mode: 'HTML'
+        })
+        return;
+      }
 
       const presence = await this.prismaService.client.presences.create({
         data: {

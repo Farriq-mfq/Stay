@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const items = ref([
   { label: 'Semua data', icon: 'pi pi-home', route: '/presences/all' },
-  { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
+  // { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
   // {
   //   label: 'Rekap',
   //   icon: 'pi pi-folder',

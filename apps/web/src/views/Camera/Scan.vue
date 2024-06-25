@@ -48,7 +48,7 @@ function onDetect(detectedCodes) {
                     severity: 'error',
                     summary: 'Error',
                     life: 3000,
-                    detail: "Mungkin anda sudah presensi"
+                    detail: "Anda sudah presensi"
                 })
             } else {
                 toast.add({
@@ -219,21 +219,15 @@ const switchCamera = () => {
 // validate session is not error
 const getSessionServiceByOne = async ({ queryKey }) => {
     const [_key, id] = queryKey;
-    const response = await axios.get(`/sessions/${id}`)
-    return response.data;
+    return await axios.get(`/sessions/${id}`)
 }
 
-// todo: error handling
 const {
-    data,
-    isError,
-    isLoading
+    isLoading,
+    isSuccess,
 } = useQuery({
     queryKey: ['getSessionServiceByOne', route.params.id],
     queryFn: getSessionServiceByOne,
-    onError: (error) => {
-        router.back();
-    },
 })
 
 
@@ -245,25 +239,33 @@ onMounted(() => {
         detail: "Arahkan Camera di QRCode"
     })
 })
-
+const handleBack = () => {
+    router.push({ name: 'camera' })
+}
 </script>
 <template>
-    <Card v-if="!isLoading">
-        {{ isError }}
-        <template #title>
-            <router-link :to="{ name: 'camera' }"
-                class="block mt-2 text-sm border-1 w-fit p-2 bg-primary border-round">Kembali</router-link>
-        </template>
-        <template #content>
-            <ProgressSpinner v-if="isLoadingPresence" style="width: 50px; height: 50px" strokeWidth="8"
-                fill="transparent" animationDuration=".5s" aria-label="Custom ProgressSpinner" />
-            <qrcode-stream :paused="isLoadingPresence" :track="trackFunctionSelected.value"
-                :formats="selectedBarcodeFormats" @error="onError" @detect="onDetect" @camera-on="onCameraReady"
-                :constraints="{ facingMode }">
+    <div>
+        <Card v-if="!isLoading && isSuccess">
+            <template #title>
+                <router-link :to="{ name: 'camera' }"
+                    class="block mt-2 text-sm border-1 w-fit p-2 bg-primary border-round">Kembali</router-link>
+            </template>
+            <template #content>
+                <ProgressSpinner v-if="isLoadingPresence || loading" style="width: 50px; height: 50px" strokeWidth="8"
+                    fill="transparent" animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+                <qrcode-stream :paused="isLoadingPresence" :track="trackFunctionSelected.value"
+                    :formats="selectedBarcodeFormats" @error="onError" @detect="onDetect" @camera-on="onCameraReady"
+                    :constraints="{ facingMode }">
 
-                <Skeleton width="100%" height="20rem" class="mb-2" v-if="loading"></Skeleton>
-                <Button v-if="!loading" @click="switchCamera" icon="pi pi-arrow-right-arrow-left" class="m-2" rounded />
-            </qrcode-stream>
-        </template>
-    </Card>
+                    <Skeleton width="100%" height="20rem" class="mb-2" v-if="loading"></Skeleton>
+                    <Button v-if="!loading" @click="switchCamera" icon="pi pi-arrow-right-arrow-left" class="m-2"
+                        rounded />
+                </qrcode-stream>
+            </template>
+        </Card>
+        <div class="card" v-else>
+            <p class="font-semibold text-red-500">Data Session tidak ditemukan</p>
+            <Button label="Kembali" icon="pi pi-arrow-left" text @click.prevent="handleBack" />
+        </div>
+    </div>
 </template>

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { JwtPayload } from './accessToken.strategy';
 import { AuthDto } from './dto/auth.dto';
 import { RoleUser } from '@prisma/client';
+import { changePasswordDto } from './dto/change-password.dto';
 @Injectable()
 export class AuthService {
     constructor(
@@ -106,4 +107,19 @@ export class AuthService {
         return await this.userService.find(payload.sub.toString())
     }
 
+    async changePassword(userId: string, changePasswordDto: changePasswordDto) {
+        const user = await this.userService.findDetail(userId)
+        if (!user || !user.refreshToken)
+            throw new UnauthorizedException();
+        const passwordMatches = await verify(user.password, changePasswordDto.old_password);
+        if (!passwordMatches) throw new BadRequestException({
+            old_password: [
+                'The old password does not match',
+            ],
+        })
+        return await this.userService.updatePassword(user.id, {
+            confirmation_password: changePasswordDto.confirmation_password,
+            password: changePasswordDto.new_password
+        })
+    }
 }

@@ -31,10 +31,17 @@ export class UsersService {
         name: true,
         username: true,
         role: true,
-        refreshToken: true,
+        refreshToken: true, 
         createdAt: true,
         updatedAt: true,
       }
+    })
+  }
+  async findDetail(id: string) {
+    return await this.prismaService.client.users.findUnique({
+      where: {
+        id: parseInt(id)
+      },
     })
   }
 
@@ -111,7 +118,6 @@ export class UsersService {
     })
   }
   async updatePassword(id: number, updateUserPasswordDto: UpdateUserPasswordDto) {
-    console.log(updateUserPasswordDto)
     return await this.prismaService.client.users.update({
       where: {
         id: id,

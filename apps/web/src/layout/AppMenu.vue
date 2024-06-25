@@ -16,15 +16,15 @@ const model = ref([
             { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
             { label: 'Presences', icon: 'pi pi-fw pi-database', to: '/presences' },
             { label: 'Change Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
+            { label: 'Profile', icon: 'pi pi-fw pi-user', to: '/profile' },
         ]
     },
     {
         label: 'Master',
         items: [
-            // auth.check('admin')
-            { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' },
+            auth.check('admin') ? { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' } : null,
             { label: 'Siswa', icon: 'pi pi-fw pi-id-card', to: '/siswa' },
-        ]
+        ].filter(item => item)
     },
 
 ]);
