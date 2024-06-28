@@ -28,7 +28,7 @@ export class AppChannel1Update {
             Markup.button.callback('Register', 'register'),
             Markup.button.callback('QRCode', 'qrcode'),
             Markup.button.callback('Contact admin', 'contact_admin'),
-            Markup.button.callback('Author', 'author'),
+            // Markup.button.callback('Author', 'author'),
         ], { columns: 2 });
 
         await ctx.reply('Silahkan Pilih Menu dibawah ini 👇', menuMarkup)
@@ -87,7 +87,7 @@ export class AppChannel1Update {
     }
     @Action('contact_admin')
     async onContactAdmin(@Ctx() ctx: Context): Promise<void> {
-        await ctx.reply('You are admin');
+        await ctx.reply('https://t.me/farriqmfq');
     }
     @Action('author')
     async onGetAuthor(@Ctx() ctx: Context): Promise<void> {

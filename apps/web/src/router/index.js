@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
 import { config } from '../config';
+import LoginView from '@/views/Auth/Login.vue'
+import NotFoundView from '@/views/Errors/NotFound.vue';
+import ForbiddenView from '@/views/Errors/Forbidden.vue';
+
 
 const router = createRouter({
     history: createWebHistory(),
@@ -117,7 +121,8 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: import('@/views/Auth/Login.vue'),
+            // component: import('@/views/Auth/Login.vue'),
+            component: LoginView,
             meta: {
                 auth: false,
                 title: "login"
@@ -126,7 +131,7 @@ const router = createRouter({
         {
             path: '/403',
             name: 'forbidden',
-            component: import('@/views/Errors/Forbidden.vue'),
+            component: ForbiddenView,
             meta: {
                 title: "403"
             }
@@ -134,7 +139,7 @@ const router = createRouter({
         {
             path: '/:pathNotFound(.*)*',
             name: 'not-found',
-            component: import('@/views/Errors/NotFound.vue'),
+            component: NotFoundView,
             meta: {
                 title: "404"
             }

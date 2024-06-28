@@ -51,5 +51,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
         }, this.server)
     }
 
-
+    async handleHttpScanned(data: ScanDto): Promise<void> {
+        await this.gatewaysService.handleScanned(data, this.server)
+    }
 }

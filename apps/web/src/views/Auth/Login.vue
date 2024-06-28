@@ -55,8 +55,7 @@ function handleLogin() {
 }
 </script>
 <template>
-    <div
-        class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+    <div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
         <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5">
             <div>
                 <div class="w-full card py-8 px-5 sm:px-8" style="border-radius: 53px">
