@@ -1,2 +1,9 @@
-@import 'primeflex/primeflex.scss';
-@import 'primeicons/primeicons.css';
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.scss";
+
+
+* {
+  box-sizing: border-box;
+}
+
+$gutter: 1rem;
