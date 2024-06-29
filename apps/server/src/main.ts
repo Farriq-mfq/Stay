@@ -1,4 +1,4 @@
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AppModule } from './app.module';
@@ -41,6 +41,13 @@ async function bootstrap() {
     credentials: true,
   })
 
-  await app.listen(3000);
+  const isDev = process.env.NODE_ENV !== 'production'
+  const port = isDev ? 3000 : process.env.PORT ?? 3000;
+  console.info(`###################################################################################`);
+  console.info(`########################## Server running at ${port} #############################`);
+  console.info(`########################## NODE ENV : ${process.env.NODE_ENV} #############################`);
+  console.info(`###################################################################################`);
+  await app.listen(port);
 }
+
 bootstrap();

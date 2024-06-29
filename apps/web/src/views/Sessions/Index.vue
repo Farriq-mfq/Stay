@@ -377,7 +377,7 @@ const clearDialogQrCode = () => {
             @click="handleAddSession" />
         </template>
       </Dialog>
-      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Tambah Session Baru"
+      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session"
         :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
         <div class="field">
           <label for="name">Nama</label>

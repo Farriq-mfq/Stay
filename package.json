@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "start": "turbo start",
     "lint": "turbo lint",
+    "start:prod": "turbo start:prod",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "dep": "node scripts/deploy.js",
     "setapp": "node scripts/setup.js"

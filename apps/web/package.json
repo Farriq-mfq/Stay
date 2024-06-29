@@ -5,6 +5,7 @@
         "dev": "vite",
         "build": "vite build",
         "start": "vite preview",
+        "start:prod": "vite preview",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
         "test": "jest"
     },

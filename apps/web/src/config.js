@@ -1,5 +1,5 @@
 export const config = {
-    app_name: "Stay Admin",
-    backend_host: `localhost:3000`,
+    app_name: `${import.meta.env.VITE_APP_NAME}`,
+    backend_host: `${import.meta.env.VITE_API_URL}`,
     backend_ssl: false
 }
