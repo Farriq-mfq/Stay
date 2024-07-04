@@ -23,7 +23,7 @@ const state = reactive({
 function errors(res) {
     if (res && res.status === 401) {
         state.form.errors = {
-            username: ["Invalid Credentials"]
+            username: ["Login gagal mohon perikasa username atau password"]
         }
     } else if (res && res.status === 400) {
         state.form.errors = res.data

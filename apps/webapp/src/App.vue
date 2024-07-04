@@ -7,5 +7,7 @@ import { RouterView } from 'vue-router';
     <div class="w-full md:max-w-30rem min-h-screen">
       <router-view />
     </div>
+    <ConfirmDialog></ConfirmDialog>
+    <Toast position="top-center" />
   </div>
 </template>

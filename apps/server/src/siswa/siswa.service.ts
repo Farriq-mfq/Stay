@@ -8,6 +8,7 @@ import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { hash } from 'argon2';
 @Injectable()
 export class SiswaService {
   constructor(
@@ -16,7 +17,14 @@ export class SiswaService {
   }
   async create(createSiswaDto: CreateSiswaDto) {
     return await this.prismaService.client.siswa.create({
-      data: createSiswaDto
+      data: {
+        notelp: createSiswaDto.notelp,
+        name: createSiswaDto.name,
+        rombel: createSiswaDto.rombel,
+        nisn: createSiswaDto.nisn,
+        nis: createSiswaDto.nis,
+        password: await hash(createSiswaDto.nisn),
+      }
     });
   }
 
@@ -118,6 +126,7 @@ export class SiswaService {
             },
             ...row.nisn && {
               nisn: row.nisn.toString(),
+              password: await hash(row.nisn.toString()),
             },
             ...row.nis && {
               nis: row.nis.toString(),
@@ -191,5 +200,24 @@ export class SiswaService {
 
   async downloadTemplate() {
     return readFileSync(join(process.cwd(), 'templates/siswa-template.xlsx'))
+  }
+
+  async findByNISN(nisn: string) {
+    return await this.prismaService.client.siswa.findUnique({
+      where: {
+        nisn
+      }
+    })
+  }
+
+  async updateToken(id: number, refreshToken: string) {
+    return await this.prismaService.client.siswa.update({
+      where: {
+        id,
+      },
+      data: {
+        refreshToken: refreshToken,
+      },
+    })
   }
 }

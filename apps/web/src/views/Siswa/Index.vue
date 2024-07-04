@@ -716,7 +716,7 @@ const downloadTemplateService = async () => {
                       <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
                     </td>
                   </tr>
-                  <tr v-if="data.telegram_account.length">
+                  <tr v-if="data.telegram_account">
                     <th>
                       Telegram
                     </th>
@@ -728,18 +728,18 @@ const downloadTemplateService = async () => {
                             <th>Nama</th>
                             <td>:</td>
                             <td>
-                              {{ data.telegram_account[0].name }}
+                              {{ data.telegram_account.name }}
                             </td>
                           </tr>
                           <tr>
                             <th>Username</th>
                             <td>:</td>
-                            <td>{{ data.telegram_account[0].username }}</td>
+                            <td>{{ data.telegram_account.username }}</td>
                           </tr>
                           <tr>
                             <th>Chat id</th>
                             <td>:</td>
-                            <td>{{ data.telegram_account[0].chat_id }}</td>
+                            <td>{{ data.telegram_account.chat_id }}</td>
                           </tr>
                         </table>
                       </Tag>
@@ -906,10 +906,11 @@ const downloadTemplateService = async () => {
       </template>
     </Dialog>
     <Dialog v-model:visible="showDialogQrcode" :modal="true" :closable="false">
-      <div class="w-full flex flex-column justify-content-center align-items-center" :id="`qrcode-siswa-${qrCode.nisn}`">
+      <div class="w-full flex flex-column justify-content-center align-items-center"
+        :id="`qrcode-siswa-${qrCode.nisn}`">
         <h1 class="text-6xl font-bold underline">
-            {{ qrCode.name }}
-          </h1>
+          {{ qrCode.name }}
+        </h1>
         <vue-qrcode :value="qrCode.nisn" :options="{ width: 800 }"></vue-qrcode>
       </div>
       <template #footer>

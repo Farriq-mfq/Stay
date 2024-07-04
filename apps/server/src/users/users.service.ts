@@ -37,6 +37,7 @@ export class UsersService {
       }
     })
   }
+  
   async findDetail(id: string) {
     return await this.prismaService.client.users.findUnique({
       where: {

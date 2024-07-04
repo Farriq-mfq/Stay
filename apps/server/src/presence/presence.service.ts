@@ -58,11 +58,11 @@ export class PresenceService {
           method: 'qrcode'
         }
       })
-      if (siswa.telegram_account.length && siswa.telegram_account[0].chat_id) {
+      if (siswa.telegram_account) {
         const htmlContent = `
         Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
         `;
-        await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, htmlContent, {
+        await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
           parse_mode: 'HTML'
         })
       }
@@ -83,8 +83,8 @@ export class PresenceService {
       }
     })
     if (gateway.presence_sessionsId === null) {
-      if (siswa.telegram_account.length && siswa.telegram_account[0].chat_id) {
-        return await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
+      if (siswa.telegram_account) {
+        return await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
           parse_mode: 'HTML'
         })
       }
@@ -109,8 +109,8 @@ export class PresenceService {
       })
 
       if (checkPresenceAlready) {
-        if (siswa.telegram_account.length && siswa.telegram_account[0].chat_id) {
-          await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `<strong>Anda sudah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${checkPresenceAlready.siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(checkPresenceAlready.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${checkPresenceAlready.method}`, {
+        if (siswa.telegram_account) {
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<strong>Anda sudah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${checkPresenceAlready.siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(checkPresenceAlready.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${checkPresenceAlready.method}`, {
             parse_mode: 'HTML'
           })
         }
@@ -128,16 +128,16 @@ export class PresenceService {
       if (presence) {
         // notify socket io
         client.emit(`PRESENCE_UPDATED_${session.id}`, true)
-        if (siswa.telegram_account.length && siswa.telegram_account[0].chat_id) {
+        if (siswa.telegram_account) {
           const htmlContent = `<strong>Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${presence.method}
           `;
-          await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, htmlContent, {
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
             parse_mode: 'HTML'
           })
         }
       } else {
-        if (siswa.telegram_account.length && siswa.telegram_account[0].chat_id) {
-          await this.bot.telegram.sendMessage(siswa.telegram_account[0].chat_id, `Perangkat masih dalam kendala`, {
+        if (siswa.telegram_account) {
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `Perangkat masih dalam kendala`, {
             parse_mode: 'HTML'
           })
         }
