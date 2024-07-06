@@ -10,23 +10,23 @@
   },
   "dependencies": {
     "@primevue/themes": "4.0.0-rc.2",
+    "@tanstack/vue-query": "^5.50.1",
+    "@vueuse/core": "^10.11.0",
+    "@websanova/vue-auth": "^4.2.1",
+    "axios": "^1.7.2",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
     "primevue": "4.0.0-rc.2",
-    "vue": "^3.4.29",
+    "socket.io-client": "^4.7.5",
+    "vue": "^3.4.31",
     "vue-qrcode-reader": "^5.5.6",
-    "vue-router": "^4.3.3",
-    "@websanova/vue-auth": "^4.2.1",
-    "@tanstack/vue-query": "^5.41.0",
-    "@vueuse/core": "^10.11.0",
-    "axios": "^1.7.2",
-    "socket.io-client": "^4.7.5"
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
-    "@primevue/auto-import-resolver": "^4.0.0-beta.5",
+    "@primevue/auto-import-resolver": "^4.0.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-vue": "^5.0.5",
-    "unplugin-vue-components": "^0.27.1",
-    "vite": "^5.3.1"
+    "unplugin-vue-components": "^0.27.2",
+    "vite": "^5.3.3"
   }
 }

@@ -1,9 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
-import { config } from '../config';
-import LoginView from '@/views/Auth/Login.vue'
-import NotFoundView from '@/views/Errors/NotFound.vue';
 import ForbiddenView from '@/views/Errors/Forbidden.vue';
+import NotFoundView from '@/views/Errors/NotFound.vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import { config } from '../config';
 
 
 const router = createRouter({

@@ -1,13 +1,17 @@
+import { config } from '@/config';
 import AppLayout from '@/layout/AppLayout.vue'
-import AuthLayout from '@/layout/AuthLayout.vue'
-import Login from '@/views/Auth/Login.vue';
+import LoginView from '@/views/Auth/Login.vue';
+import NotFoundView from '@/views/Errors/NotFound.vue';
 import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
       component: AppLayout,
+      // meta: {
+      //   auth: true
+      // },
       children: [
         {
           path: '/',
@@ -25,9 +29,9 @@ const router = createRouter({
           component: import('../views/Presences/Index.vue'),
         },
         {
-          path: '/account',
-          name: 'account',
-          component: import('../views/Account/Index.vue'),
+          path: '/settings',
+          name: 'settings',
+          component: import('../views/Settings/Index.vue'),
         },
         {
           path: '/notifications',
@@ -36,17 +40,36 @@ const router = createRouter({
         },
       ],
     },
+    // {
+    //   path: '/*',
+    //   component: AuthLayout,
+    //   children: [
+    //     {
+    //       path: '/login',
+    //       name: 'login',
+    //       component: Login,
+    //     }
+    //   ]
+    // },
+
     {
-      path: '/*',
-      component: AuthLayout,
-      children: [
-        {
-          path: '/login',
-          name: 'login',
-          component: Login,
-        }
-      ]
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+      meta: {
+        auth: false,
+        title: "login"
+      }
     },
+
+    {
+      path: '/:pathNotFound(.*)*',
+      name: 'not-found',
+      component: NotFoundView,
+      meta: {
+        title: "404"
+      }
+    }
 
   ],
   linkActiveClass: "active-link",
@@ -54,5 +77,15 @@ const router = createRouter({
 })
 
 export default (app) => {
+  router.beforeEach((to, from, next) => {
+    const title = to.meta.title;
+    if (title) {
+      document.title = `${title} - ${config.app_name}`;
+    }
+    next();
+  });
+  app.router = router
+  app.config.globalProperties.$router = router;
+
   app.use(router)
 } 

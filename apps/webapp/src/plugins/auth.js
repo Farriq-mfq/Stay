@@ -1,7 +1,6 @@
 import { createAuth } from '@websanova/vue-auth/src/v3.js';
 import driverHttpAxios from '@websanova/vue-auth/src/drivers/http/axios.1.x.js';
 import driverRouterVueRouter from '@websanova/vue-auth/src/drivers/router/vue-router.2.x.js';
-import { config } from '../config';
 
 export default (app) => {
     app.use(createAuth({
@@ -26,28 +25,28 @@ export default (app) => {
         options: {
             authRedirect: '/login',
             loginData: {
-                url: '/auth/login',
+                url: '/siswa/auth/login',
                 method: 'POST',
                 fetchUser: false,
             },
             logoutData: {
-                url: '/auth/logout',
+                url: '/siswa/auth/logout',
                 method: 'POST',
                 makeRequest: true,
             },
             fetchData: {
-                url: '/auth/me',
+                url: '/siswa/auth/me',
                 method: 'GET',
                 enabled: true,
             },
             refreshData: {
-                url: '/auth/refresh',
+                url: '/siswa/auth/refresh',
                 method: 'POST',
                 enabled: true,
             },
             stores: ['cookie', 'storage'],
-            tokenDefaultKey: config.token_key,
-            rolesKey: 'role',
+            tokenDefaultKey: "@stay/token",
+            // rolesKey: 'role',
             notFoundRedirect: { name: 'not-found' },
         },
     }));
