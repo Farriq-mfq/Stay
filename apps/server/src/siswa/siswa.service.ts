@@ -1,14 +1,14 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { hash } from 'argon2';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import { readFileSync } from 'fs';
 import { CustomPrismaService } from 'nestjs-prisma';
+import { join } from 'path';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { hash } from 'argon2';
 @Injectable()
 export class SiswaService {
   constructor(
@@ -33,6 +33,7 @@ export class SiswaService {
     limit?: number,
     search?: string,
   ) {
+    // this.whatsappProvider.sendText("6289692107175@c.us", "sdf")
     const [items, meta] = await this.prismaService.client.siswa.paginate({
       where: {
         ...search && {

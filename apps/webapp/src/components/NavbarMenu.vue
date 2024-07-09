@@ -18,9 +18,9 @@ import Scan from '@/components/Scan.vue'
                 <router-link :to="{ name: 'scan' }" class="no-underline text-center text-color-secondary">
                     <div class="h-full flex flex-column align-items-center justify-content-center">
                         <div class="relative">
-                            <i class="pi pi-qrcode text-xl" />
+                            <i class="pi pi-hourglass text-xl" />
                         </div>
-                        <p class="text-xs mt-1 font-semibold">Scan</p>
+                        <p class="text-xs mt-1 font-semibold">Sesi</p>
                     </div>
                 </router-link>
             </li>
