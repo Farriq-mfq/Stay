@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { gateways } from '@prisma/client';
 import { format } from 'date-fns';
-import { id } from 'date-fns/locale'
+import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
 import { Server } from 'socket.io';
@@ -9,16 +9,16 @@ import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { Context } from 'src/interfaces/context.interface';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
+import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 import { Telegraf } from 'telegraf';
-import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import * as xlsx from 'xlsx';
-import { NotificationService } from 'src/notification/notification.service';
+import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 @Injectable()
 export class PresenceService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    // @InjectBot(AppChannel1) private bot: Telegraf<Context>
-    private readonly notificationService: NotificationService
+    @InjectBot(AppChannel1) private bot: Telegraf<Context>,
+    private readonly whatsappProvider: WhatsappProvider
   ) { }
   async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
     // check the session
@@ -64,7 +64,9 @@ export class PresenceService {
         const htmlContent = `
         Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
         `;
-        await this.notificationService.notificationTelegram(siswa.telegram_account.chat_id, htmlContent)
+        await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
+          parse_mode: 'HTML'
+        })
       }
 
       return presence
@@ -84,7 +86,9 @@ export class PresenceService {
     })
     if (gateway.presence_sessionsId === null) {
       if (siswa.telegram_account) {
-        return await this.notificationService.notificationTelegram(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`)
+        return await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
+          parse_mode: 'HTML'
+        })
       }
     } else {
       // presence
@@ -108,11 +112,13 @@ export class PresenceService {
 
       if (checkPresenceAlready) {
         if (siswa.telegram_account) {
-          await this.notificationService.notificationTelegram(siswa.telegram_account.chat_id, `<strong>Anda sudah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${checkPresenceAlready.siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(checkPresenceAlready.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${checkPresenceAlready.method}`)
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<strong>Anda sudah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${checkPresenceAlready.siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(checkPresenceAlready.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${checkPresenceAlready.method}`, {
+            parse_mode: 'HTML'
+          })
         }
         // whatsapp notification
         if (siswa.notelp) {
-          await this.notificationService.notificationWhatsapp({
+          await this.whatsappProvider.sendMessage({
             phone: +siswa.notelp,
             message: "Maaf anda sudah melakukan presensi hari ini terimakasih :)"
           })
@@ -134,12 +140,14 @@ export class PresenceService {
         if (siswa.telegram_account) {
           const htmlContent = `<strong>Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut</strong>  :\n\n<strong>Nama : </strong> ${siswa.name}\n<strong>Tanggal : </strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Lokasi : </strong> ${gateway.location}\n<strong>Sesi : </strong> ${session.name}\n<strong>Metode : </strong> ${presence.method}
           `;
-          await this.notificationService.notificationTelegram(siswa.telegram_account.chat_id, htmlContent)
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
+            parse_mode: 'HTML'
+          })
         }
 
         // whatsapp notification
         if (siswa.notelp) {
-          await this.notificationService.notificationWhatsapp({
+          await this.whatsappProvider.sendMessage({
             phone: +siswa.notelp,
             message: `*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Tanggal* :  ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${presence.method}
           `
@@ -147,7 +155,9 @@ export class PresenceService {
         }
       } else {
         if (siswa.telegram_account) {
-          await this.notificationService.notificationTelegram(siswa.telegram_account.chat_id, `Perangkat masih dalam kendala`)
+          await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `Perangkat masih dalam kendala`, {
+            parse_mode: 'HTML'
+          })
         }
       }
     }
