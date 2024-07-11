@@ -85,6 +85,11 @@ export class WhatsappProvider {
         fs.writeFileSync(qrCodeFilePath, base64Data, 'base64');
     }
 
+    async logout() {
+        if (!this.client) throw new BadRequestException("Client not ready")
+        await this.client.logout()
+    }
+
 
     async getStatusConnected(): Promise<boolean> {
         if (!this.client) throw new BadRequestException("Client not ready")
@@ -123,6 +128,10 @@ export class WhatsappProvider {
             await qr.toFile(qrCodeFilePath, text, {
                 width: 500,
                 margin: 2,
+                color: {
+                    dark: "#010599FF",
+                    light: "#FFBF60FF"
+                }
             });
             return qrCodeFilePath;
         } catch (error) {
@@ -176,7 +185,7 @@ export class WhatsappProvider {
                 let allPresenceMessage = ``;
 
                 presences.forEach(presence => {
-                    allPresenceMessage += `*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Tanggal* :  ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n*Lokasi* :  ${presence.gateway.location}\n*Sesi* :  ${presence.session.name}\n*Metode* :  ${presence.method}\n`
+                    allPresenceMessage += `\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Tanggal* :  ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n*Lokasi* :  ${presence.gateway.location}\n*Sesi* :  ${presence.session.name}\n*Metode* :  ${presence.method}\n`
                 })
 
                 this.client.sendText(

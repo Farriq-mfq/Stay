@@ -17,6 +17,11 @@ export class WhatsappController {
         res.sendFile(path);
     }
 
+    @Post('/logout')
+    @HttpCode(HttpStatus.OK)
+    async logout() {
+        return await this.whatsappProvider.logout()
+    }
 
     @Post('/send-message')
     sendMessage(@Body() SendMessageDto: SendMessageDto): any {
