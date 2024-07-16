@@ -17,6 +17,7 @@ const model = ref([
             { label: 'Presences', icon: 'pi pi-fw pi-database', to: '/presences' },
             { label: 'Change Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
             { label: 'Profile', icon: 'pi pi-fw pi-user', to: '/profile' },
+            { label: 'Whatsapp', icon: 'pi pi-fw pi-whatsapp', to: '/whatsapp' },
         ]
     },
     {

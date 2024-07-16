@@ -1,30 +1,36 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import * as wa from '@open-wa/wa-automate';
-import * as fs from 'fs';
-import * as path from "path";
-import * as qr from 'qrcode';
-import { HandlerMessageDto } from "./dto/handler-message.dto";
-import { SendMessageDto } from "./dto/send-message.dto";
-import { ExtendedPrismaClient } from "src/prisma.extension";
-import { CustomPrismaService } from "nestjs-prisma";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import * as fs from 'fs';
+import { CustomPrismaService } from "nestjs-prisma";
+import * as path from "path";
+import * as qr from 'qrcode';
+import { config } from "src/config";
+import { ExtendedPrismaClient } from "src/prisma.extension";
+import { HandlerMessageDto } from "./dto/handler-message.dto";
+import { SendMessageDto } from "./dto/send-message.dto";
 
 @Injectable()
 export class WhatsappProvider {
     private readonly logger = new Logger(WhatsappProvider.name);
     private client?: wa.Client
     constructor(
-        private readonly configService: ConfigService,
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) {
-        if (this.configService.get('WA_NOTIFICATION_SERVICE')) {
+        if (config.whatsapp_bot) {
+            this.start()
+        }
+    }
+
+    async start() {
+        try {
             this.initialize()
             wa.ev.on("qr.**", async (qrcode) => {
                 this.saveQRCodeToFile(qrcode)
             });
-
+        } catch {
+            this.logger.error("Error whatsapp connection")
         }
     }
     async initialize() {
@@ -37,9 +43,6 @@ export class WhatsappProvider {
             headless: true,
             killProcessOnBrowserClose: true,
             useChrome: true,
-            restartOnCrash: async () => {
-                await this.initialize()
-            }
         })
 
 
@@ -47,10 +50,13 @@ export class WhatsappProvider {
             this.client.onStateChanged((state) => {
                 this.logger.log(`State changed: ${state}`);
                 if (state === "CONFLICT" || state === "UNLAUNCHED") this.client.forceRefocus();
-
-                // if (state === 'UNPAIRED') this.isConnected = false;
-
+                // check is authenticated
+                // if (state === wa.Events.AUTHENTICATED.toString()) {
+                //     // this.eventGateway.emitWhatsapp(true)
+                //     // this.server.emit('WHATSAPP_EVENT', true)
+                // }
             });
+
 
             this.client.onAnyMessage((message) => {
                 console.log(message.from)
@@ -87,7 +93,7 @@ export class WhatsappProvider {
 
     async logout() {
         if (!this.client) throw new BadRequestException("Client not ready")
-        await this.client.logout()
+        await this.client.logout(true)
     }
 
 

@@ -14,7 +14,7 @@ model siswa {
   name             String            @db.VarChar()
   nisn             String            @unique @db.VarChar()
   password         String
-  refreshToken    String?
+  refreshToken     String?
   rombel           String
   nis              String?           @unique @db.VarChar()
   rfid_token       String?           @unique
@@ -22,6 +22,7 @@ model siswa {
   updatedAt        DateTime          @updatedAt
   presences        presences[]
   telegram_account telegram_account?
+  notifications    notifications[]
 }
 
 enum RoleUser {
@@ -102,4 +103,15 @@ model telegram_account {
   updatedAt DateTime @updatedAt
   siswa     siswa?   @relation(fields: [siswaId], references: [id])
   siswaId   Int?     @unique
+}
+
+model notifications {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String   @db.Text
+  siswaId   Int
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  siswa     siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
 }

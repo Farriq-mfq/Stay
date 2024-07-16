@@ -3,7 +3,7 @@ import Scan from '@/components/Scan.vue'
 </script>
 <template>
     <nav class="fixed flex w-full md:max-w-30rem mx-auto h-5rem left-0 right-0 bottom-0" style="z-index: 999;">
-        <ul class="flex flex-row w-full px-2 bg-white border-1 border-300 border-round h-full">
+        <ul class="flex flex-row w-full px-2 bg-white border-round h-full">
             <li class="block h-full flex-1 list-none">
                 <router-link :to="{ name: 'home' }" class="no-underline text-center text-color-secondary">
                     <div class="h-full flex flex-column align-items-center justify-content-center">

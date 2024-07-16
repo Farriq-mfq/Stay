@@ -75,7 +75,7 @@ export class PresenceService {
     }
   }
 
-  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server) {
+  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<void> {
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
         rfid_token: scanned.scan
@@ -84,9 +84,12 @@ export class PresenceService {
         telegram_account: true
       }
     })
+
+    if (!siswa) return;
+
     if (gateway.presence_sessionsId === null) {
       if (siswa.telegram_account) {
-        return await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
+        await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
           parse_mode: 'HTML'
         })
       }

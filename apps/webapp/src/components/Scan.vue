@@ -169,9 +169,11 @@ function onError(err) {
 </script>
 <template>
     <div>
-        <Button class="p-5 flex-1 list-none absolute bg-primary left-0 right-0 border-circle mx-auto shadow-2"
-        style="bottom: 2rem;" rounded icon="pi pi-qrcode text-2xl text-center"
-            @click.prevent="visibleBottom = true" />
+        <div class="list-none absolute left-0 right-0 h-fit w-fit mx-auto flex-1 bg-red-500 flex align-items-center justify-center">
+            <Button class="p-5 bg-primary shadow-2"
+                style="bottom: 2rem;" rounded icon="pi pi-qrcode text-2xl text-center"
+                @click.prevent="visibleBottom = true" />
+        </div>
         <Drawer v-model:visible="visibleBottom" class="border-round-top-2xl w-30rem" blockScroll position="bottom"
             style="height: auto">
             <p class="error">{{ error }}</p>
@@ -199,5 +201,4 @@ function onError(err) {
     white-space: nowrap;
     display: inline-block;
 }
-
 </style>
