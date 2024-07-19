@@ -169,7 +169,7 @@ function onError(err) {
 </script>
 <template>
     <div>
-        <div class="list-none absolute left-0 right-0 h-fit w-fit mx-auto flex-1 bg-red-500 flex align-items-center justify-center">
+        <div class="list-none absolute left-0 right-0 h-fit w-fit mx-auto flex-1 bottom-0 flex align-items-center justify-center">
             <Button class="p-5 bg-primary shadow-2"
                 style="bottom: 2rem;" rounded icon="pi pi-qrcode text-2xl text-center"
                 @click.prevent="visibleBottom = true" />
@@ -193,7 +193,7 @@ function onError(err) {
 <style scoped>
 .error {
     font-weight: bold;
-    color: red;
+    color: red; 
 }
 
 .barcode-format-checkbox {

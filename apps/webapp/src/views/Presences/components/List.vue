@@ -29,12 +29,12 @@ const presences = [
 </script>
 <template>
     <div>
-        <DataView :value="presences">
+        <DataView :value="presences" >
             <template #empty>
                 koshong
             </template>
             <template #list="slotProps">
-                <div class="gap-3 flex flex-column">
+                <div class="gap-3 flex flex-column surface-ground">
                     <div v-for="(item, index) in slotProps.items" :key="index">
                         <Panel header="Presensi Musholla" toggleable>
                             <div class="text-sm flex align-items-center gap-2 text-500">

@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^6.1.1",
+    "@capacitor/cli": "^6.1.1",
+    "@capacitor/core": "^6.1.1",
     "@primevue/themes": "4.0.0-rc.2",
     "@tanstack/vue-query": "^5.50.1",
     "@vueuse/core": "^10.11.0",
