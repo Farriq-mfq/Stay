@@ -112,7 +112,10 @@ export class WhatsappProvider {
     }
 
     async getClient() {
-        if (!this.client) throw new BadRequestException("Client not ready")
+        if (!this.client) {
+            this.logger.error("Client not available")
+            return;
+        }
         return this.client
     }
 

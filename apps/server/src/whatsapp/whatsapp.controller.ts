@@ -13,6 +13,9 @@ export class WhatsappController {
 
     @Get('/qr-code')
     qrClientConnect(@Res() res: Response) {
+        if (this.whatsappProvider.getClient()) return res.status(404).json({
+            message: 'QRcode Is Not Found'
+        });
         const path = this.whatsappProvider.getQr();
         res.sendFile(path);
     }
