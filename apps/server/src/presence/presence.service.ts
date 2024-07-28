@@ -122,7 +122,7 @@ export class PresenceService {
         // whatsapp notification
         if (siswa.notelp) {
           await this.whatsappProvider.sendMessage({
-            phone: +siswa.notelp,
+            phone: [+siswa.notelp],
             message: "Maaf anda sudah melakukan presensi hari ini terimakasih :)"
           })
         }
@@ -151,7 +151,7 @@ export class PresenceService {
         // whatsapp notification
         if (siswa.notelp) {
           await this.whatsappProvider.sendMessage({
-            phone: +siswa.notelp,
+            phone: [+siswa.notelp],
             message: `*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Tanggal* :  ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${presence.method}
           `
           })

@@ -5,7 +5,7 @@ import Qrcode from '../Qrcode.vue';
     <div>
         <div>
             CONNECTION : 
-            <Qrcode />
+            <!-- <Qrcode /> -->
         </div>
     </div>
 </template>

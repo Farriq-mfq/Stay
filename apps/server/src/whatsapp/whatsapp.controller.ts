@@ -28,8 +28,7 @@ export class WhatsappController {
 
     @Post('/send-message')
     sendMessage(@Body() SendMessageDto: SendMessageDto): any {
-        const response = this.whatsappProvider.sendMessage(SendMessageDto);
-        return response;
+        return this.whatsappProvider.sendMessage(SendMessageDto);
     }
     @Get('/status')
     async getClientStatusConnected() {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, getCurrentInstance, watch, onMounted } from "vue";
+import { ref, getCurrentInstance, watch, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query'
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios;
@@ -42,7 +42,7 @@ const { data: siswa, isLoading, refetch, fetchNextPage,
     isFetchingNextPage, } = useInfiniteQuery({
         queryKey: ["selectSiswa", filters.value],
         queryFn: getAllSiswa,
-        getNextPageParam: (lastPage, pages) => {
+        getNextPageParam: (lastPage) => {
             return lastPage.data.data.meta.nextPage
         },
     })
@@ -82,15 +82,21 @@ onMounted(() => {
     }
 })
 
-const helo = () => {
-    alert('ok')
-}
-
 </script>
 <template>
     <div>
         <Dropdown v-if="!multiple" v-model="selectSiswa" :loading="isLoading" filter @filter="handleFilter" showClear
-            :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Siswa" class="w-full">
+            :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Siswa" id="dropdown-siswa"
+            class="w-full">
+            <template #footer>
+                <Button v-if="hasNextPage" link label="Load More" size="small" class="mt-2"
+                    :disabled="!hasNextPage || isFetchingNextPage" :loading="isFetchingNextPage"
+                    @click="fetchNextPage" />
+                <p v-else>Nothing to load</p>
+                <p class="text-sm ml-2 text-500">
+                    Showing {{ items.length }}
+                </p>
+            </template>
 
         </Dropdown>
 
@@ -98,11 +104,13 @@ const helo = () => {
             @filter="handleFilter" showClear :options="isLoading ? [] : items" optionLabel="name"
             placeholder="Pilih Siswa" class="w-full">
             <template #footer>
-                <Button v-if="hasNextPage" label="Load More" size="small" class="m-4"
+                <Button v-if="hasNextPage" link label="Load More" size="small" class="mt-2"
                     :disabled="!hasNextPage || isFetchingNextPage" :loading="isFetchingNextPage"
                     @click="fetchNextPage" />
-                <p v-else>Nothing no morer</p>
-                <p>{{ items.length }}</p>
+                <p v-else>Nothing to load</p>
+                <p class="text-sm ml-2 text-500">
+                    Showing {{ items.length }}
+                </p>
             </template>
         </MultiSelect>
     </div>
