@@ -1,13 +1,9 @@
 <script setup>
-import { useMutation, useQuery } from '@tanstack/vue-query';
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
+import { getCurrentInstance } from 'vue';
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios
-const confirm = useConfirm()
-const toast = useToast()
 
 async function fetchQRImage() {
     try {
@@ -23,16 +19,22 @@ async function fetchQRImage() {
         throw new Error('Failed to fetch image');
     }
 }
-const { data: imageUrl, qrImageError: error } = useQuery({
+const { data: imageUrl, status, qrImageError: error } = useQuery({
     queryKey: ['qrImage'],
     queryFn: fetchQRImage,
     staleTime: 60000,
     refetchInterval: 60000,
+    onError: (error) => {
+        console.error('Error fetching QR image:', error.message);
+    }
 });
+
+
+
 </script>
 <template>
     <div class="card">
         <img v-if="imageUrl" :src="imageUrl" class="w-full h-auto" />
-        <div v-if="error">Error: {{ error.message }}</div>
+        <div v-if="qrImageError">Error: {{ qrImageError.message }}</div>
     </div>
 </template>

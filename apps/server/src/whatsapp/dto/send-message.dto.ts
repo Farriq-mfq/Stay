@@ -1,9 +1,11 @@
-import { IsPhoneNumber, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsPhoneNumber, IsString, ValidateNested } from "class-validator";
 
 export class SendMessageDto {
 
-    @IsPhoneNumber('ID')
-    readonly phone: number;
+    @IsArray()
+    @ArrayMinSize(1)
+    @IsPhoneNumber('ID', { each: true })
+    readonly phone: number[];
 
     @IsString()
     readonly message: string;

@@ -75,7 +75,10 @@ export class WhatsappProvider {
 
     async sendMessage(sendMessageDto: SendMessageDto): Promise<boolean | wa.MessageId> {
         if (!this.client) throw new BadRequestException("Client not ready")
-        return await this.client.sendText(`${sendMessageDto.phone}@c.us`, sendMessageDto.message);
+        sendMessageDto.phone.forEach(async (phone) => {
+            await this.client.sendText(`${phone}@c.us`, sendMessageDto.message);
+        })
+        return true
     }
 
     saveQRCodeToFile(qrCode) {
@@ -112,7 +115,10 @@ export class WhatsappProvider {
     }
 
     async getClient() {
-        if (!this.client) throw new BadRequestException("Client not ready")
+        if (!this.client) {
+            this.logger.error("Client not available")
+            return;
+        }
         return this.client
     }
 
@@ -159,10 +165,10 @@ export class WhatsappProvider {
         })
 
         switch (message) {
-            case '/help':
+            case '/menu':
                 await this.client.sendText(
                     phone as wa.ChatId,
-                    "Available commands:\n/help - Show this help\n/qrcode - Ger QRCode"
+                    "Perintah yang tersedia:\n/menu - untuk list menu yang tersedia\n/qrcode - Mendapatkan qrcode\n/presensi - Mendapatkan List Presensi"
                 )
                 break;
             case '/qrcode':

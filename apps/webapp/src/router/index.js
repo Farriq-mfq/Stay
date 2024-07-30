@@ -16,27 +16,27 @@ const router = createRouter({
         {
           path: '/',
           name: 'home',
-          component: import('../views/Home/Index.vue'),
+          component: () => import('../views/Home/Index.vue'),
         },
         {
           path: '/scan',
           name: 'scan',
-          component: import('../views/Scan/Index.vue'),
+          component: () => import('../views/Scan/Index.vue'),
         },
         {
           path: '/presences',
           name: 'presences',
-          component: import('../views/Presences/Index.vue'),
+          component: () => import('../views/Presences/Index.vue'),
         },
         {
           path: '/settings',
           name: 'settings',
-          component: import('../views/Settings/Index.vue'),
+          component: () => import('../views/Settings/Index.vue'),
         },
         {
           path: '/notifications',
           name: 'notifications',
-          component: import('../views/Notifications/Index.vue'),
+          component: () => import('../views/Notifications/Index.vue'),
         },
       ],
     },

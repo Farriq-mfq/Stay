@@ -27,18 +27,18 @@ app.mount('#app')
 
 
 // pwa register
-import { pwaInfo } from 'virtual:pwa-info'
-import { registerSW } from 'virtual:pwa-register'
+// import { pwaInfo } from 'virtual:pwa-info'
+// import { registerSW } from 'virtual:pwa-register'
 
-console.log(pwaInfo)
+// console.log(pwaInfo)
 
 
-registerSW({
-    immediate: true,
-    onNeedRefresh() {
-        console.log('onNeedRefresh message should not appear')
-    },
-    onOfflineReady() {
-        console.log('onOfflineReady message should not appear')
-    },
-})
+// // registerSW({
+// //     immediate: true,
+// //     onNeedRefresh() {
+// //         console.log('onNeedRefresh message should not appear')
+// //     },
+// //     onOfflineReady() {
+// //         console.log('onOfflineReady message should not appear')
+// //     },
+// // })

@@ -13,7 +13,7 @@ const handleShowNotifications = () => {
 }
 </script>
 <template>
-    <div>
+    <div class="px-2">
         <List />
     </div>
 </template>
