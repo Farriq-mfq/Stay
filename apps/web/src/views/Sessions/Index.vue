@@ -57,7 +57,6 @@ const handleDebounceFilter = (val) => {
 // add session
 const addSessionDialog = ref(false)
 const errorsAddSession = ref({})
-const datetime24h = ref('')
 const sessionData = ref({
   name: '',
   start_time: null,
@@ -67,12 +66,6 @@ const sessionData = ref({
 })
 
 
-watch(datetime24h, (val) => {
-  if (val) {
-    sessionData.value.start_time = val[0];
-    sessionData.value.end_time = val[1]
-  }
-})
 
 const addSessionService = async (data) => {
   return await axios.post('/sessions', data)
@@ -177,7 +170,6 @@ const confirmDeleteSession = (id) => {
 };
 // update
 const showDialogUpdateSession = ref(false)
-const datetime24hUpdate = ref('')
 const dataUpdateSession = ref({
   name: '',
   start_time: null,
@@ -187,15 +179,6 @@ const dataUpdateSession = ref({
 })
 const errorsUpdateSession = ref({})
 
-watch(datetime24hUpdate, (val) => {
-  if (val) {
-    dataUpdateSession.value.start_time = val[0];
-    dataUpdateSession.value.end_time = val[1]
-  } else {
-    dataUpdateSession.value.start_time = null;
-    dataUpdateSession.value.end_time = null;
-  }
-})
 
 const updateService = async (data) => {
   return await axios.patch(`/sessions/${data.id}`, {
@@ -227,14 +210,10 @@ const handleShowDialogUpdateSesion = (data) => {
   dataUpdateSession.value = {
     id: data.id,
     name: data.name,
+    ...data.start_time && { start_time: new Date(data.start_time) },
+    ...data.end_time && { end_time: new Date(data.end_time) },
     allow_twice: data.allow_twice,
     gateways: data.gateways
-  }
-  if (data.start_time && data.end_time) {
-    datetime24hUpdate.value = [
-      new Date(data.start_time),
-      new Date(data.end_time)
-    ]
   }
 }
 
@@ -248,7 +227,6 @@ const clearUpdateSession = () => {
   }
 
   showDialogUpdateSession.value = false
-  datetime24hUpdate.value = []
 }
 
 const handleSubmitUpdateSesion = () => {
@@ -367,8 +345,6 @@ const clearDialogQrCode = () => {
                   {{ data.allow_twice ? 'Aktif' : 'Tidak Aktif' }}
                 </span>
               </Chip>
-              <!-- <Badge :class="{ 'text-green-600': data.allow_twice, 'text-red-600': !data.allow_twice }"
-                :value="data.allow_twice ? 'Boleh 2x' : 'Tidak Boleh 2x'" /> -->
             </template>
           </Column>
           <Column field="start_time" header="Waktu Mulai">
@@ -437,10 +413,17 @@ const clearDialogQrCode = () => {
         </div>
         <div class="field">
           <label for="start_time">
-            Waktu
+            Waktu Mulai (Optional)
           </label>
-          <Calendar id="calendar-24h" v-model="datetime24h" showTime hourFormat="24" selectionMode="range"
-            :disabled="addSessionLoading" />
+          <Calendar id="calendar-24h-mulai" v-model="sessionData.start_time" showTime hourFormat="24"
+            :disabled="addSessionLoading" showButtonBar />
+        </div>
+        <div class="field">
+          <label for="end_time">
+            Waktu Selesai (Optional)
+          </label>
+          <Calendar id="calendar-24h-selesai" v-model="sessionData.end_time" showTime hourFormat="24"
+            :disabled="addSessionLoading" showButtonBar />
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
@@ -474,9 +457,16 @@ const clearDialogQrCode = () => {
         </div>
         <div class="field">
           <label for="start_time">
-            Waktu
+            Waktu Mulai (Optional)
           </label>
-          <Calendar id="calendar-24h" v-model="datetime24hUpdate" showTime hourFormat="24" selectionMode="range"
+          <Calendar id="calendar-24h-mulai" v-model="dataUpdateSession.start_time" showTime hourFormat="24"
+            :disabled="updateSessionLoading" showButtonBar />
+        </div>
+        <div class="field">
+          <label for="end_time">
+            Waktu Selesai (Optional)
+          </label>
+          <Calendar id="calendar-24h-selesai" v-model="dataUpdateSession.end_time" showTime hourFormat="24"
             :disabled="updateSessionLoading" showButtonBar />
         </div>
         <div class="field">

@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { gateways } from '@prisma/client';
+import { gateways, presence_sessions, siswa } from '@prisma/client';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
@@ -88,20 +88,14 @@ export class PresenceService {
 
     if (!siswa) return;
 
-    if (gateway.presence_sessionsId === null) {
-      if (siswa.telegram_account) {
-        await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, `<b>Maaf Perangkat ini masih belum bisa dibuka atau digunakan</b>`, {
-          parse_mode: 'HTML'
-        })
-        // Todo: add notification via websocket,whatsapp
-      }
-    } else {
+    if (gateway.presence_sessionsId) {
       // presence
       const session = await this.prismaService.client.presence_sessions.findUnique({
         where: {
           id: gateway.presence_sessionsId,
         }
       })
+
       if (!session) {
         // todo: should implement notification
         Logger.debug("Session not found")
@@ -110,125 +104,125 @@ export class PresenceService {
       // check session have start_time and end_time
       if (session.start_time && session.end_time) {
         const current_time = new Date();
-        if (current_time < session.start_time || current_time > session.end_time) {
-          Logger.log("Session not yet available")
+        // waktu sekarang harus lebih dari waktu yang di tentukan
+        // if (current_time >= session.start_time) {
+        //   await this.createPresence({
+        //     gateway,
+        //     session,
+        //     siswa,
+        //     client,
+        //   })
+        // }
+        Logger.debug("Presence created")
+      } else {
+        // ignore some session start and end times
+        await this.createPresence({
+          gateway,
+          session,
+          siswa,
+          client,
+        })
+      }
+    } else {
+      // Todo: add notification via websocket,whatsapp
+      Logger.debug("Gateway ID not found")
+      return;
+    }
+  }
+
+
+  protected async createPresence({
+    gateway,
+    session,
+    siswa,
+    client,
+  }: {
+    siswa: siswa,
+    gateway: gateways,
+    client: Server,
+    session: presence_sessions
+  }) {
+    if (session.allow_twice) {
+      const checkPresence = await this.prismaService.client.presences.findFirst({
+        where: {
+          siswaId: siswa.id,
+          presence_sessionsId: session.id,
+          enter_time: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          },
+          method: 'card'
+        }
+      })
+
+      if (checkPresence) {
+        const checkPresenceHaveExitTime = await this.prismaService.client.presences.findFirst({
+          where: {
+            siswaId: siswa.id,
+            presence_sessionsId: session.id,
+            enter_time: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0))
+            },
+            exit_time: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0))
+            },
+            method: 'card'
+          }
+        })
+        if (checkPresenceHaveExitTime) {
           // todo: should impl notification in here
           return;
         } else {
-          if (session.allow_twice) {
-            const checkPresence = await this.prismaService.client.presences.findFirst({
-              where: {
-                siswaId: siswa.id,
-                presence_sessionsId: session.id,
-                enter_time: new Date(),
-                method: 'card'
-              }
-            })
-            if (checkPresence) {
-              // update the exit_time
-              await this.prismaService.client.presences.update({
-                where: {
-                  id: checkPresence.id,
-                },
-                data: {
-                  exit_time: new Date()
-                }
-              })
-              // todo: should impl notification in here
-            } else {
-              // update the exit_time
-              await this.prismaService.client.presences.create({
-                data: {
-                  presence_sessionsId: session.id,
-                  siswaId: siswa.id,
-                  enter_time: new Date(),
-                  method: 'card',
-                }
-              })
-              // todo: should impl notification in here
-
+          // update the exit_time
+          await this.prismaService.client.presences.update({
+            where: {
+              id: checkPresence.id,
+            },
+            data: {
+              exit_time: new Date()
             }
-          } else {
-            const checkPresence = await this.prismaService.client.presences.findFirst({
-              where: {
-                siswaId: siswa.id,
-                presence_sessionsId: session.id,
-                enter_time: new Date(),
-                method: 'card'
-              }
-            })
-
-            if (!checkPresence) {
-              await this.prismaService.client.presences.create({
-                data: {
-                  presence_sessionsId: session.id,
-                  siswaId: siswa.id,
-                  enter_time: new Date(),
-                  method: 'card',
-                }
-              })
-            } else {
-              // todo: should impl notification in here
-            }
-          }
+          })
         }
+
       } else {
-        if (session.allow_twice) {
-          const checkPresence = await this.prismaService.client.presences.findFirst({
-            where: {
-              siswaId: siswa.id,
-              presence_sessionsId: session.id,
-              enter_time: new Date(),
-              method: 'card'
-            }
-          })
-          if (checkPresence) {
-            // update the exit_time
-            await this.prismaService.client.presences.update({
-              where: {
-                id: checkPresence.id,
-              },
-              data: {
-                exit_time: new Date()
-              }
-            })
-            // todo: should impl notification in here
-          } else {
-            // update the exit_time
-            await this.prismaService.client.presences.create({
-              data: {
-                presence_sessionsId: session.id,
-                siswaId: siswa.id,
-                enter_time: new Date(),
-                method: 'card',
-              }
-            })
-            // todo: should impl notification in here
-
+        // update the exit_time
+        await this.prismaService.client.presences.create({
+          data: {
+            presence_sessionsId: session.id,
+            siswaId: siswa.id,
+            gatewaysId: gateway.id,
+            enter_time: new Date(),
+            method: 'card',
           }
-        } else {
-          const checkPresence = await this.prismaService.client.presences.findFirst({
-            where: {
-              siswaId: siswa.id,
-              presence_sessionsId: session.id,
-              enter_time: new Date(),
-              method: 'card'
-            }
-          })
+        })
+        // todo: should impl notification in here
 
-          if (!checkPresence) {
-            await this.prismaService.client.presences.create({
-              data: {
-                presence_sessionsId: session.id,
-                siswaId: siswa.id,
-                enter_time: new Date(),
-                method: 'card',
-              }
-            })
-          } else {
-            // todo: should impl notification in here
-          }
+      }
+    } else {
+      const checkPresence = await this.prismaService.client.presences.findFirst({
+        where: {
+          siswaId: siswa.id,
+          presence_sessionsId: session.id,
+          gatewaysId: gateway.id,
+          enter_time: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          },
+          method: 'card'
         }
+      })
+
+      if (checkPresence) {
+        // todo: should impl notification in here
+        return;
+      } else {
+        await this.prismaService.client.presences.create({
+          data: {
+            presence_sessionsId: session.id,
+            siswaId: siswa.id,
+            gatewaysId: gateway.id,
+            enter_time: new Date(),
+            method: 'card',
+          }
+        })
       }
     }
   }
