@@ -12,7 +12,8 @@ export class PresenceController {
 
   @Post('/qr')
   async createPresenceByQR(@Body() CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
-    return await this.presenceService.createPresenceByQR(CreatePresenceByQRDTO);
+    // return await this.presenceService.createPresenceByQR(CreatePresenceByQRDTO);
+    return {}
   }
 
   @Get('/export/:sessionId')

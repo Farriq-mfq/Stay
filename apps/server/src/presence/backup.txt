@@ -1,0 +1,54 @@
+ const checkPresence = await this.prismaService.client.presences.findFirst({
+            where: {
+              siswaId: siswa.id,
+              presence_sessionsId: session.id,
+              enter_time: new Date(),
+              method: 'card'
+            }
+          })
+          if (checkPresence) {
+            // update the exit_time
+            await this.prismaService.client.presences.update({
+              where: {
+                id: checkPresence.id,
+              },
+              data: {
+                exit_time: new Date()
+              }
+            })
+            // todo: should impl notification in here
+          } else {
+            // update the exit_time
+            await this.prismaService.client.presences.create({
+              data: {
+                presence_sessionsId: session.id,
+                siswaId: siswa.id,
+                enter_time: new Date(),
+                method: 'card',
+              }
+            })
+            // todo: should impl notification in here
+
+          }
+        } else {
+          const checkPresence = await this.prismaService.client.presences.findFirst({
+            where: {
+              siswaId: siswa.id,
+              presence_sessionsId: session.id,
+              enter_time: new Date(),
+              method: 'card'
+            }
+          })
+
+          if (!checkPresence) {
+            await this.prismaService.client.presences.create({
+              data: {
+                presence_sessionsId: session.id,
+                siswaId: siswa.id,
+                enter_time: new Date(),
+                method: 'card',
+              }
+            })
+          } else {
+            // todo: should impl notification in here
+          }

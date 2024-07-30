@@ -18,6 +18,15 @@ export class SessionsService {
       const session = await this.prismaService.client.presence_sessions.create({
         data: {
           name: createSessionDto.name,
+          ...createSessionDto.allow_twice && {
+            allow_twice: createSessionDto.allow_twice
+          },
+          ...createSessionDto.start_time && {
+            start_time: createSessionDto.start_time
+          },
+          ...createSessionDto.end_time && {
+            end_time: createSessionDto.end_time
+          },
         },
       })
       await this.prismaService.client.gateways.updateMany({
@@ -35,6 +44,15 @@ export class SessionsService {
       const session = await this.prismaService.client.presence_sessions.create({
         data: {
           name: createSessionDto.name,
+          ...createSessionDto.allow_twice && {
+            allow_twice: createSessionDto.allow_twice
+          },
+          ...createSessionDto.start_time && {
+            start_time: createSessionDto.start_time
+          },
+          ...createSessionDto.end_time && {
+            end_time: createSessionDto.end_time
+          },
         },
       })
       return session
@@ -118,6 +136,9 @@ export class SessionsService {
         },
         data: {
           name: updateSessionDto.name,
+          allow_twice: updateSessionDto.allow_twice,
+          start_time: updateSessionDto.start_time,
+          end_time: updateSessionDto.end_time,
         },
       })
       await this.prismaService.client.gateways.updateMany({
@@ -138,6 +159,9 @@ export class SessionsService {
         },
         data: {
           name: updateSessionDto.name,
+          allow_twice: updateSessionDto.allow_twice,
+          start_time: updateSessionDto.start_time,
+          end_time: updateSessionDto.end_time,
         },
       })
       return session

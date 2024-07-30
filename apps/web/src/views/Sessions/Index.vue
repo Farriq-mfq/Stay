@@ -3,6 +3,8 @@ import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
+import Calendar from 'primevue/calendar';
+import Chip from 'primevue/chip'
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -55,10 +57,23 @@ const handleDebounceFilter = (val) => {
 // add session
 const addSessionDialog = ref(false)
 const errorsAddSession = ref({})
+const datetime24h = ref('')
 const sessionData = ref({
   name: '',
+  start_time: null,
+  end_time: null,
+  allow_twice: false,
   gateways: []
 })
+
+
+watch(datetime24h, (val) => {
+  if (val) {
+    sessionData.value.start_time = val[0];
+    sessionData.value.end_time = val[1]
+  }
+})
+
 const addSessionService = async (data) => {
   return await axios.post('/sessions', data)
 }
@@ -162,15 +177,32 @@ const confirmDeleteSession = (id) => {
 };
 // update
 const showDialogUpdateSession = ref(false)
+const datetime24hUpdate = ref('')
 const dataUpdateSession = ref({
   name: '',
+  start_time: null,
+  end_time: null,
+  allow_twice: false,
   gateways: []
 })
 const errorsUpdateSession = ref({})
 
+watch(datetime24hUpdate, (val) => {
+  if (val) {
+    dataUpdateSession.value.start_time = val[0];
+    dataUpdateSession.value.end_time = val[1]
+  } else {
+    dataUpdateSession.value.start_time = null;
+    dataUpdateSession.value.end_time = null;
+  }
+})
+
 const updateService = async (data) => {
   return await axios.patch(`/sessions/${data.id}`, {
     name: data.name,
+    allow_twice: data.allow_twice,
+    start_time: data.start_time,
+    end_time: data.end_time,
     ...data.gateways.length && {
       gateways: data.gateways
     }
@@ -195,17 +227,28 @@ const handleShowDialogUpdateSesion = (data) => {
   dataUpdateSession.value = {
     id: data.id,
     name: data.name,
+    allow_twice: data.allow_twice,
     gateways: data.gateways
+  }
+  if (data.start_time && data.end_time) {
+    datetime24hUpdate.value = [
+      new Date(data.start_time),
+      new Date(data.end_time)
+    ]
   }
 }
 
 const clearUpdateSession = () => {
   dataUpdateSession.value = {
     name: '',
+    start_time: null,
+    end_time: null,
+    allow_twice: false,
     gateways: []
   }
 
   showDialogUpdateSession.value = false
+  datetime24hUpdate.value = []
 }
 
 const handleSubmitUpdateSesion = () => {
@@ -313,6 +356,33 @@ const clearDialogQrCode = () => {
           <Column expander />
           <Column field="name" header="Nama">
           </Column>
+          <Column field="allow_twice" header="Presensi 2x">
+            <template #body="{ data }">
+
+              <Chip class="py-0 pl-0 pr-3">
+                <span :class="{ 'bg-primary': data.allow_twice, 'bg-red-400': !data.allow_twice }"
+                  class="border-circle w-2rem h-2rem flex align-items-center justify-content-center text-white">
+                  <i :class="{ 'pi pi-check': data.allow_twice, 'pi pi-times': !data.allow_twice }"></i></span>
+                <span class="ml-2 font-medium">
+                  {{ data.allow_twice ? 'Aktif' : 'Tidak Aktif' }}
+                </span>
+              </Chip>
+              <!-- <Badge :class="{ 'text-green-600': data.allow_twice, 'text-red-600': !data.allow_twice }"
+                :value="data.allow_twice ? 'Boleh 2x' : 'Tidak Boleh 2x'" /> -->
+            </template>
+          </Column>
+          <Column field="start_time" header="Waktu Mulai">
+            <template #body="{ data }">
+              <Chip class="bg-primary text-white text-sm" :label="data.start_time" v-if="data.start_time" />
+              <p v-else>-</p>
+            </template>
+          </Column>
+          <Column field="end_time" header="Waktu Selesai">
+            <template #body="{ data }">
+              <Chip class="bg-red-400 text-white text-sm" :label="data.end_time" v-if="data.end_time" />
+              <p v-else>-</p>
+            </template>
+          </Column>
           <Column field="count" alignFrozen="right" :frozen="true" header="Gateway yang digunakan">
             <template #body="{ data }">
               <Badge>
@@ -353,7 +423,6 @@ const clearDialogQrCode = () => {
       <!-- create -->
       <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Tambah Session Baru" :modal="true"
         class="p-fluid">
-
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.name"
@@ -361,6 +430,17 @@ const clearDialogQrCode = () => {
           <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.name">
             {{ errorsAddSession.name[0] }}
           </p>
+        </div>
+        <div class="field">
+          <label for="allow_twice">Presensi 2x</label>
+          <InputSwitch v-model="sessionData.allow_twice" :disabled="addSessionLoading" />
+        </div>
+        <div class="field">
+          <label for="start_time">
+            Waktu
+          </label>
+          <Calendar id="calendar-24h" v-model="datetime24h" showTime hourFormat="24" selectionMode="range"
+            :disabled="addSessionLoading" />
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
@@ -377,8 +457,8 @@ const clearDialogQrCode = () => {
             @click="handleAddSession" />
         </template>
       </Dialog>
-      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session"
-        :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
+      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
+        class="p-fluid" @after-hide="clearUpdateSession">
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
@@ -387,6 +467,17 @@ const clearDialogQrCode = () => {
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.name">
             {{ errorsUpdateSession.name[0] }}
           </p>
+        </div>
+        <div class="field">
+          <label for="allow_twice">Presensi 2x</label>
+          <InputSwitch v-model="dataUpdateSession.allow_twice" :disabled="updateSessionLoading" />
+        </div>
+        <div class="field">
+          <label for="start_time">
+            Waktu
+          </label>
+          <Calendar id="calendar-24h" v-model="datetime24hUpdate" showTime hourFormat="24" selectionMode="range"
+            :disabled="updateSessionLoading" showButtonBar />
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
