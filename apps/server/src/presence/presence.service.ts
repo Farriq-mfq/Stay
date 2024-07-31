@@ -101,19 +101,32 @@ export class PresenceService {
         Logger.debug("Session not found")
         return;
       }
+      const current_time = new Date();
       // check session have start_time and end_time
+      // range check
       if (session.start_time && session.end_time) {
-        const current_time = new Date();
-        // waktu sekarang harus lebih dari waktu yang di tentukan
-        // if (current_time >= session.start_time) {
-        //   await this.createPresence({
-        //     gateway,
-        //     session,
-        //     siswa,
-        //     client,
-        //   })
-        // }
-        Logger.debug("Presence created")
+        console.log(current_time.getTime(), session.start_time.getTime(), session.end_time.getTime())
+
+        if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
+          Logger.debug(`Presence created all setting ${session}`)
+        } else {
+          console.log(`Presensi gagal harus memenuhi ${session.start_time} dan ${session.end_time}`)
+        }
+        // start time check
+      } else if (session.start_time) {
+        if (current_time >= session.start_time) {
+          Logger.debug(`Presence created only start setting ${session}`)
+        } else {
+          Logger.debug("Must be at least ${session.start_time")
+        }
+        // end time check
+      } else if (session.end_time) {
+        if (current_time <= session.end_time) {
+          Logger.debug(`Presence created only end setting ${session}`)
+        } else {
+          Logger.debug("Must be at least ${session.start_time")
+        }
+
       } else {
         // ignore some session start and end times
         await this.createPresence({

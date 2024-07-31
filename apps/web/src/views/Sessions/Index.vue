@@ -5,6 +5,8 @@ import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
 import Calendar from 'primevue/calendar';
 import Chip from 'primevue/chip'
+import { format } from 'date-fns'
+import { id } from 'date-fns/locale'
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -349,13 +351,15 @@ const clearDialogQrCode = () => {
           </Column>
           <Column field="start_time" header="Waktu Mulai">
             <template #body="{ data }">
-              <Chip class="bg-primary text-white text-sm" :label="data.start_time" v-if="data.start_time" />
+              <Chip class="bg-primary text-white text-sm"
+                :label="format(data.start_time, 'd/MM/yyyy HH:mm', { locale: id })" v-if="data.start_time" />
               <p v-else>-</p>
             </template>
           </Column>
           <Column field="end_time" header="Waktu Selesai">
             <template #body="{ data }">
-              <Chip class="bg-red-400 text-white text-sm" :label="data.end_time" v-if="data.end_time" />
+              <Chip class="bg-red-400 text-white text-sm"
+                :label="format(data.end_time, 'dd/MM/yyyy HH:mm', { locale: id })" v-if="data.end_time" />
               <p v-else>-</p>
             </template>
           </Column>
@@ -442,6 +446,7 @@ const clearDialogQrCode = () => {
       </Dialog>
       <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
         class="p-fluid" @after-hide="clearUpdateSession">
+
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
