@@ -1,7 +1,6 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { gateways, presence_sessions, siswa } from '@prisma/client';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { gateways, presence_sessions, PresenceMethod, siswa } from '@prisma/client';
+import { error } from 'console';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
 import { Server } from 'socket.io';
@@ -12,7 +11,6 @@ import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
 import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 import { Telegraf } from 'telegraf';
 import * as xlsx from 'xlsx';
-import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 @Injectable()
 export class PresenceService {
   constructor(
@@ -76,7 +74,6 @@ export class PresenceService {
   // }
 
   async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<void> {
-    // todo : fix this
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
         rfid_token: scanned.scan
@@ -97,34 +94,58 @@ export class PresenceService {
       })
 
       if (!session) {
-        // todo: should implement notification
-        Logger.debug("Session not found")
-        return;
+        throw new BadRequestException("Session not found")
       }
       const current_time = new Date();
       // check session have start_time and end_time
       // range check
       if (session.start_time && session.end_time) {
-        console.log(current_time.getTime(), session.start_time.getTime(), session.end_time.getTime())
-
         if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
-          Logger.debug(`Presence created all setting ${session}`)
+          await this.createPresence({
+            gateway,
+            session,
+            siswa,
+            client,
+            method: 'card'
+          })
         } else {
-          console.log(`Presensi gagal harus memenuhi ${session.start_time} dan ${session.end_time}`)
+          this.handlingPresenceError({
+            error: `Presensi Mulai pada ${session.start_time} dan Selesai pada ${session.end_time}`,
+            siswa
+          })
         }
         // start time check
       } else if (session.start_time) {
         if (current_time >= session.start_time) {
-          Logger.debug(`Presence created only start setting ${session}`)
+          await this.createPresence({
+            gateway,
+            session,
+            siswa,
+            client,
+            method: 'card'
+          })
         } else {
-          Logger.debug("Must be at least ${session.start_time")
+          this.handlingPresenceError({
+            error: `Presensi Mulai pada ${session.start_time}`,
+            siswa
+          })
         }
         // end time check
       } else if (session.end_time) {
         if (current_time <= session.end_time) {
-          Logger.debug(`Presence created only end setting ${session}`)
+          await this.createPresence({
+            gateway,
+            session,
+            siswa,
+            client,
+            method: 'card'
+
+          })
         } else {
-          Logger.debug("Must be at least ${session.start_time")
+          this.handlingPresenceError({
+            error: `Presensi Sudah Selesai pada ${session.end_time}`,
+            siswa
+          })
         }
 
       } else {
@@ -134,12 +155,14 @@ export class PresenceService {
           session,
           siswa,
           client,
+          method: 'card'
         })
       }
     } else {
-      // Todo: add notification via websocket,whatsapp
-      Logger.debug("Gateway ID not found")
-      return;
+      this.handlingPresenceError({
+        error: "Gateway tidak ditemukan",
+        siswa
+      })
     }
   }
 
@@ -149,11 +172,13 @@ export class PresenceService {
     session,
     siswa,
     client,
+    method
   }: {
     siswa: siswa,
     gateway: gateways,
     client: Server,
-    session: presence_sessions
+    session: presence_sessions,
+    method: PresenceMethod
   }) {
     if (session.allow_twice) {
       const checkPresence = await this.prismaService.client.presences.findFirst({
@@ -163,7 +188,7 @@ export class PresenceService {
           enter_time: {
             gte: new Date(new Date().setHours(0, 0, 0, 0))
           },
-          method: 'card'
+          method
         }
       })
 
@@ -178,15 +203,17 @@ export class PresenceService {
             exit_time: {
               gte: new Date(new Date().setHours(0, 0, 0, 0))
             },
-            method: 'card'
+            method
           }
         })
         if (checkPresenceHaveExitTime) {
-          // todo: should impl notification in here
-          return;
+          this.handlingPresenceError({
+            error: `Anda sudah melakukan semua presensi`,
+            siswa
+          })
         } else {
           // update the exit_time
-          await this.prismaService.client.presences.update({
+          const updateExitTime = await this.prismaService.client.presences.update({
             where: {
               id: checkPresence.id,
             },
@@ -194,21 +221,26 @@ export class PresenceService {
               exit_time: new Date()
             }
           })
+          await this.whatsappProvider.sendMessage({
+            message: `*[Notification]*\n\n${JSON.stringify(updateExitTime)}`,
+            phone: [+siswa.notelp]
+          })
         }
 
       } else {
-        // update the exit_time
-        await this.prismaService.client.presences.create({
+        const createPresenceEnter = await this.prismaService.client.presences.create({
           data: {
             presence_sessionsId: session.id,
             siswaId: siswa.id,
             gatewaysId: gateway.id,
             enter_time: new Date(),
-            method: 'card',
+            method,
           }
         })
-        // todo: should impl notification in here
-
+        await this.whatsappProvider.sendMessage({
+          message: `*[Notification]*\n\n${JSON.stringify(createPresenceEnter)}`,
+          phone: [+siswa.notelp]
+        })
       }
     } else {
       const checkPresence = await this.prismaService.client.presences.findFirst({
@@ -219,25 +251,39 @@ export class PresenceService {
           enter_time: {
             gte: new Date(new Date().setHours(0, 0, 0, 0))
           },
-          method: 'card'
+          method
         }
       })
 
       if (checkPresence) {
-        // todo: should impl notification in here
-        return;
+        this.handlingPresenceError({
+          error: `Anda sudah melakukan semua presensi`,
+          siswa
+        })
       } else {
-        await this.prismaService.client.presences.create({
+        const createPresence = await this.prismaService.client.presences.create({
           data: {
             presence_sessionsId: session.id,
             siswaId: siswa.id,
             gatewaysId: gateway.id,
             enter_time: new Date(),
-            method: 'card',
+            method,
           }
+        })
+        await this.whatsappProvider.sendMessage({
+          message: `*[Notification]*\n\n${JSON.stringify(createPresence)}`,
+          phone: [+siswa.notelp]
         })
       }
     }
+  }
+
+
+  protected handlingPresenceError({
+    error,
+    siswa
+  }: { error: any, siswa: siswa }): Error {
+    throw new Error(JSON.stringify({ error, siswa }))
   }
 
   async findAll(
@@ -262,7 +308,9 @@ export class PresenceService {
         gateway: true,
         siswa: true,
         session: true,
-        method: true
+        method: true,
+        enter_time: true,
+        exit_time: true,
       },
       where: {
         ...search && {
@@ -338,7 +386,9 @@ export class PresenceService {
         gateway: true,
         siswa: true,
         session: true,
-        method: true
+        method: true,
+        enter_time: true,
+        exit_time: true,
       },
       where: {
         ...search && {

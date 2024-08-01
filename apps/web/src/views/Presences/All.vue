@@ -147,8 +147,8 @@ const handleExportService = async () => {
   <div>
     <div class="field">
       <select-session @input="handleChangeSelectSession" />
-      <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export"
-        @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
+      <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel"
+        label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
     </div>
     <DataTable v-if="sessionId" ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
       :loading="isLoading" :value="isLoading ? [] : presences.data.data.items" dataKey="id" paginator :rows="10"
@@ -190,6 +190,16 @@ const handleExportService = async () => {
       <Column header="Lokasi">
         <template #body="{ data }">
           {{ data.gateway ? data.gateway.location : '-' }}
+        </template>
+      </Column>
+      <Column header="Masuk">
+        <template #body="{ data }">
+          {{ data.enter_time ?? '-' }}
+        </template>
+      </Column>
+      <Column header="Keluar">
+        <template #body="{ data }">
+          {{ data.exit_time ?? '-' }}
         </template>
       </Column>
       <Column header="Metode">
