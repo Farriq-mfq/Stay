@@ -180,13 +180,22 @@ export class GatewaysService {
         case 'presence':
           try {
             await this.presenceService.createPresenceByScanned(data, gateway, client)
+            // client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, true)
+            this.updateRealtimePresence({
+              client,
+              sessionId: gateway.presence_sessionsId
+            })
           } catch (e) {
             if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
-              await this.whatsappProvider.sendMessage({
-                message: `*[Notification]*\n\n${errorPayload.error}`,
-                phone: [+errorPayload.siswa.notelp]
-              })
+              if (this.whatsappProvider.client) {
+                await this.whatsappProvider.sendMessage({
+                  message: `*[Notification]*\n\n${errorPayload.error}`,
+                  phone: [+errorPayload.siswa.notelp]
+                })
+              } else {
+                console.log(errorPayload)
+              }
             } else {
               console.log("terjadi kesalahan pada sistem")
             }
@@ -202,5 +211,21 @@ export class GatewaysService {
       Logger.error(err)
     }
 
+  }
+
+  async updateRealtimePresence({
+    client,
+    sessionId
+  }: {
+    client: Server,
+    sessionId: number
+  }) {
+    const timeoutId = setTimeout(() => {
+      client.emit(`PRESENCE_UPDATED_${sessionId}`, true, (ack) => {
+        if (ack) {
+          clearTimeout(timeoutId);
+        }
+      })
+    }, 5000)
   }
 }

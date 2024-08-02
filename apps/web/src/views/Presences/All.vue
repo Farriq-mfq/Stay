@@ -217,11 +217,11 @@ const handleExportService = async () => {
           </Tag>
         </template>
       </Column>
-      <Column header="Tanggal">
+      <!-- <Column header="Tanggal">
         <template #body="{ data }">
           {{ format(new Date(data.createdAt), 'EEEE, d MMMM yyyy', { locale: id }) }}
         </template>
-      </Column>
+      </Column> -->
     </DataTable>
   </div>
 </template>

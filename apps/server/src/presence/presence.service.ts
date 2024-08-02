@@ -221,10 +221,12 @@ export class PresenceService {
               exit_time: new Date()
             }
           })
-          await this.whatsappProvider.sendMessage({
-            message: `*[Notification]*\n\n${JSON.stringify(updateExitTime)}`,
-            phone: [+siswa.notelp]
-          })
+          if (this.whatsappProvider.client) {
+            await this.whatsappProvider.sendMessage({
+              message: `*[Notification]*\n\n${JSON.stringify(updateExitTime)}`,
+              phone: [+siswa.notelp]
+            })
+          }
         }
 
       } else {
@@ -237,10 +239,12 @@ export class PresenceService {
             method,
           }
         })
-        await this.whatsappProvider.sendMessage({
-          message: `*[Notification]*\n\n${JSON.stringify(createPresenceEnter)}`,
-          phone: [+siswa.notelp]
-        })
+        if (this.whatsappProvider.client) {
+          await this.whatsappProvider.sendMessage({
+            message: `*[Notification]*\n\n${JSON.stringify(createPresenceEnter)}`,
+            phone: [+siswa.notelp]
+          })
+        }
       }
     } else {
       const checkPresence = await this.prismaService.client.presences.findFirst({
@@ -270,10 +274,12 @@ export class PresenceService {
             method,
           }
         })
-        await this.whatsappProvider.sendMessage({
-          message: `*[Notification]*\n\n${JSON.stringify(createPresence)}`,
-          phone: [+siswa.notelp]
-        })
+        if (this.whatsappProvider.client) {
+          await this.whatsappProvider.sendMessage({
+            message: `*[Notification]*\n\n${JSON.stringify(createPresence)}`,
+            phone: [+siswa.notelp]
+          })
+        }
       }
     }
   }
