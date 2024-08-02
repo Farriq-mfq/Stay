@@ -1,6 +1,8 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, siswa } from '@prisma/client';
 import { error } from 'console';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
 import { Server } from 'socket.io';
@@ -445,10 +447,15 @@ export class PresenceService {
       NISN: presence.siswa.nisn,
       NIS: presence.siswa.nis,
       Rombel: presence.siswa.rombel,
+      Masuk: format(presence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+        locale: id
+      }),
+      Keluar: format(presence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+        locale: id
+      }),
       Session: presence.session.name,
       Location: presence.gateway ? presence.gateway.location : '-',
       Metode: presence.method,
-      Tanggal: presence.createdAt
     }))
 
 
