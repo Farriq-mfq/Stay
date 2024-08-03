@@ -8,7 +8,6 @@ import { config } from '../config';
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-
         {
             path: '/',
             component: AppLayout,
@@ -171,6 +170,14 @@ const router = createRouter({
             component: NotFoundView,
             meta: {
                 title: "404"
+            }
+        },
+        {
+            path: '/real-time',
+            name: 'RealTime',
+            component: () => import('@/views/RealTime/Index.vue'),
+            meta: {
+                title: "Real-Time",
             }
         }
     ]
