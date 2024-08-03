@@ -1,34 +1,19 @@
 <script setup>
 import { useQuery } from '@tanstack/vue-query';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const socket = proxy.socket
 
-const expandedRows = ref({});
-const filters = ref(null);
-const first = ref(0);
-const queryParams = ref({
-    first: 0,
-    rows: 10,
-})
-const totalRecords = ref(0);
-const dt = ref()
 const sessionId = ref(null)
 const allPresences = ref([])
 
 
 const getAllPresences = async () => {
     if (sessionId.value) {
-        const queries = {
-            page: (queryParams.value.first / queryParams.value.rows) + 1,
-            limit: queryParams.value.rows,
-            ...filters.value && { search: filters.value }
-        }
-
-        const params = new URLSearchParams(queries)
-
-        return await axios.get(`/presence/${sessionId.value}?${params}`)
+        return await axios.get(`/presence/${sessionId.value}/today`)
     } else {
         throw new Error()
     }
@@ -36,19 +21,13 @@ const getAllPresences = async () => {
 
 
 const { data: presences, isLoading, refetch } = useQuery({
-    queryKey: [`presences-all`, sessionId.value, queryParams.value],
+    queryKey: [`presences-all`, sessionId.value],
     queryFn: getAllPresences,
 })
 
-
-const onPage = (event) => {
-    queryParams.value = event;
-    refetch()
-};
-
 watch(presences, () => {
     if (presences.value) {
-        totalRecords.value = presences.value.data.data.meta.totalCount
+        allPresences.value = presences.value.data.data
     }
 })
 
@@ -97,11 +76,6 @@ onMounted(() => {
     }
 });
 
-const handleDebounceFilter = (val) => {
-    filters.value = val;
-    refetch()
-}
-
 
 const handleChangeSelectSession = (val) => {
     sessionId.value = val.id
@@ -113,8 +87,7 @@ const handleChangeSelectSession = (val) => {
         <div class="field">
             <select-session @input="handleChangeSelectSession" />
         </div>
-
-        <DataTable :value="allPresences" tableStyle="min-width: 50rem">
+        <DataTable v-if="sessionId" :value="allPresences" tableStyle="min-width: 50rem" :loading="isLoading">
             <template #empty>
                 <div class="flex justify-content-center p-4 gap-3 align-items-center">
                     <i class="pi pi-folder-open"></i>
@@ -123,14 +96,12 @@ const handleChangeSelectSession = (val) => {
                     </span>
                 </div>
             </template>
-            <!-- <Column expander /> -->
             <Column header="Nama">
                 <template #body="{ data }">
-                    {{ data }}
-                    <!-- {{ data.siswaId }} -->
+                    {{ data.siswa.name }}
                 </template>
             </Column>
-            <!-- <Column header="Rombel">
+            <Column header="Rombel">
                 <template #body="{ data }">
                     {{ data.siswa.rombel }}
                 </template>
@@ -142,12 +113,12 @@ const handleChangeSelectSession = (val) => {
             </Column>
             <Column header="Masuk">
                 <template #body="{ data }">
-                    {{ data.enter_time ?? '-' }}
+                    {{ data.enter_time ? format(data.enter_time, 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-' }}
                 </template>
             </Column>
             <Column header="Keluar">
                 <template #body="{ data }">
-                    {{ data.exit_time ?? '-' }}
+                    {{ data.exit_time ? format(data.exit_time, 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-' }}
                 </template>
             </Column>
             <Column header="Metode">
@@ -164,7 +135,7 @@ const handleChangeSelectSession = (val) => {
                         {{ data.method }}
                     </Tag>
                 </template>
-            </Column> -->
+            </Column>
         </DataTable>
     </div>
 </template>
