@@ -84,6 +84,7 @@ const handleChangeSelectSession = (val) => {
 </script>
 <template>
     <div class="card">
+        <clock />
         <div class="field">
             <select-session @input="handleChangeSelectSession" />
         </div>

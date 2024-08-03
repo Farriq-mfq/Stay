@@ -20,6 +20,13 @@ export class WhatsappController {
         res.sendFile(path);
     }
 
+
+    @Get('/client')
+    async getClient() {
+        return await this.whatsappProvider.getClient()
+    }
+
+
     @Post('/logout')
     @HttpCode(HttpStatus.OK)
     async logout() {

@@ -5,11 +5,11 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
 @Controller('sessions')
-@UseGuards(AccessTokenGuard)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) { }
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   create(@Body() createSessionDto: CreateSessionDto) {
     return this.sessionsService.create(createSessionDto);
   }
@@ -24,16 +24,19 @@ export class SessionsController {
   }
 
   @Get(':id')
+  @UseGuards(AccessTokenGuard)
   findOne(@Param('id') id: string) {
     return this.sessionsService.findOne(+id);
   }
 
   @Patch(':id')
+  @UseGuards(AccessTokenGuard)
   update(@Param('id') id: string, @Body() updateSessionDto: UpdateSessionDto) {
     return this.sessionsService.update(+id, updateSessionDto);
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
   remove(@Param('id') id: string) {
     return this.sessionsService.remove(+id);
   }

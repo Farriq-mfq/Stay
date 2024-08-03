@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { gateways, presence_sessions, PresenceMethod, siswa } from '@prisma/client';
+import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
 import { error } from 'console';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -75,7 +75,7 @@ export class PresenceService {
   //   }
   // }
 
-  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<void> {
+  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences> {
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
         rfid_token: scanned.scan
@@ -103,7 +103,7 @@ export class PresenceService {
       // range check
       if (session.start_time && session.end_time) {
         if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
-          await this.createPresence({
+          return await this.createPresence({
             gateway,
             session,
             siswa,
@@ -119,7 +119,7 @@ export class PresenceService {
         // start time check
       } else if (session.start_time) {
         if (current_time >= session.start_time) {
-          await this.createPresence({
+          return await this.createPresence({
             gateway,
             session,
             siswa,
@@ -135,7 +135,7 @@ export class PresenceService {
         // end time check
       } else if (session.end_time) {
         if (current_time <= session.end_time) {
-          await this.createPresence({
+          return await this.createPresence({
             gateway,
             session,
             siswa,
@@ -152,7 +152,7 @@ export class PresenceService {
 
       } else {
         // ignore some session start and end times
-        await this.createPresence({
+        return await this.createPresence({
           gateway,
           session,
           siswa,
@@ -181,7 +181,7 @@ export class PresenceService {
     client: Server,
     session: presence_sessions,
     method: PresenceMethod
-  }) {
+  }): Promise<presences> {
     if (session.allow_twice) {
       const checkPresence = await this.prismaService.client.presences.findFirst({
         where: {
@@ -221,6 +221,10 @@ export class PresenceService {
             },
             data: {
               exit_time: new Date()
+            },
+            include: {
+              gateway: true,
+              siswa: true
             }
           })
           if (this.whatsappProvider.client) {
@@ -229,6 +233,8 @@ export class PresenceService {
               phone: [+siswa.notelp]
             })
           }
+
+          return updateExitTime
         }
 
       } else {
@@ -239,6 +245,10 @@ export class PresenceService {
             gatewaysId: gateway.id,
             enter_time: new Date(),
             method,
+          },
+          include: {
+            gateway: true,
+            siswa: true
           }
         })
         if (this.whatsappProvider.client) {
@@ -247,6 +257,7 @@ export class PresenceService {
             phone: [+siswa.notelp]
           })
         }
+        return createPresenceEnter;
       }
     } else {
       const checkPresence = await this.prismaService.client.presences.findFirst({
@@ -274,6 +285,10 @@ export class PresenceService {
             gatewaysId: gateway.id,
             enter_time: new Date(),
             method,
+          },
+          include: {
+            gateway: true,
+            siswa: true
           }
         })
         if (this.whatsappProvider.client) {
@@ -282,6 +297,7 @@ export class PresenceService {
             phone: [+siswa.notelp]
           })
         }
+        return createPresence;
       }
     }
   }
@@ -294,6 +310,42 @@ export class PresenceService {
     throw new Error(JSON.stringify({ error, siswa }))
   }
 
+
+  async findAllPresenceToday({ sessionId }: {
+    sessionId: string,
+  }) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
+      }
+    })
+
+    return await this.prismaService.client.presences.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setHours(0, 0, 0, 0))
+        },
+        presence_sessionsId: session.id,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        id: true,
+        presence_sessionsId: true,
+        gatewaysId: true,
+        siswaId: true,
+        createdAt: true,
+        updatedAt: true,
+        gateway: true,
+        siswa: true,
+        session: true,
+        method: true,
+        enter_time: true,
+        exit_time: true,
+      },
+    })
+  }
   async findAll(
     sessionId: string,
     page?: number,

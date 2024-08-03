@@ -115,10 +115,6 @@ export class WhatsappProvider {
     }
 
     async getClient():Promise<wa.Client | null> {
-        if (!this.client) {
-            this.logger.error("Client not available")
-            return;
-        }
         return this.client
     }
 

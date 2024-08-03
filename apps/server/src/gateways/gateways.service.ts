@@ -179,12 +179,14 @@ export class GatewaysService {
       switch (gateway.role) {
         case 'presence':
           try {
-            await this.presenceService.createPresenceByScanned(data, gateway, client)
-            // client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, true)
-            this.updateRealtimePresence({
-              client,
-              sessionId: gateway.presence_sessionsId
-            })
+            const presence = await this.presenceService.createPresenceByScanned(data, gateway, client)
+            if (presence) {
+              client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
+            }
+            // this.updateRealtimePresence({
+            //   client,
+            //   sessionId: gateway.presence_sessionsId
+            // })
           } catch (e) {
             if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
