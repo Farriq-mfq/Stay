@@ -14,7 +14,7 @@ import { SendMessageDto } from "./dto/send-message.dto";
 @Injectable()
 export class WhatsappProvider {
     private readonly logger = new Logger(WhatsappProvider.name);
-    private client?: wa.Client
+    public client?: wa.Client
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) {
@@ -43,6 +43,8 @@ export class WhatsappProvider {
             headless: true,
             killProcessOnBrowserClose: true,
             useChrome: true,
+            logFile:false,
+
         })
 
 
@@ -114,11 +116,7 @@ export class WhatsappProvider {
         await this.client.forceUpdateConnectionState()
     }
 
-    async getClient() {
-        if (!this.client) {
-            this.logger.error("Client not available")
-            return;
-        }
+    async getClient():Promise<wa.Client | null> {
         return this.client
     }
 

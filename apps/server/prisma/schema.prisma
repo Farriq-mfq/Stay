@@ -66,13 +66,16 @@ model gateways {
 // only role presences are allowed
 
 model presence_sessions {
-  id        Int         @id @default(autoincrement())
-  name      String
-  qrcode    String      @unique @default(cuid())
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  gateways  gateways[]
-  presences presences[]
+  id          Int         @id @default(autoincrement())
+  name        String
+  qrcode      String      @unique @default(cuid())
+  allow_twice Boolean?    @default(false)
+  start_time  DateTime?
+  end_time    DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  gateways    gateways[]
+  presences   presences[]
 }
 
 enum PresenceMethod {
@@ -88,6 +91,8 @@ model presences {
   gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
   gatewaysId          Int?
   session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
+  enter_time          DateTime
+  exit_time           DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   presence_sessionsId Int?

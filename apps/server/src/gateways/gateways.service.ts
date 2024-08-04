@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
@@ -9,13 +9,15 @@ import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
+import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 @Injectable()
 export class GatewaysService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly presenceService: PresenceService
+    private readonly presenceService: PresenceService,
+    private readonly whatsappProvider: WhatsappProvider
   ) {
 
   }
@@ -176,7 +178,30 @@ export class GatewaysService {
 
       switch (gateway.role) {
         case 'presence':
-          await this.presenceService.createPresenceByScanned(data, gateway, client)
+          try {
+            const presence = await this.presenceService.createPresenceByScanned(data, gateway, client)
+            if (presence) {
+              client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
+            }
+            // this.updateRealtimePresence({
+            //   client,
+            //   sessionId: gateway.presence_sessionsId
+            // })
+          } catch (e) {
+            if (e instanceof Error) {
+              const errorPayload = JSON.parse(e.message) as any
+              if (this.whatsappProvider.client) {
+                await this.whatsappProvider.sendMessage({
+                  message: `*[Notification]*\n\n${errorPayload.error}`,
+                  phone: [+errorPayload.siswa.notelp]
+                })
+              } else {
+                console.log(errorPayload)
+              }
+            } else {
+              console.log("terjadi kesalahan pada sistem")
+            }
+          }
           break;
         case 'register':
           client.emit(`READER_${gateway.ip}`, data.scan)
@@ -188,5 +213,23 @@ export class GatewaysService {
       Logger.error(err)
     }
 
+  }
+  /**
+   * this optional use
+   */
+  async updateRealtimePresence({
+    client,
+    sessionId
+  }: {
+    client: Server,
+    sessionId: number
+  }) {
+    const timeoutId = setTimeout(() => {
+      client.emit(`PRESENCE_UPDATED_${sessionId}`, true, (ack) => {
+        if (ack) {
+          clearTimeout(timeoutId);
+        }
+      })
+    }, 5000)
   }
 }

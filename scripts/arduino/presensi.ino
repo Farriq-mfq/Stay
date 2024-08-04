@@ -7,7 +7,7 @@
 // SS / SDA -> 7
 // SCK -> 13
 // RST -> 9
-// SOLVE : 28 JUNI 2024
+// CC : FARRIQMFQ
 // #################### END CONNECTED PIN ##########################
 
 #include <Ethernet.h>
@@ -32,7 +32,7 @@ EthernetClient client;
 
 // #################### REQUEST HTTP CLIENT SETTING ###################
 
-char serverAddress[] = "192.168.1.5";
+char serverAddress[] = "192.168.1.4";
 int port = 3000;
 HttpClient httpClient = HttpClient(client, serverAddress, port);
 
@@ -40,7 +40,7 @@ HttpClient httpClient = HttpClient(client, serverAddress, port);
 
 // ####################### KONFIGURASI TOKEN ##########################
 
-String serverToken = "eyJhbGciOiJIUzI1NiJ9.NDI0NTVhNWYwMTE3YmIzMjY1N2NkNTE1MGRjMGFlM2E.LYf22KZ1pCJPvnj6eCwy5HZhw3h2txy35Dveh56fcv8";
+String serverToken = "eyJhbGciOiJIUzI1NiJ9.OWQwYTVmNGIxYzVlMzI4NjJiMzRkMTUwOWJiN2M2OTY.SH1A9_7sIdT6CTycChvduudxmAjkg7Fre7TLkJNLHas";
 // ####################### KONFIGURASI TOKEN ##########################
 
 void setup() {

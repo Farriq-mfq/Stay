@@ -3,6 +3,10 @@ import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
+import Calendar from 'primevue/calendar';
+import Chip from 'primevue/chip'
+import { format } from 'date-fns'
+import { id } from 'date-fns/locale'
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -57,8 +61,14 @@ const addSessionDialog = ref(false)
 const errorsAddSession = ref({})
 const sessionData = ref({
   name: '',
+  start_time: null,
+  end_time: null,
+  allow_twice: false,
   gateways: []
 })
+
+
+
 const addSessionService = async (data) => {
   return await axios.post('/sessions', data)
 }
@@ -164,13 +174,20 @@ const confirmDeleteSession = (id) => {
 const showDialogUpdateSession = ref(false)
 const dataUpdateSession = ref({
   name: '',
+  start_time: null,
+  end_time: null,
+  allow_twice: false,
   gateways: []
 })
 const errorsUpdateSession = ref({})
 
+
 const updateService = async (data) => {
   return await axios.patch(`/sessions/${data.id}`, {
     name: data.name,
+    allow_twice: data.allow_twice,
+    start_time: data.start_time,
+    end_time: data.end_time,
     ...data.gateways.length && {
       gateways: data.gateways
     }
@@ -195,6 +212,9 @@ const handleShowDialogUpdateSesion = (data) => {
   dataUpdateSession.value = {
     id: data.id,
     name: data.name,
+    ...data.start_time && { start_time: new Date(data.start_time) },
+    ...data.end_time && { end_time: new Date(data.end_time) },
+    allow_twice: data.allow_twice,
     gateways: data.gateways
   }
 }
@@ -202,6 +222,9 @@ const handleShowDialogUpdateSesion = (data) => {
 const clearUpdateSession = () => {
   dataUpdateSession.value = {
     name: '',
+    start_time: null,
+    end_time: null,
+    allow_twice: false,
     gateways: []
   }
 
@@ -313,6 +336,33 @@ const clearDialogQrCode = () => {
           <Column expander />
           <Column field="name" header="Nama">
           </Column>
+          <Column field="allow_twice" header="Presensi 2x">
+            <template #body="{ data }">
+
+              <Chip class="py-0 pl-0 pr-3">
+                <span :class="{ 'bg-primary': data.allow_twice, 'bg-red-400': !data.allow_twice }"
+                  class="border-circle w-2rem h-2rem flex align-items-center justify-content-center text-white">
+                  <i :class="{ 'pi pi-check': data.allow_twice, 'pi pi-times': !data.allow_twice }"></i></span>
+                <span class="ml-2 font-medium">
+                  {{ data.allow_twice ? 'Aktif' : 'Tidak Aktif' }}
+                </span>
+              </Chip>
+            </template>
+          </Column>
+          <Column field="start_time" header="Waktu Mulai">
+            <template #body="{ data }">
+              <Chip class="bg-primary text-white text-sm"
+                :label="format(data.start_time, 'd/MM/yyyy HH:mm', { locale: id })" v-if="data.start_time" />
+              <p v-else>-</p>
+            </template>
+          </Column>
+          <Column field="end_time" header="Waktu Selesai">
+            <template #body="{ data }">
+              <Chip class="bg-red-400 text-white text-sm"
+                :label="format(data.end_time, 'dd/MM/yyyy HH:mm', { locale: id })" v-if="data.end_time" />
+              <p v-else>-</p>
+            </template>
+          </Column>
           <Column field="count" alignFrozen="right" :frozen="true" header="Gateway yang digunakan">
             <template #body="{ data }">
               <Badge>
@@ -353,7 +403,6 @@ const clearDialogQrCode = () => {
       <!-- create -->
       <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Tambah Session Baru" :modal="true"
         class="p-fluid">
-
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.name"
@@ -361,6 +410,24 @@ const clearDialogQrCode = () => {
           <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.name">
             {{ errorsAddSession.name[0] }}
           </p>
+        </div>
+        <div class="field">
+          <label for="allow_twice">Presensi 2x</label>
+          <InputSwitch v-model="sessionData.allow_twice" :disabled="addSessionLoading" />
+        </div>
+        <div class="field">
+          <label for="start_time">
+            Waktu Mulai (Optional)
+          </label>
+          <Calendar id="calendar-24h-mulai" v-model="sessionData.start_time" showTime hourFormat="24"
+            :disabled="addSessionLoading" showButtonBar />
+        </div>
+        <div class="field">
+          <label for="end_time">
+            Waktu Selesai (Optional)
+          </label>
+          <Calendar id="calendar-24h-selesai" v-model="sessionData.end_time" showTime hourFormat="24"
+            :disabled="addSessionLoading" showButtonBar />
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
@@ -377,8 +444,9 @@ const clearDialogQrCode = () => {
             @click="handleAddSession" />
         </template>
       </Dialog>
-      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session"
-        :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
+      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
+        class="p-fluid" @after-hide="clearUpdateSession">
+
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
@@ -387,6 +455,24 @@ const clearDialogQrCode = () => {
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.name">
             {{ errorsUpdateSession.name[0] }}
           </p>
+        </div>
+        <div class="field">
+          <label for="allow_twice">Presensi 2x</label>
+          <InputSwitch v-model="dataUpdateSession.allow_twice" :disabled="updateSessionLoading" />
+        </div>
+        <div class="field">
+          <label for="start_time">
+            Waktu Mulai (Optional)
+          </label>
+          <Calendar id="calendar-24h-mulai" v-model="dataUpdateSession.start_time" showTime hourFormat="24"
+            :disabled="updateSessionLoading" showButtonBar />
+        </div>
+        <div class="field">
+          <label for="end_time">
+            Waktu Selesai (Optional)
+          </label>
+          <Calendar id="calendar-24h-selesai" v-model="dataUpdateSession.end_time" showTime hourFormat="24"
+            :disabled="updateSessionLoading" showButtonBar />
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
