@@ -7,7 +7,7 @@
 // SS / SDA -> 7
 // SCK -> 13
 // RST -> 9
-// SOLVE : 28 JUNI 2024
+// CC : FARRIQMFQ
 // #################### END CONNECTED PIN ##########################
 
 #include <Ethernet.h>

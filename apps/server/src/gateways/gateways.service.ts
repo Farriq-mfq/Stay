@@ -214,7 +214,9 @@ export class GatewaysService {
     }
 
   }
-
+  /**
+   * this optional use
+   */
   async updateRealtimePresence({
     client,
     sessionId

@@ -62,7 +62,7 @@ export class PresenceService {
   //     })
   //     if (siswa.telegram_account) {
   //       const htmlContent = `
-  //       Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'EEEE, d MMMM yyyy', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
+  //       Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
   //       `;
   //       await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
   //         parse_mode: 'HTML'
@@ -112,7 +112,11 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Mulai pada ${session.start_time} dan Selesai pada ${session.end_time}`,
+            error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+              locale: id
+            })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+              locale: id
+            })}`,
             siswa
           })
         }
@@ -128,7 +132,9 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Mulai pada ${session.start_time}`,
+            error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+              locale: id
+            })}`,
             siswa
           })
         }
@@ -145,7 +151,9 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Sudah Selesai pada ${session.end_time}`,
+            error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+              locale: id
+            })}`,
             siswa
           })
         }
@@ -210,7 +218,7 @@ export class PresenceService {
         })
         if (checkPresenceHaveExitTime) {
           this.handlingPresenceError({
-            error: `Anda sudah melakukan semua presensi`,
+            error: `Anda sudah melakukan presensi hari ini 😊`,
             siswa
           })
         } else {
@@ -228,8 +236,9 @@ export class PresenceService {
             }
           })
           if (this.whatsappProvider.client) {
+
             await this.whatsappProvider.sendMessage({
-              message: `*[Notification]*\n\n${JSON.stringify(updateExitTime)}`,
+              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
               phone: [+siswa.notelp]
             })
           }
@@ -253,7 +262,7 @@ export class PresenceService {
         })
         if (this.whatsappProvider.client) {
           await this.whatsappProvider.sendMessage({
-            message: `*[Notification]*\n\n${JSON.stringify(createPresenceEnter)}`,
+            message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
             phone: [+siswa.notelp]
           })
         }
@@ -274,7 +283,7 @@ export class PresenceService {
 
       if (checkPresence) {
         this.handlingPresenceError({
-          error: `Anda sudah melakukan semua presensi`,
+          error: `Anda sudah melakukan presensi hari ini 😊`,
           siswa
         })
       } else {
@@ -293,7 +302,7 @@ export class PresenceService {
         })
         if (this.whatsappProvider.client) {
           await this.whatsappProvider.sendMessage({
-            message: `*[Notification]*\n\n${JSON.stringify(createPresence)}`,
+            message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
             phone: [+siswa.notelp]
           })
         }
@@ -499,10 +508,10 @@ export class PresenceService {
       NISN: presence.siswa.nisn,
       NIS: presence.siswa.nis,
       Rombel: presence.siswa.rombel,
-      Masuk: format(presence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+      Masuk: format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }),
-      Keluar: format(presence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+      Keluar: format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }),
       Session: presence.session.name,

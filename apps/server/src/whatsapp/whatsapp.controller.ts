@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Res } from "@nestjs/common";
 import { Response } from "express";
 import { SendMessageDto } from "./dto/send-message.dto";
 import { WhatsappProvider } from "./whatsapp.provider";
@@ -12,8 +12,8 @@ export class WhatsappController {
     ) { }
 
     @Get('/qr-code')
-    qrClientConnect(@Res() res: Response) {
-        if (this.whatsappProvider.getClient()) return res.status(404).json({
+    async qrClientConnect(@Res() res: Response) {
+        if (await this.whatsappProvider.getClient()) return res.status(404).json({
             message: 'QRcode Is Not Found'
         });
         const path = this.whatsappProvider.getQr();
@@ -23,7 +23,10 @@ export class WhatsappController {
 
     @Get('/client')
     async getClient() {
-        return await this.whatsappProvider.getClient()
+        if (await this.whatsappProvider.getClient()) {
+            return this.whatsappProvider.getClient()
+        }
+        throw new NotFoundException()
     }
 
 

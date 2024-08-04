@@ -43,6 +43,8 @@ export class WhatsappProvider {
             headless: true,
             killProcessOnBrowserClose: true,
             useChrome: true,
+            logFile:false,
+
         })
 
 
