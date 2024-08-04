@@ -43,7 +43,7 @@ export class WhatsappProvider {
             headless: true,
             killProcessOnBrowserClose: true,
             useChrome: true,
-            logFile:false,
+            logFile: false,
 
         })
 
@@ -98,7 +98,7 @@ export class WhatsappProvider {
 
     async logout() {
         if (!this.client) throw new BadRequestException("Client not ready")
-        await this.client.logout(true)
+        return await this.client.logout()
     }
 
 
@@ -116,7 +116,7 @@ export class WhatsappProvider {
         await this.client.forceUpdateConnectionState()
     }
 
-    async getClient():Promise<wa.Client | null> {
+    async getClient(): Promise<wa.Client | null> {
         return this.client
     }
 
@@ -139,8 +139,8 @@ export class WhatsappProvider {
                 width: 500,
                 margin: 2,
                 color: {
-                    dark: "#010599FF",
-                    light: "#FFBF60FF"
+                    dark: '#00F',  // Blue dots
+                    light: '#0000' // Transparent background
                 }
             });
             return qrCodeFilePath;

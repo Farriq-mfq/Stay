@@ -1,9 +1,13 @@
 <script setup>
-import { useQuery } from '@tanstack/vue-query';
+import { useMutation, useQuery } from '@tanstack/vue-query';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance } from 'vue'
 import QRCode from '../Qrcode.vue'
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
+const confirm = useConfirm()
+const toast = useToast()
 
 const checkConnectionWhatsappService = async () => {
     return await axios.get('/whatsapp/client')
@@ -21,7 +25,37 @@ const {
     queryFn: checkConnectionWhatsappService,
 })
 
+const logoutConnectionService = async () => {
+    return await axios.post('/whatsapp/logout')
+}
 
+const {
+    mutateAsync: logoutMutateConnection,
+    isPending: logoutPendingConnection,
+} = useMutation({
+    mutationKey: ['logoutConnection'],
+    mutationFn: logoutConnectionService,
+})
+
+const handleConnectionLogout = () => {
+    confirm.require({
+        message: 'Apakah anda yakin ingin logout akun whatsapp anda ?',
+        acceptLabel: 'Logout',
+        acceptClass: 'p-button-danger',
+        rejectLabel: 'Batal',
+        accept: () => {
+            logoutMutateConnection({}, {
+                onSuccess: async () => {
+                    await refetch()
+                    toast.add({ severity: 'success', summary: 'Berhasil logout', life: 2000 });
+                },
+                onError: async (error) => {
+                    toast.add({ severity: 'error', summary: 'Terjadi kesalahan saat melakukan logout', life: 2000 });
+                }
+            })
+        }
+    });
+}
 
 </script>
 <template>
@@ -40,26 +74,39 @@ const {
                     fill="var(--surface-ground)" animationDuration=".5s" aria-label="Loading" />
             </div>
             <div class="border-solid flex-1 surface-border border-1 p-4 border-round" v-if="status === 'success'">
-                <h2 class="text-lg font-bold border-bottom-1 surface-border pb-2">Whatsapp info</h2>
+                <h2 class="text-lg font-bold border-bottom-1 surface-border pb-2">Connection Info</h2>
                 <ul class="list-none p-0 gap-2 flex flex-column">
                     <li>
-                        <b>Nomor</b> : {{ data.data.data._hostAccountNumber }}
+                        <b>Host Account Number</b> : {{ data.data.data._hostAccountNumber }}
                     </li>
                     <li>
-                        <b>Info</b> :
-                        <code>
-                            {{ data.data.data._sessionInfo }}
-                       </code>
+                        <b>WA VERSION</b> : {{ data.data.data._sessionInfo.WA_VERSION }}
+                    </li>
+                    <li>
+                        <b>OS</b> : {{ data.data.data._sessionInfo.OS }}
+                    </li>
+                    <li>
+                        <b>RAM INFO</b> : {{ data.data.data._sessionInfo.RAM_INFO }}
+                    </li>
+                    <li>
+                        <b>BROWSER VERSION</b> : {{ data.data.data._sessionInfo.BROWSER_VERSION }}
+                    </li>
+                    <li>
+                        <b>PAGE UA</b> : {{ data.data.data._sessionInfo.PAGE_UA }}
+                    </li>
+                    <li>
+                        <b>ACC TYPE</b> : {{ data.data.data._sessionInfo.ACC_TYPE }}
                     </li>
                 </ul>
             </div>
         </div>
-        <hr />
+        <Divider />
         <div class="flex gap-2">
             <Button @click.prevent="refetch" :label="status === 'pending' ? 'Koneksi Sedang di check' : 'Check Koneksi'"
                 :loading="status === 'pending' || isFetching" icon="pi pi-refresh" />
-            <Button @click.prevent="refetch" :label="'Logout'"
-                :loading="status === 'pending' || isFetching" icon="pi pi-sign-out" severity="danger" />
+            <Button @click.prevent="handleConnectionLogout" :label="'Logout'"
+                :loading="isFetching || logoutPendingConnection" v-if="status === 'success'" icon="pi pi-sign-out"
+                severity="danger" />
         </div>
     </div>
 </template>
