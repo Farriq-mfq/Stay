@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
-const hours = ref(0);
-const minutes = ref(0);
-const seconds = ref(0);
+const hours = ref('-');
+const minutes = ref('-');
+const seconds = ref('-');
 const setTime = () => {
     const date = new Date();
     let h = date.getHours();

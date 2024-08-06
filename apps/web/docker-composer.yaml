@@ -1,0 +1,15 @@
+version: 1
+services:
+ app:
+  build: 
+    context: .
+    dockerFile: Dockerfile
+  ports:
+    - "8000:80"
+  volumes:
+    - .:/app
+    - /app/node_modules
+  environment:
+    - VITE_APP_NAME=STAY
+    - VITE_API_URL=localhost:3000
+    - NODE_ENV=production

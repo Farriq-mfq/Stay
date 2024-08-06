@@ -190,6 +190,11 @@ export class GatewaysService {
           } catch (e) {
             if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
+              // check error object 
+              if (errorPayload.error) {
+                client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, errorPayload.error)
+              }
+
               if (this.whatsappProvider.client) {
                 await this.whatsappProvider.sendMessage({
                   message: `*[Notification]*\n\n${errorPayload.error}`,
