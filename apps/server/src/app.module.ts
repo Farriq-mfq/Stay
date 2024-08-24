@@ -3,18 +3,14 @@ import { AuthModule } from './auth/auth.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { UsersModule } from './users/users.module';
-
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CustomPrismaModule } from 'nestjs-prisma';
-import { TelegrafModule } from 'nestjs-telegraf';
 import { EventsModule } from './events/events.module';
-import { telegrafSessionMiddleware } from './middlewares/telegraf.session';
 import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
 import { SessionsModule } from './sessions/sessions.module';
 import { StatsModule } from './stats/stats.module';
-import { AppChannel1 } from './telegram/channel1/app-channel1.contants';
 import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 @Module({
@@ -37,17 +33,17 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
       }),
       inject: [ConfigService],
     }),
-    TelegrafModule.forRootAsync({
-      botName: AppChannel1,
-      useFactory: (configService: ConfigService) => {
-        return ({
-          token: configService.get<string>('TELEGRAM_BOT_TOKEN'),
-          middlewares: [telegrafSessionMiddleware],
-          include: [AppChannel1Module]
-        })
-      },
-      inject: [ConfigService],
-    }),
+    // TelegrafModule.forRootAsync({
+    //   botName: AppChannel1,
+    //   useFactory: (configService: ConfigService) => {
+    //     return ({
+    //       token: configService.get<string>('TELEGRAM_BOT_TOKEN'),
+    //       middlewares: [telegrafSessionMiddleware],
+    //       include: [AppChannel1Module]
+    //     })
+    //   },
+    //   inject: [ConfigService],
+    // }),
     AppChannel1Module,
     EventsModule,
     AuthModule,

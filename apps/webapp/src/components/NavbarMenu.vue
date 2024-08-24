@@ -15,7 +15,7 @@ import Scan from '@/components/Scan.vue'
                 </router-link>
             </li>
             <li class="block h-full flex-1 list-none">
-                <router-link :to="{ name: 'scan' }" class="no-underline text-center text-color-secondary">
+                <router-link :to="{ name: 'sessions' }" class="no-underline text-center text-color-secondary">
                     <div class="h-full flex flex-column align-items-center justify-content-center">
                         <div class="relative">
                             <i class="pi pi-hourglass text-xl" />

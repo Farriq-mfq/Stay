@@ -19,9 +19,9 @@ const router = createRouter({
           component: () => import('../views/Home/Index.vue'),
         },
         {
-          path: '/scan',
-          name: 'scan',
-          component: () => import('../views/Scan/Index.vue'),
+          path: '/sessions',
+          name: 'sessions',
+          component: () => import('../views/Session/Index.vue'),
         },
         {
           path: '/presences',

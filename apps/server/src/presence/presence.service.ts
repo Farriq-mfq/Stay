@@ -1,23 +1,18 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
-import { error } from 'console';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
-import { InjectBot } from 'nestjs-telegraf';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
-import { Context } from 'src/interfaces/context.interface';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { AppChannel1 } from 'src/telegram/channel1/app-channel1.contants';
 import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
-import { Telegraf } from 'telegraf';
 import * as xlsx from 'xlsx';
 @Injectable()
 export class PresenceService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    @InjectBot(AppChannel1) private bot: Telegraf<Context>,
+    // @InjectBot(AppChannel1) private bot: Telegraf<Context>,
     private readonly whatsappProvider: WhatsappProvider
   ) { }
   // async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
@@ -190,45 +185,71 @@ export class PresenceService {
     session: presence_sessions,
     method: PresenceMethod
   }): Promise<presences> {
-    if (session.allow_twice) {
-      const checkPresence = await this.prismaService.client.presences.findFirst({
-        where: {
-          siswaId: siswa.id,
-          presence_sessionsId: session.id,
-          enter_time: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0))
-          },
-          method
-        }
-      })
-
-      if (checkPresence) {
-        const checkPresenceHaveExitTime = await this.prismaService.client.presences.findFirst({
+    return await this.prismaService.client.$transaction(async (tx) => {
+      if (session.allow_twice) {
+        const checkPresence = await tx.presences.findFirst({
           where: {
             siswaId: siswa.id,
             presence_sessionsId: session.id,
             enter_time: {
               gte: new Date(new Date().setHours(0, 0, 0, 0))
             },
-            exit_time: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0))
-            },
             method
           }
         })
-        if (checkPresenceHaveExitTime) {
-          this.handlingPresenceError({
-            error: `Anda sudah melakukan presensi hari ini 😊`,
-            siswa
-          })
-        } else {
-          // update the exit_time
-          const updateExitTime = await this.prismaService.client.presences.update({
+
+        if (checkPresence) {
+          const checkPresenceHaveExitTime = await tx.presences.findFirst({
             where: {
-              id: checkPresence.id,
-            },
+              siswaId: siswa.id,
+              presence_sessionsId: session.id,
+              enter_time: {
+                gte: new Date(new Date().setHours(0, 0, 0, 0))
+              },
+              exit_time: {
+                gte: new Date(new Date().setHours(0, 0, 0, 0))
+              },
+              method
+            }
+          })
+          if (checkPresenceHaveExitTime) {
+            this.handlingPresenceError({
+              error: `Anda sudah melakukan presensi hari ini 😊`,
+              siswa
+            })
+          } else {
+            // update the exit_time
+            const updateExitTime = await tx.presences.update({
+              where: {
+                id: checkPresence.id,
+              },
+              data: {
+                exit_time: new Date()
+              },
+              include: {
+                gateway: true,
+                siswa: true
+              }
+            })
+            if (this.whatsappProvider.client) {
+
+              await this.whatsappProvider.sendMessage({
+                message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
+                phone: [+siswa.notelp]
+              })
+            }
+
+            return updateExitTime
+          }
+
+        } else {
+          const createPresenceEnter = await tx.presences.create({
             data: {
-              exit_time: new Date()
+              presence_sessionsId: session.id,
+              siswaId: siswa.id,
+              gatewaysId: gateway.id,
+              enter_time: new Date(),
+              method,
             },
             include: {
               gateway: true,
@@ -236,79 +257,57 @@ export class PresenceService {
             }
           })
           if (this.whatsappProvider.client) {
-
             await this.whatsappProvider.sendMessage({
-              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
+              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
               phone: [+siswa.notelp]
             })
           }
-
-          return updateExitTime
+          return createPresenceEnter;
         }
-
       } else {
-        const createPresenceEnter = await this.prismaService.client.presences.create({
-          data: {
-            presence_sessionsId: session.id,
+        const checkPresence = await tx.presences.findFirst({
+          where: {
             siswaId: siswa.id,
+            presence_sessionsId: session.id,
             gatewaysId: gateway.id,
-            enter_time: new Date(),
-            method,
-          },
-          include: {
-            gateway: true,
-            siswa: true
+            enter_time: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0))
+            },
+            method
           }
         })
-        if (this.whatsappProvider.client) {
-          await this.whatsappProvider.sendMessage({
-            message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
-            phone: [+siswa.notelp]
-          })
-        }
-        return createPresenceEnter;
-      }
-    } else {
-      const checkPresence = await this.prismaService.client.presences.findFirst({
-        where: {
-          siswaId: siswa.id,
-          presence_sessionsId: session.id,
-          gatewaysId: gateway.id,
-          enter_time: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0))
-          },
-          method
-        }
-      })
 
-      if (checkPresence) {
-        this.handlingPresenceError({
-          error: `Anda sudah melakukan presensi hari ini 😊`,
-          siswa
-        })
-      } else {
-        const createPresence = await this.prismaService.client.presences.create({
-          data: {
-            presence_sessionsId: session.id,
-            siswaId: siswa.id,
-            gatewaysId: gateway.id,
-            enter_time: new Date(),
-            method,
-          },
-          include: {
-            gateway: true,
-            siswa: true
-          }
-        })
-        if (this.whatsappProvider.client) {
-          await this.whatsappProvider.sendMessage({
-            message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
-            phone: [+siswa.notelp]
+        if (checkPresence) {
+          this.handlingPresenceError({
+            error: `Anda sudah melakukan presensi hari ini 😊`,
+            siswa
           })
+        } else {
+          const createPresence = await tx.presences.create({
+            data: {
+              presence_sessionsId: session.id,
+              siswaId: siswa.id,
+              gatewaysId: gateway.id,
+              enter_time: new Date(),
+              method,
+            },
+            include: {
+              gateway: true,
+              siswa: true
+            }
+          })
+          if (this.whatsappProvider.client) {
+            await this.whatsappProvider.sendMessage({
+              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
+              phone: [+siswa.notelp]
+            })
+          }
+          return createPresence;
         }
-        return createPresence;
       }
-    }
+    }, {
+      isolationLevel: 'Serializable'
+    })
   }
 
 
@@ -508,12 +507,12 @@ export class PresenceService {
       NISN: presence.siswa.nisn,
       NIS: presence.siswa.nis,
       Rombel: presence.siswa.rombel,
-      Masuk: format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+      Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
-      }),
-      Keluar: format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+      }) : '-',
+      Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
-      }),
+      }) : '-',
       Session: presence.session.name,
       Location: presence.gateway ? presence.gateway.location : '-',
       Metode: presence.method,

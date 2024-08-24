@@ -110,6 +110,7 @@ model telegram_account {
   siswaId   Int?     @unique
 }
 
+// plans for firebase notifications
 model notifications {
   id        Int      @id @default(autoincrement())
   title     String
