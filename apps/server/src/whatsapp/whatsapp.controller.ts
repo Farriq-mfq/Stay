@@ -1,65 +1,133 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Res } from "@nestjs/common";
-import { Response } from "express";
-import { SendMessageDto } from "./dto/send-message.dto";
-import { WhatsappProvider } from "./whatsapp.provider";
-import { HandlerMessageDto } from "./dto/handler-message.dto";
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CreateWASessionDto } from "./dto/create-session.dto";
+import { WhatsappService } from "./whatsapp.service";
 
+@ApiTags('Whatsapp Service')
 @Controller('/whatsapp')
 export class WhatsappController {
 
     constructor(
-        private readonly whatsappProvider: WhatsappProvider
+        private readonly whatsappService: WhatsappService,
     ) { }
 
-    @Get('/qr-code')
-    async qrClientConnect(@Res() res: Response) {
-        if (await this.whatsappProvider.getClient()) return res.status(404).json({
-            message: 'QRcode Is Not Found'
-        });
-        const path = this.whatsappProvider.getQr();
-        res.sendFile(path);
-    }
 
-
-    @Get('/client')
-    async getClient() {
-        if (await this.whatsappProvider.getClient()) {
-            return this.whatsappProvider.getClient()
-        }
-        throw new NotFoundException()
-    }
-
-
-    @Post('/logout')
-    @HttpCode(HttpStatus.OK)
-    async logout() {
-        return await this.whatsappProvider.logout()
-    }
-
-    @Post('/send-message')
-    sendMessage(@Body() SendMessageDto: SendMessageDto): any {
-        return this.whatsappProvider.sendMessage(SendMessageDto);
-    }
-    @Get('/status')
-    async getClientStatusConnected() {
-        return await this.whatsappProvider.getStatusConnected();
-    }
-
-    @Post('/update-connection')
-    @HttpCode(HttpStatus.OK)
-    async updateSateConnection() {
-        return await this.whatsappProvider.forceUpdateConnectionState()
-    }
-
-    @Get('/get-connection-state')
-    async getStateConnection() {
-        return await this.whatsappProvider.getConnectionState()
-    }
-
-    @Post('/conversetion')
-    async handleMessage(
-        @Body() body: HandlerMessageDto
+    @Post('/create-session')
+    @ApiBody({
+        type: CreateWASessionDto,
+        description: 'Create a new session',
+        required: true
+    })
+    @ApiResponse({ status: 201, description: "OK" })
+    @ApiResponse({ status: 400, description: "Bad Request" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async createSession(
+        @Body() createSessionDto: CreateWASessionDto
     ) {
-        return this.whatsappProvider.handlerMessage(body)
+        return await this.whatsappService.createSession(createSessionDto)
+    }
+    @Post('/start-session/:sessionId')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 201, description: "OK" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    @ApiResponse({ status: 400, description: "Bad Request" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    async startSession(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string
+    ) {
+        return await this.whatsappService.startSession(sessionId)
+    }
+    @Get('/check-session/:sessionId')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 200, description: "OK" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async checkSession(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string
+    ) {
+        return await this.whatsappService.checkConnection(sessionId)
+    }
+    @Get('/session-status/:sessionId')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 200, description: "OK" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async statusSession(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string
+    ) {
+        return await this.whatsappService.statusSession(sessionId)
+    }
+    @Post('/logout-session/:sessionId')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 201, description: "OK" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async logoutSession(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string
+    ) {
+        return await this.whatsappService.logoutSession(sessionId)
+    }
+    @Post('/close-session/:sessionId')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 201, description: "OK" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async closeSession(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string
+    ) {
+        return await this.whatsappService.closeSession(sessionId)
+    }
+
+    @Post('/:sessionId/send-message')
+    @ApiParam({
+        name: 'sessionId',
+        type: 'string',
+        description: 'Session ID',
+        required: true,
+        example: 1
+    })
+    @ApiResponse({ status: 201, description: "OK" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async sendMessage() {
+        return 'ok'
+    }
+
+    @Get('/list-sessions')
+    @ApiResponse({ status: 200, description: "List of sessions" })
+    @ApiResponse({ status: 404, description: "Not found" })
+    @ApiResponse({ status: 500, description: "Internal Server Error" })
+    async listSession() {
+        return await this.whatsappService.listSessions()
     }
 }

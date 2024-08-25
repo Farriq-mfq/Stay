@@ -9,7 +9,6 @@ import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
-import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 @Injectable()
 export class GatewaysService {
   constructor(
@@ -17,7 +16,6 @@ export class GatewaysService {
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
     private readonly presenceService: PresenceService,
-    private readonly whatsappProvider: WhatsappProvider
   ) {
 
   }
@@ -195,14 +193,14 @@ export class GatewaysService {
                 client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, errorPayload.error)
               }
 
-              if (this.whatsappProvider.client) {
-                await this.whatsappProvider.sendMessage({
-                  message: `*[Notification]*\n\n${errorPayload.error}`,
-                  phone: [+errorPayload.siswa.notelp]
-                })
-              } else {
-                console.log(errorPayload)
-              }
+              // if (this.whatsappProvider.client) {
+              //   await this.whatsappProvider.sendMessage({
+              //     message: `*[Notification]*\n\n${errorPayload.error}`,
+              //     phone: [+errorPayload.siswa.notelp]
+              //   })
+              // } else {
+              //   console.log(errorPayload)
+              // }
             } else {
               console.log("terjadi kesalahan pada sistem")
             }

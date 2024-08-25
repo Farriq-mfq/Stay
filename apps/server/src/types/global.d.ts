@@ -7,7 +7,9 @@ declare global {
             JWT_SECRET_SISWA?: string
             JWT_REFRESH_SECRET_SISWA?: string
             TELEGRAM_BOT_TOKEN?: string
-            PORT?: number
+            WHATSAPP_SERVER?: string
+            WHATSAPP_SERVER_SECRETKEY?: string
+            PORT?: string
         }
     }
 }

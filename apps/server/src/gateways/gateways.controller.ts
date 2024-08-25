@@ -4,7 +4,9 @@ import { UpdateGatewayDto } from './dto/update-gateway.dto';
 import { GatewaysService } from './gateways.service';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
+import { ApiTags } from '@nestjs/swagger';
 @Controller('gateways')
+@ApiTags("Gateway")
 @UseGuards(AccessTokenGuard)
 export class GatewaysController {
   constructor(private readonly gatewaysService: GatewaysService) { }

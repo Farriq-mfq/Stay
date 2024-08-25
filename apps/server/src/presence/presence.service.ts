@@ -6,14 +6,14 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
+// import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 import * as xlsx from 'xlsx';
 @Injectable()
 export class PresenceService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     // @InjectBot(AppChannel1) private bot: Telegraf<Context>,
-    private readonly whatsappProvider: WhatsappProvider
+    // private readonly whatsappProvider: WhatsappProvider
   ) { }
   // async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
   //   // check the session
@@ -231,13 +231,13 @@ export class PresenceService {
                 siswa: true
               }
             })
-            if (this.whatsappProvider.client) {
+            // if (this.whatsappProvider.client) {
 
-              await this.whatsappProvider.sendMessage({
-                message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
-                phone: [+siswa.notelp]
-              })
-            }
+            //   await this.whatsappProvider.sendMessage({
+            //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
+            //     phone: [+siswa.notelp]
+            //   })
+            // }
 
             return updateExitTime
           }
@@ -256,12 +256,12 @@ export class PresenceService {
               siswa: true
             }
           })
-          if (this.whatsappProvider.client) {
-            await this.whatsappProvider.sendMessage({
-              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
-              phone: [+siswa.notelp]
-            })
-          }
+          // if (this.whatsappProvider.client) {
+          //   await this.whatsappProvider.sendMessage({
+          //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
+          //     phone: [+siswa.notelp]
+          //   })
+          // }
           return createPresenceEnter;
         }
       } else {
@@ -296,12 +296,12 @@ export class PresenceService {
               siswa: true
             }
           })
-          if (this.whatsappProvider.client) {
-            await this.whatsappProvider.sendMessage({
-              message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
-              phone: [+siswa.notelp]
-            })
-          }
+          // if (this.whatsappProvider.client) {
+          //   await this.whatsappProvider.sendMessage({
+          //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
+          //     phone: [+siswa.notelp]
+          //   })
+          // }
           return createPresence;
         }
       }

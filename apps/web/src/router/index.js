@@ -100,31 +100,31 @@ const router = createRouter({
                 {
                     path: '/whatsapp',
                     name: 'whatsapp',
-                    redirect: {
-                        name: 'connection'
-                    },
+                    // redirect: {
+                    //     name: 'connection'
+                    // },
                     component: () => import('@/views/Whatsapp/Index.vue'),
-                    children: [
-                        {
-                            path: '/whatsapp/connection',
-                            component: () => import('@/views/Whatsapp/tabs/Connection.vue'),
-                            name: 'connection',
-                            meta: {
-                                title: "Connection",
-                            }
-                        },
-                        {
-                            path: '/whatsapp/send-message',
-                            component: () => import('@/views/Whatsapp/tabs/Message.vue'),
-                            name: 'send-message',
-                            meta: {
-                                title: "Send Message",
-                            }
-                        },
-                    ],
+                    // children: [
+                    //     {
+                    //         path: '/whatsapp/connection',
+                    //         component: () => import('@/views/Whatsapp/tabs/Connection.vue'),
+                    //         name: 'connection',
+                    //         meta: {
+                    //             title: "Connection",
+                    //         }
+                    //     },
+                    //     {
+                    //         path: '/whatsapp/send-message',
+                    //         component: () => import('@/views/Whatsapp/tabs/Message.vue'),
+                    //         name: 'send-message',
+                    //         meta: {
+                    //             title: "Send Message",
+                    //         }
+                    //     },
+                    // ],
                     meta: {
                         title: "WhatsApp",
-                        auth: 'admin'
+                        // auth: 'admin'
                     }
                 },
                 {

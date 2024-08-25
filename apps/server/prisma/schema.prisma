@@ -121,3 +121,14 @@ model notifications {
   updatedAt DateTime @updatedAt
   siswa     siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
 }
+
+// whatsapp session
+
+model whatsapp_sessions {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  token     String?  @db.VarChar(255)
+  logging   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

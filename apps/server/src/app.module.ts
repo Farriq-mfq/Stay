@@ -13,6 +13,7 @@ import { SessionsModule } from './sessions/sessions.module';
 import { StatsModule } from './stats/stats.module';
 import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
+import configuration from './config/configuration';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -23,7 +24,8 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
       },
     }),
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      load: [configuration]
     }),
     JwtModule.registerAsync({
       global: true,
@@ -44,7 +46,7 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
     //   },
     //   inject: [ConfigService],
     // }),
-    AppChannel1Module,
+    // AppChannel1Module,
     EventsModule,
     AuthModule,
     UsersModule,
