@@ -1,0 +1,10 @@
+export default () => ({
+    port: parseInt(process.env.PORT, 10) || 3000,
+    JWT_SECRET: process.env.JWT_SECRET,
+    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+    JWT_SECRET_SISWA: process.env.JWT_SECRET_SISWA,
+    JWT_REFRESH_SECRET_SISWA: process.env.JWT_REFRESH_SECRET_SISWA,
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    WHATSAPP_SERVER: process.env.WHATSAPP_SERVER,
+    WHATSAPP_SERVER_SECRETKEY: process.env.WHATSAPP_SERVER_SECRETKEY,
+})

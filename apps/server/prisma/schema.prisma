@@ -123,12 +123,17 @@ model notifications {
 }
 
 // whatsapp session
+enum whatsapp_status {
+  CONNECTED
+  DISCONNECTED
+  INITIALIZED
+}
 
 model whatsapp_sessions {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  token     String?  @db.VarChar(255)
-  logging   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int             @id @default(autoincrement())
+  name      String          @db.VarChar(255)
+  token     String?         @db.VarChar(255)
+  status    whatsapp_status @default(INITIALIZED)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 }
