@@ -233,6 +233,15 @@ export class WhatsappService {
                 }
             })
 
+
+            await this.prismaService.client.whatsapp_sessions.update({
+                where: {
+                    id: +sessionId
+                },
+                data: {
+                    status: "INITIALIZED"
+                }
+            })
             return response.data
 
         } catch (e) {
