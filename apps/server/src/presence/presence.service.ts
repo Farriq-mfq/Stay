@@ -71,6 +71,7 @@ export class PresenceService {
   // }
 
   async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences> {
+
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
         rfid_token: scanned.scan
@@ -79,6 +80,7 @@ export class PresenceService {
         telegram_account: true
       }
     })
+
 
     if (!siswa) return;
 
@@ -89,7 +91,6 @@ export class PresenceService {
           id: gateway.presence_sessionsId,
         }
       })
-
       if (!session) {
         throw new BadRequestException("Session not found")
       }
@@ -172,6 +173,9 @@ export class PresenceService {
   }
 
 
+  /**
+   * TODO : Improvment race condition
+   */
   protected async createPresence({
     gateway,
     session,
@@ -305,8 +309,6 @@ export class PresenceService {
           return createPresence;
         }
       }
-    }, {
-      isolationLevel: 'Serializable'
     })
   }
 

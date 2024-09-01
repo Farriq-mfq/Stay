@@ -23,6 +23,8 @@ model siswa {
   presences        presences[]
   telegram_account telegram_account?
   notifications    notifications[]
+
+  @@index([nis, nisn])
 }
 
 enum RoleUser {
@@ -61,10 +63,11 @@ model gateways {
   presences           presences[]
   presence_sessions   presence_sessions? @relation(fields: [presence_sessionsId], references: [id])
   presence_sessionsId Int?
+
+  @@index([ip, token])
 }
 
 // only role presences are allowed
-
 model presence_sessions {
   id          Int         @id @default(autoincrement())
   name        String
@@ -76,6 +79,8 @@ model presence_sessions {
   updatedAt   DateTime    @updatedAt
   gateways    gateways[]
   presences   presences[]
+
+  @@index([qrcode])
 }
 
 enum PresenceMethod {
@@ -97,6 +102,8 @@ model presences {
   updatedAt           DateTime           @updatedAt
   presence_sessionsId Int?
   method              PresenceMethod     @default(other)
+
+  @@index([siswaId, gatewaysId, presence_sessionsId])
 }
 
 model telegram_account {
@@ -108,9 +115,11 @@ model telegram_account {
   updatedAt DateTime @updatedAt
   siswa     siswa?   @relation(fields: [siswaId], references: [id])
   siswaId   Int?     @unique
+
+  @@index([siswaId, chat_id])
 }
 
-// plans for firebase notifications
+// plan for firebase notifications
 model notifications {
   id        Int      @id @default(autoincrement())
   title     String
