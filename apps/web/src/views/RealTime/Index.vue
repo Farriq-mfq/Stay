@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/vue-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { computed, getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
+import { Vue3Lottie } from 'vue3-lottie'
+import RfidJson from './rfid.json'
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const socket = proxy.socket
@@ -159,7 +161,7 @@ const scrooltoBottomRealtimePage = ref(null);
 <template>
     <div>
         <!-- style="position: sticky;top: 0px;z-index: 999;" -->
-        <div class="bg-white px-6 pb-4 shadow-2">
+        <!-- <div class="bg-white px-6 pb-4 shadow-2">
             <div class="flex lg:flex-row flex-column align-items-center lg:justify-content-between">
                 <h1 class="font-bold xl:text-6xl lg:text-2xl text-2xl lg:mt-0 mt-4 text-center lg:text-left">
                     SMK NEGERI 1 PEKALONGAN
@@ -177,25 +179,39 @@ const scrooltoBottomRealtimePage = ref(null);
                 <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger"
                     @click.prevent="clearSession" v-if="sessionId" />
             </div>
+        </div> -->
+        <div class="mx-4 mt-3">
+            <div class="field" v-if="sessionId === null">
+                <select-session @input="handleChangeSelectSession" />
+            </div>
+            <div class="flex gap-2 align-items-center justify-content-center lg:justify-content-start">
+                <Button label="Reload" icon="pi pi-refresh" @click.prevent="handleRefresh" size="small"
+                    v-if="sessionId" />
+                <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger"
+                    @click.prevent="clearSession" v-if="sessionId" />
+            </div>
         </div>
         <div class="flex flex-wrap" v-if="sessionId">
             <div class="xl:col-7 col-12">
-                <div>
-                    <div
-                        class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
-                        <div>
-                            <div class="font-semibold lg:text-xl"> AKTIVITAS PRESENSI SISWA</div>
-                            <div class="font-semibold mt-2 lg:text-md text-xs"> Data Presensi Realtime Siswa</div>
-                        </div>
-                        <div>
-                            <div class="font-semibold lg:text-lg text-sm">Jumlah Siswa Presensi : {{ allPresences.size
-                                }}</div>
+                <div
+                    class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
+                    <div>
+                        <div class="font-semibold lg:text-xl"> {{ detailSession.name }} </div>
+                        <div class="font-semibold mt-2 lg:text-md text-sm">
+                            Aktifitas Presensi secara realtime
+                            <!-- {{ detailSession.gateways[0].location }} -->
                         </div>
                     </div>
-                    <DataView :value="dataPresences">
-                        <template #list="slotProps">
-                            <div class="bg-white border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
-                                style="height: 70vh;">
+                    <div>
+                        <div class="font-semibold lg:text-lg text-sm">Jumlah Presensi : {{ allPresences.size
+                            }}</div>
+                    </div>
+                </div>
+                <DataView :value="dataPresences">
+                    <template #list="slotProps">
+                        <div class="bg-white border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
+                            style="height: 75vh;">
+                            <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
                                 <div v-for="(item, index) in slotProps.items" :key="index"
                                     class="border-solid p-3 border-round border-1 surface-border shadow-1">
                                     <div class="flex justify-content-between align-items-center">
@@ -239,38 +255,52 @@ const scrooltoBottomRealtimePage = ref(null);
                                             '-' }}
                                     </div>
                                 </div>
-                                <div ref="scrooltoBottomRealtimePage"></div>
-                            </div>
-                        </template>
-                        <template #empty>
-                            <div class=" flex justify-content-center p-4 gap-3 align-items-center">
-                                <i class="pi pi-folder-open"></i>
-                                <span>
-                                    Data Presensi Hari Ini Belum ada
-                                </span>
-                            </div>
-                        </template>
-                    </DataView>
-                </div>
+                            </TransitionGroup>
+
+                            <div ref="scrooltoBottomRealtimePage"></div>
+                        </div>
+                    </template>
+                    <template #empty>
+                        <div class=" flex justify-content-center p-4 gap-3 align-items-center">
+                            <i class="pi pi-folder-open"></i>
+                            <span>
+                                Data Presensi Hari Ini Belum ada
+                            </span>
+                        </div>
+                    </template>
+                </DataView>
             </div>
-            <div class="lg:col-5 col-12">
-                <div class="border-solid border-round p-2 surface-border border-1 bg-white shadow-1 flex justify-content-center align-items-center flex-column"
-                    style="height: 80vh;">
+            <div class="xl:col-5 col-12">
+                <div class="border-solid border-round py-4 surface-border border-1 bg-white shadow-1 flex align-items-center flex-column"
+                    style="height: 84vh;">
+                    <clock />
+                    <!-- <clock /> -->
                     <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
                     <i class="pi pi-times text-red-500" v-if="errorMessage"
                         style="font-size: 200px;font-weight: 100;"></i>
                     <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
-                    <pre>
-        </pre>
                     <i class="pi pi-check text-primary" v-if="successPresence"
                         style="font-size: 200px;font-weight: 100;"></i>
                     <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
                         KARTU
                     </span>
-                    <img src="/gif/rfid.gif" alt="RFID SCANNER" v-if="!errorMessage && !successPresence"
-                        class="h-30rem w-30rem">
+                    <Vue3Lottie :animationData="RfidJson" :height="400" :width="400"
+                        v-if="!errorMessage && !successPresence" />
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+</style>
