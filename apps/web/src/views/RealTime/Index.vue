@@ -5,6 +5,9 @@ import { id } from 'date-fns/locale';
 import { computed, getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
 import { Vue3Lottie } from 'vue3-lottie'
 import RfidJson from './rfid.json'
+import CurrentDay from '../../components/CurrentDay.vue';
+import AppConfig from '../../layout/AppConfig.vue';
+
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const socket = proxy.socket
@@ -159,27 +162,7 @@ const scrooltoBottomRealtimePage = ref(null);
 </script>
 
 <template>
-    <div>
-        <!-- style="position: sticky;top: 0px;z-index: 999;" -->
-        <!-- <div class="bg-white px-6 pb-4 shadow-2">
-            <div class="flex lg:flex-row flex-column align-items-center lg:justify-content-between">
-                <h1 class="font-bold xl:text-6xl lg:text-2xl text-2xl lg:mt-0 mt-4 text-center lg:text-left">
-                    SMK NEGERI 1 PEKALONGAN
-                </h1>
-                <div class="pt-3">
-                    <clock />
-                </div>
-            </div>
-            <div class="field" v-if="sessionId === null">
-                <select-session @input="handleChangeSelectSession" />
-            </div>
-            <div class="flex gap-2 align-items-center justify-content-center lg:justify-content-start">
-                <Button label="Reload" icon="pi pi-refresh" @click.prevent="handleRefresh" size="small"
-                    v-if="sessionId" />
-                <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger"
-                    @click.prevent="clearSession" v-if="sessionId" />
-            </div>
-        </div> -->
+    <div class="pt-3">
         <div class="mx-4 mt-3">
             <div class="field" v-if="sessionId === null">
                 <select-session @input="handleChangeSelectSession" />
@@ -197,9 +180,8 @@ const scrooltoBottomRealtimePage = ref(null);
                     class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
                     <div>
                         <div class="font-semibold lg:text-xl"> {{ detailSession.name }} </div>
-                        <div class="font-semibold mt-2 lg:text-md text-sm">
+                        <div class="mt-2 text-md">
                             Aktifitas Presensi secara realtime
-                            <!-- {{ detailSession.gateways[0].location }} -->
                         </div>
                     </div>
                     <div>
@@ -209,11 +191,11 @@ const scrooltoBottomRealtimePage = ref(null);
                 </div>
                 <DataView :value="dataPresences">
                     <template #list="slotProps">
-                        <div class="bg-white border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
-                            style="height: 75vh;">
+                        <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
+                            style="max-height: 75vh;height: fit-content">
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
                                 <div v-for="(item, index) in slotProps.items" :key="index"
-                                    class="border-solid p-3 border-round border-1 surface-border shadow-1">
+                                    :class="`${(index + 1) === slotProps.items.length ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`">
                                     <div class="flex justify-content-between align-items-center">
                                         <div>
                                             <div class="font-semibold text-xl mb-2">
@@ -271,10 +253,13 @@ const scrooltoBottomRealtimePage = ref(null);
                 </DataView>
             </div>
             <div class="xl:col-5 col-12">
-                <div class="border-solid border-round py-4 surface-border border-1 bg-white shadow-1 flex align-items-center flex-column"
-                    style="height: 84vh;">
-                    <clock />
-                    <!-- <clock /> -->
+                <div class="border-solid border-round-xl pb-4 surface-border border-1 shadow-1 flex align-items-center flex-column"
+                    style="height: fit-content;">
+                    <div
+                        class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
+                        <CurrentDay />
+                        <clock />
+                    </div>
                     <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
                     <i class="pi pi-times text-red-500" v-if="errorMessage"
                         style="font-size: 200px;font-weight: 100;"></i>
@@ -289,6 +274,8 @@ const scrooltoBottomRealtimePage = ref(null);
                 </div>
             </div>
         </div>
+        <app-config></app-config>
+        <div class="layout-mask"></div>
     </div>
 </template>
 

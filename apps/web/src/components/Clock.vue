@@ -23,7 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex gap-2 text-6xl justify-content-center font-bold mb-5 border-solid px-4 py-2 w-fit mx-auto border-round-xl border-1 surface-border shadow-1 text-center bg-white">
+    <div class="flex gap-2 text-6xl justify-content-center font-bold mb-5 border-solid px-4 py-2 w-fit mx-auto border-round-xl border-1 surface-border shadow-1 text-center bg-primary">
         <span>
             {{ hours }}
         </span>
