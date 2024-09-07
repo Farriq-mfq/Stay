@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
@@ -11,8 +11,10 @@ export class StatsController {
     return await this.statsService.getAllStats();
   }
 
-  @Get('/presences/chart')
-  async getChartPresences() {
-    return await this.statsService.getChartPresences()
+  @Get('/presences/chart/:sessionId')
+  async getChartPresences(
+    @Param('sessionId') sessionId: string
+  ) {
+    return await this.statsService.getChartPresences(sessionId)
   }
 }

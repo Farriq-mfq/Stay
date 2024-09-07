@@ -1,9 +1,8 @@
 <script setup>
 import { ref } from 'vue';
-import { useRoute } from 'vue-router'
-const route = useRoute()
 const items = ref([
   { label: 'Semua data', icon: 'pi pi-home', route: '/presences/all' },
+  { label: 'Grafik', icon: 'pi pi-chart-line', route: '/presences/chart' },
   // { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
   // {
   //   label: 'Rekap',

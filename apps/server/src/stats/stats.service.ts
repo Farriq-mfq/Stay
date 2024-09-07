@@ -37,7 +37,12 @@ export class StatsService {
     }
   }
 
-  async getChartPresences() {
+  async getChartPresences(sessionId: string) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +sessionId
+      }
+    })
     const currentYear = new Date().getFullYear();
     const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
     const endOfYear = new Date(`${currentYear}-12-31T23:59:59.999Z`);
@@ -47,7 +52,8 @@ export class StatsService {
         createdAt: {
           gte: startOfYear,
           lte: endOfYear
-        }
+        },
+        presence_sessionsId: session.id,
       }
     })
     const mappingMonth = months.map((month, index) => ({

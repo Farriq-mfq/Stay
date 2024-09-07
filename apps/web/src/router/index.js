@@ -72,13 +72,21 @@ const router = createRouter({
                             },
                         },
                         {
-                            path: '/presences/recap',
+                            path: '/presences/chart',
                             name: 'presences-recap',
-                            component: () => import('@/views/Presences/Recap.vue'),
+                            component: () => import('@/views/Presences/Chart.vue'),
                             meta: {
-                                title: "Recap Presences",
+                                title: "Chart Presences",
                             },
                         }
+                        // {
+                        //     path: '/presences/recap',
+                        //     name: 'presences-recap',
+                        //     component: () => import('@/views/Presences/Recap.vue'),
+                        //     meta: {
+                        //         title: "Recap Presences",
+                        //     },
+                        // }
                     ]
                 },
                 {

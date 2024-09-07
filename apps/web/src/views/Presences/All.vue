@@ -1,15 +1,9 @@
 <script setup>
 import { useQuery } from '@tanstack/vue-query';
-import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref, watch, onMounted } from 'vue';
-import { useConfirm } from "primevue/useconfirm";
-import { format } from 'date-fns'
-import { id } from 'date-fns/locale'
-const toast = useToast();
+import { format } from 'date-fns';
+import { getCurrentInstance, ref, watch } from 'vue';
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
-const confirm = useConfirm();
-const socket = proxy.socket
 
 // the datatable queries server side
 const expandedRows = ref({});
@@ -58,53 +52,11 @@ watch(presences, () => {
   }
 })
 
-const isListening = ref(false);
-
-watch(sessionId, (newSessionId, oldSessionId) => {
-  if (oldSessionId) {
-    turnOffListener();
-    socket.removeAllListeners(`PRESENCE_UPDATED_${oldSessionId}`)
-  }
-  if (newSessionId) {
-    turnOnListener();
-    refetch();
-  }
+watch(sessionId, (val) => {
+  refetch()
 })
 
-const handlePresenceUpdate = (data) => {
-  toast.add({
-    severity: 'info',
-    summary: 'Presensi Baru',
-    detail: `Presensi Baru Berhasil ditambahkan`,
-    life: 500,
-  })
-  refetch();
-  turnOffListener();
-  setTimeout(turnOnListener, 100);
-};
 
-const turnOnListener = () => {
-  if (!isListening.value && sessionId.value) {
-    socket.once(`PRESENCE_UPDATED_${sessionId.value}`, handlePresenceUpdate);
-    isListening.value = true;
-    console.log(`Listen on`)
-  }
-};
-
-const turnOffListener = () => {
-  if (isListening.value && sessionId.value) {
-    socket.off(`PRESENCE_UPDATED_${sessionId.value}`, handlePresenceUpdate);
-    isListening.value = false;
-    console.log(`Listen off`)
-  }
-};
-
-onMounted(() => {
-  if (sessionId.value) {
-    turnOnListener();
-    refetch();
-  }
-});
 
 const handleDebounceFilter = (val) => {
   filters.value = val;
@@ -147,8 +99,12 @@ const handleExportService = async () => {
   <div>
     <div class="field">
       <select-session @input="handleChangeSelectSession" />
-      <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel"
-        label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
+      <div class="flex gap-2">
+        <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel"
+          label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
+        <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh"
+          outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId" />
+      </div>
     </div>
     <DataTable v-if="sessionId" ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
       :loading="isLoading" :value="isLoading ? [] : presences.data.data.items" dataKey="id" paginator :rows="10"
