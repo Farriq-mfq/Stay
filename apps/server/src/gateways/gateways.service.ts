@@ -193,14 +193,6 @@ export class GatewaysService {
                 client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, errorPayload.error)
               }
 
-              // if (this.whatsappProvider.client) {
-              //   await this.whatsappProvider.sendMessage({
-              //     message: `*[Notification]*\n\n${errorPayload.error}`,
-              //     phone: [+errorPayload.siswa.notelp]
-              //   })
-              // } else {
-              //   console.log(errorPayload)
-              // }
             } else {
               console.log("terjadi kesalahan pada sistem")
             }

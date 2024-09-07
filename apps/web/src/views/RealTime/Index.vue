@@ -179,13 +179,14 @@ const scrooltoBottomRealtimePage = ref(null);
                 <div
                     class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
                     <div>
-                        <div class="font-semibold lg:text-xl"> {{ detailSession.name }} </div>
+                        <div class="font-semibold lg:text-xl text-lg"> {{ detailSession.name }} </div>
                         <div class="mt-2 text-md">
                             Aktifitas Presensi secara realtime
                         </div>
                     </div>
                     <div>
-                        <div class="font-semibold lg:text-lg text-sm">Jumlah Presensi : {{ allPresences.size
+                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
+                            allPresences.size
                             }}</div>
                     </div>
                 </div>
@@ -269,8 +270,7 @@ const scrooltoBottomRealtimePage = ref(null);
                     <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
                         KARTU
                     </span>
-                    <Vue3Lottie :animationData="RfidJson" :height="400" :width="400"
-                        v-if="!errorMessage && !successPresence" />
+                    <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" />
                 </div>
             </div>
         </div>

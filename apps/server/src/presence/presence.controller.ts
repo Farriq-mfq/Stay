@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { format } from 'date-fns';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
@@ -6,6 +7,7 @@ import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
 
 @Controller('presence')
+@ApiTags("Presence")
 export class PresenceController {
   constructor(private readonly presenceService: PresenceService) { }
 

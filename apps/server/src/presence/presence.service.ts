@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -6,14 +6,12 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-// import { WhatsappProvider } from 'src/whatsapp/whatsapp.provider';
 import * as xlsx from 'xlsx';
+import { CreatePresenceByNisDto } from './dto/create-presence.dto';
 @Injectable()
 export class PresenceService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    // @InjectBot(AppChannel1) private bot: Telegraf<Context>,
-    // private readonly whatsappProvider: WhatsappProvider
   ) { }
   // async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
   //   // check the session
@@ -70,6 +68,85 @@ export class PresenceService {
   //   }
   // }
 
+  async createPresenceByNis(createPresenceByNisDto: CreatePresenceByNisDto) {
+    const siswa = await this.prismaService.client.siswa.findUnique({
+      where: {
+        nis: createPresenceByNisDto.nis
+      },
+    })
+
+    if (!siswa) throw new NotFoundException("Siswa not found");
+
+    const session = await this.prismaService.client.presence_sessions.findUnique({
+      where: {
+        id: createPresenceByNisDto.session
+      }
+    })
+
+    if (!session) throw new NotFoundException("Session not found");
+
+    const current_time = new Date();
+
+
+    if (session.start_time && session.end_time) {
+      if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
+        this.createPresence({
+          session,
+          siswa,
+          method: "other"
+        })
+      } else {
+        this.handlingPresenceError({
+          error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+            locale: id
+          })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+            locale: id
+          })}`,
+          siswa
+        })
+      }
+    } else if (session.end_time) {
+      if (current_time >= session.start_time) {
+        return await this.createPresence({
+          session,
+          siswa,
+          method: 'other'
+        })
+      } else {
+        this.handlingPresenceError({
+          error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+            locale: id
+          })}`,
+          siswa
+        })
+      }
+    } else if (session.end_time) {
+      if (current_time <= session.end_time) {
+        return await this.createPresence({
+          session,
+          siswa,
+          method: 'other'
+
+        })
+      } else {
+        this.handlingPresenceError({
+          error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+            locale: id
+          })}`,
+          siswa
+        })
+      }
+
+    } else {
+      return await this.createPresence({
+        session,
+        siswa,
+        method: 'other'
+      })
+    }
+  }
+
+
   async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences> {
 
     const siswa = await this.prismaService.client.siswa.findUnique({
@@ -82,7 +159,7 @@ export class PresenceService {
     })
 
 
-    if (!siswa) return;
+    if (!siswa) throw new NotFoundException("Siswa not found");
 
     if (gateway.presence_sessionsId) {
       // presence
@@ -92,7 +169,7 @@ export class PresenceService {
         }
       })
       if (!session) {
-        throw new BadRequestException("Session not found")
+        throw new NotFoundException("Session not found")
       }
       const current_time = new Date();
       // check session have start_time and end_time
@@ -172,10 +249,6 @@ export class PresenceService {
     }
   }
 
-
-  /**
-   * TODO : Improvment race condition
-   */
   protected async createPresence({
     gateway,
     session,
@@ -184,8 +257,8 @@ export class PresenceService {
     method
   }: {
     siswa: siswa,
-    gateway: gateways,
-    client: Server,
+    gateway?: gateways,
+    client?: Server,
     session: presence_sessions,
     method: PresenceMethod
   }): Promise<presences> {
@@ -198,7 +271,7 @@ export class PresenceService {
             enter_time: {
               gte: new Date(new Date().setHours(0, 0, 0, 0))
             },
-            method
+            // method
           }
         })
 
@@ -213,7 +286,7 @@ export class PresenceService {
               exit_time: {
                 gte: new Date(new Date().setHours(0, 0, 0, 0))
               },
-              method
+              // method
             }
           })
           if (checkPresenceHaveExitTime) {
@@ -251,7 +324,9 @@ export class PresenceService {
             data: {
               presence_sessionsId: session.id,
               siswaId: siswa.id,
-              gatewaysId: gateway.id,
+              ...gateway && {
+                gatewaysId: gateway.id,
+              },
               enter_time: new Date(),
               method,
             },
@@ -273,11 +348,13 @@ export class PresenceService {
           where: {
             siswaId: siswa.id,
             presence_sessionsId: session.id,
-            gatewaysId: gateway.id,
+            ...gateway && {
+              gatewaysId: gateway.id,
+            },
             enter_time: {
               gte: new Date(new Date().setHours(0, 0, 0, 0))
             },
-            method
+            // method
           }
         })
 
@@ -291,7 +368,9 @@ export class PresenceService {
             data: {
               presence_sessionsId: session.id,
               siswaId: siswa.id,
-              gatewaysId: gateway.id,
+              ...gateway && {
+                gatewaysId: gateway.id,
+              },
               enter_time: new Date(),
               method,
             },

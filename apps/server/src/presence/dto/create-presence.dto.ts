@@ -10,3 +10,13 @@ export class CreatePresenceByQRDTO {
     @IsNumber()
     session: number
 }
+
+
+export class CreatePresenceByNisDto {
+    @IsNumberString()
+    @IsNotEmpty()
+    nis: string
+    @IsNotEmpty()
+    @IsNumber()
+    session: number
+}

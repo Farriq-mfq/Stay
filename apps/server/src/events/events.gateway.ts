@@ -11,6 +11,8 @@ import { Server } from 'socket.io';
 import { WsExceptionFilter } from 'src/exceptions/wsExceptionFilter';
 import { GatewaysGuard } from 'src/gateways/gateways.guard';
 import { GatewaysService } from 'src/gateways/gateways.service';
+import { CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
+import { PresenceService } from 'src/presence/presence.service';
 import { ScanDto } from './dto/scan.dto';
 
 
@@ -27,7 +29,8 @@ import { ScanDto } from './dto/scan.dto';
 })
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     constructor(
-        private readonly gatewaysService: GatewaysService
+        private readonly gatewaysService: GatewaysService,
+        private readonly presenceService: PresenceService
     ) {
 
     }
@@ -54,5 +57,30 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     async handleHttpScanned(data: ScanDto): Promise<void> {
         await this.gatewaysService.handleScanned(data, this.server)
     }
-   
+
+    async handleHttpByNIS(createPresenceByNisDto: CreatePresenceByNisDto) {
+        try {
+            const presence = await this.presenceService.createPresenceByNis(createPresenceByNisDto)
+             if (presence) {
+                this.server.emit(`PRESENCE_UPDATED_${createPresenceByNisDto.session}`, presence)
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                const errorPayload = JSON.parse(e.message) as any
+                // check error object 
+                if (errorPayload.error) {
+                    this.server.emit(`PRESENCE_ERROR_${createPresenceByNisDto.session}`, errorPayload.error)
+                }
+
+            } else {
+                this.server.emit(`PRESENCE_ERROR_${createPresenceByNisDto.session}`, "Internal Server Error")
+            }
+        }
+        try {
+            await this.presenceService.createPresenceByNis(createPresenceByNisDto)
+        } catch (err) {
+            Logger.error(`Error creating presence by NIS: ${err.message}`);
+        }
+    }
+
 }

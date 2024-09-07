@@ -7,7 +7,7 @@ const currentDate = new Date();
 const formattedDate = computed(() => format(currentDate, 'EEEE, dd MMMM yyyy', { locale: id }))
 </script>
 <template>
-    <div class="bg-primary shadow-1 border-1 surface-border px-4 py-2 border-round-xl mb-4 font-semibold text-3xl w-fit">
+    <div class="bg-primary shadow-1 border-1 surface-border px-4 py-2 border-round-xl mb-4 font-semibold md:text-3xl text-xl w-fit">
         {{ formattedDate }}
     </div>
 </template>
