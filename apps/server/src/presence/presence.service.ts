@@ -71,7 +71,7 @@ export class PresenceService {
   async createPresenceByNis(createPresenceByNisDto: CreatePresenceByNisDto) {
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
-        nis: createPresenceByNisDto.nis
+        nisn: createPresenceByNisDto.nisn
       },
     })
 

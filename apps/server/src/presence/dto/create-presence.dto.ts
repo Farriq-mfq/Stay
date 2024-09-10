@@ -13,9 +13,13 @@ export class CreatePresenceByQRDTO {
 
 
 export class CreatePresenceByNisDto {
-    @IsNumberString()
-    @IsNotEmpty()
-    nis: string
+    @IsNumberString({}, {
+        message: "NISN harus Angka"
+    })
+    @IsNotEmpty({
+        message: "NISN tidak boleh kosong"
+    })
+    nisn: string
     @IsNotEmpty()
     @IsNumber()
     session: number

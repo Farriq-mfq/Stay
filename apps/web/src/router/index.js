@@ -132,7 +132,7 @@ const router = createRouter({
                     // ],
                     meta: {
                         title: "WhatsApp",
-                        // auth: 'admin'
+                        auth: 'admin'
                     }
                 },
                 {
@@ -182,12 +182,28 @@ const router = createRouter({
         },
         {
             path: '/real-time',
-            name: 'RealTime',
+            name: 'RealTime-view',
             component: () => import('@/views/RealTime/Index.vue'),
             meta: {
                 title: "Real-Time",
             }
-        }
+        },
+        {
+            path: '/real-time/presence',
+            name: 'RealTime-presence',
+            component: () => import('@/views/RealTime/Presence.vue'),
+            meta: {
+                title: "Real-Time",
+            }
+        },
+        {
+            path: '/real-time/camera',
+            name: 'RealTime-camera',
+            component: () => import('@/views/RealTime/Camera.vue'),
+            meta: {
+                title: "Real-Time",
+            }
+        },
     ]
 });
 

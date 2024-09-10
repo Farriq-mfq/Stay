@@ -1,4 +1,4 @@
-import { Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
     MessageBody,
     OnGatewayConnection,
@@ -61,25 +61,18 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     async handleHttpByNIS(createPresenceByNisDto: CreatePresenceByNisDto) {
         try {
             const presence = await this.presenceService.createPresenceByNis(createPresenceByNisDto)
-             if (presence) {
-                this.server.emit(`PRESENCE_UPDATED_${createPresenceByNisDto.session}`, presence)
-            }
+            this.server.emit(`PRESENCE_UPDATED_${createPresenceByNisDto.session}`, presence)
+            return presence
         } catch (e) {
+            console.log(e)
             if (e instanceof Error) {
                 const errorPayload = JSON.parse(e.message) as any
                 // check error object 
-                if (errorPayload.error) {
-                    this.server.emit(`PRESENCE_ERROR_${createPresenceByNisDto.session}`, errorPayload.error)
-                }
+                throw new BadRequestException(errorPayload.error)
 
             } else {
-                this.server.emit(`PRESENCE_ERROR_${createPresenceByNisDto.session}`, "Internal Server Error")
+                throw new InternalServerErrorException("Terjadi kesalahan")
             }
-        }
-        try {
-            await this.presenceService.createPresenceByNis(createPresenceByNisDto)
-        } catch (err) {
-            Logger.error(`Error creating presence by NIS: ${err.message}`);
         }
     }
 
