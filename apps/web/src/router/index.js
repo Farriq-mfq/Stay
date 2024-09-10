@@ -1,6 +1,7 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import ForbiddenView from '@/views/Errors/Forbidden.vue';
 import NotFoundView from '@/views/Errors/NotFound.vue';
+import LoginView from '@/views/Auth/Login.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { config } from '../config';
 
@@ -157,8 +158,8 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: import('@/views/Auth/Login.vue'),
-            // component: LoginView,
+            // component: import('@/views/Auth/Login.vue'),
+            component: LoginView,
             meta: {
                 auth: false,
                 title: "login"

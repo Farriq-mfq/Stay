@@ -3,11 +3,10 @@ import { useMutation, useQuery } from '@tanstack/vue-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { computed, getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
-import { Vue3Lottie } from 'vue3-lottie'
-import RfidJson from './rfid.json'
 import CurrentDay from '../../components/CurrentDay.vue';
 import AppConfig from '../../layout/AppConfig.vue';
 import { useToast } from 'primevue/usetoast';
+import { QrcodeStream } from 'vue-qrcode-reader'
 
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -183,7 +182,7 @@ const noFrontCamera = ref(false)
 function onDetect(detectedCodes) {
     result.value = detectedCodes.map((code) => code.rawValue)
     presenceServiceMutation({
-        nisn: result.value,
+        nisn: result.value[0],
         session: sessionId.value,
     }, {
         onSuccess: (data) => {
@@ -193,7 +192,7 @@ function onDetect(detectedCodes) {
                 detail: 'Presensi Berhasil',
                 life: 3000
             })
-            nis.value = null
+            nisn.value = null
             errorPresence.value = null
         },
         onError: (err) => {
@@ -208,6 +207,13 @@ function onDetect(detectedCodes) {
                 } else {
                     errorPresence.value = err.response.data
                 }
+            } else if (err.response.status === 404) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: err.response.data.message,
+                    life: 3000
+                })
             } else {
                 toast.add({
                     severity: 'error',
@@ -404,7 +410,7 @@ const switchCamera = () => {
                     <div>
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
                             allPresences.size
-                        }}</div>
+                            }}</div>
                     </div>
                 </div>
                 <DataView :value="dataPresences">
@@ -479,10 +485,10 @@ const switchCamera = () => {
                         <clock />
                     </div>
                     <div class="flex justify-content-center items-center flex-column gap-4">
-                        <ProgressSpinner v-if="isLoadingPresence || loading" style="width: 50px; height: 50px"
+                        <ProgressSpinner v-if="presenceServiceLoading || loading" style="width: 50px; height: 50px"
                             strokeWidth="8" fill="transparent" animationDuration=".5s"
                             aria-label="Custom ProgressSpinner" />
-                        <qrcode-stream :paused="isLoadingPresence" :track="trackFunctionSelected.value"
+                        <qrcode-stream :paused="presenceServiceLoading" :track="trackFunctionSelected.value"
                             :formats="selectedBarcodeFormats" @error="onError" @detect="onDetect"
                             @camera-on="onCameraReady" :constraints="{ facingMode }">
 

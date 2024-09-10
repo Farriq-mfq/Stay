@@ -7,7 +7,8 @@
         "start": "vite preview",
         "start:prod": "vite preview",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-        "test": "jest"
+        "test": "jest",
+        "pm2": "vite build && pm2 start ecosystem.config.js --env production"
     },
     "dependencies": {
         "@chenfengyuan/vue-qrcode": "^2.0.0",

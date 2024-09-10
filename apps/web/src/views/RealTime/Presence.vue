@@ -187,7 +187,7 @@ const onSubmit = () => {
                 detail: 'Presensi Berhasil',
                 life: 3000
             })
-            nis.value = null
+            nisn.value = null
             errorPresence.value = null
         },
         onError: (err) => {
@@ -202,6 +202,13 @@ const onSubmit = () => {
                 } else {
                     errorPresence.value = err.response.data
                 }
+            } else if (err.response.status === 404) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: err.response.data.message,
+                    life: 3000
+                })
             } else {
                 toast.add({
                     severity: 'error',
@@ -211,7 +218,7 @@ const onSubmit = () => {
                 })
             }
         },
-        
+
     })
 }
 
@@ -243,7 +250,7 @@ const onSubmit = () => {
                     <div>
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
                             allPresences.size
-                            }}</div>
+                        }}</div>
                     </div>
                 </div>
                 <DataView :value="dataPresences">
@@ -278,7 +285,7 @@ const onSubmit = () => {
                                     </div>
                                     <Divider />
                                     <div class="text-md mb-2">
-                                        <b>Lokasi</b> : {{ item.gateway ? item.gateway.location : '-' }}
+                                        <b>Nomor</b> : {{ (index + 1) }}
                                     </div>
                                     <div class="text-md mb-2" v-html="`${detailSession.allow_twice ? '<b>Masuk</b> : ' : '<b>Waktu</b> : '}${item.enter_time ?
                                         format(item.enter_time, 'dd/MM/yyyy HH:mm:ss', {
@@ -320,14 +327,15 @@ const onSubmit = () => {
                     <form @submit.prevent="onSubmit" class="w-full p-fluid">
                         <div class="field px-5">
                             <label for="nis" class="text-lg font-semibold">Masukan NISN</label>
-                            <InputText class="w-full" ref="inputPresence" v-model="nisn" placeholder="12345"
+                            <InputText class="w-full" ref="inputPresence" v-model="nisn" placeholder="Contoh : 12345678"
                                 :invalid="errorPresence && errorPresence.nisn.length > 0" size="large" autofocus="on" />
                             <p class="text-red-500" v-if="errorPresence && errorPresence.nisn">
                                 {{ errorPresence.nisn[0] }}
                             </p>
                         </div>
                         <div class="field w-fit px-5">
-                            <Button label="Presensi" type="submit" icon="pi pi-save" :disabled="presenceServiceLoading" :loading="presenceServiceLoading" size="large" />
+                            <Button label="Presensi" type="submit" icon="pi pi-save" :disabled="presenceServiceLoading"
+                                :loading="presenceServiceLoading" size="large" />
                         </div>
                     </form>
                 </div>

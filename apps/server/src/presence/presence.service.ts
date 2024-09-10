@@ -75,7 +75,7 @@ export class PresenceService {
       },
     })
 
-    if (!siswa) throw new NotFoundException("Siswa not found");
+    if (!siswa) throw new NotFoundException("NISN masih salah");
 
     const session = await this.prismaService.client.presence_sessions.findUnique({
       where: {

@@ -1,4 +1,4 @@
-import { BadRequestException, InternalServerErrorException, Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException, Logger, NotFoundException, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
     MessageBody,
     OnGatewayConnection,
@@ -64,14 +64,15 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
             this.server.emit(`PRESENCE_UPDATED_${createPresenceByNisDto.session}`, presence)
             return presence
         } catch (e) {
-            console.log(e)
-            if (e instanceof Error) {
-                const errorPayload = JSON.parse(e.message) as any
-                // check error object 
-                throw new BadRequestException(errorPayload.error)
-
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException(e.message)
             } else {
-                throw new InternalServerErrorException("Terjadi kesalahan")
+                if (e instanceof Error) {
+                    const errorPayload = JSON.parse(e.message) as any
+                    throw new BadRequestException(errorPayload.error)
+                } else {
+                    throw new InternalServerErrorException("Terjadi kesalahan")
+                }
             }
         }
     }
