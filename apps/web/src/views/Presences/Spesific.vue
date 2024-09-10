@@ -1,3 +1,0 @@
-<template>
-    ini spsific
-</template>

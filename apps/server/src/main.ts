@@ -1,9 +1,10 @@
-import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationError } from 'class-validator';
 import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
-import { ValidationError } from 'class-validator';
 // for error : Do not know how to serialize a BigInt prisma issue 
 // solution : https://github.com/prisma/studio/issues/614
 // @ts-ignore
@@ -12,7 +13,11 @@ BigInt.prototype.toJSON = function () {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const isDev = process.env.NODE_ENV !== 'production'
+
+  const app = await NestFactory.create(AppModule, {
+    forceCloseConnections: isDev ? true : false,
+  });
 
   // validation
   app.useGlobalPipes(new ValidationPipe({
@@ -41,7 +46,18 @@ async function bootstrap() {
     credentials: true,
   })
 
-  const isDev = process.env.NODE_ENV !== 'production'
+  // swagger
+  if (process.env.NODE_ENV !== 'production') {
+    const configDoc = new DocumentBuilder()
+      .setTitle("Stay API")
+      .setDescription("Swagger documentation for Stay Api")
+      .setVersion("1.0.0")
+      .build();
+    const docs = SwaggerModule.createDocument(app, configDoc)
+    SwaggerModule.setup("/", app, docs);
+  }
+
+
   const port = isDev ? 3000 : process.env.PORT ?? 3000;
   console.info(`###################################################################################`);
   console.info(`########################## Server running at ${port} #############################`);

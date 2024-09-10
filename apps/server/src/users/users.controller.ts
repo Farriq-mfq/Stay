@@ -5,7 +5,9 @@ import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags("Users")
 @Controller('users')
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Roles('admin')

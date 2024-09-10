@@ -72,13 +72,21 @@ const router = createRouter({
                             },
                         },
                         {
-                            path: '/presences/recap',
+                            path: '/presences/chart',
                             name: 'presences-recap',
-                            component: () => import('@/views/Presences/Recap.vue'),
+                            component: () => import('@/views/Presences/Chart.vue'),
                             meta: {
-                                title: "Recap Presences",
+                                title: "Chart Presences",
                             },
                         }
+                        // {
+                        //     path: '/presences/recap',
+                        //     name: 'presences-recap',
+                        //     component: () => import('@/views/Presences/Recap.vue'),
+                        //     meta: {
+                        //         title: "Recap Presences",
+                        //     },
+                        // }
                     ]
                 },
                 {
@@ -100,28 +108,28 @@ const router = createRouter({
                 {
                     path: '/whatsapp',
                     name: 'whatsapp',
-                    redirect: {
-                        name: 'connection'
-                    },
+                    // redirect: {
+                    //     name: 'connection'
+                    // },
                     component: () => import('@/views/Whatsapp/Index.vue'),
-                    children: [
-                        {
-                            path: '/whatsapp/connection',
-                            component: () => import('@/views/Whatsapp/tabs/Connection.vue'),
-                            name: 'connection',
-                            meta: {
-                                title: "Connection",
-                            }
-                        },
-                        {
-                            path: '/whatsapp/send-message',
-                            component: () => import('@/views/Whatsapp/tabs/Message.vue'),
-                            name: 'send-message',
-                            meta: {
-                                title: "Send Message",
-                            }
-                        },
-                    ],
+                    // children: [
+                    //     {
+                    //         path: '/whatsapp/connection',
+                    //         component: () => import('@/views/Whatsapp/tabs/Connection.vue'),
+                    //         name: 'connection',
+                    //         meta: {
+                    //             title: "Connection",
+                    //         }
+                    //     },
+                    //     {
+                    //         path: '/whatsapp/send-message',
+                    //         component: () => import('@/views/Whatsapp/tabs/Message.vue'),
+                    //         name: 'send-message',
+                    //         meta: {
+                    //             title: "Send Message",
+                    //         }
+                    //     },
+                    // ],
                     meta: {
                         title: "WhatsApp",
                         auth: 'admin'
@@ -174,12 +182,28 @@ const router = createRouter({
         },
         {
             path: '/real-time',
-            name: 'RealTime',
+            name: 'RealTime-view',
             component: () => import('@/views/RealTime/Index.vue'),
             meta: {
                 title: "Real-Time",
             }
-        }
+        },
+        {
+            path: '/real-time/presence',
+            name: 'RealTime-presence',
+            component: () => import('@/views/RealTime/Presence.vue'),
+            meta: {
+                title: "Real-Time",
+            }
+        },
+        {
+            path: '/real-time/camera',
+            name: 'RealTime-camera',
+            component: () => import('@/views/RealTime/Camera.vue'),
+            meta: {
+                title: "Real-Time",
+            }
+        },
     ]
 });
 

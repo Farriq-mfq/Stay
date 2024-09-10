@@ -8,8 +8,10 @@ import * as xlsx from 'xlsx';
 import { siswa } from '@prisma/client';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('siswa')
+@ApiTags("Siswa")
 @UseGuards(AccessTokenGuard)
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) { }

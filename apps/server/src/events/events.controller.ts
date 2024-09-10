@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs
 import { GatewaysHttpGuard } from "src/gateways/gateways.http.guard";
 import { ScanDto } from "./dto/scan.dto";
 import { EventsGateway } from "./events.gateway";
+import { CreatePresenceByNisDto } from "src/presence/dto/create-presence.dto";
 
 @Controller('events')
 export class EventController {
@@ -16,5 +17,13 @@ export class EventController {
         @Body() data: ScanDto
     ): Promise<void> {
         await this.eventsGateway.handleHttpScanned(data);
+    }
+
+
+
+    @Post('/nis')
+    @HttpCode(HttpStatus.OK)
+    async httpManualByNIS(@Body() createPresenceByNisDto: CreatePresenceByNisDto) {
+        return await this.eventsGateway.handleHttpByNIS(createPresenceByNisDto);
     }
 }

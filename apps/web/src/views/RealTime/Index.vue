@@ -3,6 +3,11 @@ import { useQuery } from '@tanstack/vue-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { computed, getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
+import { Vue3Lottie } from 'vue3-lottie'
+import RfidJson from './rfid.json'
+import CurrentDay from '../../components/CurrentDay.vue';
+import AppConfig from '../../layout/AppConfig.vue';
+
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const socket = proxy.socket
@@ -10,6 +15,7 @@ const socket = proxy.socket
 const sessionId = ref(null)
 const allPresences = ref(new Map());
 const errorMessage = ref(null)
+const successPresence = ref(null)
 
 
 const getAllPresences = async () => {
@@ -57,10 +63,16 @@ const resetAllPresences = () => {
 }
 
 const handlePresenceUpdate = (data) => {
+    successPresence.value = data
     allPresences.value.set(data.id, data)
     turnOffListener();
     setTimeout(turnOnListener, 100);
-    nextTick(scrollToBottom)
+    nextTick(() => {
+        scrollToBottom()
+        setTimeout(() => {
+            successPresence.value = null
+        }, 500)
+    })
 };
 
 const handlePresenceError = (error) => {
@@ -70,7 +82,7 @@ const handlePresenceError = (error) => {
     nextTick(() => {
         setTimeout(() => {
             errorMessage.value = null
-        }, 2000)
+        }, 500)
     })
 };
 
@@ -100,104 +112,182 @@ onMounted(() => {
     }
 });
 
+const detailSession = ref(null)
 
 const handleChangeSelectSession = (val) => {
     sessionId.value = val.id
+    detailSession.value = val
 }
 
 const dataPresences = computed(() => Array.from(allPresences.value.values()))
 
-const dataTable = ref(null)
 const scrollToBottom = () => {
-    if (dataTable.value) {
-        window.scrollTo({
-            behavior: 'smooth',
-            top: dataTable.value.$el.scrollHeight
-        })
+    if (scrooltoBottomRealtimePage.value) {
+        scrooltoBottomRealtimePage.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
 
-const wrapperTop = ref(null)
 
 onMounted(() => {
     scrollToBottom()
-
-    if (window != undefined) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 150 && wrapperTop.value != null) {
-                wrapperTop.value.classList.add('shadow-4')
-            } else {
-                wrapperTop.value.classList.remove('shadow-4')
-            }
-        })
-    }
 })
+
+
+const handleRefresh = () => {
+    refetch()
+    resetAllPresences()
+    if (presences.value) {
+        if (presences.value.data.data.length > 0) {
+            presences.value.data.data.map(presence => {
+                allPresences.value.set(presence.id, presence)
+            })
+        }
+
+    }
+}
+
+const clearSession = () => {
+    turnOffListener();
+    socket.removeAllListeners(`PRESENCE_UPDATED_${sessionId.value}`)
+    resetAllPresences()
+    sessionId.value = null
+    detailSession.value = null
+    refetch();
+}
+
+const scrooltoBottomRealtimePage = ref(null);
+
 
 </script>
 
 <template>
-    <div>
-        <div ref="wrapperTop" style="position: sticky;top: 0;z-index: 999;" class="bg-white px-6 py-4">
-            <clock />
-            <div class="field">
+    <div class="pt-3">
+        <div class="mx-4 mt-3">
+            <div class="field" v-if="sessionId === null">
                 <select-session @input="handleChangeSelectSession" />
             </div>
-            <Message severity="warn" v-if="errorMessage" :closable="false">
-                {{ errorMessage }}
-            </Message>
+            <div class="flex gap-2 align-items-center justify-content-center lg:justify-content-start">
+                <Button label="Reload" icon="pi pi-refresh" @click.prevent="handleRefresh" size="small"
+                    v-if="sessionId" />
+                <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger"
+                    @click.prevent="clearSession" v-if="sessionId" />
+            </div>
         </div>
-        <div class="card" v-if="sessionId">
-            <DataTable :value="dataPresences" tableStyle="min-width: 50rem" :loading="isLoading" ref="dataTable">
-                <template #empty>
-                    <div class=" flex justify-content-center p-4 gap-3 align-items-center">
-                        <i class="pi pi-folder-open"></i>
-                        <span>
-                            Data Presensi Hari Ini Belum ada
-                        </span>
+        <div class="flex flex-wrap" v-if="sessionId">
+            <div class="xl:col-7 col-12">
+                <div
+                    class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
+                    <div>
+                        <div class="font-semibold lg:text-xl text-lg"> {{ detailSession.name }} </div>
+                        <div class="mt-2 text-md">
+                            Aktifitas Presensi secara realtime
+                        </div>
                     </div>
-                </template>
-                <Column header="Nama">
-                    <template #body="{ data }">
-                        {{ data.siswa.name }}
+                    <div>
+                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
+                            allPresences.size
+                            }}</div>
+                    </div>
+                </div>
+                <DataView :value="dataPresences">
+                    <template #list="slotProps">
+                        <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
+                            style="max-height: 75vh;height: fit-content">
+                            <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
+                                <div v-for="(item, index) in slotProps.items" :key="index"
+                                    :class="`${(index + 1) === slotProps.items.length ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`">
+                                    <div class="flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="font-semibold text-xl mb-2">
+                                                {{ item.siswa.name }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <b>Rombel</b> : <Tag class="bg-primary">{{ item.siswa.rombel }}</Tag>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Tag severity="info" v-if="item.method === 'card'">
+                                                <i class="pi pi-id-card mr-1" />
+                                                {{ item.method }}
+                                            </Tag>
+                                            <Tag severity="warning" v-if="item.method === 'qrcode'">
+                                                <i class="pi pi-id-card mr-1" />
+                                                {{ item.method }}
+                                            </Tag>
+                                            <Tag severity="secondary" v-if="item.method === 'other'">
+                                                {{ item.method }}
+                                            </Tag>
+                                        </div>
+                                    </div>
+                                    <Divider />
+                                    <div class="text-md mb-2">
+                                        <b>Lokasi</b> : {{ item.gateway ? item.gateway.location : '-' }}
+                                    </div>
+                                    <div class="text-md mb-2" v-html="`${detailSession.allow_twice ? '<b>Masuk</b> : ' : '<b>Waktu</b> : '}${item.enter_time ?
+                                        format(item.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+                                            locale: id
+                                        }) :
+                                        '-'}`">
+                                    </div>
+                                    <div class="text-md mb-2" v-if="detailSession.allow_twice">
+                                        <b>Keluar</b> : {{ item.exit_time ?
+                                            format(item.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+                                                locale: id
+                                            }) :
+                                            '-' }}
+                                    </div>
+                                </div>
+                            </TransitionGroup>
+
+                            <div ref="scrooltoBottomRealtimePage"></div>
+                        </div>
                     </template>
-                </Column>
-                <Column header="Rombel">
-                    <template #body="{ data }">
-                        {{ data.siswa.rombel }}
+                    <template #empty>
+                        <div class=" flex justify-content-center p-4 gap-3 align-items-center">
+                            <i class="pi pi-folder-open"></i>
+                            <span>
+                                Data Presensi Hari Ini Belum ada
+                            </span>
+                        </div>
                     </template>
-                </Column>
-                <Column header="Lokasi">
-                    <template #body="{ data }">
-                        {{ data.gateway ? data.gateway.location : '-' }}
-                    </template>
-                </Column>
-                <Column header="Masuk">
-                    <template #body="{ data }">
-                        {{ data.enter_time ? format(data.enter_time, 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-' }}
-                    </template>
-                </Column>
-                <Column header="Keluar">
-                    <template #body="{ data }">
-                        {{ data.exit_time ? format(data.exit_time, 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-' }}
-                    </template>
-                </Column>
-                <Column header="Metode">
-                    <template #body="{ data }">
-                        <Tag severity="info" v-if="data.method === 'card'">
-                            <i class="pi pi-id-card mr-1" />
-                            {{ data.method }}
-                        </Tag>
-                        <Tag severity="warning" v-if="data.method === 'qrcode'">
-                            <i class="pi pi-id-card mr-1" />
-                            {{ data.method }}
-                        </Tag>
-                        <Tag severity="secondary" v-if="data.method === 'other'">
-                            {{ data.method }}
-                        </Tag>
-                    </template>
-                </Column>
-            </DataTable>
+                </DataView>
+            </div>
+            <div class="xl:col-5 col-12">
+                <div class="border-solid border-round-xl pb-4 surface-border border-1 shadow-1 flex align-items-center flex-column"
+                    style="height: fit-content;">
+                    <div
+                        class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
+                        <CurrentDay />
+                        <clock />
+                    </div>
+                    <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
+                    <i class="pi pi-times text-red-500" v-if="errorMessage"
+                        style="font-size: 200px;font-weight: 100;"></i>
+                    <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
+                    <i class="pi pi-check text-primary" v-if="successPresence"
+                        style="font-size: 200px;font-weight: 100;"></i>
+                    <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
+                        KARTU
+                    </span>
+                    <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" />
+                </div>
+            </div>
         </div>
+        <app-config></app-config>
+        <div class="layout-mask"></div>
     </div>
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+</style>
