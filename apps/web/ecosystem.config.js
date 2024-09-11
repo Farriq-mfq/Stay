@@ -1,14 +1,14 @@
 module.exports = {
     apps: [
         {
-            name: "frontend-presensi",
+            name: 'frontend-presensi',
             script: 'serve',
             env: {
-                PM2_SERVER_PATH: './dist',
-                PM2_SERVER_PORT: 8080,
-                PM2_SERVER_SPA: true,
-                NODE_ENV: 'production',
+                PM2_SERVE_PATH: './dist',
+                PM2_SERVE_PORT: 8080,
+                PM2_SERVE_SPA: 'true',
+                NODE_ENV: 'production'
             }
         }
     ]
-}
+};
