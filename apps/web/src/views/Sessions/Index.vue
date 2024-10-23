@@ -376,8 +376,8 @@ const clearDialogQrCode = () => {
                 <Button icon="pi pi-pencil" @click.prevent="handleShowDialogUpdateSesion(data)" />
                 <Button :loading="deleteSessionPending" :disabled="deleteSessionPending" severity="danger"
                   @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
-                <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
-                <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" />
+                <!-- <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
+                <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" /> -->
               </div>
             </template>
           </Column>

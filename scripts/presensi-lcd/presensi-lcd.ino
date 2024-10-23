@@ -34,7 +34,7 @@ EthernetClient client;
 
 // #################### REQUEST HTTP CLIENT SETTING ###################
 
-char serverAddress[] = "192.168.1.7";
+char serverAddress[] = "192.168.1.3";
 int port = 3000;
 HttpClient httpClient = HttpClient(client, serverAddress, port);
 
@@ -46,6 +46,8 @@ String serverToken = "eyJhbGciOiJIUzI1NiJ9.ZjRlMGYxNmJlYzYzNGZhZDM4N2U2MzA5ZThkY
 // ####################### KONFIGURASI TOKEN ##########################
 // LCD INITIALIZE
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int pinBuzzer = 2;
 
 void setup() {
   Serial.begin(9600);
@@ -71,6 +73,7 @@ void setup() {
   lcd.print("IP: ");
   lcd.setCursor(3, 1);
   lcd.print(Ethernet.localIP());
+  pinMode(pinBuzzer, OUTPUT);
   //
   delay(5000);
 }  //setup
@@ -86,6 +89,9 @@ void loop() {
       uuid += mfrc522.uid.uidByte[i];
     }
 
+    digitalWrite(pinBuzzer, HIGH);
+    delay(300);
+    digitalWrite(pinBuzzer, LOW);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("ID : ");
@@ -94,6 +100,7 @@ void loop() {
     delay(1000);
     lcd.clear();
     lcd.print("Waiting...");
+
 
     IPAddress localIP = Ethernet.localIP();
     String parsedIP = String(localIP[0]) + "." + String(localIP[1]) + "." + String(localIP[2]) + "." + String(localIP[3]);
@@ -116,7 +123,6 @@ void loop() {
     Serial.println(statusCode);
     Serial.print("Response: ");
     Serial.println(response);
-  
   }
   delay(1000);
   resetLcd();

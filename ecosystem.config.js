@@ -4,7 +4,6 @@ module.exports = {
             name: 'Stay',
             script: 'pnpm',
             args: 'start',
-            // cwd: '.',
             watch: true,
             env: {
                 NODE_ENV: 'production'

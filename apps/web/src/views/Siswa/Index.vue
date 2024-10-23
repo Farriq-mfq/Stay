@@ -128,7 +128,7 @@ const { mutateAsync: removeSiswaMutate, isPending: removeSiswaPending } = useMut
 
 const confirmRemoveSiswa = (data) => {
   confirm.require({
-    message: 'Yakin ingin reset data siswa ?',
+    message: 'Yakin ingin hapus data siswa ?',
     header: 'Confirmation',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
