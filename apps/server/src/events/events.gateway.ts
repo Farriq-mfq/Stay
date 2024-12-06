@@ -17,6 +17,7 @@ import { ScanDto } from './dto/scan.dto';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
+import { presences } from '@prisma/client';
 
 // solve socket io not connected to esp32: 
 // https://stackoverflow.com/questions/54800516/socketio-server-not-connecting-to-esp8266
@@ -67,8 +68,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
         }, this.server)
     }
 
-    async handleHttpScanned(data: ScanDto): Promise<void> {
-        await this.gatewaysService.handleScanned(data, this.server)
+    async handleHttpScanned(data: ScanDto): Promise<void | presences> {
+        return await this.gatewaysService.handleScanned(data, this.server)
     }
 
     async handleHttpByNIS(createPresenceByNisDto: CreatePresenceByNisDto) {

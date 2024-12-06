@@ -5,7 +5,6 @@ import { ValidationError } from 'class-validator';
 import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
-import { RedisIoAdapter } from './adapters/redis.adapter';
 // for error : Do not know how to serialize a BigInt prisma issue 
 // solution : https://github.com/prisma/studio/issues/614
 // @ts-ignore

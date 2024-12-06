@@ -9,6 +9,7 @@ import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
 import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
+import { presences } from '@prisma/client';
 @Injectable()
 export class GatewaysService {
   constructor(
@@ -166,7 +167,7 @@ export class GatewaysService {
   async handleScanned(
     data: ScannedDto,
     client: Server
-  ) {
+  ): Promise<void | presences> {
     try {
       const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
         where: {
@@ -178,13 +179,13 @@ export class GatewaysService {
         case 'presence':
           try {
             const presence = await this.presenceService.createPresenceByScanned(data, gateway, client)
+
             if (presence) {
               client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
+              return presence;
             }
-            // this.updateRealtimePresence({
-            //   client,
-            //   sessionId: gateway.presence_sessionsId
-            // })
+
+
           } catch (e) {
             if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
@@ -194,7 +195,7 @@ export class GatewaysService {
               }
 
             } else {
-              console.log("terjadi kesalahan pada sistem")
+              throw new InternalServerErrorException('Internal server error')
             }
           }
           break;

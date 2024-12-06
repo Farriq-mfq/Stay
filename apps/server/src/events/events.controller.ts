@@ -3,6 +3,7 @@ import { GatewaysHttpGuard } from "src/gateways/gateways.http.guard";
 import { ScanDto } from "./dto/scan.dto";
 import { EventsGateway } from "./events.gateway";
 import { CreatePresenceByNisDto } from "src/presence/dto/create-presence.dto";
+import { presences, siswa } from "@prisma/client";
 
 @Controller('events')
 export class EventController {
@@ -15,8 +16,20 @@ export class EventController {
     @UseGuards(GatewaysHttpGuard)
     async httpScan(
         @Body() data: ScanDto
-    ): Promise<void> {
-        await this.eventsGateway.handleHttpScanned(data);
+    ): Promise<void | { siswa: string }> {
+        const result = await this.eventsGateway.handleHttpScanned(data);
+        if (result) {
+
+            type presenceSiswaType = presences & {
+                siswa: siswa
+            }
+
+
+            const siswa = (result as presenceSiswaType).siswa
+            return {
+                siswa: `${siswa.name.slice(0, 15)}...`,
+            }
+        }
     }
 
 
