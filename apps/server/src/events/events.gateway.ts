@@ -14,9 +14,11 @@ import { GatewaysService } from 'src/gateways/gateways.service';
 import { CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
 import { PresenceService } from 'src/presence/presence.service';
 import { ScanDto } from './dto/scan.dto';
+import { ConfigService } from '@nestjs/config';
+import { createClient } from 'redis';
+import { createAdapter } from '@socket.io/redis-adapter';
 
-
-// solve with socket io not connected to esp32: 
+// solve socket io not connected to esp32: 
 // https://stackoverflow.com/questions/54800516/socketio-server-not-connecting-to-esp8266
 @WebSocketGateway({
     cors: {
@@ -30,15 +32,26 @@ import { ScanDto } from './dto/scan.dto';
 export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     constructor(
         private readonly gatewaysService: GatewaysService,
-        private readonly presenceService: PresenceService
+        private readonly presenceService: PresenceService,
+        private readonly configService: ConfigService
     ) {
 
     }
     handleConnection(client: any, ...args: any[]) {
         Logger.debug(`Connected client: ${client.id}`);
     }
-    afterInit(server: any) {
+    async afterInit(server: any) {
         Logger.debug(`Connected client: ${server}`);
+        // i will connected adapter to redis for solve cluster pm2 running
+        // first
+        const pubClient = createClient({
+            url: this.configService.get('REDIS_URL')
+        })
+
+        const subClient = pubClient.duplicate();
+
+        await Promise.all([pubClient.connect(), subClient.connect()]);
+        server.adapter(createAdapter(pubClient, subClient));
     }
     @WebSocketServer()
     server: Server;

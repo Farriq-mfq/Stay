@@ -15,6 +15,14 @@ export default defineConfig(() => {
                 ]
             })
         ],
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    api: 'modern',
+                    silenceDeprecations: ["legacy-js-api"],
+                }
+            }
+        },
         resolve: {
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url))
