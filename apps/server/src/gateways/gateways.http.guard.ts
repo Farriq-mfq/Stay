@@ -20,12 +20,9 @@ export class GatewaysHttpGuard implements CanActivate {
         const data = req.body as ScanDto
         Logger.debug(data);
         try {
-            const token = await this.jwtService.verify(data.token, {
-                ignoreExpiration: true
-            })
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
-                    token,
+                    token: data.token,
                     ip: data.ip,
                 }
             })
