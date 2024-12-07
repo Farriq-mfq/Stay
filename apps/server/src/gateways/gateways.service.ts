@@ -152,15 +152,22 @@ export class GatewaysService {
         id: id
       }
     })
+
+    const token = await this.tokenService.generateRandomToken(16);
     const updated = await this.prismaService.client.gateways.update({
       where: {
         id: gateway.id
       },
       data: {
-        token: await this.tokenService.generateRandomToken(16)
+        token
       }
     })
-    return await this.jwtService.sign(updated.token)
+    if (updated) {
+      return token
+    } else {
+      throw new InternalServerErrorException("unknown error")
+    }
+
   }
 
 

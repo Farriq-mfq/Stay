@@ -19,12 +19,14 @@ export class GatewaysGuard implements CanActivate {
         const client: Socket = context.switchToWs().getClient<Socket>();
         const data = context.switchToWs().getData() as ScanDto;
         try {
-            const token = await this.jwtService.verify(data.token, {
-                ignoreExpiration: true
-            })
+            // change strategy validate token
+            // const token = await this.jwtService.verify(data.token, {
+            //     ignoreExpiration: true
+            // })
+
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
-                    token,
+                    token:data.token,
                     ip: data.ip,
                 }
             })
