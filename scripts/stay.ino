@@ -49,7 +49,7 @@ HttpClient httpClient(client, serverAddress, port);
 
 // ####################### KONFIGURASI TOKEN ##########################
 
-String serverToken = "db8beffcda963277cd77fd05d3946c22";
+String serverToken = "b38cc482488b6e57c9a09e9e4655561f";
 // ####################### KONFIGURASI TOKEN ##########################
 // LCD INITIALIZE
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -75,6 +75,10 @@ void setup() {
   // start init lcd
   lcd.init();
   lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Hi :)");
+  lcd.setCursor(0, 1);
+  lcd.print("Stay Presence");
   // end lcd
   pinMode(pinBuzzer, OUTPUT);
   pinMode(ledYellow, OUTPUT);
@@ -144,9 +148,12 @@ void loop() {
       lcd.print("ID: " + uuid);
     }
     httpClient.endRequest();
+    mfrc522.PICC_HaltA();
 
+    // Stop encryption on PCD
+    mfrc522.PCD_StopCrypto1();
   }
-  delay(1000);
+  // delay(1000);
   // resetLcd();
 }  //loop
 
