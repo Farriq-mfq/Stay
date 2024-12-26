@@ -23,7 +23,8 @@ export class GatewaysHttpGuard implements CanActivate {
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
                     token: data.token,
-                    ip: data.ip,
+                    // not used currently
+                    // ip: data.ip,
                 }
             })
 

@@ -199,12 +199,12 @@ export class GatewaysService {
               // check error object 
               if (errorPayload.error) {
                 client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, errorPayload.error)
+                // try to show to lcd module
+                return {
+                  message: errorPayload.error
+                }
               }
 
-              // try to show to lcd module
-              return {
-                message: errorPayload.error
-              }
 
             } else {
               throw new InternalServerErrorException('Internal server error')
