@@ -17,6 +17,7 @@
 #include <ArduinoHttpClient.h>
 #include <LiquidCrystal_I2C.h>
 #include <avr/wdt.h>
+// #include <ArduinoJson.h>
 
 int pin1 = 4;
 int pin2 = 2;
@@ -29,25 +30,26 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 // ########################### SETTING IP GATEWAY #####################
-IPAddress ip(192, 168, 10, 170);
+IPAddress ip(192, 168, 85, 35);
 // CUSTOM GATEWAY (OPTIONAL)
-IPAddress gateway(192, 168, 10, 254);
+IPAddress gateway(192, 168, 85, 203);
 // CUSTOM DNS (OPTIONAL)
-IPAddress dns(192, 168, 10, 254);
+IPAddress dns(192, 168, 85, 203);
 
 EthernetClient client;
 
 // #################### REQUEST HTTP CLIENT SETTING ###################
 
-char serverAddress[] = "103.49.238.227";
+// char serverAddress[] = "103.49.238.227";
 int port = 3000;
-HttpClient httpClient = HttpClient(client, serverAddress, port);
+IPAddress serverAddress(62, 77, 158, 139);
+HttpClient httpClient(client, serverAddress, port);
 
 // #################### END REQUEST HTTP CLIENT SETTING ###################
 
 // ####################### KONFIGURASI TOKEN ##########################
 
-String serverToken = "eyJhbGciOiJIUzI1NiJ9.YTZmYmFkN2I4Y2UxYTZlMDFkZDA1OGYyMTI0YjI1ZjY.qoTiyJIIR9Vbs-feaX76BtviSiVZMRnvbnL55_stT8c";
+String serverToken = "ef11b18d372b0704afb2a5bde75141e2";
 // ####################### KONFIGURASI TOKEN ##########################
 // LCD INITIALIZE
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -65,12 +67,7 @@ void setup() {
   mfrc522.PCD_Init();
   ShowReaderDetails();
   Serial.println(F("Scan PICC to see UID, type, and data blocks..."));
-  // Ethernet.begin(mac, ip);
-  // BEGIN WITH CUSTOM GATEWAY
-  // Ethernet.begin(mac, ip ,gateway);
-  // BEGIN WITH CUSTOM DNS AND GATEWAY
-  Ethernet.begin(mac, ip, dns, gateway);
-  Serial.println(Ethernet.localIP());
+
   pinMode(pin1, OUTPUT);
   pinMode(pin2, OUTPUT);
   digitalWrite(pin1, HIGH);
@@ -78,13 +75,11 @@ void setup() {
   // start init lcd
   lcd.init();
   lcd.backlight();
-  // end lcd
   lcd.setCursor(0, 0);
-  lcd.print("Welcome :) ");
+  lcd.print("Hi :)");
   lcd.setCursor(0, 1);
-  lcd.print("IP: ");
-  lcd.setCursor(3, 1);
-  lcd.print(Ethernet.localIP());
+  lcd.print("Stay Presence");
+  // end lcd
   pinMode(pinBuzzer, OUTPUT);
   pinMode(ledYellow, OUTPUT);
   pinMode(ledGreen, OUTPUT);
@@ -92,7 +87,22 @@ void setup() {
   delay(5000);
 }  //setup
 
+
 void loop() {
+  // BEGIN WITH CUSTOM GATEWAY
+  // Ethernet.begin(mac, ip ,gateway);
+  Ethernet.maintain();
+  if (Ethernet.begin(mac) == 0) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Searching...");
+    lcd.setCursor(0, 1);
+    lcd.print("Connection");
+    // BEGIN WITH CUSTOM DNS AND GATEWAY
+    Ethernet.begin(mac, ip, dns, gateway);
+  }
+
+  // printIpAddress();
 
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
     MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
@@ -118,7 +128,12 @@ void loop() {
     httpClient.beginBody();
     httpClient.print(jsonData);
     httpClient.setTimeout(1000);
-    httpClient.endRequest();
+    int statusCode = httpClient.responseStatusCode();
+    Serial.print("Response Code: ");
+    Serial.println(statusCode);
+    String response = httpClient.responseBody();
+    Serial.print("Response Body: ");
+    Serial.println(response);
 
     Serial.println("Request succeeded:");
     digitalWrite(pinBuzzer, HIGH);
@@ -126,10 +141,60 @@ void loop() {
     delay(100);
     digitalWrite(pinBuzzer, LOW);
     digitalWrite(ledGreen, LOW);
+    if (statusCode == 200) {
+      parseJsonManuallyAndDisplay(response);
+      delay(1000);
+      resetLcd();
+    }
+    httpClient.endRequest();
+    mfrc522.PICC_HaltA();
+    // Stop encryption on PCD
+    mfrc522.PCD_StopCrypto1();
   }
-  delay(500);
+  // delay(1000);
   // resetLcd();
 }  //loop
+
+
+
+void printIpAddress() {
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Connected IP :");
+  lcd.setCursor(0,1);
+  lcd.print(Ethernet.localIP());
+}
+
+void parseJsonManuallyAndDisplay(String response) {
+  lcd.clear();
+
+  // Find "siswa"
+  int siswaIndex = response.indexOf("\"siswa\":");
+  if (siswaIndex != -1) {
+    int start = siswaIndex + 8;  // Move past "siswa":
+    if (response[start] == '\"') {
+      start++;  // Skip the quote
+      int end = response.indexOf("\"", start);
+      String siswaValue = response.substring(start, end);
+
+      // Display siswa on the second line of the LCD
+      lcd.setCursor(0, 0);
+      lcd.print("Terimakasih");
+      lcd.setCursor(0, 1);
+      lcd.print(siswaValue);
+    } else {
+      int end = response.indexOf(",", start);
+      if (end == -1) end = response.indexOf("}", start);  // Handle no trailing comma
+      String siswaValue = response.substring(start, end);
+
+      // Display siswa on the second line of the LCD
+      lcd.setCursor(0, 0);
+      lcd.print("Terimakasih");
+      lcd.setCursor(0, 1);
+      lcd.print(siswaValue);
+    }
+  }
+}
 
 
 void resetLcd() {
