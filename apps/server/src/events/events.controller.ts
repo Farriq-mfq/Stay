@@ -16,10 +16,15 @@ export class EventController {
     @UseGuards(GatewaysHttpGuard)
     async httpScan(
         @Body() data: ScanDto
-    ): Promise<void | { siswa: string }> {
+    ): Promise<void | { siswa: string } | { message: string }> {
         const result = await this.eventsGateway.handleHttpScanned(data);
         if (result) {
 
+            if ("message" in result) {
+                return {
+                    message: result.message
+                }
+            }
             type presenceSiswaType = presences & {
                 siswa: siswa
             }
@@ -28,6 +33,10 @@ export class EventController {
             const siswa = (result as presenceSiswaType).siswa
             return {
                 siswa: `${siswa.name.slice(0, 15)}...`,
+            }
+        } else {
+            return {
+                message: 'Terjadi kesalahan'
             }
         }
     }

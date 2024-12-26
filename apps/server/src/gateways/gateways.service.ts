@@ -1,15 +1,15 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { presences } from '@prisma/client';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
 import { Server } from 'socket.io';
+import { ScanDto } from 'src/events/dto/scan.dto';
 import { PresenceService } from 'src/presence/presence.service';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { TokenService } from 'src/services/token.service';
 import { CreateGatewayDto, RoleGatewayType } from './dto/create-gateway.dto';
-import { ScannedDto } from './dto/scanned.dto';
 import { UpdateGatewayDto } from './dto/update-gateway.dto';
-import { presences } from '@prisma/client';
 @Injectable()
 export class GatewaysService {
   constructor(
@@ -172,13 +172,14 @@ export class GatewaysService {
 
 
   async handleScanned(
-    data: ScannedDto,
+    data: ScanDto,
     client: Server
-  ): Promise<void | presences | { message: string }> {
+  ): Promise<presences | { message: string }> {
     try {
       const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
         where: {
-          ip: data.ip
+          // ip: data.ip,
+          token: data.token
         },
       })
 
@@ -192,7 +193,6 @@ export class GatewaysService {
               return presence;
             }
 
-
           } catch (e) {
             if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
@@ -204,8 +204,12 @@ export class GatewaysService {
                   message: errorPayload.error
                 }
               }
+              else if (e instanceof NotFoundException) {
+                return {
+                  message: e.message
+                }
 
-
+              }
             } else {
               throw new InternalServerErrorException('Internal server error')
             }
@@ -213,6 +217,9 @@ export class GatewaysService {
           break;
         case 'register':
           client.emit(`READER_${gateway.ip}`, data.scan)
+          return {
+            message: 'reading success'
+          }
           break;
         default:
           throw new InternalServerErrorException('Role not registered')

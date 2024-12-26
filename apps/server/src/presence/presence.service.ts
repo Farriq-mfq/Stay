@@ -148,7 +148,6 @@ export class PresenceService {
 
 
   async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences> {
-
     const siswa = await this.prismaService.client.siswa.findUnique({
       where: {
         rfid_token: scanned.scan

@@ -15,8 +15,6 @@ import { CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
 import { PresenceService } from 'src/presence/presence.service';
 import { ScanDto } from './dto/scan.dto';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from 'redis';
-import { createAdapter } from '@socket.io/redis-adapter';
 import { presences } from '@prisma/client';
 
 // solve socket io not connected to esp32: 
@@ -44,15 +42,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     async afterInit(server: any) {
         Logger.debug(`Connected client: ${server}`);
         // i will connected adapter to redis for solve cluster pm2 running
-        // first
-        const pubClient = createClient({
-            url: this.configService.get('REDIS_URL')
-        })
-
-        const subClient = pubClient.duplicate();
-
-        await Promise.all([pubClient.connect(), subClient.connect()]);
-        server.adapter(createAdapter(pubClient, subClient));
     }
     @WebSocketServer()
     server: Server;
@@ -62,10 +51,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     @UseGuards(GatewaysGuard)
     @SubscribeMessage('SCAN')
     async onHandleScan(@MessageBody() data: ScanDto): Promise<void> {
-        await this.gatewaysService.handleScanned({
-            ip: data.ip,
-            scan: data.scan
-        }, this.server)
+        await this.gatewaysService.handleScanned(data, this.server)
     }
 
     async handleHttpScanned(data: ScanDto): Promise<void | presences | { message: string }> {

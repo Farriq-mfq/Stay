@@ -19,6 +19,7 @@ export class GatewaysHttpGuard implements CanActivate {
         const req = context.switchToHttp().getRequest() as Request;
         const data = req.body as ScanDto
         Logger.debug(data);
+         
         try {
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
