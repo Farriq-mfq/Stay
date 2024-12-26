@@ -174,7 +174,7 @@ export class GatewaysService {
   async handleScanned(
     data: ScannedDto,
     client: Server
-  ): Promise<void | presences> {
+  ): Promise<void | presences | { message: string }> {
     try {
       const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
         where: {
@@ -199,6 +199,11 @@ export class GatewaysService {
               // check error object 
               if (errorPayload.error) {
                 client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, errorPayload.error)
+              }
+
+              // try to show to lcd module
+              return {
+                message: errorPayload.error
               }
 
             } else {
