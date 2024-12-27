@@ -270,7 +270,7 @@ const scrooltoBottomRealtimePage = ref(null);
                     <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
                         KARTU
                     </span>
-                    <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" />
+                    <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
                 </div>
             </div>
         </div>

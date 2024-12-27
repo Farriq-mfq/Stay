@@ -95,6 +95,7 @@ export class GatewaysService {
         location: true,
         role: true,
         status: true,
+        token: true
       }
     });
   }

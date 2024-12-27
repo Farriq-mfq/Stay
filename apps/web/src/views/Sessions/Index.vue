@@ -215,7 +215,7 @@ const handleShowDialogUpdateSesion = (data) => {
     ...data.start_time && { start_time: new Date(data.start_time) },
     ...data.end_time && { end_time: new Date(data.end_time) },
     allow_twice: data.allow_twice,
-    gateways: data.gateways
+    gateways: data.gateways,
   }
 }
 
@@ -446,7 +446,6 @@ const clearDialogQrCode = () => {
       </Dialog>
       <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
         class="p-fluid" @after-hide="clearUpdateSession">
-
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
@@ -476,6 +475,7 @@ const clearDialogQrCode = () => {
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
+          {{ dataUpdateSession.gateways }}
           <SelectGateway role="presence" :defaultValue="dataUpdateSession.gateways" multiple
             @input="handleChangeUpdateSessionGateway" />
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.gateways">

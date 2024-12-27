@@ -87,6 +87,7 @@ export class SessionsService {
             location: true,
             role: true,
             status: true,
+            token: true
           }
         }
       }
