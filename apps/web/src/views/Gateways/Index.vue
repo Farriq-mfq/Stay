@@ -1,7 +1,7 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { capitalize, getCurrentInstance, ref, watch } from 'vue';
+import { capitalize, getCurrentInstance, ref, useModel, watch } from 'vue';
 import { useClipboard } from '@vueuse/core'
 import { useConfirm } from "primevue/useconfirm";
 const toast = useToast();
@@ -351,6 +351,20 @@ const confirmGenerateNewToken = (data) => {
 
 // copy text
 const { text, copy, copied, isSupported } = useClipboard({ source: newToken.value })
+
+
+
+// show token
+const showToken = ref(false)
+const selectedToken = ref(null)
+const handleShowToken = (data) => {
+    showToken.value = true
+    selectedToken.value = data
+}
+
+const handleCloseShowToken = () => {
+    selectedToken.value = null
+}
 </script>
 
 <template>
@@ -411,6 +425,8 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                                     :disabled="pendingUpdateStatusGateway"
                                     :severity="data.status ? 'danger' : 'success'"
                                     @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
+                                <Button icon="pi pi-eye" outlined severity="info"
+                                    @click.prevent="handleShowToken(data)" />
                             </div>
                         </template>
                     </Column>
@@ -574,6 +590,18 @@ const { text, copy, copied, isSupported } = useClipboard({ source: newToken.valu
                 <template #footer>
                     <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
                         @click.prevent="copy(newToken)" v-if="isSupported" />
+                </template>
+            </Dialog>
+            <Dialog v-model:visible="showToken" :modal="true" @after-hide="handleCloseShowToken">
+                <p>
+                    Note : Silahkan masukan token ini ketika script diupload ke device!
+                </p>
+                <div class="text-lg field grid px-2">
+                    <InputText class="flex-1" readonly :value="selectedToken.token" />
+                </div>
+                <template #footer>
+                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
+                        @click.prevent="copy(selectedToken.token)" v-if="isSupported" />
                 </template>
             </Dialog>
         </div>

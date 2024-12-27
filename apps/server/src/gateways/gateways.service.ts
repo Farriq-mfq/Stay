@@ -48,6 +48,7 @@ export class GatewaysService {
         location: true,
         role: true,
         status: true,
+        token: true
       },
       where: {
         ...search && {
@@ -216,7 +217,7 @@ export class GatewaysService {
           }
           break;
         case 'register':
-          client.emit(`READER_${gateway.ip}`, data.scan)
+          client.emit(`READER_${gateway.token}`, data.scan)
           return {
             message: 'reading success'
           }
