@@ -195,7 +195,12 @@ export class GatewaysService {
             }
 
           } catch (e) {
-            if (e instanceof Error) {
+            if (e instanceof NotFoundException) {
+              return {
+                message: e.message
+              }
+
+            } else if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
               // check error object 
               if (errorPayload.error) {
@@ -205,12 +210,7 @@ export class GatewaysService {
                   message: errorPayload.error
                 }
               }
-              else if (e instanceof NotFoundException) {
-                return {
-                  message: e.message
-                }
 
-              }
             } else {
               throw new InternalServerErrorException('Internal server error')
             }

@@ -34,10 +34,6 @@ export class EventController {
             return {
                 siswa: `${siswa.name.slice(0, 15)}...`,
             }
-        } else {
-            return {
-                message: 'Terjadi kesalahan'
-            }
         }
     }
 
