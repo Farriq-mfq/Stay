@@ -45,7 +45,7 @@ export default (app) => {
                 method: 'POST',
                 enabled: true,
             },
-            stores: ['cookie', 'storage'],
+            stores: ['storage'],
             tokenDefaultKey: config.token_key,
             rolesKey: 'role',
             notFoundRedirect: { name: 'not-found' },
