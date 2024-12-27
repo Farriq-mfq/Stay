@@ -353,7 +353,7 @@ const handleGatewayUpdate = (data) => {
 
 const turnOnListener = () => {
   if (!isListening.value && selectedGateway.value) {
-    socket.once(`READER_${selectedGateway.value.token}`, handleGatewayUpdate);
+    socket.on(`READER_${selectedGateway.value.token}`, handleGatewayUpdate);
     isListening.value = true;
     console.log('Listening on')
   }
@@ -361,7 +361,7 @@ const turnOnListener = () => {
 
 const turnOffListener = () => {
   if (isListening.value && selectedGateway.value) {
-    socket.off(`READER_${selectedGateway.value.token}`, handleGatewayUpdate);
+    // socket.off(`READER_${selectedGateway.value.token}`, handleGatewayUpdate);
     isListening.value = false;
     console.log('Listening off')
   }
@@ -452,7 +452,8 @@ const setDefaultGateway = () => {
 
 const resetDefaultGateway = () => {
   defaultGateway.value = null
-  socket.off(`READER_${selectedGateway.value.token}`);
+  // disabled : off socket
+  // socket.off(`READER_${selectedGateway.value.token}`);
   selectedGateway.value = null
 }
 
@@ -635,7 +636,6 @@ const downloadTemplateService = async () => {
 <template>
   <div class="grid">
     <div class="col-12">
-      {{ selectedGateway }}
       <div class="card">
         <Toolbar class="mb-4">
           <template v-slot:start>
