@@ -475,7 +475,6 @@ const clearDialogQrCode = () => {
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
-          {{ dataUpdateSession.gateways }}
           <SelectGateway role="presence" :defaultValue="dataUpdateSession.gateways" multiple
             @input="handleChangeUpdateSessionGateway" />
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.gateways">
