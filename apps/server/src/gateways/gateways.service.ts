@@ -220,7 +220,7 @@ export class GatewaysService {
         case 'register':
           client.emit(`READER_${gateway.token}`, data.scan)
           return {
-            message: 'reading success'
+            message: 'KARTU TERBACA'
           }
           break;
         default:

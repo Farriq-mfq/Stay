@@ -158,7 +158,7 @@ export class PresenceService {
     })
 
 
-    if (!siswa) throw new NotFoundException("Siswa not found");
+    if (!siswa) throw new NotFoundException("KARTU TDK TERDAFTAR");
 
     if (gateway.presence_sessionsId) {
       // presence
@@ -168,7 +168,7 @@ export class PresenceService {
         }
       })
       if (!session) {
-        throw new NotFoundException("Session not found")
+        throw new NotFoundException("SESI TIDAK DITEMUKAN")
       }
       const current_time = new Date();
       // check session have start_time and end_time
@@ -242,7 +242,7 @@ export class PresenceService {
       }
     } else {
       this.handlingPresenceError({
-        error: "Gateway tidak ditemukan",
+        error: "GATEWAY TDK DITEMUKAN",
         siswa
       })
     }
@@ -290,7 +290,7 @@ export class PresenceService {
           })
           if (checkPresenceHaveExitTime) {
             this.handlingPresenceError({
-              error: `Anda sudah melakukan presensi hari ini 😊`,
+              error: `ANDA SUDAH PRESENSI`,
               siswa
             })
           } else {
@@ -359,7 +359,7 @@ export class PresenceService {
 
         if (checkPresence) {
           this.handlingPresenceError({
-            error: `Anda sudah melakukan presensi hari ini 😊`,
+            error: `ANDA SUDAH PRESENSI`,
             siswa
           })
         } else {
