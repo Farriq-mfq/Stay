@@ -17,7 +17,7 @@
 #include <ArduinoHttpClient.h>
 #include <LiquidCrystal_I2C.h>
 #include <avr/wdt.h>
-// #include <ArduinoJson.h>
+#include <ArduinoJson.h>
 
 int pin1 = 4;
 int pin2 = 2;
@@ -159,32 +159,37 @@ void loop() {
 
 void printIpAddress() {
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   lcd.print("Connected IP :");
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print(Ethernet.localIP());
 }
 
 void parseJsonManuallyAndDisplay(String response) {
   lcd.clear();
+  int dataIndex = response.indexOf("\"data\":");
+  if (dataIndex != -1) {
+    int messageIndex = response.indexOf("\"message\":", dataIndex);
+    if (messageIndex != -1) {
+      int start = messageIndex + 10;  // Move past "message":
+      if (response[start] == '\"') {
+        start++;  // Skip the opening quote
+        int end = response.indexOf("\"", start);
+        String messageValue = response.substring(start, end);
 
-  // Find "siswa"
-  int siswaIndex = response.indexOf("\"siswa\":");
+        // Display message on the second line of the LCD
+        lcd.setCursor(0, 0);
+        lcd.print(messageValue);
+      }
+    }
+  }
+  // Check for "siswa"
+  int siswaIndex = response.indexOf("\"siswa\":", dataIndex);
   if (siswaIndex != -1) {
     int start = siswaIndex + 8;  // Move past "siswa":
     if (response[start] == '\"') {
-      start++;  // Skip the quote
+      start++;  // Skip the opening quote
       int end = response.indexOf("\"", start);
-      String siswaValue = response.substring(start, end);
-
-      // Display siswa on the second line of the LCD
-      lcd.setCursor(0, 0);
-      lcd.print("Terimakasih");
-      lcd.setCursor(0, 1);
-      lcd.print(siswaValue);
-    } else {
-      int end = response.indexOf(",", start);
-      if (end == -1) end = response.indexOf("}", start);  // Handle no trailing comma
       String siswaValue = response.substring(start, end);
 
       // Display siswa on the second line of the LCD
