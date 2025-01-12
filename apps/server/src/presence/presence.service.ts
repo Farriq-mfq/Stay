@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -6,8 +6,14 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { isJSON, isValidDateString, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+type FilterDate = {
+  start_date?: string,
+  end_date?: string
+}
+
 @Injectable()
 export class PresenceService {
   constructor(
@@ -434,12 +440,29 @@ export class PresenceService {
       },
     })
   }
+
+
   async findAll(
     sessionId: string,
     page?: number,
     limit?: number,
     search?: string,
+    date?: string
   ) {
+
+    let filterDate: FilterDate | null = null;
+    if (isJSON(date)) {
+      const parseFilterDateAsJson = JSON.parse(date) as FilterDate;
+      if (isValidDateString(parseFilterDateAsJson.start_date, 'yyyy-MM-dd') && isValidDateString(parseFilterDateAsJson.end_date, 'yyyy-MM-dd')) {
+        if (validateDateRange(parseFilterDateAsJson.start_date, parseFilterDateAsJson.end_date)) {
+          filterDate = parseFilterDateAsJson
+        } else {
+          throw new BadRequestException('Invalid date range');
+        }
+      }
+    }
+
+
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: parseInt(sessionId)
@@ -498,6 +521,12 @@ export class PresenceService {
           ],
         },
         presence_sessionsId: session.id,
+        ...(filterDate && {
+          createdAt: {
+            gte: new Date(filterDate.start_date),
+            lte: new Date(filterDate.end_date)
+          }
+        })
       },
       orderBy: {
         createdAt: 'desc'
@@ -516,7 +545,22 @@ export class PresenceService {
   async exportData(
     sessionId: string,
     search?: string,
+    date?: string
   ) {
+
+    let filterDate: FilterDate | null = null;
+    if (isJSON(date)) {
+      const parseFilterDateAsJson = JSON.parse(date) as FilterDate;
+      if (isValidDateString(parseFilterDateAsJson.start_date, 'yyyy-MM-dd') && isValidDateString(parseFilterDateAsJson.end_date, 'yyyy-MM-dd')) {
+        if (validateDateRange(parseFilterDateAsJson.start_date, parseFilterDateAsJson.end_date)) {
+          filterDate = parseFilterDateAsJson
+        } else {
+          throw new BadRequestException('Invalid date range');
+        }
+      }
+    }
+
+
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: parseInt(sessionId)
@@ -576,6 +620,12 @@ export class PresenceService {
           ],
         },
         presence_sessionsId: session.id,
+        ...(filterDate && {
+          createdAt: {
+            gte: new Date(filterDate.start_date),
+            lte: new Date(filterDate.end_date)
+          }
+        })
       },
       orderBy: {
         createdAt: 'desc'

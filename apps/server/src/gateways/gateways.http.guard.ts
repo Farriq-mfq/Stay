@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, Logger } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
 import { PrismaService } from "nestjs-prisma";
@@ -19,7 +19,7 @@ export class GatewaysHttpGuard implements CanActivate {
         const req = context.switchToHttp().getRequest() as Request;
         const data = req.body as ScanDto
         Logger.debug(data);
-         
+
         try {
             const gateway = await this.prismaService.gateways.findFirstOrThrow({
                 where: {
@@ -30,7 +30,7 @@ export class GatewaysHttpGuard implements CanActivate {
             })
 
             if (!gateway.status) {
-                return false
+                throw new UnauthorizedException("device off");
             }
         } catch {
             return false;

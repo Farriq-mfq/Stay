@@ -1,6 +1,6 @@
 <script setup>
 import { useQuery } from '@tanstack/vue-query';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { getCurrentInstance, ref, watch } from 'vue';
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -16,6 +16,7 @@ const queryParams = ref({
 const totalRecords = ref(0);
 const dt = ref()
 const sessionId = ref(null)
+const filterDate = ref()
 
 
 const getAllPresences = async () => {
@@ -23,8 +24,15 @@ const getAllPresences = async () => {
     const queries = {
       page: (queryParams.value.first / queryParams.value.rows) + 1,
       limit: queryParams.value.rows,
-      ...filters.value && { search: filters.value }
+      ...filters.value && { search: filters.value },
+      ...filterDate.value && filterDate.value.length === 2 && {
+        date: JSON.stringify({
+          start_date: format(filterDate.value[0], "yyyy-MM-dd"),
+          end_date: format(filterDate.value[1], "yyyy-MM-dd"),
+        })
+      }
     }
+
 
     const params = new URLSearchParams(queries)
 
@@ -74,7 +82,13 @@ const handleExportService = async () => {
   loadingExport.value = true;
   if (sessionId.value) {
     const queries = {
-      ...filters.value && { search: filters.value }
+      ...filters.value && { search: filters.value },
+      ...filterDate.value && filterDate.value.length === 2 && {
+        date: JSON.stringify({
+          start_date: format(filterDate.value[0], "yyyy-MM-dd"),
+          end_date: format(filterDate.value[1], "yyyy-MM-dd"),
+        })
+      }
     }
 
     const params = new URLSearchParams(queries)
@@ -94,6 +108,11 @@ const handleExportService = async () => {
     throw new Error()
   }
 }
+
+const handleFilter = () => {
+  refetch()
+}
+
 </script>
 <template>
   <div>
@@ -106,6 +125,14 @@ const handleExportService = async () => {
           outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId" />
       </div>
     </div>
+    <div v-if="sessionId" class="mt-3">
+      <div class="flex gap-2">
+        <Calendar v-model="filterDate" :disabled="isLoading" placeholder="Filter Tanggal Presensi" showButtonBar
+          selectionMode="range" :manualInput="false" />
+        <Button :loading="isLoading" icon="pi pi-filter" label="Filter" @click="handleFilter" />
+      </div>
+    </div>
+
     <DataTable v-if="sessionId" ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
       :loading="isLoading" :value="isLoading ? [] : presences.data.data.items" dataKey="id" paginator :rows="10"
       :filters="filters" lazy

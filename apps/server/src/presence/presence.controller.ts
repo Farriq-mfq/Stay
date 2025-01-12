@@ -25,10 +25,12 @@ export class PresenceController {
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('search') search?: string,
+    @Query("date") date?: string
   ) {
     const buffer = await this.presenceService.exportData(
       sessionId,
       search,
+      date
     )
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -51,12 +53,15 @@ export class PresenceController {
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('search') search?: string,
+    @Query("date") date?: string
   ) {
+
     return await this.presenceService.findAll(
       sessionId,
       page,
       limit,
       search,
+      date
     )
   }
 
