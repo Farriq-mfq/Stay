@@ -64,5 +64,21 @@ export class PresenceController {
       date
     )
   }
+  @Get('/:sessionId/:rombel')
+  @UseGuards(AccessTokenGuard)
+  async findAllByRombel(
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query("date") date: string,
+    @Query('search') search?: string,
+    @Param('rombel') rombel?: string
+  ) {
+
+    return await this.presenceService.findAllRombel(
+      sessionId,
+      search,
+      date,
+      rombel
+    )
+  }
 
 }

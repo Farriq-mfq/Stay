@@ -6,11 +6,12 @@ import { PresenceService } from 'src/presence/presence.service';
 import { TokenService } from 'src/services/token.service';
 import { GatewaysController } from './gateways.controller';
 import { GatewaysService } from './gateways.service';
+import { SiswaService } from 'src/siswa/siswa.service';
 
 @Module({
   imports: [PresenceModule],
   controllers: [GatewaysController],
-  providers: [GatewaysService, TokenService, PresenceService, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [GatewaysService, TokenService, PresenceService, AccessTokenStrategy, RefreshTokenStrategy, SiswaService],
   exports: [GatewaysService, TokenService, PresenceService]
 })
 export class GatewaysModule { }

@@ -38,13 +38,18 @@ export class SiswaController {
     res.send(file);
   }
 
+  @Get("/rombel")
+  async getSiswaClass() {
+    return await this.siswaService.getGroupClass()
+  }
+
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.findOne(+id);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateSiswaDto: UpdateSiswaDto) {
+  async update(@Param('id', new ParseIntPipe()) id: string, @Body() updateSiswaDto: UpdateSiswaDto) {
     return await this.siswaService.update(+id, updateSiswaDto);
   }
 
@@ -54,17 +59,17 @@ export class SiswaController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.remove(+id);
   }
 
   @Post(':id/rfid-token')
-  async registerRfid(@Param('id') id: string, @Body() updateToken: UpdateTokenDto) {
+  async registerRfid(@Param('id', new ParseIntPipe()) id: string, @Body() updateToken: UpdateTokenDto) {
     return await this.siswaService.registerRfid(+id, updateToken)
   }
 
   @Delete(':id/rfid-token')
-  async resetTokenRFID(@Param('id') id: string) {
+  async resetTokenRFID(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.resetTokenRFID(+id)
   }
 
@@ -93,4 +98,6 @@ export class SiswaController {
   ) {
     return await this.siswaService.resetTelegram(id)
   }
+
+
 }

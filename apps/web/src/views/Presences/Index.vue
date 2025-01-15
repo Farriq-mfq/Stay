@@ -3,6 +3,7 @@ import { ref } from 'vue';
 const items = ref([
   { label: 'Semua data', icon: 'pi pi-home', route: '/presences/all' },
   { label: 'Grafik', icon: 'pi pi-chart-line', route: '/presences/chart' },
+  { label: 'Rombel', icon: 'pi pi-home', route: '/presences/rombel' },
   // { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
   // {
   //   label: 'Rekap',

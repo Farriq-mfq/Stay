@@ -37,7 +37,10 @@ export class StatsService {
     }
   }
 
-  async getChartPresences(sessionId: string) {
+  async getChartPresences(sessionId: string, siswaClass: string) {
+    if (siswaClass) {
+      // get siswa classs
+    }
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: +sessionId

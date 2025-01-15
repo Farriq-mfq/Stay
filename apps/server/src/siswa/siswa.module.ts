@@ -8,5 +8,6 @@ import { RefreshTokenStrategySiswa } from './strategies/refreshToken.strategy';
 @Module({
   controllers: [SiswaController, SiswaAuthController],
   providers: [SiswaService, SiswaAuthService, AccessTokenStrategySiswa, RefreshTokenStrategySiswa],
+  exports: [SiswaService]
 })
 export class SiswaModule { }

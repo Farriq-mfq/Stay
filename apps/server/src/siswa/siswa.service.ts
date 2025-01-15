@@ -221,4 +221,23 @@ export class SiswaService {
       },
     })
   }
+
+  async getGroupClass() {
+    const getRombel = await this.prismaService.client.siswa.findMany({
+      select: {
+        rombel: true
+      },
+      distinct: ['rombel'],
+      orderBy: {
+        rombel: 'asc'
+      }
+    })
+
+    let rombels = [];
+
+    for (const rombel of getRombel) {
+      rombels.push(rombel.rombel)
+    }
+    return rombels;
+  }
 }
