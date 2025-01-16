@@ -72,26 +72,21 @@ const handleChangeSelectSession = (val) => {
 const loadingExport = ref(false)
 const handleExportService = async () => {
     loadingExport.value = true;
-    if (sessionId.value) {
+    if (sessionId.value && selectedRombel.value && filterDate.value) {
         const queries = {
             ...filters.value && { search: filters.value },
-            ...filterDate.value && filterDate.value.length === 2 && {
-                date: JSON.stringify({
-                    start_date: format(filterDate.value[0], "yyyy-MM-dd"),
-                    end_date: format(filterDate.value[1], "yyyy-MM-dd"),
-                })
-            }
+            date: format(filterDate.value, "yyyy-MM-dd"),
         }
 
         const params = new URLSearchParams(queries)
 
-        const response = await axios.get(`/presence/export/${sessionId.value}?${params}`, {
+        const response = await axios.get(`/presence/export/${sessionId.value}/${selectedRombel.value.value}?${params}`, {
             responseType: 'blob',
         })
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`);
+        link.setAttribute('download', `${format(new Date(), 'yyyy-MM-dd')}-presences-${selectedRombel.value.value}.xlsx`);
         document.body.appendChild(link);
         link.click();
         loadingExport.value = false;
@@ -127,8 +122,8 @@ const resetAll = () => {
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport"
                     icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3"
                     v-if="sessionId && selectedRombel && filterDate" />
-                <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger"
-                    v-if="sessionId && selectedRombel && filterDate" />
+                <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3"
+                    severity="danger" v-if="sessionId && selectedRombel && filterDate" />
             </div>
 
         </div>
@@ -171,6 +166,11 @@ const resetAll = () => {
                 <template #body="{ data }">
                     <Tag value="Presensi" severity="success" v-if="data.hasPresence" />
                     <Tag value="Tidak Presensi" severity="danger" v-if="!data.hasPresence" />
+                </template>
+            </Column>
+            <Column header="Gateway">
+                <template #body="{ data }">
+                    {{ data.gateway }}
                 </template>
             </Column>
             <Column header="Masuk">

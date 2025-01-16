@@ -80,5 +80,26 @@ export class PresenceController {
       rombel
     )
   }
+  @Get('/export/:sessionId/:rombel')
+  @UseGuards(AccessTokenGuard)
+  async exportPresenceByRombel(
+    @Res() res: Response,
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query("date") date: string,
+    @Query('search') search?: string,
+    @Param('rombel') rombel?: string
+  ) {
+
+    const buffer = await this.presenceService.exportByClass(
+      sessionId,
+      search,
+      date,
+      rombel)
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
+    });
+    res.send(buffer);
+  }
 
 }

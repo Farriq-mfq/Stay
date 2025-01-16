@@ -14,8 +14,8 @@ export class StatsController {
   @Get('/presences/chart/:sessionId')
   async getChartPresences(
     @Param('sessionId') sessionId: string,
-    @Query('class') siswaClass?: string
+    @Query('rombel') rombel?: string
   ) {
-    return await this.statsService.getChartPresences(sessionId, siswaClass);
+    return await this.statsService.getChartPresences(sessionId, rombel);
   }
 }

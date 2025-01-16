@@ -1,3 +1,4 @@
+div
 <script setup>
 
 import { getCurrentInstance, reactive, watch } from 'vue';
@@ -9,23 +10,31 @@ const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const session = ref(null)
 const { isDarkTheme } = useLayout();
-
+const selectedRombel = ref();
 
 const getChartPresencesService = async () => {
-    return await axios.get(`/stats/presences/chart/${session.value.id}`)
+    const queries = {
+        ...(selectedRombel.value && {
+            rombel: selectedRombel.value.value
+        })
+    }
+    const queryParams = new URLSearchParams(queries)
+
+    return await axios.get(`/stats/presences/chart/${session.value.id}?${queryParams}`)
 }
 
 const {
     data: chartPresences,
     isLoading: chartPresencesLoading,
 } = useQuery({
-    queryKey: ['getChartPresencesService', session],
+    queryKey: ['getChartPresencesService', session, selectedRombel],
     queryFn: getChartPresencesService,
 })
 
 
 const handleChangeSelectSession = (val) => {
     session.value = val
+    selectedRombel.value = null
 }
 
 
@@ -137,6 +146,16 @@ const printObj = ref({
     },
 })
 
+const getRombel = async () => {
+    return await axios.get('/siswa/rombel');
+}
+
+const { data: dataRombels, isLoading: loadingRombel } = useQuery({
+    queryKey: ['rombel'],
+    queryFn: getRombel
+})
+
+
 </script>
 <template>
     <div>
@@ -145,6 +164,9 @@ const printObj = ref({
             <div class="flex gap-2">
                 <Button :disabled="chartPresencesLoading" :loading="chartPresencesLoading" icon="pi pi-print"
                     label="Print" class="mt-3" v-if="session" v-print="printObj" />
+                <Dropdown v-if="session" :loading="loadingRombel" v-model="selectedRombel"
+                    :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []"
+                    optionLabel="value" placeholder="Pilih Rombel" class="w-full mt-3" />
             </div>
         </div>
         <div id="printChart">

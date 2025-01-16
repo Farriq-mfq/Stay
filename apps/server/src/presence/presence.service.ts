@@ -685,7 +685,15 @@ export class PresenceService {
           rombel: true,
           createdAt: true,
           updatedAt: true,
-          presences: true
+          presences: {
+            select: {
+              gateway: true,
+              presence_sessionsId: true,
+              createdAt: true,
+              enter_time: true,
+              exit_time: true
+            }
+          },
         },
         where: {
           rombel: {
@@ -720,7 +728,8 @@ export class PresenceService {
           createAt: presence.createdAt,
           updateAt: presence.updatedAt,
           hasPresence: presence.hasPresence,
-          detailPresence: presence.detailPresence
+          detailPresence: presence.detailPresence,
+          gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
         }
       })
     } else {
@@ -737,16 +746,8 @@ export class PresenceService {
   ) {
     const rombels = await this.siswaService.getGroupClass();
     if (rombels.includes(rombel)) {
-      let filterDate: FilterDate | null = null;
-      if (isJSON(date)) {
-        const parseFilterDateAsJson = JSON.parse(date) as FilterDate;
-        if (isValidDateString(parseFilterDateAsJson.start_date, 'yyyy-MM-dd') && isValidDateString(parseFilterDateAsJson.end_date, 'yyyy-MM-dd')) {
-          if (validateDateRange(parseFilterDateAsJson.start_date, parseFilterDateAsJson.end_date)) {
-            filterDate = parseFilterDateAsJson
-          } else {
-            throw new BadRequestException('Invalid date range');
-          }
-        }
+      if (!isValidDateString(date, 'yyyy-MM-dd')) {
+        throw new BadRequestException("date invalid")
       }
 
 
@@ -755,91 +756,64 @@ export class PresenceService {
           id: parseInt(sessionId)
         }
       })
-
-      const presences = await this.prismaService.client.presences.findMany({
+      const presences = await this.prismaService.client.siswa.findMany({
         select: {
           id: true,
-          presence_sessionsId: true,
-          gatewaysId: true,
-          siswaId: true,
+          name: true,
+          rombel: true,
           createdAt: true,
           updatedAt: true,
-          gateway: true,
-          siswa: true,
-          session: true,
-          method: true,
-          enter_time: true,
-          exit_time: true,
+          presences: {
+            select: {
+              gateway: true,
+              presence_sessionsId: true,
+              createdAt: true,
+              enter_time: true,
+              exit_time: true
+            }
+          },
+          nis: true,
+          nisn: true,
+
         },
         where: {
-          siswa: {
-            rombel
+          rombel: {
+            equals: rombel
           },
           ...search && {
             OR: [
               {
-                siswa: {
-                  name: {
-                    contains: search,
-                    mode: 'insensitive'
-                  },
-                },
-              },
-              {
-                siswa: {
-                  rombel: {
-                    contains: search,
-                    mode: 'insensitive'
-                  }
-                }
-              },
-              {
-                gateway: {
-                  name: {
-                    contains: search,
-                    mode: 'insensitive'
-                  }
-                },
-              },
-              {
-                gateway: {
-                  location: {
-                    contains: search,
-                    mode: 'insensitive'
-                  }
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
                 },
               },
             ],
           },
-          presence_sessionsId: session.id,
-          ...(filterDate && {
-            createdAt: {
-              gte: new Date(filterDate.start_date),
-              lte: new Date(filterDate.end_date)
-            }
-          })
-
-
-        },
-        orderBy: {
-          createdAt: 'desc'
         }
       })
 
-      const mappingPresences = presences.map(presence => ({
-        Nama: presence.siswa.name,
-        NISN: presence.siswa.nisn,
-        NIS: presence.siswa.nis,
-        Rombel: presence.siswa.rombel,
-        Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+      const checkSiswaHasPresence = presences.map(presence => {
+        return {
+          ...presence,
+          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+        }
+      })
+      const mappingPresences = checkSiswaHasPresence.map(presence => ({
+        Nama: presence.name,
+        NISN: presence.nisn,
+        NIS: presence.nis,
+        Rombel: presence.rombel,
+        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
+        Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
-        }) : '-',
-        Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+        }) : '-' : '-',
+        Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
-        }) : '-',
-        Session: presence.session.name,
-        Lokasi: presence.gateway ? presence.gateway.location : '-',
-        Metode: presence.method,
+        }) : '-' : '-',
+        Session: session.name,
+        Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
       }))
 
 
