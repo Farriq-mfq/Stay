@@ -79,7 +79,15 @@ const router = createRouter({
                             meta: {
                                 title: "Chart Presences",
                             },
-                        }
+                        },
+                        {
+                            path: '/presences/rombel',
+                            name: 'presences-recap-rombel',
+                            component: () => import('@/views/Presences/Rombel.vue'),
+                            meta: {
+                                title: "Rombel Presences",
+                            },
+                        },
                         // {
                         //     path: '/presences/recap',
                         //     name: 'presences-recap',

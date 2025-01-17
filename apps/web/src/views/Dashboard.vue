@@ -101,5 +101,20 @@ const auth = inject('auth')
         </router-link>
       </div>
     </div>
+    <div class="px-3">
+      <Card>
+        <template #title>
+          Info Aplikasi
+        </template>
+        <template #content>
+          <p class="m-0">
+            Sistem presensi siswa berbasis RFID (Radio Frequency Identification) merupakan inovasi teknologi yang
+            dirancang untuk meningkatkan efisiensi dan akurasi dalam proses pencatatan kehadiran siswa. Dengan
+            memanfaatkan teknologi RFID, sistem ini menggantikan metode tradisional seperti tanda tangan manual atau
+            pencatatan berbasis kertas yang rentan terhadap kesalahan dan manipulasi data.
+          </p>
+        </template>
+      </Card>
+    </div>
   </div>
 </template>

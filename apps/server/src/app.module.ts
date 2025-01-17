@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { GatewaysModule } from './gateways/gateways.module';
-import { SiswaModule } from './siswa/siswa.module';
-import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CustomPrismaModule } from 'nestjs-prisma';
+import { AuthModule } from './auth/auth.module';
+import configuration from './config/configuration';
 import { EventsModule } from './events/events.module';
+import { GatewaysModule } from './gateways/gateways.module';
 import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
 import { SessionsModule } from './sessions/sessions.module';
+import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
-import { AppChannel1Module } from './telegram/channel1/app-channel1.module';
-import { WhatsappModule } from './whatsapp/whatsapp.module';
-import configuration from './config/configuration';
+import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -55,7 +53,7 @@ import configuration from './config/configuration';
     PresenceModule,
     SessionsModule,
     StatsModule,
-    WhatsappModule,
+    // WhatsappModule,
   ],
 })
 export class AppModule { }

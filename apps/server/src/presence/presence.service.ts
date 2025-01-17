@@ -9,6 +9,8 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { isJSON, isValidDateString, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+import { SiswaService } from 'src/siswa/siswa.service';
+import { contains } from 'class-validator';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -17,6 +19,7 @@ type FilterDate = {
 @Injectable()
 export class PresenceService {
   constructor(
+    private readonly siswaService: SiswaService,
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) { }
   // async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
@@ -654,5 +657,173 @@ export class PresenceService {
     xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
     const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
     return buffer;
+  }
+
+  async findAllRombel(
+    sessionId: string,
+    search?: string,
+    date?: string,
+    rombel?: string
+
+  ) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      if (!isValidDateString(date, 'yyyy-MM-dd')) {
+        throw new BadRequestException("date invalid")
+      }
+
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+      const presences = await this.prismaService.client.siswa.findMany({
+        select: {
+          id: true,
+          name: true,
+          rombel: true,
+          createdAt: true,
+          updatedAt: true,
+          presences: {
+            select: {
+              gateway: true,
+              presence_sessionsId: true,
+              createdAt: true,
+              enter_time: true,
+              exit_time: true
+            }
+          },
+        },
+        where: {
+          rombel: {
+            equals: rombel
+          },
+          ...search && {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                },
+              },
+            ],
+          },
+        }
+      })
+
+      const checkSiswaHasPresence = presences.map(presence => {
+        return {
+          ...presence,
+          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+        }
+      })
+
+      return checkSiswaHasPresence.map(presence => {
+        return {
+          id: presence.id,
+          name: presence.name,
+          rombel: presence.rombel,
+          createAt: presence.createdAt,
+          updateAt: presence.updatedAt,
+          hasPresence: presence.hasPresence,
+          detailPresence: presence.detailPresence,
+          gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+        }
+      })
+    } else {
+      throw new NotFoundException()
+    }
+
+  }
+
+  async exportByClass(
+    sessionId: string,
+    search?: string,
+    date?: string,
+    rombel?: string
+  ) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      if (!isValidDateString(date, 'yyyy-MM-dd')) {
+        throw new BadRequestException("date invalid")
+      }
+
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+      const presences = await this.prismaService.client.siswa.findMany({
+        select: {
+          id: true,
+          name: true,
+          rombel: true,
+          createdAt: true,
+          updatedAt: true,
+          presences: {
+            select: {
+              gateway: true,
+              presence_sessionsId: true,
+              createdAt: true,
+              enter_time: true,
+              exit_time: true
+            }
+          },
+          nis: true,
+          nisn: true,
+
+        },
+        where: {
+          rombel: {
+            equals: rombel
+          },
+          ...search && {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive'
+                },
+              },
+            ],
+          },
+        }
+      })
+
+      const checkSiswaHasPresence = presences.map(presence => {
+        return {
+          ...presence,
+          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+        }
+      })
+      const mappingPresences = checkSiswaHasPresence.map(presence => ({
+        Nama: presence.name,
+        NISN: presence.nisn,
+        NIS: presence.nis,
+        Rombel: presence.rombel,
+        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
+        Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+          locale: id
+        }) : '-' : '-',
+        Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+          locale: id
+        }) : '-' : '-',
+        Session: session.name,
+        Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+      }))
+
+
+      const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
+      const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+      return buffer;
+    } else {
+      throw new NotFoundException()
+    }
   }
 }

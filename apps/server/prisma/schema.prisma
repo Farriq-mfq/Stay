@@ -79,6 +79,7 @@ model presence_sessions {
   updatedAt   DateTime    @updatedAt
   gateways    gateways[]
   presences   presences[]
+  rombel      String?
 
   @@index([qrcode])
 }
