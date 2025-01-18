@@ -1,4 +1,10 @@
-## [1.1.0] - 2025-01-17.
+## [1.2.0] - 2025-01-18
+
+### Added
+
+-   menambah fitur backup database
+
+## [1.1.0] - 2025-01-17
 
 ### Added
 
@@ -6,7 +12,7 @@
 -   menambah fitur filter grafik data presensi berdasarkan rombel (rombongan kelas).
 -   menambah fitur display lcd.
 
-## [1.0.0] - 2025-01-06.
+## [1.0.0] - 2025-01-06
 
 ### Initial Release
 
