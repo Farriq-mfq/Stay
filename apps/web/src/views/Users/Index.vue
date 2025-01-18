@@ -299,6 +299,8 @@ const clearUpdateUserPassword = () => {
   <div class="grid">
     <div class="col-12">
       <div class="card">
+        <h3>Pengguna Sistem</h3>
+        <hr>
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
@@ -435,8 +437,8 @@ const clearUpdateUserPassword = () => {
           <div class="field">
             <label for="confirmation_password">Konfirmasi Password</label>
             <InputText id="confirmation_password" :disabled="updateUserPasswordLoading"
-              :invalid="errorsUpdateUserPassword && errorsUpdateUserPassword.confirmation_password" required="true" autofocus
-              v-model="updateUserPasswordData.confirmation_password" />
+              :invalid="errorsUpdateUserPassword && errorsUpdateUserPassword.confirmation_password" required="true"
+              autofocus v-model="updateUserPasswordData.confirmation_password" />
             <p class="text-red-500" v-if="errorsUpdateUserPassword && errorsUpdateUserPassword.confirmation_password">
               {{ errorsUpdateUserPassword.confirmation_password[0] }}
             </p>
@@ -445,8 +447,8 @@ const clearUpdateUserPassword = () => {
           <template #footer>
             <Button label="Batal" :disabled="updateUserPasswordLoading" severity="danger" icon="pi pi-times" outlined
               @click.prevent="showDialogUpdateUserPassword = false" />
-            <Button label="Update" :loading="updateUserPasswordLoading" :disabled="updateUserPasswordLoading" icon="pi pi-link"
-              @click="handleUpdateUserPassword" />
+            <Button label="Update" :loading="updateUserPasswordLoading" :disabled="updateUserPasswordLoading"
+              icon="pi pi-link" @click="handleUpdateUserPassword" />
           </template>
         </Dialog>
       </div>

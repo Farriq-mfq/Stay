@@ -21,6 +21,10 @@ export class CreateSessionDto {
     @IsNumber({}, { each: true })
     @IsOptional()
     gateways: number[]
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    rombel: string[]
 }
 
 

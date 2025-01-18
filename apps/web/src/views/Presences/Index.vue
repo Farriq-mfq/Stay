@@ -17,7 +17,7 @@ const items = ref([
 <template>
   <Card>
     <template #title>
-      Presences
+      Data Presensi
     </template>
     <template #content>
       <TabMenu :model="items">

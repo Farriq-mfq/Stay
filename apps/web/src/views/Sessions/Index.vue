@@ -23,6 +23,9 @@ const queryParams = ref({
 const totalRecords = ref(0);
 const dt = ref()
 
+const selectedRombel = ref([]);
+
+
 const getAllSessions = async () => {
   const queries = {
     page: (queryParams.value.first / queryParams.value.rows) + 1,
@@ -64,13 +67,13 @@ const sessionData = ref({
   start_time: null,
   end_time: null,
   allow_twice: false,
-  gateways: []
+  gateways: [],
 })
 
 
 
 const addSessionService = async (data) => {
-  return await axios.post('/sessions', data)
+  return await axios.post('/sessions', { ...data, rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : [] })
 }
 
 const {
@@ -93,8 +96,12 @@ const handleAddSession = () => {
       addSessionDialog.value = false
       sessionData.value = {
         name: '',
-        gateways: []
+        start_time: null,
+        end_time: null,
+        allow_twice: false,
+        gateways: [],
       }
+      selectedRombel.value = []
       refetch()
     },
     onError: (err) => {
@@ -190,7 +197,8 @@ const updateService = async (data) => {
     end_time: data.end_time,
     ...data.gateways.length && {
       gateways: data.gateways
-    }
+    },
+    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
   })
 }
 
@@ -217,6 +225,8 @@ const handleShowDialogUpdateSesion = (data) => {
     allow_twice: data.allow_twice,
     gateways: data.gateways,
   }
+
+  selectedRombel.value = data.rombel ? JSON.parse(data.rombel).map(item => ({ value: item })) : []
 }
 
 const clearUpdateSession = () => {
@@ -229,10 +239,11 @@ const clearUpdateSession = () => {
   }
 
   showDialogUpdateSession.value = false
+  selectedRombel.value = []
 }
 
 const handleSubmitUpdateSesion = () => {
-  updateSession(dataUpdateSession.value, {
+  updateSession({ ...dataUpdateSession.value, rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : [] }, {
     onSuccess() {
       toast.add({
         severity: 'success',
@@ -264,6 +275,18 @@ const handleSubmitUpdateSesion = () => {
     }
   })
 }
+// get rombel service
+const getRombel = async () => {
+  return await axios.get('/siswa/rombel');
+}
+
+const { data: dataRombels, isLoading: loadingRombel } = useQuery({
+  queryKey: ['rombel'],
+  queryFn: getRombel
+})
+
+
+
 
 // camera
 const router = proxy.$router;
@@ -300,6 +323,8 @@ const clearDialogQrCode = () => {
   <div class="grid">
     <div class="col-12">
       <div class="card">
+        <h3>Sesi Presensi</h3>
+        <hr>
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
@@ -360,6 +385,15 @@ const clearDialogQrCode = () => {
             <template #body="{ data }">
               <Chip class="bg-red-400 text-white text-sm"
                 :label="format(data.end_time, 'dd/MM/yyyy HH:mm', { locale: id })" v-if="data.end_time" />
+              <p v-else>-</p>
+            </template>
+          </Column>
+          <Column field="rombel" header="Rombel yang diijinkan">
+            <template #body="{ data }">
+              <div v-if="data.rombel && data.rombel.length">
+                <Chip class="bg-primary text-white text-sm m-2" :label="rmbl" v-for="rmbl in JSON.parse(data.rombel)"
+                  :key="rmbl" />
+              </div>
               <p v-else>-</p>
             </template>
           </Column>
@@ -436,6 +470,15 @@ const clearDialogQrCode = () => {
             {{ errorsAddSession.gateways[0] }}
           </p>
         </div>
+        <div class="field">
+          <label for="gateways">Rombel (Optional)</label>
+          <MultiSelect :loading="loadingRombel" filter v-model="selectedRombel"
+            :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
+            placeholder="Pilih Rombel" class="w-full" />
+          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.rombel">
+            {{ errorsAddSession.rombel[0] }}
+          </p>
+        </div>
 
         <template #footer>
           <Button label="Batal" :disabled="addSessionLoading" severity="danger" icon="pi pi-times" outlined
@@ -479,6 +522,16 @@ const clearDialogQrCode = () => {
             @input="handleChangeUpdateSessionGateway" />
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.gateways">
             {{ errorsUpdateSession.gateways[0] }}
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="gateways">Rombel (Optional)</label>
+          <MultiSelect :loading="loadingRombel" filter v-model="selectedRombel"
+            :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
+            placeholder="Pilih Rombel" class="w-full" />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.rombel">
+            {{ errorsUpdateSession.rombel[0] }}
           </p>
         </div>
 

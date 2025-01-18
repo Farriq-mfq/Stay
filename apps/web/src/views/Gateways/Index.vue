@@ -371,6 +371,8 @@ const handleCloseShowToken = () => {
     <div class="grid">
         <div class="col-12">
             <div class="card">
+                <h3>Gateway</h3>
+                <hr>
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
