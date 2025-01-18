@@ -1,15 +1,15 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { createReadStream, existsSync, ReadStream, unlinkSync } from 'fs';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { BackupService } from './backup.service';
 @Controller("backup")
+@UseGuards(AccessTokenGuard)
 export class BackupController {
     constructor(
         private readonly backupService: BackupService,
     ) { }
     @Get("database")
-    // @Header('Content-Type', 'application/sql')
-    // @Header('Content-Disposition', `attachment; filename=${Date.now()}-backup.sql"`)
     async backupDatabase(
         @Res() res: Response
     ) {

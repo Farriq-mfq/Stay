@@ -303,6 +303,16 @@ export class PresenceService {
               siswa
             })
           } else {
+            // validate by rombel
+            const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+            if (parseRombel.length > 0) {
+              if (!parseRombel.includes(siswa.rombel)) {
+                this.handlingPresenceError({
+                  error: `ANDA TIDAK DAPAT PRESENSI DI ROMBEL INI`,
+                  siswa
+                })
+              }
+            }
             // update the exit_time
             const updateExitTime = await tx.presences.update({
               where: {
@@ -328,6 +338,16 @@ export class PresenceService {
           }
 
         } else {
+          // validate by rombel
+          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          if (parseRombel.length > 0) {
+            if (!parseRombel.includes(siswa.rombel)) {
+              this.handlingPresenceError({
+                error: `ANDA TIDAK DAPAT PRESENSI DI ROMBEL INI`,
+                siswa
+              })
+            }
+          }
           const createPresenceEnter = await tx.presences.create({
             data: {
               presence_sessionsId: session.id,
@@ -372,6 +392,16 @@ export class PresenceService {
             siswa
           })
         } else {
+          // validate by rombel
+          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          if (parseRombel.length > 0) {
+            if (!parseRombel.includes(siswa.rombel)) {
+              this.handlingPresenceError({
+                error: `ANDA TIDAK DAPAT PRESENSI DI ROMBEL INI`,
+                siswa
+              })
+            }
+          }
           const createPresence = await tx.presences.create({
             data: {
               presence_sessionsId: session.id,

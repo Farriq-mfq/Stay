@@ -11,12 +11,12 @@ const model = ref([
     {
         label: 'Fitur',
         items: [
-            { label: 'Gateways', icon: 'pi pi-fw pi-link', to: '/gateways' },
-            { label: 'Sessions', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
+            { label: 'Gateway', icon: 'pi pi-fw pi-link', to: '/gateways' },
+            { label: 'Sesi Presensi', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
             // { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
-            { label: 'Presences', icon: 'pi pi-fw pi-server', to: '/presences' },
-            { label: 'Change Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
-            { label: 'Profile', icon: 'pi pi-fw pi-user', to: '/profile' },
+            { label: 'Data Presensi', icon: 'pi pi-fw pi-server', to: '/presences' },
+            // { label: 'Ubah Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
+            { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' },
             { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' },
             // {
             //     label: 'Notifications', icon: 'pi pi-fw pi-bell',

@@ -19,6 +19,7 @@ const handleBackupService = async () => {
         link.setAttribute('download', `${format(new Date(), 'yyyy-MM-dd')}-backup.sql`);
         document.body.appendChild(link);
         link.click();
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Backup berhasil dilakukan', life: 3000 });
     } catch {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Gagal melakukan backup', life: 3000 });
     } finally {

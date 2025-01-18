@@ -3,6 +3,12 @@
 ### Added
 
 -   menambah fitur backup database
+-   menambah fitur sesi per rombel
+
+### Change 
+-   merubah nama menu fitur di sidebar
+-   memberi judul perhalaman
+-   menggabungkan ubah password di menu profile
 
 ## [1.1.0] - 2025-01-17
 
