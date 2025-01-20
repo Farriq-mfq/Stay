@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
-import { format } from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { isJSON, isValidDateString, validateDateRange } from 'src/utils/helpers';
+import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
 import { SiswaService } from 'src/siswa/siswa.service';
@@ -855,5 +855,139 @@ export class PresenceService {
     } else {
       throw new NotFoundException()
     }
+  }
+
+  async findAllPresenceByMonthClass(sessionId: string, date?: string, rombel?: string) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+
+      const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const dateInterval = eachDayOfInterval({
+        start: startDate, end: endDate
+      })
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+
+      const presences = await this.prismaService.client.presences.findMany({
+        where: {
+          presence_sessionsId: session.id,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+
+      const siswa = await this.prismaService.client.siswa.findMany({
+        where: {
+          rombel
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+
+
+      const mappingPresences = siswa.map(s => {
+        return {
+          name: s.name,
+          presences: dateInterval.map(d => {
+            return {
+              [format(d, "dd")]: presences.find(presence => presence.siswaId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd")) ?? null
+            }
+          })
+        }
+      })
+      return {
+        date: {
+          startDate,
+          endDate
+        },
+        presences: mappingPresences
+      }
+
+    }
+  }
+  async exportPresenceByMonthClass(sessionId: string, date?: string, rombel?: string) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+
+      const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const dateInterval = eachDayOfInterval({
+        start: startDate, end: endDate
+      })
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+
+      const presences = await this.prismaService.client.presences.findMany({
+        where: {
+          presence_sessionsId: session.id,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+
+      const siswa = await this.prismaService.client.siswa.findMany({
+        where: {
+          rombel
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+
+      const transformedData = siswa.map((s) => {
+        const transformed = {};
+        dateInterval.forEach((d) => {
+          const dt = presences.find(presence => presence.siswaId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+          transformed[format(d, "dd")] = dt ? `${format(dt.enter_time, 'HH:mm:ss', { locale: id })}${dt.exit_time ? `- ` + format(dt.exit_time, 'HH:mm:ss', { locale: id }) : ''}` : "-";
+        });
+        transformed["Nama"] = s.name;
+        return transformed
+      });
+
+
+      const sortData = transformedData.map((data: any) => {
+        const keys = Object.keys(data).filter(key => key !== "Nama"); // Hilangkan 'Nama' dari key
+        const sortedSiswa = { Nama: data.Nama };
+        keys.sort((keyA, keyB) => parseInt(keyA) - parseInt(keyB)).forEach(key=>{
+          sortedSiswa[key] = data[key];
+        }); 
+
+        return sortedSiswa;
+      });
+
+
+      return sortData
+    };
+
+
+
+    // const worksheet = xlsx.utils.json_to_sheet(transformedData);
+    // const workbook = xlsx.utils.book_new();
+    // xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences-' + `${rombel}-` + date);
+    // const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    // return buffer;
+
   }
 }

@@ -85,7 +85,15 @@ const router = createRouter({
                             name: 'presences-recap-rombel',
                             component: () => import('@/views/Presences/Rombel.vue'),
                             meta: {
-                                title: "Rombel Presences",
+                                title: "Rombel Presences Harian",
+                            },
+                        },
+                        {
+                            path: '/presences/monthly',
+                            name: 'presences-recap-month',
+                            component: () => import('@/views/Presences/Monthly.vue'),
+                            meta: {
+                                title: "Rekap Presences Bulanan",
                             },
                         },
                         // {

@@ -80,6 +80,7 @@ export class PresenceController {
       rombel
     )
   }
+
   @Get('/export/:sessionId/:rombel')
   @UseGuards(AccessTokenGuard)
   async exportPresenceByRombel(
@@ -101,5 +102,38 @@ export class PresenceController {
     });
     res.send(buffer);
   }
+  @Get('/:sessionId/:rombel/monthly')
+  @UseGuards(AccessTokenGuard)
+  async findAllPresenceByMonthClass(
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query("date") date: string,
+    @Param('rombel') rombel?: string
+  ) {
 
+    return await this.presenceService.findAllPresenceByMonthClass(
+      sessionId,
+      date,
+      rombel
+    )
+  }
+  @Get('/:sessionId/:rombel/monthly/export')
+  @UseGuards(AccessTokenGuard)
+  async exportPresenceByMonthClass(
+    @Res() res: Response,
+    @Param('sessionId', new ParseIntPipe()) sessionId: string,
+    @Query("date") date: string,
+    @Param('rombel') rombel?: string,
+  ) {
+
+    const buffer = await this.presenceService.exportPresenceByMonthClass(
+      sessionId,
+      date,
+      rombel)
+    res.send(buffer)
+    // res.set({
+    //   'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    //   'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
+    // });
+    // res.send(buffer);
+  }
 }
