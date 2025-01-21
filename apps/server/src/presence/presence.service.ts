@@ -1,16 +1,16 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
-import { format } from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { isJSON, isValidDateString, validateDateRange } from 'src/utils/helpers';
+import { SiswaService } from 'src/siswa/siswa.service';
+import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
-import { SiswaService } from 'src/siswa/siswa.service';
-import { contains } from 'class-validator';
+import * as _ from 'lodash';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -666,16 +666,16 @@ export class PresenceService {
     })
 
     const mappingPresences = presences.map(presence => ({
-      Nama: presence.siswa.name,
-      NISN: presence.siswa.nisn,
-      NIS: presence.siswa.nis,
-      Rombel: presence.siswa.rombel,
       Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }) : '-',
       Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }) : '-',
+      Nama: presence.siswa.name,
+      NISN: presence.siswa.nisn,
+      NIS: presence.siswa.nis,
+      Rombel: presence.siswa.rombel,
       Session: presence.session.name,
       Lokasi: presence.gateway ? presence.gateway.location : '-',
       Metode: presence.method,
@@ -831,17 +831,17 @@ export class PresenceService {
         }
       })
       const mappingPresences = checkSiswaHasPresence.map(presence => ({
-        Nama: presence.name,
-        NISN: presence.nisn,
-        NIS: presence.nis,
-        Rombel: presence.rombel,
-        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
         Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
         }) : '-' : '-',
         Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
         }) : '-' : '-',
+        Nama: presence.name,
+        NISN: presence.nisn,
+        NIS: presence.nis,
+        Rombel: presence.rombel,
+        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
         Session: session.name,
         Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
       }))
@@ -855,5 +855,128 @@ export class PresenceService {
     } else {
       throw new NotFoundException()
     }
+  }
+
+  async findAllPresenceByMonthClass(sessionId: string, date?: string, rombel?: string) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+
+      const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const dateInterval = eachDayOfInterval({
+        start: startDate, end: endDate
+      })
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+
+      const presences = await this.prismaService.client.presences.findMany({
+        where: {
+          presence_sessionsId: session.id,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+
+      const siswa = await this.prismaService.client.siswa.findMany({
+        where: {
+          rombel
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+
+
+      const mappingPresences = siswa.map(s => {
+        return {
+          name: s.name,
+          presences: dateInterval.map(d => {
+            return {
+              [format(d, "dd")]: presences.find(presence => presence.siswaId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd")) ?? null
+            }
+          })
+        }
+      })
+      return {
+        date: {
+          startDate,
+          endDate
+        },
+        presences: mappingPresences
+      }
+
+    }
+  }
+  async exportPresenceByMonthClass(sessionId: string, date?: string, rombel?: string) {
+    const rombels = await this.siswaService.getGroupClass();
+    if (rombels.includes(rombel)) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+
+      const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      const dateInterval = eachDayOfInterval({
+        start: startDate, end: endDate
+      })
+
+      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+        where: {
+          id: parseInt(sessionId)
+        }
+      })
+
+      const presences = await this.prismaService.client.presences.findMany({
+        where: {
+          presence_sessionsId: session.id,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+
+      const siswa = await this.prismaService.client.siswa.findMany({
+        where: {
+          rombel
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+
+      const transformedData = siswa.map((s) => {
+        const transformed = new Map();
+        // transformed["Nama"] = s.name;
+        transformed.set("Nama", s.name)
+        dateInterval.forEach((d) => {
+          const dt = presences.find(presence => presence.siswaId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+          transformed.set(`-${parseInt(format(d, "dd"))}-`, dt ? `${format(dt.enter_time, 'HH:mm:ss', { locale: id })}${dt.exit_time ? `- ` + format(dt.exit_time, 'HH:mm:ss', { locale: id }) : ''}` : "-");
+        });
+
+        return Object.fromEntries(transformed)
+      });
+
+
+      const worksheet = xlsx.utils.json_to_sheet(transformedData);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences-' + `${rombel}-` + date);
+      const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+      return buffer;
+    } else {
+      throw new BadRequestException()
+    }
+
   }
 }

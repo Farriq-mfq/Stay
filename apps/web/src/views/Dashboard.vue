@@ -105,7 +105,7 @@ const auth = inject('auth')
       </div>
     </div>
     <div class="px-3 w-full">
-      <Fieldset legend="Catatan Pembaruan">
+      <Fieldset legend="Catatan Pembaruan" class="overflow-y-auto" style="height: 500px !important;">
         <Changelog />
       </Fieldset>
     </div>

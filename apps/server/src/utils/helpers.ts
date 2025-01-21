@@ -1,5 +1,5 @@
 
-import { parse, isValid, isBefore } from 'date-fns'
+import { parse, isValid, isBefore, format } from 'date-fns'
 export function isValidDateString(dateString: string, format: string): boolean {
     if (dateString === undefined) return false
     const parsedDate = parse(dateString, format, new Date());
@@ -59,3 +59,26 @@ export const parseDatabaseUrl = (dbUrl) => {
         queryParams,
     };
 };
+
+
+
+// Function to validate and format input
+export function validateAndFormatDateYear(input: string): { year: string, month: string } | null {
+    const regex = /^\d{4}-\d{2}$/; // Matches 'yyyy-MM' format
+
+    if (!regex.test(input)) {
+        return null;
+    }
+
+    const parsedDate = parse(input, 'yyyy-MM', new Date());
+
+    if (!isValid(parsedDate)) {
+        return null;
+    }
+
+    const splitDate = format(parsedDate, 'yyyy-MM').split('-');
+    return {
+        year: splitDate[0],
+        month: splitDate[1]
+    }
+}
