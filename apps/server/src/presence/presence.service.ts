@@ -666,16 +666,16 @@ export class PresenceService {
     })
 
     const mappingPresences = presences.map(presence => ({
-      Nama: presence.siswa.name,
-      NISN: presence.siswa.nisn,
-      NIS: presence.siswa.nis,
-      Rombel: presence.siswa.rombel,
       Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }) : '-',
       Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
         locale: id
       }) : '-',
+      Nama: presence.siswa.name,
+      NISN: presence.siswa.nisn,
+      NIS: presence.siswa.nis,
+      Rombel: presence.siswa.rombel,
       Session: presence.session.name,
       Lokasi: presence.gateway ? presence.gateway.location : '-',
       Metode: presence.method,
@@ -831,17 +831,17 @@ export class PresenceService {
         }
       })
       const mappingPresences = checkSiswaHasPresence.map(presence => ({
-        Nama: presence.name,
-        NISN: presence.nisn,
-        NIS: presence.nis,
-        Rombel: presence.rombel,
-        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
         Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
         }) : '-' : '-',
         Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
           locale: id
         }) : '-' : '-',
+        Nama: presence.name,
+        NISN: presence.nisn,
+        NIS: presence.nis,
+        Rombel: presence.rombel,
+        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
         Session: session.name,
         Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
       }))
@@ -977,9 +977,6 @@ export class PresenceService {
     } else {
       throw new BadRequestException()
     }
-
-
-
 
   }
 }

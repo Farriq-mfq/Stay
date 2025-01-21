@@ -1,3 +1,9 @@
+## [1.3.0] - 2025-01-21
+
+### Added
+-   menambah fitur rekap perbulan
+-   menambah scrool di dashboard change log (catatan perubahan) 
+
 ## [1.2.0] - 2025-01-18
 
 ### Added
