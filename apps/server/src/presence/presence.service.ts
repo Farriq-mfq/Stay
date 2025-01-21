@@ -10,7 +10,6 @@ import { SiswaService } from 'src/siswa/siswa.service';
 import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
-import * as _ from 'lodash';
 type FilterDate = {
   start_date?: string,
   end_date?: string
