@@ -6,11 +6,11 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { ScannedDto } from 'src/gateways/dto/scanned.dto';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { SiswaService } from 'src/siswa/siswa.service';
 import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
-import { SiswaService } from 'src/siswa/siswa.service';
-import { contains } from 'class-validator';
+import * as _ from 'lodash';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -957,37 +957,29 @@ export class PresenceService {
       })
 
       const transformedData = siswa.map((s) => {
-        const transformed = {};
+        const transformed = new Map();
+        // transformed["Nama"] = s.name;
+        transformed.set("Nama", s.name)
         dateInterval.forEach((d) => {
           const dt = presences.find(presence => presence.siswaId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
-          transformed[format(d, "dd")] = dt ? `${format(dt.enter_time, 'HH:mm:ss', { locale: id })}${dt.exit_time ? `- ` + format(dt.exit_time, 'HH:mm:ss', { locale: id }) : ''}` : "-";
+          transformed.set(`-${parseInt(format(d, "dd"))}-`, dt ? `${format(dt.enter_time, 'HH:mm:ss', { locale: id })}${dt.exit_time ? `- ` + format(dt.exit_time, 'HH:mm:ss', { locale: id }) : ''}` : "-");
         });
-        transformed["Nama"] = s.name;
-        return transformed
+
+        return Object.fromEntries(transformed)
       });
 
 
-      const sortData = transformedData.map((data: any) => {
-        const keys = Object.keys(data).filter(key => key !== "Nama"); // Hilangkan 'Nama' dari key
-        const sortedSiswa = { Nama: data.Nama };
-        keys.sort((keyA, keyB) => parseInt(keyA) - parseInt(keyB)).forEach(key=>{
-          sortedSiswa[key] = data[key];
-        }); 
-
-        return sortedSiswa;
-      });
-
-
-      return sortData
-    };
+      const worksheet = xlsx.utils.json_to_sheet(transformedData);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences-' + `${rombel}-` + date);
+      const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+      return buffer;
+    } else {
+      throw new BadRequestException()
+    }
 
 
 
-    // const worksheet = xlsx.utils.json_to_sheet(transformedData);
-    // const workbook = xlsx.utils.book_new();
-    // xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences-' + `${rombel}-` + date);
-    // const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-    // return buffer;
 
   }
 }
