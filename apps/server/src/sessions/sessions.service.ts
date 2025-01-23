@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CreateSessionDto } from './dto/create-session.dto';
@@ -15,6 +15,14 @@ export class SessionsService {
 
   async create(createSessionDto: CreateSessionDto) {
     if (createSessionDto.gateways && createSessionDto.gateways.length) {
+      const checkSessionName = await this.prismaService.client.presence_sessions.findFirst({
+        where: {
+          name: createSessionDto.name
+        }
+      })
+
+      if (checkSessionName) throw new BadRequestException('Session name already exist')
+
       const session = await this.prismaService.client.presence_sessions.create({
         data: {
           name: createSessionDto.name,
@@ -27,7 +35,7 @@ export class SessionsService {
           ...createSessionDto.end_time && {
             end_time: createSessionDto.end_time
           },
-          ...createSessionDto.rombel.length > 0 && {
+          ...createSessionDto.rombel && createSessionDto.rombel.length > 0 && {
             rombel: JSON.stringify(createSessionDto.rombel)
           }
         },
@@ -56,7 +64,7 @@ export class SessionsService {
           ...createSessionDto.end_time && {
             end_time: createSessionDto.end_time
           },
-          ...createSessionDto.rombel.length > 0 && {
+          ...createSessionDto.rombel && createSessionDto.rombel.length > 0 && {
             rombel: JSON.stringify(createSessionDto.rombel)
           }
         },
@@ -96,6 +104,9 @@ export class SessionsService {
             token: true
           }
         }
+      },
+      orderBy: {
+        createdAt: "desc"
       }
     }).withPages({
       limit: limit ?? 10,
@@ -146,7 +157,7 @@ export class SessionsService {
           allow_twice: updateSessionDto.allow_twice,
           start_time: updateSessionDto.start_time,
           end_time: updateSessionDto.end_time,
-          rombel: JSON.stringify(updateSessionDto.rombel)
+          rombel: updateSessionDto.rombel && updateSessionDto.rombel.length > 0 ? JSON.stringify(updateSessionDto.rombel) : null
         },
       })
       await this.prismaService.client.gateways.updateMany({
