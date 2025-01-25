@@ -14,8 +14,23 @@ export class StatsController {
   @Get('/presences/chart/:sessionId')
   async getChartPresences(
     @Param('sessionId') sessionId: string,
-    @Query('rombel') rombel?: string
+    @Query('rombel') rombel?: string,
+    @Query('year') year?: string
   ) {
-    return await this.statsService.getChartPresences(sessionId, rombel);
+    return await this.statsService.getChartPresences(sessionId, rombel, year);
+  }
+  @Get('/presences/years/:sessionId')
+  async getALlYearPresence(
+    @Param('sessionId') sessionId: string,
+  ) {
+    return await this.statsService.getALlYearPresence(sessionId);
+  }
+
+  @Get('/presences/rombel/:sessionId')
+  async getStatsPresenceByRombel(
+    @Param('sessionId') sessionId: string,
+    @Query('date') date?: string
+  ) {
+    return await this.statsService.getStatsPresenceByRombel(sessionId, date);
   }
 }

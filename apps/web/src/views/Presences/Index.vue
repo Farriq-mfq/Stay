@@ -1,10 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 const items = ref([
-  { label: 'Semua data', icon: 'pi pi-home', route: '/presences/all' },
-  { label: 'Grafik', icon: 'pi pi-chart-line', route: '/presences/chart' },
-  { label: 'Rombel', icon: 'pi pi-home', route: '/presences/rombel' },
-  { label: 'Rekap Bulanan', icon: 'pi pi-database', route: '/presences/monthly' },
+  { label: 'Semua data', route: '/presences/all' },
+  { label: 'Rekap Harian', route: '/presences/rombel' },
+  { label: 'Rekap Bulanan', route: '/presences/monthly' },
   // { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
   // {
   //   label: 'Rekap',
@@ -25,7 +24,6 @@ const items = ref([
         <template #item="{ item, props }">
           <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
             <a v-ripple :href="href" v-bind="props.action" @click="navigate">
-              <span v-bind="props.icon" />
               <span v-bind="props.label">{{ item.label }}</span>
             </a>
           </router-link>

@@ -165,7 +165,7 @@ export class SiswaService {
   }
 
   async reset() {
-    return await this.prismaService.client.$queryRaw`TRUNCATE TABLE "siswa" CASCADE`
+    // return await this.prismaService.client.$queryRaw`TRUNCATE TABLE "siswa" CASCADE`
   }
 
   async registerRfid(id: number, updateToken: UpdateTokenDto) {

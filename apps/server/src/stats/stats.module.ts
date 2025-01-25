@@ -3,9 +3,10 @@ import { StatsService } from './stats.service';
 import { StatsController } from './stats.controller';
 import { SiswaModule } from 'src/siswa/siswa.module';
 import { SiswaService } from 'src/siswa/siswa.service';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [SiswaModule],
+  imports: [SiswaModule, CacheModule.register()],
   controllers: [StatsController],
   providers: [StatsService, SiswaService],
 })

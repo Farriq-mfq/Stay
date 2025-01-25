@@ -23,6 +23,9 @@ model siswa {
   presences        presences[]
   telegram_account telegram_account?
   notifications    notifications[]
+  profile_picture  String?
+  // for mobile phone register
+  nfc_token        String?
 
   @@index([nis, nisn])
 }

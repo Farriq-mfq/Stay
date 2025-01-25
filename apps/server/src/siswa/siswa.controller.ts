@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards, Res, StreamableFile, Header } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards, Res, StreamableFile, Header, ServiceUnavailableException } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
 import { CreateSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
@@ -55,7 +55,8 @@ export class SiswaController {
 
   @Delete('/reset')
   async reset() {
-    return await this.siswaService.reset()
+    // return await this.siswaService.reset()
+    throw new ServiceUnavailableException()
   }
 
   @Delete(':id')

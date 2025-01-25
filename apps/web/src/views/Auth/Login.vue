@@ -1,6 +1,6 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
-import { inject, reactive } from 'vue';
+import { inject, provide, reactive } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 
 const toast = useToast()
@@ -54,18 +54,25 @@ function handleLogin() {
         state.form.body.password = ''
     })
 }
+
+const APP_NAME = inject('APP_NAME')
 </script>
 <template>
-    <div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
-        <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5 xl:col-4">
+    <div
+        class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+        <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5 xl:col-3">
             <div>
-                <div class="w-full card py-8 px-5 sm:px-8" style="border-radius: 53px">
+                <div class="w-full card py-5" style="border-radius: 20px">
                     <div class="text-center mb-5">
-                        <div class="text-900 text-3xl font-medium mb-3">
-                            Selamat datang
+                        <div class="font-bold text-3xl font-medium mb-3">
+                            {{ APP_NAME }}
                         </div>
-                        <span class="text-600 font-medium">
-                            Silahkan login 
+                        <hr>
+                        <div class="text-900 text-2xl font-medium mb-3 uppercase text-center">
+                            Selamat Datang!
+                        </div>
+                        <span class="text-600 font-medium text-center">
+                            Silakan masuk untuk melanjutkan
                         </span>
                     </div>
                     <div class="mb-4">
@@ -90,18 +97,25 @@ function handleLogin() {
                         </p>
                     </div>
 
-                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
+                    <!-- <div class="flex align-items-center justify-content-between mb-5 gap-5">
                         <div class="flex align-items-center">
                             <Checkbox :disabled="state.form.loading" v-model="state.form.remember" id="rememberme1"
                                 binary class="mr-2"></Checkbox>
                             <label for="rememberme1">Remember me</label>
                         </div>
-                    </div>
+                    </div> -->
                     <Button :disabled="state.form.loading" type="submit"
                         :label="state.form.loading ? 'Loading...' : 'Sign In'" class="w-full p-3 text-xl"></Button>
+                    <div class="text-center mt-5">
+                        <span class="font-medium ml-2">&copy; Copyright {{ new Date().getFullYear() }} | TIM IT SMK
+                            Negeri 1
+                            Pekalongan</span>
+
+                    </div>
                 </div>
             </div>
         </form>
+
         <app-config></app-config>
     </div>
 </template>
