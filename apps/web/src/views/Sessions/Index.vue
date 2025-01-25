@@ -363,10 +363,7 @@ const clearDialogQrCode = () => {
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} sessions" :first="first"
           @page="onPage($event)">
           <template #header>
-            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">
-                Session
-              </h5>
+            <div class="flex flex-column  md:flex-row md:justify-content-end md:align-items-center">
               <IconField iconPosition="left" class="block mt-2 md:mt-0">
                 <InputIcon class="pi pi-search" />
                 <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto" placeholder="Search..." />
@@ -387,7 +384,7 @@ const clearDialogQrCode = () => {
           <Column field="allow_twice" header="Presensi 2x">
             <template #body="{ data }">
 
-              <Chip class="py-0 pl-0 pr-3">
+              <Chip class="py-0 pl-0 pr-4">
                 <span :class="{ 'bg-primary': data.allow_twice, 'bg-red-400': !data.allow_twice }"
                   class="border-circle w-2rem h-2rem flex align-items-center justify-content-center text-white">
                   <i :class="{ 'pi pi-check': data.allow_twice, 'pi pi-times': !data.allow_twice }"></i></span>

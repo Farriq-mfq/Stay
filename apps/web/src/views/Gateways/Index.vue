@@ -389,10 +389,7 @@ const handleCloseShowToken = () => {
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} gateways" :first="first"
                     @page="onPage($event)">
                     <template #header>
-                        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                            <h5 class="m-0">
-                                Gateway
-                            </h5>
+                        <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
                             <IconField iconPosition="left" class="block mt-2 md:mt-0">
                                 <InputIcon class="pi pi-search" />
                                 <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
