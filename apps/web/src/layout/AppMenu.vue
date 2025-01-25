@@ -15,7 +15,7 @@ const model = ref([
             { label: 'Sesi Presensi', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
             // { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
             { label: 'Data Presensi', icon: 'pi pi-fw pi-server', to: '/presences' },
-            // { label: 'Ubah Password', icon: 'pi pi-fw pi-key', to: '/change-password' },
+            { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' },
             { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' },
             { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' },
             // {

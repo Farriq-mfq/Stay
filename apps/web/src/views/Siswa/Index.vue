@@ -645,8 +645,8 @@ const downloadTemplateService = async () => {
               <Button label="Tambah Siswa" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddSiswa = true" />
               <Button label="Import Siswa" icon="pi pi-arrow-up" severity="success" class="mr-2"
                 @click.prevent="showDialogImportsiswa = true" />
-              <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
-                :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" />
+              <!-- <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
+                :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
               <Button label="Download Format" @click.prevent="downloadTemplateService" icon="pi pi-download"
                 class="mr-2" />
             </div>

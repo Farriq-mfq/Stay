@@ -2,11 +2,11 @@
 import { useQuery } from '@tanstack/vue-query';
 import { eachDayOfInterval, format } from 'date-fns';
 import { getCurrentInstance, ref, watch } from 'vue';
+import { useVueToPrint } from 'vue-to-print';
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 
 // the datatable queries server side
-const dt = ref()
 const sessionId = ref(null)
 const filterDate = ref()
 const selectedRombel = ref();
@@ -92,6 +92,15 @@ const resetAll = () => {
 const getRangeDate = (startDate, endDate) => {
     return eachDayOfInterval({ start: startDate, end: endDate })
 }
+
+const componentPrintRef = ref();
+const { handlePrint } = useVueToPrint({
+    content: componentPrintRef,
+    documentTitle: format(new Date(), 'yyyy-MM-dd') + "-presences",
+    removeAfterPrint: true,
+    copyStyles: true,
+});
+
 </script>
 <template>
     <div>
@@ -107,6 +116,8 @@ const getRangeDate = (startDate, endDate) => {
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport"
                     icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3"
                     v-if="sessionId && selectedRombel && filterDate" />
+                <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print"
+                    @click.prevent="handlePrint" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport"
                     icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3"
                     v-if="sessionId && selectedRombel && filterDate" />
@@ -117,7 +128,7 @@ const getRangeDate = (startDate, endDate) => {
         </div>
 
         <div class="overflow-x-auto">
-            <table class="p-datatable p-datatable-gridlines p-component w-full"
+            <table ref="componentPrintRef" class="p-datatable p-datatable-gridlines p-component w-full"
                 v-if="sessionId && selectedRombel && filterDate && presences">
                 <!-- Table Header -->
                 <thead class="p-datatable-thead">

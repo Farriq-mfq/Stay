@@ -2,12 +2,12 @@
 import { useQuery } from '@tanstack/vue-query';
 import { format, parse } from 'date-fns';
 import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { useVueToPrint } from 'vue-to-print';
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 
 // the datatable queries server side
 const filters = ref(null);
-const dt = ref()
 const sessionId = ref(null)
 const filterDate = ref()
 const selectedRombel = ref();
@@ -33,12 +33,6 @@ const { data: presences, isLoading, refetch } = useQuery({
     queryKey: [`presences-all-rombel`, sessionId.value, selectedRombel.value, filterDate.value],
     queryFn: getAllPresences,
 })
-
-
-const onPage = (event) => {
-    queryParams.value = event;
-    refetch()
-};
 
 
 const getRombel = async () => {
@@ -96,14 +90,20 @@ const handleExportService = async () => {
     }
 }
 
-const handleFilter = () => {
-    refetch()
-}
 const resetAll = () => {
     sessionId.value = null
     selectedRombel.value = null
     filterDate.value = null
 }
+
+
+const componentPrintRef = ref();
+const { handlePrint } = useVueToPrint({
+    content: componentPrintRef,
+    documentTitle: format(new Date(), 'yyyy-MM-dd') + "-presences",
+    removeAfterPrint: true,
+    copyStyles: true,
+});
 </script>
 <template>
     <div>
@@ -119,6 +119,8 @@ const resetAll = () => {
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport"
                     icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3"
                     v-if="sessionId && selectedRombel && filterDate" />
+                <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print"
+                    @click.prevent="handlePrint" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport"
                     icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3"
                     v-if="sessionId && selectedRombel && filterDate" />
@@ -129,7 +131,7 @@ const resetAll = () => {
         </div>
 
 
-        <DataTable v-if="sessionId && selectedRombel && filterDate" ref="dt" :loading="isLoading"
+        <DataTable v-if="sessionId && selectedRombel && filterDate" ref="componentPrintRef" :loading="isLoading"
             :value="isLoading ? [] : presences.data.data" dataKey="id">
             <template #header>
                 <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -197,3 +199,11 @@ const resetAll = () => {
         </DataTable>
     </div>
 </template>
+
+<style>
+@media print {
+    .p-datatable-header {
+        display: none !important;
+    }
+}
+</style>

@@ -351,7 +351,7 @@ const clearDialogQrCode = () => {
         <Toolbar class="mb-4">
           <template v-slot:start>
             <div class="my-2">
-              <Button label="Buat session baru" icon="pi pi-plus" class="mr-2"
+              <Button label="Buat sesi presensi baru" icon="pi pi-plus" class="mr-2"
                 @click.prevent="addSessionDialog = true" />
             </div>
           </template>

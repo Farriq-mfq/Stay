@@ -73,14 +73,6 @@ const router = createRouter({
                             },
                         },
                         {
-                            path: '/presences/chart',
-                            name: 'presences-recap',
-                            component: () => import('@/views/Presences/Chart.vue'),
-                            meta: {
-                                title: "Chart Presences",
-                            },
-                        },
-                        {
                             path: '/presences/rombel',
                             name: 'presences-recap-rombel',
                             component: () => import('@/views/Presences/Rombel.vue'),
@@ -104,6 +96,56 @@ const router = createRouter({
                         //         title: "Recap Presences",
                         //     },
                         // }
+                    ]
+                },
+                {
+                    path: '/stats',
+                    name: 'stats',
+                    redirect: {
+                        name: 'stats-all'
+                    },
+                    component: () => import('@/views/Stats/Index.vue'),
+                    children: [
+                        {
+                            path: '/stats/all',
+                            name: 'stats-all',
+                            component: () => import('@/views/Stats/All.vue'),
+                            meta: {
+                                title: "Stats Presences",
+                            },
+                        },
+                        {
+                            path: '/stats/rombel',
+                            name: 'stats-rombel',
+                            component: () => import('@/views/Stats/Rombel.vue'),
+                            meta: {
+                                title: "Stats Presences By Rombel",
+                            },
+                        },
+                        // {
+                        //     path: '/presences/chart',
+                        //     name: 'presences-recap',
+                        //     component: () => import('@/views/Presences/Chart.vue'),
+                        //     meta: {
+                        //         title: "Chart Presences",
+                        //     },
+                        // },
+                        // {
+                        //     path: '/presences/rombel',
+                        //     name: 'presences-recap-rombel',
+                        //     component: () => import('@/views/Presences/Rombel.vue'),
+                        //     meta: {
+                        //         title: "Rombel Presences Harian",
+                        //     },
+                        // },
+                        // {
+                        //     path: '/presences/monthly',
+                        //     name: 'presences-recap-month',
+                        //     component: () => import('@/views/Presences/Monthly.vue'),
+                        //     meta: {
+                        //         title: "Rekap Presences Bulanan",
+                        //     },
+                        // },
                     ]
                 },
                 {

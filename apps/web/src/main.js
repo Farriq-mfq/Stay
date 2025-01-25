@@ -26,6 +26,8 @@ import '@/assets/styles.scss';
 
 const app = createApp(App);
 
+app.provide("APP_NAME", import.meta.env.VITE_APP_NAME);
+
 app.use(http);
 app.use(router);
 app.use(auth);

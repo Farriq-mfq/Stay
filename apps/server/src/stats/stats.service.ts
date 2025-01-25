@@ -1,15 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { format } from 'date-fns';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { endOfMonth, format, isValid, parse, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { SiswaService } from 'src/siswa/siswa.service';
 import { months } from 'src/utils/getMonth';
+import { validateAndFormatDateYear } from 'src/utils/helpers';
 @Injectable()
 export class StatsService {
   constructor(
     private readonly siswaService: SiswaService,
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {
 
   }
@@ -39,16 +42,20 @@ export class StatsService {
     }
   }
 
-  async getChartPresences(sessionId: string, rombel: string) {
+  async getChartPresences(sessionId: string, rombel: string, year?: string) {
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: +sessionId
       }
     })
-    
+    const currentYear = year ?? new Date().getFullYear();
+    if (currentYear === "" || currentYear === undefined) throw new BadRequestException("year cannot be empty")
+    const parseYear = parse(`${currentYear}`, 'yyyy', new Date());
+    if (!isValid(parseYear)) throw new BadRequestException("invalid year format");
+
+
     const rombels = await this.siswaService.getGroupClass();
 
-    const currentYear = new Date().getFullYear();
     const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
     const endOfYear = new Date(`${currentYear}-12-31T23:59:59.999Z`);
 
@@ -76,6 +83,87 @@ export class StatsService {
       }).length
     }))
 
-    return mappingMonth
+    return {
+      year: currentYear,
+      stats: mappingMonth
+    }
+  }
+
+  async getALlYearPresence(sessionId: string) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +sessionId
+      }
+    })
+    const cacheKey = `getALlYearPresence-${session.id}`
+
+    if (await this.cacheManager.get(cacheKey)) return await this.cacheManager.get(cacheKey)
+
+    const dataPresences = await this.prismaService.client.presences.groupBy({
+      by: ['createdAt'],
+      where: {
+        presence_sessionsId: session.id,
+      },
+      orderBy: {
+        createdAt: "asc"
+      },
+    })
+
+    const years = [...new Set(dataPresences.map(data => format(data.createdAt, 'yyyy', {
+      locale: id
+    })))]
+    if (years.length > 0) await this.cacheManager.set(cacheKey, years)
+    return years
+  }
+
+  async getStatsPresenceByRombel(sessionId: string, date: string) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +sessionId
+      }
+    })
+
+    let startDate = null;
+    let endDate = null;
+    if (date) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+      startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+    }
+
+    const presences = await this.prismaService.client.presences.findMany({
+      where: {
+        ...(startDate && endDate && {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }),
+        presence_sessionsId: session.id,
+      },
+      include: {
+        siswa: {
+          select: {
+            rombel: true
+          }
+        }
+      }
+    })
+    const rombels = await this.siswaService.getGroupClass();
+
+    const mappingRombels = rombels.map(rombel => {
+      return {
+        key: rombel,
+        value: presences.filter(data => data.siswa.rombel === rombel).length
+      }
+    })
+
+    return {
+      date: startDate && endDate ? date : null,
+      stats: mappingRombels
+    };
   }
 }
