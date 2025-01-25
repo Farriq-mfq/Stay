@@ -68,18 +68,26 @@ model gateways {
 }
 
 // only role presences are allowed
+enum SessionRoleType {
+  PEGAWAI
+  ROLE
+}
+
 model presence_sessions {
   id          Int         @id @default(autoincrement())
   name        String
   qrcode      String      @unique @default(cuid())
   allow_twice Boolean?    @default(false)
-  start_time  DateTime?
-  end_time    DateTime?
+  start_time  String?
+  end_time    String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   gateways    gateways[]
   presences   presences[]
+  // change to group
   rombel      String?
+  // plan by allowed_role
+  // role_type SessionRoleType?
 
   @@index([qrcode])
 }

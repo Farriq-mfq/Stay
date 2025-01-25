@@ -73,7 +73,14 @@ const sessionData = ref({
 
 
 const addSessionService = async (data) => {
-  return await axios.post('/sessions', { ...data, rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : [] })
+  return await axios.post('/sessions', {
+    name: data.name,
+    start_time: data.start_time ? format(data.start_time, 'HH:mm:ss') : null,
+    end_time: data.end_time ? format(data.end_time, 'HH:mm:ss') : null,
+    allow_twice: data.allow_twice,
+    gateways: data.gateways,
+    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
+  })
 }
 
 const {
@@ -195,7 +202,7 @@ const updateService = async (data) => {
     allow_twice: data.allow_twice,
     start_time: data.start_time,
     end_time: data.end_time,
-    ...data.gateways.length && {
+    ...data.gateways && data.gateways.length && {
       gateways: data.gateways
     },
     rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
@@ -217,11 +224,13 @@ const {
 
 const handleShowDialogUpdateSesion = (data) => {
   showDialogUpdateSession.value = true
+  errorsUpdateSession.value = {}
+  const now = format(Date.now(), "yyyy-MM-dd")
   dataUpdateSession.value = {
     id: data.id,
     name: data.name,
-    ...data.start_time && { start_time: new Date(data.start_time) },
-    ...data.end_time && { end_time: new Date(data.end_time) },
+    ...data.start_time && { start_time: new Date(`${now} ${data.start_time}`) },
+    ...data.end_time && { end_time: new Date(`${now} ${data.end_time}`) },
     allow_twice: data.allow_twice,
     gateways: data.gateways,
   }
@@ -243,7 +252,18 @@ const clearUpdateSession = () => {
 }
 
 const handleSubmitUpdateSesion = () => {
-  updateSession({ ...dataUpdateSession.value, rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : [] }, {
+  updateSession({
+    id: dataUpdateSession.value.id,
+    name: dataUpdateSession.value.name,
+    allow_twice: dataUpdateSession.value.allow_twice,
+    start_time: dataUpdateSession.value.start_time ? format(dataUpdateSession.value.start_time, 'HH:mm:ss') : null,
+    end_time: dataUpdateSession.value.end_time ? format(dataUpdateSession.value.end_time, 'HH:mm:ss') : null,
+    ...dataUpdateSession.value.gateways.length && {
+      gateways: dataUpdateSession.value.gateways
+    }
+    ,
+    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
+  }, {
     onSuccess() {
       toast.add({
         severity: 'success',
@@ -251,12 +271,15 @@ const handleSubmitUpdateSesion = () => {
         detail: 'Session berhasil diupdate',
         life: 3000
       })
+
+      errorsUpdateSession.value = {}
       clearUpdateSession()
       refetch()
     },
     onError: (err) => {
+      if (!err.response) return;
       if (err.response.status === 400) {
-        errorsAddSession.value = err.response.data
+        errorsUpdateSession.value = err.response.data
       } else if (err.response.status === 404) {
         toast.add({
           severity: 'error',
@@ -376,21 +399,19 @@ const clearDialogQrCode = () => {
           </Column>
           <Column field="start_time" header="Waktu Mulai">
             <template #body="{ data }">
-              <Chip class="bg-primary text-white text-sm"
-                :label="format(data.start_time, 'd/MM/yyyy HH:mm', { locale: id })" v-if="data.start_time" />
+              <Chip class="bg-primary text-white text-sm" :label="data.start_time" v-if="data.start_time" />
               <p v-else>-</p>
             </template>
           </Column>
           <Column field="end_time" header="Waktu Selesai">
             <template #body="{ data }">
-              <Chip class="bg-red-400 text-white text-sm"
-                :label="format(data.end_time, 'dd/MM/yyyy HH:mm', { locale: id })" v-if="data.end_time" />
+              <Chip class="bg-red-400 text-white text-sm" :label="data.end_time" v-if="data.end_time" />
               <p v-else>-</p>
             </template>
           </Column>
           <Column field="rombel" header="Rombel yang diijinkan">
             <template #body="{ data }">
-              <div v-if="data.rombel && data.rombel.length">
+              <div v-if="data.rombel && JSON.parse(data.rombel).length > 0">
                 <Chip class="bg-primary text-white text-sm m-2" :label="rmbl" v-for="rmbl in JSON.parse(data.rombel)"
                   :key="rmbl" />
               </div>
@@ -445,7 +466,7 @@ const clearDialogQrCode = () => {
             {{ errorsAddSession.name[0] }}
           </p>
         </div>
-        <div class="field">
+        <div class="field flex gap-2 flex-column">
           <label for="allow_twice">Presensi 2x</label>
           <InputSwitch v-model="sessionData.allow_twice" :disabled="addSessionLoading" />
         </div>
@@ -453,15 +474,21 @@ const clearDialogQrCode = () => {
           <label for="start_time">
             Waktu Mulai (Optional)
           </label>
-          <Calendar id="calendar-24h-mulai" v-model="sessionData.start_time" showTime hourFormat="24"
-            :disabled="addSessionLoading" showButtonBar />
+          <Calendar timeOnly id="calendar-24h-mulai" v-model="sessionData.start_time" hourFormat="24" showSeconds
+            :disabled="addSessionLoading" showButtonBar showIcon />
+          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.start_time">
+            {{ errorsAddSession.start_time[0] }}
+          </p>
         </div>
         <div class="field">
           <label for="end_time">
             Waktu Selesai (Optional)
           </label>
-          <Calendar id="calendar-24h-selesai" v-model="sessionData.end_time" showTime hourFormat="24"
-            :disabled="addSessionLoading" showButtonBar />
+          <Calendar timeOnly id="calendar-24h-selesai" v-model="sessionData.end_time" showTime hourFormat="24"
+            :disabled="addSessionLoading" showSeconds showButtonBar showIcon />
+          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.end_time">
+            {{ errorsAddSession.end_time[0] }}
+          </p>
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>
@@ -498,7 +525,7 @@ const clearDialogQrCode = () => {
             {{ errorsUpdateSession.name[0] }}
           </p>
         </div>
-        <div class="field">
+        <div class="field flex gap-2 flex-column">
           <label for="allow_twice">Presensi 2x</label>
           <InputSwitch v-model="dataUpdateSession.allow_twice" :disabled="updateSessionLoading" />
         </div>
@@ -506,15 +533,23 @@ const clearDialogQrCode = () => {
           <label for="start_time">
             Waktu Mulai (Optional)
           </label>
-          <Calendar id="calendar-24h-mulai" v-model="dataUpdateSession.start_time" showTime hourFormat="24"
+          <Calendar id="calendar-24h-mulai" timeOnly showSeconds showIcon v-model="dataUpdateSession.start_time"
+            showTime hourFormat="24" :invalid="errorsUpdateSession && errorsUpdateSession.start_time"
             :disabled="updateSessionLoading" showButtonBar />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.start_time">
+            {{ errorsUpdateSession.start_time[0] }}
+          </p>
         </div>
         <div class="field">
           <label for="end_time">
             Waktu Selesai (Optional)
           </label>
-          <Calendar id="calendar-24h-selesai" v-model="dataUpdateSession.end_time" showTime hourFormat="24"
+          <Calendar id="calendar-24h-selesai" timeOnly showSeconds showIcon v-model="dataUpdateSession.end_time"
+            showTime hourFormat="24" :invalid="errorsUpdateSession && errorsUpdateSession.end_time"
             :disabled="updateSessionLoading" showButtonBar />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.end_time">
+            {{ errorsUpdateSession.end_time[0] }}
+          </p>
         </div>
         <div class="field">
           <label for="gateways">Gateway (Optional)</label>

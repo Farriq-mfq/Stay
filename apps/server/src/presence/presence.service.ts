@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
-import { eachDayOfInterval, endOfMonth, format, startOfMonth } from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, isAfter, isBefore, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
@@ -77,81 +77,81 @@ export class PresenceService {
   // }
 
   async createPresenceByNis(createPresenceByNisDto: CreatePresenceByNisDto) {
-    const siswa = await this.prismaService.client.siswa.findUnique({
-      where: {
-        nisn: createPresenceByNisDto.nisn
-      },
-    })
+    // const siswa = await this.prismaService.client.siswa.findUnique({
+    //   where: {
+    //     nisn: createPresenceByNisDto.nisn
+    //   },
+    // })
 
-    if (!siswa) throw new NotFoundException("NISN masih salah");
+    // if (!siswa) throw new NotFoundException("NISN masih salah");
 
-    const session = await this.prismaService.client.presence_sessions.findUnique({
-      where: {
-        id: createPresenceByNisDto.session
-      }
-    })
+    // const session = await this.prismaService.client.presence_sessions.findUnique({
+    //   where: {
+    //     id: createPresenceByNisDto.session
+    //   }
+    // })
 
-    if (!session) throw new NotFoundException("Session not found");
+    // if (!session) throw new NotFoundException("Session not found");
 
-    const current_time = new Date();
+    // const current_time = new Date();
 
 
-    if (session.start_time && session.end_time) {
-      if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
-        this.createPresence({
-          session,
-          siswa,
-          method: "other"
-        })
-      } else {
-        this.handlingPresenceError({
-          error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
-            locale: id
-          })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
-            locale: id
-          })}`,
-          siswa
-        })
-      }
-    } else if (session.end_time) {
-      if (current_time >= session.start_time) {
-        return await this.createPresence({
-          session,
-          siswa,
-          method: 'other'
-        })
-      } else {
-        this.handlingPresenceError({
-          error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
-            locale: id
-          })}`,
-          siswa
-        })
-      }
-    } else if (session.end_time) {
-      if (current_time <= session.end_time) {
-        return await this.createPresence({
-          session,
-          siswa,
-          method: 'other'
+    // if (session.start_time && session.end_time) {
+    //   if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
+    //     this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: "other"
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
+    // } else if (session.end_time) {
+    //   if (current_time >= session.start_time) {
+    //     return await this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: 'other'
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
+    // } else if (session.end_time) {
+    //   if (current_time <= session.end_time) {
+    //     return await this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: 'other'
 
-        })
-      } else {
-        this.handlingPresenceError({
-          error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
-            locale: id
-          })}`,
-          siswa
-        })
-      }
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
 
-    } else {
-      return await this.createPresence({
-        session,
-        siswa,
-        method: 'other'
-      })
-    }
+    // } else {
+    //   return await this.createPresence({
+    //     session,
+    //     siswa,
+    //     method: 'other'
+    //   })
+    // }
   }
 
 
@@ -178,11 +178,15 @@ export class PresenceService {
       if (!session) {
         throw new NotFoundException("SESI TIDAK DITEMUKAN")
       }
-      const current_time = new Date();
+
+      const now = format(Date.now(), "yyyy-MM-dd");
+      const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
       // check session have start_time and end_time
       // range check
       if (session.start_time && session.end_time) {
-        if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
+        const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+        const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+        if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
           return await this.createPresence({
             gateway,
             session,
@@ -192,9 +196,9 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+            error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
               locale: id
-            })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+            })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
               locale: id
             })}`,
             siswa
@@ -202,7 +206,8 @@ export class PresenceService {
         }
         // start time check
       } else if (session.start_time) {
-        if (current_time >= session.start_time) {
+        const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+        if (isAfter(current_time, parseStartTime)) {
           return await this.createPresence({
             gateway,
             session,
@@ -212,7 +217,7 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+            error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
               locale: id
             })}`,
             siswa
@@ -220,7 +225,8 @@ export class PresenceService {
         }
         // end time check
       } else if (session.end_time) {
-        if (current_time <= session.end_time) {
+        const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+        if (isBefore(current_time, parseEndTime)) {
           return await this.createPresence({
             gateway,
             session,
@@ -231,7 +237,7 @@ export class PresenceService {
           })
         } else {
           this.handlingPresenceError({
-            error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+            error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
               locale: id
             })}`,
             siswa
