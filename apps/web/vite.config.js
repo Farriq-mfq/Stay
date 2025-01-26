@@ -20,7 +20,12 @@ export default defineConfig(() => {
                 ]
             }),
             VitePWA({
-                registerType: 'autoUpdate', injectRegister: "auto",
+                mode: process.env.NODE_MODE,
+                injectManifest: {
+                    injectionPoint: undefined
+                },
+                registerType: 'autoUpdate',
+                injectRegister: "auto",
                 workbox: {
                     globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
                     cleanupOutdatedCaches: true
@@ -28,36 +33,45 @@ export default defineConfig(() => {
                 devOptions: {
                     enabled: true
                 },
+                srcDir: 'src',
+                filename: 'sw.js',
+                strategies: 'injectManifest',
                 manifest: {
-                    name: "Stay ",
+                    name: "Sistem Presensi",
                     short_name: "Stay",
-                    // description: '',
-                    theme_color: '#ffffff',
+                    description: 'Sistem Presensi',
+                    theme_color: '#ffffff', // white
+                    background_color: "#ffffff", // white
                     display: "standalone",
                     icons: [
                         {
-                            "src": "public/pwa-64x64.png",
+                            "src": "/pwa-64x64.png",
                             "sizes": "64x64",
                             "type": "image/png"
                         },
                         {
-                            "src": "public/pwa-192x192.png",
+                            "src": "/pwa-192x192.png",
                             "sizes": "192x192",
                             "type": "image/png"
                         },
                         {
-                            "src": "public/pwa-512x512.png",
+                            "src": "/pwa-512x512.png",
                             "sizes": "512x512",
                             "type": "image/png"
                         },
                         {
-                            "src": "public/maskable-icon-512x512.png",
+                            "src": "/maskable-icon-512x512.png",
                             "sizes": "512x512",
                             "type": "image/png",
                             "purpose": "maskable"
                         }
-                    ]
-                }
+                    ],
+                    orientation: "portrait"
+                },
+                workbox: {
+                    clientsClaim: true,
+                    skipWaiting: true,
+                },
             })
         ],
         css: {

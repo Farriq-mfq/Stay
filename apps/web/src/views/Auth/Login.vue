@@ -60,7 +60,7 @@ const APP_NAME = inject('APP_NAME')
 <template>
     <div
         class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
-        <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5 xl:col-3">
+        <form @submit.prevent="handleLogin" class="col-12 sm:col-10 md:col-8 lg:col-5 xl:col-4">
             <div>
                 <div class="w-full card py-5" style="border-radius: 20px">
                     <div class="text-center mb-5">
