@@ -28,7 +28,9 @@ export default defineConfig(() => {
                 injectRegister: "auto",
                 workbox: {
                     globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
-                    cleanupOutdatedCaches: true
+                    cleanupOutdatedCaches: true,
+                    clientsClaim: true,
+                    skipWaiting: true,
                 },
                 devOptions: {
                     enabled: true
@@ -67,10 +69,6 @@ export default defineConfig(() => {
                         }
                     ],
                     orientation: "portrait"
-                },
-                workbox: {
-                    clientsClaim: true,
-                    skipWaiting: true,
                 },
             })
         ],

@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { changePasswordDto } from './dto/change-password.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RefreshTokenGuard } from 'src/guards/refreshToken.guard';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -26,7 +27,7 @@ export class AuthController {
     return await this.authService.logout(req['user'] as JwtPayload)
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   refreshTokens(@Req() req: Request) {
     const userId = req.user['sub'];

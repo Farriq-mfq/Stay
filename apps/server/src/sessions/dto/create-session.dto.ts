@@ -29,7 +29,7 @@ export class CreateSessionDto {
     @IsArray()
     @IsString({ each: true })
     @IsOptional()
-    rombel: string[]
+    group: string[]
 }
 
 

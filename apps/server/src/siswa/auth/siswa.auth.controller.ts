@@ -1,10 +1,11 @@
 import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
+import { JwtPayload } from "src/auth/accessToken.strategy";
 import { AccessTokenSiswaGuard } from "../guards/accessTokenSiswa.guard";
+import { RefreshTokenSiswaGuard } from "../guards/refreshTokenSiswa.guard";
+import { JwtPayloadSiswa } from "../strategies/accessToken.strategy";
 import { AuthSiswaDto } from "./dto/auth.dto";
 import { SiswaAuthService } from "./siswa.auth.service";
-import { JwtPayloadSiswa } from "../strategies/accessToken.strategy";
-import { JwtPayload } from "src/auth/accessToken.strategy";
 
 @Controller('/siswa/auth')
 export class SiswaAuthController {
@@ -32,7 +33,7 @@ export class SiswaAuthController {
     getMe(@Req() req: Request) {
         return this.siswaAuthService.getMe(req['user'] as JwtPayload)
     }
-    @UseGuards(AccessTokenSiswaGuard)
+    @UseGuards(RefreshTokenSiswaGuard)
     @Post('refresh')
     refreshTokens(@Req() req: Request) {
         const siswaId = req.user['sub'];

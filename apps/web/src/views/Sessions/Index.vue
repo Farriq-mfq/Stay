@@ -23,7 +23,7 @@ const queryParams = ref({
 const totalRecords = ref(0);
 const dt = ref()
 
-const selectedRombel = ref([]);
+const selectedGroup = ref([]);
 
 
 const getAllSessions = async () => {
@@ -79,7 +79,7 @@ const addSessionService = async (data) => {
     end_time: data.end_time ? format(data.end_time, 'HH:mm:ss') : null,
     allow_twice: data.allow_twice,
     gateways: data.gateways,
-    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
   })
 }
 
@@ -108,7 +108,7 @@ const handleAddSession = () => {
         allow_twice: false,
         gateways: [],
       }
-      selectedRombel.value = []
+      selectedGroup.value = []
       refetch()
     },
     onError: (err) => {
@@ -205,7 +205,7 @@ const updateService = async (data) => {
     ...data.gateways && data.gateways.length && {
       gateways: data.gateways
     },
-    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
   })
 }
 
@@ -235,7 +235,7 @@ const handleShowDialogUpdateSesion = (data) => {
     gateways: data.gateways,
   }
 
-  selectedRombel.value = data.rombel ? JSON.parse(data.rombel).map(item => ({ value: item })) : []
+  selectedGroup.value = data.group ? JSON.parse(data.group).map(item => ({ value: item })) : []
 }
 
 const clearUpdateSession = () => {
@@ -248,7 +248,7 @@ const clearUpdateSession = () => {
   }
 
   showDialogUpdateSession.value = false
-  selectedRombel.value = []
+  selectedGroup.value = []
 }
 
 const handleSubmitUpdateSesion = () => {
@@ -262,7 +262,7 @@ const handleSubmitUpdateSesion = () => {
       gateways: dataUpdateSession.value.gateways
     }
     ,
-    rombel: selectedRombel.value.length ? selectedRombel.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
   }, {
     onSuccess() {
       toast.add({
@@ -406,10 +406,10 @@ const clearDialogQrCode = () => {
               <p v-else>-</p>
             </template>
           </Column>
-          <Column field="rombel" header="Rombel yang diijinkan">
+          <Column field="group" header="Group yang diijinkan">
             <template #body="{ data }">
-              <div v-if="data.rombel && JSON.parse(data.rombel).length > 0">
-                <Chip class="bg-primary text-white text-sm m-2" :label="rmbl" v-for="rmbl in JSON.parse(data.rombel)"
+              <div v-if="data.group && JSON.parse(data.group).length > 0">
+                <Chip class="bg-primary text-white text-sm m-2" :label="rmbl" v-for="rmbl in JSON.parse(data.group)"
                   :key="rmbl" />
               </div>
               <p v-else>-</p>
@@ -495,8 +495,8 @@ const clearDialogQrCode = () => {
           </p>
         </div>
         <div class="field">
-          <label for="gateways">Rombel (Optional)</label>
-          <MultiSelect :loading="loadingRombel" filter v-model="selectedRombel"
+          <label for="gateways">Group (Optional)</label>
+          <MultiSelect :loading="loadingRombel" filter v-model="selectedGroup"
             :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
             placeholder="Pilih Rombel" class="w-full" />
           <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.rombel">
@@ -558,8 +558,8 @@ const clearDialogQrCode = () => {
         </div>
 
         <div class="field">
-          <label for="gateways">Rombel (Optional)</label>
-          <MultiSelect :loading="loadingRombel" filter v-model="selectedRombel"
+          <label for="gateways">Group (Optional)</label>
+          <MultiSelect :loading="loadingRombel" filter v-model="selectedGroup"
             :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
             placeholder="Pilih Rombel" class="w-full" />
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.rombel">

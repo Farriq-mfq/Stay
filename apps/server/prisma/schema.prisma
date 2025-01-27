@@ -25,9 +25,25 @@ model siswa {
   notifications    notifications[]
   profile_picture  String?
   // for mobile phone register
-  nfc_token        String?
+  mobile_nfc_token String?           @unique
 
   @@index([nis, nisn])
+}
+
+// employees
+model pegawai {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar()
+  username         String   @unique @db.VarChar() // di isi dengan NIP 
+  password         String
+  refreshToken     String?
+  rfid_token       String?  @unique
+  mobile_nfc_token String?  @unique
+  position         String?
+  group            String
+  sign_picture     String? // gambar tanda tangan
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 enum RoleUser {
@@ -73,24 +89,25 @@ model gateways {
 // only role presences are allowed
 enum SessionRoleType {
   PEGAWAI
-  ROLE
+  SISWA
 }
 
 model presence_sessions {
-  id          Int         @id @default(autoincrement())
-  name        String
-  qrcode      String      @unique @default(cuid())
-  allow_twice Boolean?    @default(false)
-  start_time  String?
-  end_time    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  gateways    gateways[]
-  presences   presences[]
+  id                Int              @id @default(autoincrement())
+  name              String
+  qrcode            String           @unique @default(cuid())
+  allow_twice       Boolean?         @default(false)
+  start_time        String?
+  end_time          String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  gateways          gateways[]
+  presences         presences[]
   // change to group
-  rombel      String?
+  // rombel            String?
+  group             String?
   // plan by allowed_role
-  // role_type SessionRoleType?
+  session_role_type SessionRoleType?
 
   @@index([qrcode])
 }

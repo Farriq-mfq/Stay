@@ -33,7 +33,6 @@ export class SiswaService {
     limit?: number,
     search?: string,
   ) {
-    // this.whatsappProvider.sendText("6289692107175@c.us", "sdf")
     const [items, meta] = await this.prismaService.client.siswa.paginate({
       where: {
         ...search && {

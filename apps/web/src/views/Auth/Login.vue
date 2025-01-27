@@ -1,6 +1,6 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
-import { inject, provide, reactive } from 'vue';
+import { inject, reactive, getCurrentInstance } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 
 const toast = useToast()
@@ -19,6 +19,8 @@ const state = reactive({
     }
 });
 
+const auth = inject("auth")
+
 
 function errors(res) {
     if (res && res.status === 401) {
@@ -28,12 +30,25 @@ function errors(res) {
     } else if (res && res.status === 400) {
         state.form.errors = res.data
     } else {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: "Internal server error",
-            life: 3000
-        })
+        if (auth.token() != null) {
+            auth.logout({
+                makeRequest: false,
+                redirect: { name: 'login' },
+            })
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: "Terjadi kendala, Silahkan login ulang",
+                life: 3000
+            })
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Internal server error",
+                life: 3000
+            })
+        }
     }
 }
 
@@ -97,13 +112,13 @@ const APP_NAME = inject('APP_NAME')
                         </p>
                     </div>
 
-                    <!-- <div class="flex align-items-center justify-content-between mb-5 gap-5">
+                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
                         <div class="flex align-items-center">
                             <Checkbox :disabled="state.form.loading" v-model="state.form.remember" id="rememberme1"
                                 binary class="mr-2"></Checkbox>
                             <label for="rememberme1">Remember me</label>
                         </div>
-                    </div> -->
+                    </div>
                     <Button :disabled="state.form.loading" type="submit"
                         :label="state.form.loading ? 'Loading...' : 'Sign In'" class="w-full p-3 text-xl"></Button>
                     <div class="text-center mt-5">

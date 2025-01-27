@@ -309,7 +309,7 @@ export class PresenceService {
             })
           } else {
             // validate by rombel
-            const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+            const parseRombel = session.group ? JSON.parse(session.group) : [];
             if (parseRombel.length > 0) {
               if (!parseRombel.includes(siswa.rombel)) {
                 this.handlingPresenceError({
@@ -344,7 +344,7 @@ export class PresenceService {
 
         } else {
           // validate by rombel
-          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
           if (parseRombel.length > 0) {
             if (!parseRombel.includes(siswa.rombel)) {
               this.handlingPresenceError({
@@ -398,7 +398,7 @@ export class PresenceService {
           })
         } else {
           // validate by rombel
-          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
           if (parseRombel.length > 0) {
             if (!parseRombel.includes(siswa.rombel)) {
               this.handlingPresenceError({

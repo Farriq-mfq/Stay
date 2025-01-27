@@ -35,8 +35,8 @@ export class SessionsService {
           ...createSessionDto.end_time && {
             end_time: createSessionDto.end_time
           },
-          ...createSessionDto.rombel && createSessionDto.rombel.length > 0 && {
-            rombel: JSON.stringify(createSessionDto.rombel)
+          ...createSessionDto.group && createSessionDto.group.length > 0 && {
+            group: JSON.stringify(createSessionDto.group)
           }
         },
       })
@@ -64,8 +64,8 @@ export class SessionsService {
           ...createSessionDto.end_time && {
             end_time: createSessionDto.end_time
           },
-          ...createSessionDto.rombel && createSessionDto.rombel.length > 0 && {
-            rombel: JSON.stringify(createSessionDto.rombel)
+          ...createSessionDto.group && createSessionDto.group.length > 0 && {
+            group: JSON.stringify(createSessionDto.group)
           }
         },
       })
@@ -157,7 +157,7 @@ export class SessionsService {
           allow_twice: updateSessionDto.allow_twice,
           start_time: updateSessionDto.start_time,
           end_time: updateSessionDto.end_time,
-          rombel: updateSessionDto.rombel && updateSessionDto.rombel.length > 0 ? JSON.stringify(updateSessionDto.rombel) : null
+          group: updateSessionDto.group && updateSessionDto.group.length > 0 ? JSON.stringify(updateSessionDto.group) : null
         },
       })
       await this.prismaService.client.gateways.updateMany({
@@ -181,7 +181,7 @@ export class SessionsService {
           allow_twice: updateSessionDto.allow_twice,
           start_time: updateSessionDto.start_time,
           end_time: updateSessionDto.end_time,
-          rombel: JSON.stringify(updateSessionDto.rombel)
+          group: JSON.stringify(updateSessionDto.group)
         },
       })
       return session

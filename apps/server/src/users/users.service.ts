@@ -26,18 +26,18 @@ export class UsersService {
       where: {
         id: parseInt(id)
       },
-      select:{
+      select: {
         id: true,
         name: true,
         username: true,
         role: true,
-        refreshToken: true, 
+        refreshToken: true,
         createdAt: true,
         updatedAt: true,
       }
     })
   }
-  
+
   async findDetail(id: string) {
     return await this.prismaService.client.users.findUnique({
       where: {
@@ -53,7 +53,7 @@ export class UsersService {
         id: parseInt(id)
       },
       data: {
-        refreshToken: token != null ? await hash(token) : token
+        refreshToken: token != null ? token : token
       }
     })
   }
