@@ -123,8 +123,8 @@ const {
 const confirmDeleteUser = (id) => {
   confirm.require({
     target: event.currentTarget,
-    header: 'Confirmation',
-    message: 'Yakin Hapus User Ini ?',
+    header: 'Konfirmasi',
+    message: 'Yakin hapus user ini ?',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',

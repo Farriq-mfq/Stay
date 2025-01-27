@@ -1,3 +1,11 @@
+## [1.4.1] - 2025-21-25
+### Added
+-   menambah fitur pegawai
+### Change
+-   mengubah "Confirmation" jadi "Konfirmasi"
+### FIX 
+-   memperbaiki security login
+-   memperbaiki halaman not found
 ## [1.4.0] - 2025-21-25
 ### Added
 -   menambah menu statistik

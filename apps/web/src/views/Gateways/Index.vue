@@ -199,7 +199,7 @@ const { mutateAsync: removeGatewayMutate, isPending: removeGatewayPending } = us
 const confirmDeleteGateway = (data) => {
     confirm.require({
         message: 'Yakin ingin menghapus gateway ini ?',
-        header: 'Confirmation',
+        header: 'Konfirmasi',
         icon: 'pi pi-info-circle',
         rejectClass: 'p-button-secondary p-button-outlined',
         acceptClass: 'p-button-danger',
@@ -316,7 +316,7 @@ const { mutateAsync: generateNewTokenMutate, isPending: generateNewTokenPending 
 const confirmGenerateNewToken = (data) => {
     confirm.require({
         message: ' Yakin ingin membuat token baru ?',
-        header: 'Confirmation',
+        header: 'Konfirmasi',
         icon: 'pi pi-info-circle',
         rejectClass: 'p-button-secondary p-button-outlined',
         acceptClass: 'p-button-danger',

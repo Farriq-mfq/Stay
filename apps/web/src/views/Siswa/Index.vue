@@ -128,8 +128,8 @@ const { mutateAsync: removeSiswaMutate, isPending: removeSiswaPending } = useMut
 
 const confirmRemoveSiswa = (data) => {
   confirm.require({
-    message: 'Yakin ingin hapus data siswa ?',
-    header: 'Confirmation',
+    message: 'Yakin ingin hapus data siswa ini ?',
+    header: 'Konfirmasi',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
@@ -404,7 +404,7 @@ const confirmResetRFID = (event, data) => {
   confirm.require({
     target: event.currentTarget,
     message: 'Yakin ingin reset kartu RFID ?',
-    header: 'Confirmation',
+    header: 'Konfirmasi',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',
@@ -475,7 +475,7 @@ const {
 const confirmResetSiswa = () => {
   confirm.require({
     message: 'Yakin ingin reset data siswa ?',
-    header: 'Confirmation',
+    header: 'Konfirmasi',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
@@ -578,7 +578,7 @@ const {
 const confirmResetTelegram = (event, data) => {
   confirm.require({
     target: event.currentTarget,
-    header: 'Confirmation',
+    header: 'Konfirmasi',
     message: 'Yakin ingin reset Telegram ?',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
@@ -706,46 +706,42 @@ const downloadTemplateService = async () => {
           <template #expansion="{ data }">
             <Card>
               <template #content>
-                <table style="border-spacing: 0.6rem;">
-                  <tr v-if="data.rfid_token">
-                    <th>
-                      ID Kartu
-                    </th>
-                    <td>:</td>
-                    <td>
-                      <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
-                    </td>
-                  </tr>
-                  <tr v-if="data.telegram_account">
-                    <th>
-                      Telegram
-                    </th>
-                    <td>:</td>
-                    <td>
-                      <Tag class="p-2">
-                        <table>
-                          <tr>
-                            <th>Nama</th>
-                            <td>:</td>
-                            <td>
-                              {{ data.telegram_account.name }}
-                            </td>
-                          </tr>
-                          <tr>
-                            <th>Username</th>
-                            <td>:</td>
-                            <td>{{ data.telegram_account.username }}</td>
-                          </tr>
-                          <tr>
-                            <th>Chat id</th>
-                            <td>:</td>
-                            <td>{{ data.telegram_account.chat_id }}</td>
-                          </tr>
-                        </table>
-                      </Tag>
-                    </td>
-                  </tr>
-                </table>
+                <tr v-if="data.rfid_token">
+                  <th>
+                    ID Kartu
+                  </th>
+                  <td>:</td>
+                  <td>
+                    <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
+                  </td>
+                </tr>
+                <!-- <tr v-if="data.telegram_account">
+                  <th>
+                    Telegram
+                  </th>
+                  <td>:</td>
+                  <td>
+                    <Tag class="p-2">
+                <tr>
+                  <th>Nama</th>
+                  <td>:</td>
+                  <td>
+                    {{ data.telegram_account.name }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Username</th>
+                  <td>:</td>
+                  <td>{{ data.telegram_account.username }}</td>
+                </tr>
+                <tr>
+                  <th>Chat id</th>
+                  <td>:</td>
+                  <td>{{ data.telegram_account.chat_id }}</td>
+                </tr>
+                </Tag>
+                </td>
+                </tr> -->
               </template>
               <template #footer>
                 <div class="flex gap-2">

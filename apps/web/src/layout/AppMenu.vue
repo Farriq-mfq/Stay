@@ -35,7 +35,8 @@ const model = ref([
         items: [
             auth.check('admin') ? { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' } : null,
             { label: 'Siswa', icon: 'pi pi-fw pi-id-card', to: '/siswa' },
-        ].filter(item => item)
+            { label: 'Pegawai', icon: 'pi pi-fw pi-users', to: '/pegawai' },
+        ].filter(item => item != null)
     },
 
 ]);

@@ -154,8 +154,8 @@ const {
 const confirmDeleteSession = (id) => {
   confirm.require({
     target: event.currentTarget,
-    header: 'Confirmation',
-    message: 'Yakin Hapus Session Ini ?',
+    header: 'Konfirmasi',
+    message: 'Yakin hapus sesi presensi ini ?',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',
