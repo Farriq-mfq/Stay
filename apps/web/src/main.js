@@ -7,7 +7,6 @@ import http from './plugins/http';
 import queryClient from './plugins/query-client';
 import socket from './plugins/socket';
 import router from './router';
-import print from 'vue3-print-nb'
 
 import VueQrcode from '@chenfengyuan/vue-qrcode';
 import BadgeDirective from 'primevue/badgedirective';
@@ -33,7 +32,6 @@ app.use(router);
 app.use(auth);
 app.use(queryClient);
 app.use(socket);
-app.use(print);
 app.directive('debounce', vueDebounce({ lock: true }))
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);

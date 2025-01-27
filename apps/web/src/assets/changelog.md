@@ -3,12 +3,15 @@
 -   menambah menu statistik
 -   menambah statistik berdasarkan rombel
 -   menambah fitur print pada rekap harian dan rekap bulanan presensi
+-   menambah pwa
 ### Change
 -   menugubah menu grafik di presensi jadi menu tersendiri yaitu statistik
 -   menghapus fitur reset siswa
 -   mengubah fitur waktu mulai dan waktu selesai di sesi presensi jadi waktu, yang dulunya adalah tanggal waktu
 -   menulis ulang button tambah sesi dari "tambah session baru" jadi "tambah sesi presensi baru"
 -   menambah copyright dan nama aplikasi di bagian login
+### FIX
+-   menghapus title table
 ## [1.3.0] - 2025-01-21
 
 ### Added

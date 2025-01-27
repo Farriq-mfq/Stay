@@ -134,10 +134,7 @@ const { handlePrint } = useVueToPrint({
         <DataTable v-if="sessionId && selectedRombel && filterDate" ref="componentPrintRef" :loading="isLoading"
             :value="isLoading ? [] : presences.data.data" dataKey="id">
             <template #header>
-                <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                    <h5 class="m-0">
-                        Presences
-                    </h5>
+                <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
                     <IconField iconPosition="left" class="block mt-2 md:mt-0">
                         <InputIcon class="pi pi-search" />
                         <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
