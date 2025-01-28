@@ -35,13 +35,6 @@ export class SessionsService {
           throw new BadRequestException(`Group ${validateGroup.join(', ')} not found`)
         }
       }
-    } else {
-      if (createSessionDto.group && createSessionDto.group.length > 0) {
-        const validateGroupAndRombel = createSessionDto.group.filter(group => !rombels.includes(group) && !groups.includes(group))
-        if (validateGroupAndRombel.length > 0) {
-          throw new BadRequestException(`Group ${validateGroupAndRombel.join(', ')} not found`)
-        }
-      }
     }
   }
 
@@ -52,7 +45,7 @@ export class SessionsService {
         name: createSessionDto.name
       }
     })
-    
+
     await this.validateGroup(createSessionDto);
 
     if (createSessionDto.gateways && createSessionDto.gateways.length) {
@@ -178,6 +171,28 @@ export class SessionsService {
         gateways: true
       }
     })
+
+
+    if (findSession.name !== updateSessionDto.name) {
+      const checkSessionNameAlreadyExist = await this.prismaService.client.presence_sessions.findFirst({
+        where: {
+          name: updateSessionDto.name
+        }
+      })
+      if (checkSessionNameAlreadyExist) throw new BadRequestException('Session name already exist')
+    }
+
+    if (findSession.group !== JSON.stringify(updateSessionDto.group)) {
+      await this.prismaService.client.presence_sessions.update({
+        where: {
+          id
+        },
+        data: {
+          group: null
+        }
+      })
+    }
+
     await this.prismaService.client.gateways.updateMany({
       data: {
         presence_sessionsId: null

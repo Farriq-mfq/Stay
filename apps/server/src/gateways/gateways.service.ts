@@ -1,6 +1,6 @@
 import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { presences } from '@prisma/client';
+import { presences, presences_pegawai } from '@prisma/client';
 import { CustomPrismaService } from 'nestjs-prisma';
 import * as ping from 'net-ping';
 import { Server } from 'socket.io';
@@ -176,7 +176,7 @@ export class GatewaysService {
   async handleScanned(
     data: ScanDto,
     client: Server
-  ): Promise<presences | { message: string }> {
+  ): Promise<presences | presences_pegawai | { message: string }> {
     try {
       const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
         where: {

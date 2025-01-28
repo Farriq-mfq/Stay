@@ -11,15 +11,16 @@ import * as xlsx from 'xlsx'
 
 @Controller('pegawai')
 // @ApiTags("Pegawai")
-@UseGuards(AccessTokenGuard)
 export class PegawaiController {
   constructor(private readonly pegawaiService: PegawaiService) { }
 
+  @UseGuards(AccessTokenGuard)
   @Post()
   async create(@Body() createPegawaiDto: CreatePegawaiDto) {
     return await this.pegawaiService.create(createPegawaiDto);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get()
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -29,6 +30,7 @@ export class PegawaiController {
     return await this.pegawaiService.findAll(page, limit, search);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get('/download')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
@@ -37,12 +39,19 @@ export class PegawaiController {
     res.send(file);
   }
 
+  @Get("/all")
+  async findWithoutPaginate() {
+    return await this.pegawaiService.findWithoutPaginate()
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Get("/group")
   async getSiswaClass() {
     return await this.pegawaiService.getGroup()
   }
 
   @Get(':id')
+  @UseGuards(AccessTokenGuard)
   async findOne(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.findOne(+id);
   }
@@ -58,21 +67,26 @@ export class PegawaiController {
   //   throw new ServiceUnavailableException()
   // }
 
+  @UseGuards(AccessTokenGuard)
   @Delete(':id')
   async remove(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.remove(+id);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Post(':id/rfid-token')
+
   async registerRfid(@Param('id', new ParseIntPipe()) id: string, @Body() updateToken: UpdatePegawaiTokenDto) {
     return await this.pegawaiService.registerRfid(+id, updateToken)
   }
 
+  @UseGuards(AccessTokenGuard)
   @Delete(':id/rfid-token')
   async resetTokenRFID(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.resetTokenRFID(+id)
   }
 
+  @UseGuards(AccessTokenGuard)
   @Post('/import')
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))

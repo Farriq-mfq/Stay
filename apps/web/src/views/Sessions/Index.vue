@@ -6,7 +6,6 @@ import { useConfirm } from "primevue/useconfirm";
 import Calendar from 'primevue/calendar';
 import Chip from 'primevue/chip'
 import { format } from 'date-fns'
-import { id } from 'date-fns/locale'
 const toast = useToast();
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -81,7 +80,7 @@ const addSessionService = async (data) => {
     allow_twice: data.allow_twice,
     gateways: data.gateways,
     group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : [],
-    session_role_type: data.session_role_type != "" ? data.session_role_type : null
+    session_role_type: data.session_role_type
   })
 }
 
@@ -115,6 +114,14 @@ const handleAddSession = () => {
     },
     onError: (err) => {
       if (err.response.status === 400) {
+        if (err.response.data.message) {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response.data.message,
+            life: 3000,
+          });
+        }
         errorsAddSession.value = err.response.data
       } else if (err.response.status === 404) {
         toast.add({
@@ -239,7 +246,7 @@ const handleShowDialogUpdateSesion = (data) => {
     ...data.end_time && { end_time: new Date(`${now} ${data.end_time}`) },
     allow_twice: data.allow_twice,
     gateways: data.gateways,
-    session_role_type: data.session_role_type != null ? data.session_role_type : "",
+    session_role_type: data.session_role_type,
     group: data.group ? JSON.parse(data.group) : []
   }
 
@@ -272,7 +279,7 @@ const handleSubmitUpdateSesion = () => {
     }
     ,
     group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : [],
-    session_role_type: dataUpdateSession.value.session_role_type ? dataUpdateSession.value.session_role_type : null
+    session_role_type: dataUpdateSession.value.session_role_type
   }, {
     onSuccess() {
       toast.add({
@@ -289,6 +296,14 @@ const handleSubmitUpdateSesion = () => {
     onError: (err) => {
       if (!err.response) return;
       if (err.response.status === 400) {
+        if (err.response.data.message) {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response.data.message,
+            life: 3000,
+          });
+        }
         errorsUpdateSession.value = err.response.data
       } else if (err.response.status === 404) {
         toast.add({
@@ -330,7 +345,6 @@ const { data: dataGroups, isLoading: loadingGroup } = useQuery({
 
 
 
-const groupAndRombel = ref([])
 
 watch(() => sessionData.value.session_role_type, () => {
   selectedGroup.value = []
@@ -348,22 +362,9 @@ watch(() => dataUpdateSession.value.session_role_type, () => {
       const validateGroup = dataGroups.value.data.data.filter(rombel => mappingSelectedGroup.includes(rombel))
       selectedGroup.value = validateGroup.length > 0 ? validateGroup.map(item => ({ value: item })) : []
     }
-  } else {
-    if (groupAndRombel.length > 0) {
-      const validateRombelAndGroup = groupAndRombel.filter(rombel => mappingSelectedGroup.includes(rombel))
-      selectedGroup.value = validateRombelAndGroup.length > 0 ? validateRombelAndGroup.map(item => ({ value: item })) : []
-    }
   }
 })
 
-watch([() => dataRombels.value, () => dataGroups.value], () => {
-  if (dataRombels.value && dataGroups.value) {
-    const mappingRombel = dataRombels.value.data.data.map(item => ({ value: item }))
-    const mappingGroup = dataGroups.value.data.data.map(item => ({ value: item }))
-    groupAndRombel.value = [...mappingGroup, ...mappingRombel]
-  }
-
-})
 
 
 // camera
@@ -433,6 +434,7 @@ const clearDialogQrCode = () => {
               </span>
             </div>
           </template>
+          <Column expander />
           <Column field="name" header="Nama">
           </Column>
           <Column field="session_role_type" header="Tipe Role">
@@ -512,8 +514,8 @@ const clearDialogQrCode = () => {
         </DataTable>
       </div>
       <!-- create -->
-      <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Tambah Session Baru" :modal="true"
-        class="p-fluid">
+      <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Buat sesi presensi baru"
+        :modal="true" class="p-fluid">
         <div class="field">
           <label for="role_type">
             Sesi Presensi diijinkan untuk ?
@@ -527,10 +529,6 @@ const clearDialogQrCode = () => {
             <div class="flex align-items-center">
               <RadioButton v-model="sessionData.session_role_type" inputId="pegawai" name="pegawai" value="PEGAWAI" />
               <label for="pegawai" class="ml-2">Pegawai</label>
-            </div>
-            <div class="flex align-items-center">
-              <RadioButton v-model="sessionData.session_role_type" inputId="pegawai" name="pegawai" value="" />
-              <label for="pegawai" class="ml-2">Semua</label>
             </div>
           </div>
           <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.session_role_type">
@@ -580,8 +578,6 @@ const clearDialogQrCode = () => {
           <label for="group" v-if="sessionData.session_role_type === 'SISWA'">Pilih Rombel Siswa (Optional)</label>
           <label for="group" v-else-if="sessionData.session_role_type === 'PEGAWAI'">Pilih Kelompok Pegawai
             (Optional)</label>
-          <label for="group" v-else>Pilih Rombel &
-            Kelompok (Optional)</label>
           <!-- siswa -->
           <MultiSelect v-if="sessionData.session_role_type == 'SISWA'" :loading="loadingRombel" filter
             v-model="selectedGroup" :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []"
@@ -590,9 +586,7 @@ const clearDialogQrCode = () => {
           <MultiSelect v-else-if="sessionData.session_role_type == 'PEGAWAI'" :loading="loadingGroup" filter
             v-model="selectedGroup" :options="dataGroups ? dataGroups.data.data.map(item => ({ value: item })) : []"
             optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
-          <!-- group and rombel -->
-          <MultiSelect v-else :loading="loadingGroup && loadingRombel" filter v-model="selectedGroup"
-            :options="groupAndRombel" optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
+
           <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.group">
             {{ errorsAddSession.group[0] }}
           </p>
@@ -605,8 +599,8 @@ const clearDialogQrCode = () => {
             @click="handleAddSession" />
         </template>
       </Dialog>
-      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
-        class="p-fluid" @after-hide="clearUpdateSession">
+      <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Sesi Presensi"
+        :modal="true" class="p-fluid" @after-hide="clearUpdateSession">
         <div class="field">
           <label for="role_type">
             Sesi Presensi diijinkan untuk ?
@@ -620,10 +614,6 @@ const clearDialogQrCode = () => {
               <RadioButton v-model="dataUpdateSession.session_role_type" inputId="pegawai" name="pegawai"
                 value="PEGAWAI" />
               <label for="pegawai" class="ml-2">Pegawai</label>
-            </div>
-            <div class="flex align-items-center">
-              <RadioButton v-model="dataUpdateSession.session_role_type" inputId="pegawai" name="pegawai" value="" />
-              <label for="pegawai" class="ml-2">Semua</label>
             </div>
           </div>
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.session_role_type">
@@ -679,8 +669,6 @@ const clearDialogQrCode = () => {
             (Optional)</label>
           <label for="group" v-else-if="dataUpdateSession.session_role_type === 'PEGAWAI'">Pilih Kelompok Pegawai
             (Optional)</label>
-          <label for="group" v-else>Pilih Rombel &
-            Kelompok (Optional)</label>
           <!-- siswa -->
           <MultiSelect v-if="dataUpdateSession.session_role_type == 'SISWA'" :loading="loadingRombel" filter
             v-model="selectedGroup" :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []"
@@ -689,9 +677,6 @@ const clearDialogQrCode = () => {
           <MultiSelect v-else-if="dataUpdateSession.session_role_type == 'PEGAWAI'" :loading="loadingGroup" filter
             v-model="selectedGroup" :options="dataGroups ? dataGroups.data.data.map(item => ({ value: item })) : []"
             optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
-          <!-- group and rombel -->
-          <MultiSelect v-else :loading="loadingGroup && loadingRombel" filter v-model="selectedGroup"
-            :options="groupAndRombel" optionLabel="value" placeholder="Pilih Rombel & Kelompok" class="w-full" />
           <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.group">
             {{ errorsUpdateSession.group[0] }}
           </p>

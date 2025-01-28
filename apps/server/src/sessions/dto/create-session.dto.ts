@@ -1,6 +1,6 @@
 import { SessionRoleType } from "@prisma/client"
 import { Transform, TransformFnParams } from "class-transformer"
-import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from "class-validator"
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 import { IsRangeTime } from "src/validators/is-range-time.validator"
 import { IsTime } from "src/validators/is-time.validator"
 
@@ -32,9 +32,10 @@ export class CreateSessionDto {
     @IsOptional()
     group: string[]
 
-    @IsString({ message: "Session Role Type Harus String"})
+    @IsNotEmpty({ message: "Session Role Type Harus diisi" })
+    @IsString({ message: "Session Role Type Harus String" })
     @IsEnum(SessionRoleType, { message: "Session Role Type Salah, Hanya Ada 2 Yaitu Siswa dan Pegawai" })
-    @IsOptional()
+    // @IsOptional()
     session_role_type: SessionRoleType
 }
 

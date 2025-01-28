@@ -80,6 +80,21 @@ export class PegawaiService {
     }
   }
 
+  async findWithoutPaginate() {
+    return await this.prismaService.client.pegawai.findMany({
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        group: true,
+        sign_picture: true
+      },
+      orderBy: {
+        name: "asc"
+      }
+    });
+  }
+
   async findOne(id: number) {
     return await this.prismaService.client.pegawai.findUniqueOrThrow({
       where: {

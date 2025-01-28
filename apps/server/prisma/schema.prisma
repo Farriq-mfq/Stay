@@ -112,7 +112,7 @@ model presence_sessions {
   // rombel            String?
   group             String?
   // plan by allowed_role
-  session_role_type SessionRoleType?
+  session_role_type SessionRoleType
   presences_pegawai presences_pegawai[]
 
   @@index([qrcode])

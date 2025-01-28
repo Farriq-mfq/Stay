@@ -14,7 +14,13 @@ const model = ref([
             { label: 'Gateway', icon: 'pi pi-fw pi-link', to: '/gateways' },
             { label: 'Sesi Presensi', icon: 'pi pi-fw pi-file-edit', to: '/sessions' },
             // { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
-            { label: 'Data Presensi', icon: 'pi pi-fw pi-server', to: '/presences' },
+            {
+                label: 'Data Presensi',
+                icon: 'pi pi-fw pi-server',
+                items: [
+                    { label: 'Siswa', icon: 'pi pi-fw pi-bars', to: '/presences' },
+                ]
+            },
             { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' },
             { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' },
             { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' },
