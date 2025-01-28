@@ -3,24 +3,59 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { SiswaService } from 'src/siswa/siswa.service';
+import { PegawaiService } from 'src/pegawai/pegawai.service';
 
 @Injectable()
 export class SessionsService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly siswaService: SiswaService,
+    private readonly pegawaiService: PegawaiService
 
   ) {
 
   }
 
-  async create(createSessionDto: CreateSessionDto) {
-    if (createSessionDto.gateways && createSessionDto.gateways.length) {
-      const checkSessionName = await this.prismaService.client.presence_sessions.findFirst({
-        where: {
-          name: createSessionDto.name
+  protected async validateGroup(createSessionDto: CreateSessionDto | UpdateSessionDto) {
+    // validate group
+    const rombels = await this.siswaService.getGroupClass()
+    const groups = await this.pegawaiService.getGroup()
+    if (createSessionDto.session_role_type === "SISWA") {
+      if (createSessionDto.group && createSessionDto.group.length > 0) {
+        const validateRombel = createSessionDto.group.filter(group => !rombels.includes(group))
+        if (validateRombel.length > 0) {
+          throw new BadRequestException(`Rombel ${validateRombel.join(', ')} not found`)
         }
-      })
+      }
+    } else if (createSessionDto.session_role_type === "PEGAWAI") {
+      if (createSessionDto.group && createSessionDto.group.length > 0) {
+        const validateGroup = createSessionDto.group.filter(group => !groups.includes(group))
+        if (validateGroup.length > 0) {
+          throw new BadRequestException(`Group ${validateGroup.join(', ')} not found`)
+        }
+      }
+    } else {
+      if (createSessionDto.group && createSessionDto.group.length > 0) {
+        const validateGroupAndRombel = createSessionDto.group.filter(group => !rombels.includes(group) && !groups.includes(group))
+        if (validateGroupAndRombel.length > 0) {
+          throw new BadRequestException(`Group ${validateGroupAndRombel.join(', ')} not found`)
+        }
+      }
+    }
+  }
 
+  async create(createSessionDto: CreateSessionDto) {
+
+    const checkSessionName = await this.prismaService.client.presence_sessions.findFirst({
+      where: {
+        name: createSessionDto.name
+      }
+    })
+    
+    await this.validateGroup(createSessionDto);
+
+    if (createSessionDto.gateways && createSessionDto.gateways.length) {
       if (checkSessionName) throw new BadRequestException('Session name already exist')
 
       const session = await this.prismaService.client.presence_sessions.create({
@@ -37,7 +72,8 @@ export class SessionsService {
           },
           ...createSessionDto.group && createSessionDto.group.length > 0 && {
             group: JSON.stringify(createSessionDto.group)
-          }
+          },
+          session_role_type: createSessionDto.session_role_type
         },
       })
       await this.prismaService.client.gateways.updateMany({
@@ -52,6 +88,7 @@ export class SessionsService {
       })
       return session
     } else {
+      if (checkSessionName) throw new BadRequestException('Session name already exist')
       const session = await this.prismaService.client.presence_sessions.create({
         data: {
           name: createSessionDto.name,
@@ -66,7 +103,8 @@ export class SessionsService {
           },
           ...createSessionDto.group && createSessionDto.group.length > 0 && {
             group: JSON.stringify(createSessionDto.group)
-          }
+          },
+          session_role_type: createSessionDto.session_role_type
         },
       })
       return session
@@ -129,6 +167,9 @@ export class SessionsService {
   }
 
   async update(id: number, updateSessionDto: UpdateSessionDto) {
+
+    await this.validateGroup(updateSessionDto);
+
     const findSession = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id
@@ -157,7 +198,8 @@ export class SessionsService {
           allow_twice: updateSessionDto.allow_twice,
           start_time: updateSessionDto.start_time,
           end_time: updateSessionDto.end_time,
-          group: updateSessionDto.group && updateSessionDto.group.length > 0 ? JSON.stringify(updateSessionDto.group) : null
+          group: updateSessionDto.group && updateSessionDto.group.length > 0 ? JSON.stringify(updateSessionDto.group) : null,
+          session_role_type: updateSessionDto.session_role_type
         },
       })
       await this.prismaService.client.gateways.updateMany({
@@ -181,7 +223,8 @@ export class SessionsService {
           allow_twice: updateSessionDto.allow_twice,
           start_time: updateSessionDto.start_time,
           end_time: updateSessionDto.end_time,
-          group: JSON.stringify(updateSessionDto.group)
+          group: JSON.stringify(updateSessionDto.group),
+          session_role_type: updateSessionDto.session_role_type
         },
       })
       return session

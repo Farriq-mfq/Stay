@@ -1,11 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { hash } from 'argon2';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 // import { UpdateSiswaDto } from './dto/update-siswa.dto';
-import { CreatePegawaiDto } from './dto/create-pegawai.dto';
+import { CreatePegawaiDto, ImportPegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
 @Injectable()
 export class PegawaiService {
   constructor(
@@ -101,58 +105,63 @@ export class PegawaiService {
     });
   }
 
-  // async import(data, keys) {
-  //   const requiredKeys = ['notelp', 'nama', 'nis', 'nisn', 'rombel'];
-  //   try {
-  //     const isValid = requiredKeys.every(key => keys.includes(key));
-  //     if (isValid) {
-  //       let allData = []
-  //       for (const row of data) {
-  //         const rowData = {
-  //           ...row.notelp && {
-  //             notelp: row.notelp.toString()
-  //           },
-  //           ...row.nama && {
-  //             name: row.nama.toString(),
-  //           },
-  //           ...row.nisn && {
-  //             nisn: row.nisn.toString(),
-  //             password: await hash(row.nisn.toString()),
-  //           },
-  //           ...row.nis && {
-  //             nis: row.nis.toString(),
-  //           },
-  //           ...row.rombel && {
-  //             rombel: row.rombel.toString().toUpperCase(),
-  //           },
-  //         }
-  //         const createSiswaDto = plainToClass(ImportSiswaDto, rowData);
-  //         const errors = await validate(createSiswaDto)
+  async import(data, keys) {
+    const requiredKeys = ['nama', 'username', 'jabatan', 'kelompok', 'ttd'];
+    try {
+      const isValid = requiredKeys.every(key => keys.includes(key));
+      if (isValid) {
+        let allData = []
+        if (data.length > 0) {
+          for (const row of data) {
+            const rowData = {
+              ...row.nama && {
+                name: row.nama
+              },
+              ...row.username && {
+                username: row.username,
+                password: await hash(row.username),
+              },
+              ...row.jabatan && {
+                position: row.jabatan,
+              },
+              ...row.kelompok && {
+                group: row.kelompok.toUpperCase(),
+              },
+              ...row.ttd && {
+                sign_picture: row.ttd,
+              },
+            }
+            const createPegawaiValidate = plainToClass(ImportPegawaiDto, rowData);
+            const errors = await validate(createPegawaiValidate)
 
-  //         if (!(errors.length > 0)) {
-  //           const created = await this.prismaService.client.siswa.upsert({
-  //             where: {
-  //               nisn: rowData.nisn,
-  //             },
-  //             create: rowData,
-  //             update: rowData
-  //           })
-  //           allData.push(created)
-  //         }
-  //       }
-  //       return allData
-  //     } else {
-  //       throw new BadRequestException()
-  //     }
+            if (!(errors.length > 0)) {
+              const created = await this.prismaService.client.pegawai.upsert({
+                where: {
+                  username: rowData.username,
+                },
+                create: rowData,
+                update: rowData
+              })
+              allData.push(created)
+            }
+          }
+          return allData
+        } else {
+          throw new BadRequestException()
+        }
+      } else {
+        throw new BadRequestException()
+      }
 
-  //   } catch (e) {
-  //     if (e instanceof BadRequestException) {
-  //       throw new BadRequestException()
-  //     } else {
-  //       throw new InternalServerErrorException()
-  //     }
-  //   }
-  // }
+    } catch (e) {
+      if (e instanceof BadRequestException) {
+        throw new BadRequestException()
+      } else {
+        console.log(e)
+        throw new InternalServerErrorException()
+      }
+    }
+  }
 
   // async reset() {
   //   // return await this.prismaService.client.$queryRaw`TRUNCATE TABLE "siswa" CASCADE`
@@ -189,9 +198,9 @@ export class PegawaiService {
   //   })
   // }
 
-  // async downloadTemplate() {
-  //   return readFileSync(join(process.cwd(), 'templates/siswa-template.xlsx'))
-  // }
+  async downloadTemplate() {
+    return readFileSync(join(process.cwd(), 'templates/pegawai-template.xlsx'))
+  }
 
   async findByUsername(username: string) {
     return await this.prismaService.client.pegawai.findUnique({
@@ -212,22 +221,22 @@ export class PegawaiService {
     })
   }
 
-  // async getGroupClass() {
-  //   const getRombel = await this.prismaService.client.siswa.findMany({
-  //     select: {
-  //       rombel: true
-  //     },
-  //     distinct: ['rombel'],
-  //     orderBy: {
-  //       rombel: 'asc'
-  //     }
-  //   })
+  async getGroup() {
+    const getGroups = await this.prismaService.client.pegawai.findMany({
+      select: {
+        group: true
+      },
+      distinct: ['group'],
+      orderBy: {
+        group: 'asc'
+      }
+    })
 
-  //   let rombels = [];
+    let groups = [];
 
-  //   for (const rombel of getRombel) {
-  //     rombels.push(rombel.rombel)
-  //   }
-  //   return rombels;
-  // }
+    for (const group of getGroups) {
+      groups.push(group.group)
+    }
+    return groups;
+  }
 }

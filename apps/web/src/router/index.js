@@ -219,6 +219,14 @@ const router = createRouter({
                         title: "Siswa",
                     }
                 },
+                {
+                    path: '/pegawai',
+                    name: 'pegawai',
+                    component: () => import('@/views/Pegawai/Index.vue'),
+                    meta: {
+                        title: "Pegawai",
+                    }
+                },
             ]
         },
         {

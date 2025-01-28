@@ -1,6 +1,7 @@
 ## [1.4.1] - 2025-21-25
 ### Added
--   menambah fitur pegawai
+-   menambah fitur manajemen pegawai
+-   menambah tipe sesi presensi
 ### Change
 -   mengubah "Confirmation" jadi "Konfirmasi"
 ### FIX 

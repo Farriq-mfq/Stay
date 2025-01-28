@@ -1,7 +1,7 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, ref, watch } from 'vue';
+import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
 import Calendar from 'primevue/calendar';
 import Chip from 'primevue/chip'
@@ -68,6 +68,7 @@ const sessionData = ref({
   end_time: null,
   allow_twice: false,
   gateways: [],
+  session_role_type: ""
 })
 
 
@@ -79,7 +80,8 @@ const addSessionService = async (data) => {
     end_time: data.end_time ? format(data.end_time, 'HH:mm:ss') : null,
     allow_twice: data.allow_twice,
     gateways: data.gateways,
-    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : [],
+    session_role_type: data.session_role_type != "" ? data.session_role_type : null
   })
 }
 
@@ -191,9 +193,12 @@ const dataUpdateSession = ref({
   start_time: null,
   end_time: null,
   allow_twice: false,
-  gateways: []
+  gateways: [],
+  group: [],
+  session_role_type: ""
 })
 const errorsUpdateSession = ref({})
+
 
 
 const updateService = async (data) => {
@@ -205,7 +210,8 @@ const updateService = async (data) => {
     ...data.gateways && data.gateways.length && {
       gateways: data.gateways
     },
-    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : [],
+    session_role_type: data.session_role_type
   })
 }
 
@@ -233,6 +239,8 @@ const handleShowDialogUpdateSesion = (data) => {
     ...data.end_time && { end_time: new Date(`${now} ${data.end_time}`) },
     allow_twice: data.allow_twice,
     gateways: data.gateways,
+    session_role_type: data.session_role_type != null ? data.session_role_type : "",
+    group: data.group ? JSON.parse(data.group) : []
   }
 
   selectedGroup.value = data.group ? JSON.parse(data.group).map(item => ({ value: item })) : []
@@ -244,7 +252,8 @@ const clearUpdateSession = () => {
     start_time: null,
     end_time: null,
     allow_twice: false,
-    gateways: []
+    gateways: [],
+    session_role_type: ""
   }
 
   showDialogUpdateSession.value = false
@@ -262,7 +271,8 @@ const handleSubmitUpdateSesion = () => {
       gateways: dataUpdateSession.value.gateways
     }
     ,
-    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : []
+    group: selectedGroup.value.length ? selectedGroup.value.map(item => item.value) : [],
+    session_role_type: dataUpdateSession.value.session_role_type ? dataUpdateSession.value.session_role_type : null
   }, {
     onSuccess() {
       toast.add({
@@ -308,7 +318,52 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
   queryFn: getRombel
 })
 
+const getGroup = async () => {
+  return await axios.get('/pegawai/group');
+}
 
+
+const { data: dataGroups, isLoading: loadingGroup } = useQuery({
+  queryKey: ['pegawai-group'],
+  queryFn: getGroup
+})
+
+
+
+const groupAndRombel = ref([])
+
+watch(() => sessionData.value.session_role_type, () => {
+  selectedGroup.value = []
+})
+
+watch(() => dataUpdateSession.value.session_role_type, () => {
+  const mappingSelectedGroup = selectedGroup.value.map(item => item.value)
+  if (dataUpdateSession.value.session_role_type == "SISWA") {
+    if (dataRombels.value) {
+      const validateRombel = dataRombels.value.data.data.filter(rombel => mappingSelectedGroup.includes(rombel))
+      selectedGroup.value = validateRombel.length > 0 ? validateRombel.map(item => ({ value: item })) : []
+    }
+  } else if (dataUpdateSession.value.session_role_type == "PEGAWAI") {
+    if (dataGroups.value) {
+      const validateGroup = dataGroups.value.data.data.filter(rombel => mappingSelectedGroup.includes(rombel))
+      selectedGroup.value = validateGroup.length > 0 ? validateGroup.map(item => ({ value: item })) : []
+    }
+  } else {
+    if (groupAndRombel.length > 0) {
+      const validateRombelAndGroup = groupAndRombel.filter(rombel => mappingSelectedGroup.includes(rombel))
+      selectedGroup.value = validateRombelAndGroup.length > 0 ? validateRombelAndGroup.map(item => ({ value: item })) : []
+    }
+  }
+})
+
+watch([() => dataRombels.value, () => dataGroups.value], () => {
+  if (dataRombels.value && dataGroups.value) {
+    const mappingRombel = dataRombels.value.data.data.map(item => ({ value: item }))
+    const mappingGroup = dataGroups.value.data.data.map(item => ({ value: item }))
+    groupAndRombel.value = [...mappingGroup, ...mappingRombel]
+  }
+
+})
 
 
 // camera
@@ -378,12 +433,16 @@ const clearDialogQrCode = () => {
               </span>
             </div>
           </template>
-          <Column expander />
           <Column field="name" header="Nama">
+          </Column>
+          <Column field="session_role_type" header="Tipe Role">
+            <template #body="{ data }">
+              <Tag v-if="data.session_role_type" severity="info">{{ data.session_role_type }}</Tag>
+              <p v-else>-</p>
+            </template>
           </Column>
           <Column field="allow_twice" header="Presensi 2x">
             <template #body="{ data }">
-
               <Chip class="py-0 pl-0 pr-4">
                 <span :class="{ 'bg-primary': data.allow_twice, 'bg-red-400': !data.allow_twice }"
                   class="border-circle w-2rem h-2rem flex align-items-center justify-content-center text-white">
@@ -456,6 +515,29 @@ const clearDialogQrCode = () => {
       <Dialog v-model:visible="addSessionDialog" :style="{ width: '450px' }" header="Tambah Session Baru" :modal="true"
         class="p-fluid">
         <div class="field">
+          <label for="role_type">
+            Sesi Presensi diijinkan untuk ?
+          </label>
+
+          <div class="flex flex-wrap gap-3 border-1 py-4 px-2 border-round border-primary justify-content-center">
+            <div class="flex align-items-center">
+              <RadioButton v-model="sessionData.session_role_type" inputId="siswa" name="siswa" value="SISWA" />
+              <label for="siswa" class="ml-2">Siswa</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="sessionData.session_role_type" inputId="pegawai" name="pegawai" value="PEGAWAI" />
+              <label for="pegawai" class="ml-2">Pegawai</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="sessionData.session_role_type" inputId="pegawai" name="pegawai" value="" />
+              <label for="pegawai" class="ml-2">Semua</label>
+            </div>
+          </div>
+          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.session_role_type">
+            {{ errorsAddSession.session_role_type[0] }}
+          </p>
+        </div>
+        <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.name"
             required="true" autofocus v-model="sessionData.name" />
@@ -495,12 +577,24 @@ const clearDialogQrCode = () => {
           </p>
         </div>
         <div class="field">
-          <label for="gateways">Group (Optional)</label>
-          <MultiSelect :loading="loadingRombel" filter v-model="selectedGroup"
-            :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
-            placeholder="Pilih Rombel" class="w-full" />
-          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.rombel">
-            {{ errorsAddSession.rombel[0] }}
+          <label for="group" v-if="sessionData.session_role_type === 'SISWA'">Pilih Rombel Siswa (Optional)</label>
+          <label for="group" v-else-if="sessionData.session_role_type === 'PEGAWAI'">Pilih Kelompok Pegawai
+            (Optional)</label>
+          <label for="group" v-else>Pilih Rombel &
+            Kelompok (Optional)</label>
+          <!-- siswa -->
+          <MultiSelect v-if="sessionData.session_role_type == 'SISWA'" :loading="loadingRombel" filter
+            v-model="selectedGroup" :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []"
+            optionLabel="value" placeholder="Pilih Rombel" class="w-full" />
+          <!-- pegawai -->
+          <MultiSelect v-else-if="sessionData.session_role_type == 'PEGAWAI'" :loading="loadingGroup" filter
+            v-model="selectedGroup" :options="dataGroups ? dataGroups.data.data.map(item => ({ value: item })) : []"
+            optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
+          <!-- group and rombel -->
+          <MultiSelect v-else :loading="loadingGroup && loadingRombel" filter v-model="selectedGroup"
+            :options="groupAndRombel" optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
+          <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.group">
+            {{ errorsAddSession.group[0] }}
           </p>
         </div>
 
@@ -513,6 +607,29 @@ const clearDialogQrCode = () => {
       </Dialog>
       <Dialog v-model:visible="showDialogUpdateSession" :style="{ width: '450px' }" header="Edit Session" :modal="true"
         class="p-fluid" @after-hide="clearUpdateSession">
+        <div class="field">
+          <label for="role_type">
+            Sesi Presensi diijinkan untuk ?
+          </label>
+          <div class="flex flex-wrap gap-3 border-1 py-4 px-2 border-round border-primary justify-content-center">
+            <div class="flex align-items-center">
+              <RadioButton v-model="dataUpdateSession.session_role_type" inputId="siswa" name="siswa" value="SISWA" />
+              <label for="siswa" class="ml-2">Siswa</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="dataUpdateSession.session_role_type" inputId="pegawai" name="pegawai"
+                value="PEGAWAI" />
+              <label for="pegawai" class="ml-2">Pegawai</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="dataUpdateSession.session_role_type" inputId="pegawai" name="pegawai" value="" />
+              <label for="pegawai" class="ml-2">Semua</label>
+            </div>
+          </div>
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.session_role_type">
+            {{ errorsUpdateSession.session_role_type[0] }}
+          </p>
+        </div>
         <div class="field">
           <label for="name">Nama</label>
           <InputText id="name" :disabled="updateSessionLoading"
@@ -558,12 +675,25 @@ const clearDialogQrCode = () => {
         </div>
 
         <div class="field">
-          <label for="gateways">Group (Optional)</label>
-          <MultiSelect :loading="loadingRombel" filter v-model="selectedGroup"
-            :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
-            placeholder="Pilih Rombel" class="w-full" />
-          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.rombel">
-            {{ errorsUpdateSession.rombel[0] }}
+          <label for="group" v-if="dataUpdateSession.session_role_type === 'SISWA'">Pilih Rombel Siswa
+            (Optional)</label>
+          <label for="group" v-else-if="dataUpdateSession.session_role_type === 'PEGAWAI'">Pilih Kelompok Pegawai
+            (Optional)</label>
+          <label for="group" v-else>Pilih Rombel &
+            Kelompok (Optional)</label>
+          <!-- siswa -->
+          <MultiSelect v-if="dataUpdateSession.session_role_type == 'SISWA'" :loading="loadingRombel" filter
+            v-model="selectedGroup" :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []"
+            optionLabel="value" placeholder="Pilih Rombel" class="w-full" />
+          <!-- pegawai -->
+          <MultiSelect v-else-if="dataUpdateSession.session_role_type == 'PEGAWAI'" :loading="loadingGroup" filter
+            v-model="selectedGroup" :options="dataGroups ? dataGroups.data.data.map(item => ({ value: item })) : []"
+            optionLabel="value" placeholder="Pilih Kelompok" class="w-full" />
+          <!-- group and rombel -->
+          <MultiSelect v-else :loading="loadingGroup && loadingRombel" filter v-model="selectedGroup"
+            :options="groupAndRombel" optionLabel="value" placeholder="Pilih Rombel & Kelompok" class="w-full" />
+          <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.group">
+            {{ errorsUpdateSession.group[0] }}
           </p>
         </div>
 

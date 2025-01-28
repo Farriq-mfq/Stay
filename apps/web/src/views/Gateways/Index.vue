@@ -410,6 +410,13 @@ const handleCloseShowToken = () => {
                     </Column>
                     <Column field="ip" alignFrozen="right" :frozen="true" header="IP">
                     </Column>
+                    <Column field="location" header="Lokasi">
+                    </Column>
+                    <Column field="role" header="Role">
+                        <template #body="{ data }">
+                            <Tag :severity="data.role" :value="data.role.toUpperCase()" />
+                        </template>
+                    </Column>
                     <Column header="Status">
                         <template #body="{ data }">
                             <Tag v-if="data.status" value="Aktif" severity="primary" />
@@ -430,42 +437,16 @@ const handleCloseShowToken = () => {
                         </template>
                     </Column>
                     <template #expansion="{ data }">
-                        <Card>
-                            <template #content>
-                                <table style="border-spacing: 0.6rem;">
-                                    <tr style="width: 4rem;">
-                                        <th style="width: 4rem;">
-                                            Lokasi
-                                        </th>
-                                        <td>:</td>
-                                        <td>{{ data.location }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th style="width: 4rem;">
-                                            Role
-                                        </th>
-                                        <td>:</td>
-                                        <td>
-                                            <Tag>
-                                                {{ capitalize(data.role) }}
-                                            </Tag>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </template>
-                            <template #footer>
-                                <div class="flex gap-3 mt-1">
-                                    <Button :disabled="loadingTesting" :loading="loadingTesting"
-                                        :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
-                                        @click.prevent="handleTestConnection(data.id)" />
-                                    <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending"
-                                        :disabled="generateNewTokenPending" icon="pi pi-key"
-                                        @click.prevent="confirmGenerateNewToken(data.id)" />
-                                    <Button label="Hapus" outlined severity="danger"
-                                        @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
-                                </div>
-                            </template>
-                        </Card>
+                        <div class="flex gap-3 mt-1">
+                            <Button :disabled="loadingTesting" :loading="loadingTesting"
+                                :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
+                                @click.prevent="handleTestConnection(data.id)" />
+                            <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending"
+                                :disabled="generateNewTokenPending" icon="pi pi-key"
+                                @click.prevent="confirmGenerateNewToken(data.id)" />
+                            <Button label="Hapus" outlined severity="danger" @click.prevent="confirmDeleteGateway(data)"
+                                icon="pi pi-trash" />
+                        </div>
                     </template>
                 </DataTable>
             </div>

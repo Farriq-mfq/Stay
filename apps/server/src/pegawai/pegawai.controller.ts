@@ -1,15 +1,17 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { PegawaiService } from './pegawai.service';
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseFilePipeBuilder, ParseIntPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { CreatePegawaiDto } from './dto/create-pegawai.dto';
-import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
-import { AccessTokenPegawaiGuard } from './guards/accessTokenPegawai.guard';
+import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
+import { PegawaiService } from './pegawai.service';
+import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as xlsx from 'xlsx'
+
 
 @Controller('pegawai')
 // @ApiTags("Pegawai")
-// @UseGuards(AccessTokenGuard)
-@UseGuards(AccessTokenPegawaiGuard)
+@UseGuards(AccessTokenGuard)
 export class PegawaiController {
   constructor(private readonly pegawaiService: PegawaiService) { }
 
@@ -27,18 +29,18 @@ export class PegawaiController {
     return await this.pegawaiService.findAll(page, limit, search);
   }
 
-  // @Get('/download')
-  // @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  // @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
-  // async downloadFileTemplate(@Res() res: Response) {
-  //   const file = await this.siswaService.downloadTemplate();
-  //   res.send(file);
-  // }
+  @Get('/download')
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
+  async downloadFileTemplate(@Res() res: Response) {
+    const file = await this.pegawaiService.downloadTemplate();
+    res.send(file);
+  }
 
-  // @Get("/rombel")
-  // async getSiswaClass() {
-  //   return await this.siswaService.getGroupClass()
-  // }
+  @Get("/group")
+  async getSiswaClass() {
+    return await this.pegawaiService.getGroup()
+  }
 
   @Get(':id')
   async findOne(@Param('id', new ParseIntPipe()) id: string) {
@@ -71,31 +73,23 @@ export class PegawaiController {
     return await this.pegawaiService.resetTokenRFID(+id)
   }
 
-  // @Post('/import')
-  // @HttpCode(200)
-  // @UseInterceptors(FileInterceptor('file'))
-  // async import(@UploadedFile(
-  //   new ParseFilePipeBuilder()
-  //     .addFileTypeValidator({
-  //       fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //     })
-  //     .build({
-  //       errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-  //     }),
-  // ) file: Express.Multer.File) {
-  //   const workbook = xlsx.read(file.buffer, { type: 'buffer' });
-  //   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  //   const keys = xlsx.utils.sheet_to_json(worksheet, { header: 1 })[0];
-  //   const data: siswa[] = xlsx.utils.sheet_to_json(worksheet);
-  //   return await this.siswaService.import(data, keys);
-  // }
-
-  // @Delete(':id/reset-telegram')
-  // async resetTelegram(
-  //   @Param('id', new ParseIntPipe()) id: number
-  // ) {
-  //   return await this.siswaService.resetTelegram(id)
-  // }
-
+  @Post('/import')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async import(@UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+      }),
+  ) file: Express.Multer.File) {
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const keys = xlsx.utils.sheet_to_json(worksheet, { header: 1 })[0];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+    return await this.pegawaiService.import(data, keys);
+  }
 
 }
