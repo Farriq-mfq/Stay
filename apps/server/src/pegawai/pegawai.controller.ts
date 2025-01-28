@@ -39,9 +39,11 @@ export class PegawaiController {
     res.send(file);
   }
 
-  @Get("/all")
-  async findWithoutPaginate() {
-    return await this.pegawaiService.findWithoutPaginate()
+  @Get("/:sessionId/all")
+  async findWithoutPaginate(
+    @Param('sessionId') sessionId:string
+  ) {
+    return await this.pegawaiService.findWithoutPaginate(sessionId)
   }
 
   @UseGuards(AccessTokenGuard)

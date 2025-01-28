@@ -3,6 +3,8 @@ import { getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import VLazyImage from "v-lazy-image";
 import CurrentDay from '../../../components/CurrentDay.vue';
+import { id } from 'date-fns/locale'
+import { format } from 'date-fns'
 
 
 const { proxy } = getCurrentInstance()
@@ -25,7 +27,7 @@ const { sessionId, detailSession } = defineProps({
 
 
 const getPegawai = async () => {
-    return await axios.get('/pegawai/all')
+    return await axios.get(`/pegawai/${sessionId}/all`)
 }
 
 const { data: pegawai } = useQuery({
@@ -175,38 +177,46 @@ const scrooltoBottomRealtimePage = ref(null);
                 @click.prevent="clearSession" />
         </div>
         <div class="flex flex-column justify-content-center align-items-center">
+            <h3>
+                {{detailSession.name}}
+            </h3>
             <CurrentDay />
             <clock />
         </div>
-        <div class="overflow-x-auto mx-5">
+        <div class="overflow-x-auto mx-5" style="height:600px">
             <Message size="large" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
             <Message size="large" v-if="successPresence" severity="success">
-               Terimakasih : {{ successPresence.pegawai.name }}
+                Terimakasih : {{ successPresence.pegawai.name }}
             </Message>
             <table ref="componentPrintRef" class="p-datatable p-datatable-gridlines p-component w-full" v-if="pegawai">
                 <thead class="p-datatable-thead">
                     <tr>
+                        <th class="p-column-header">No</th>
                         <th class="p-column-header">Nama</th>
-                        <!-- <th class="p-column-header">Jabatan</th>
-                        <th class="p-column-header">Kelompok</th> -->
+                        <th class="p-column-header">Jabatan</th>
+                        <th class="p-column-header">Kelompok</th>
                         <th class="p-column-header">Waktu</th>
                         <th class="p-column-header">TTD</th>
                     </tr>
                 </thead>
-                <tbody class="p-datatable-tbody" v-for="pg in pegawai.data.data" :key="pg.id">
+                <tbody class="p-datatable-tbody" v-for="(pg, idx) in pegawai.data.data" :key="pg.id">
                     <tr class="p-row">
+                        <td class="p-column-body">
+                            {{ idx + 1 }}
+                        </td>
                         <td class="p-column-body">
                             {{ pg.name }}
                         </td>
-                        <!-- <td class="p-column-body">
+                        <td class="p-column-body">
                             {{ pg.position }}
                         </td>
                         <td class="p-column-body">
                             {{ pg.group }}
-                        </td> -->
+                        </td>
                         <td class="p-column-body">
-                            <div v-if="allPresences.get(pg.id)">
-                                {{ allPresences.get(pg.id).enter_time }}
+                            <div class="flex flex-column gap-2 justify-content-center items-center w-fit" v-if="allPresences.get(pg.id)">
+                                <Tag icon="pi pi-clock" severity="success" :value="format(allPresences.get(pg.id).enter_time, 'HH:mm:ss', { locale: id })" />
+                                <Tag icon="pi pi-clock" severity="danger" :value="format(allPresences.get(pg.id).exit_time, 'HH:mm:ss', { locale: id })" v-if="allPresences.get(pg.id).exit_time" />
                             </div>
                         </td>
                         <td class="p-column-body">
@@ -217,6 +227,7 @@ const scrooltoBottomRealtimePage = ref(null);
                     </tr>
                 </tbody>
             </table>
+            <div ref="scrooltoBottomRealtimePage"></div>
         </div>
     </div>
 </template>

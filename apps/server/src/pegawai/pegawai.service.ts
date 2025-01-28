@@ -80,19 +80,28 @@ export class PegawaiService {
     }
   }
 
-  async findWithoutPaginate() {
-    return await this.prismaService.client.pegawai.findMany({
+  async findWithoutPaginate(sessionId: string) {
+
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +sessionId
+      }
+    })
+    const pegawai = await this.prismaService.client.pegawai.findMany({
       select: {
         id: true,
         name: true,
         position: true,
         group: true,
-        sign_picture: true
+        sign_picture: true,
       },
+
       orderBy: {
         name: "asc"
       }
     });
+
+    return pegawai.filter(pg => session.group ? session.group.includes(pg.group) : pg.group)
   }
 
   async findOne(id: number) {
