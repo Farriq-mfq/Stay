@@ -2,10 +2,12 @@
 import { useQuery } from '@tanstack/vue-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { computed, getCurrentInstance, onMounted, ref, watch, nextTick } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch, nextTick, TransitionGroup } from 'vue';
 // import { Vue3Lottie } from 'vue3-lottie'
 // import RfidJson from './rfid.json'
 import CurrentDay from '../../../components/CurrentDay.vue';
+import VLazyImage from "v-lazy-image";
+
 
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
@@ -45,7 +47,7 @@ watch(presences, () => {
     if (presences.value) {
         if (presences.value.data.data.length > 0) {
             presences.value.data.data.map(presence => {
-                allPresences.value.set(presence.id, presence)
+                allPresences.value.set(presence.siswa.id, presence)
             })
         }
 
@@ -142,7 +144,7 @@ const handleRefresh = () => {
     if (presences.value) {
         if (presences.value.data.data.length > 0) {
             presences.value.data.data.map(presence => {
-                allPresences.value.set(presence.id, presence)
+                allPresences.value.set(presence.siswa.id, presence)
             })
         }
 
@@ -189,8 +191,8 @@ const emit = defineEmits(['close'])
                         <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
                             style="max-height: 75vh;height: fit-content">
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
-                                <div v-for="(item, index) in slotProps.items" :key="index"
-                                    :class="`${(index + 1) === slotProps.items.length ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`">
+                                <div v-for="(item, index) in slotProps.items" :key="item.siswa.id"
+                                    :class="`${(index + 1) === 1 ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`">
                                     <div class="flex justify-content-between align-items-center">
                                         <div>
                                             <div class="font-semibold text-xl mb-2">
@@ -248,8 +250,9 @@ const emit = defineEmits(['close'])
                 </DataView>
             </div>
             <div class="xl:col-5 col-12">
-                <div class="border-solid border-round-xl pb-4 surface-border border-1 shadow-1 flex align-items-center flex-column"
+                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column"
                     style="height: fit-content;">
+                    <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px;object-fit: cover;" />
                     <div
                         class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
                         <CurrentDay />
@@ -261,9 +264,9 @@ const emit = defineEmits(['close'])
                     <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
                     <i class="pi pi-check text-primary" v-if="successPresence"
                         style="font-size: 200px;font-weight: 100;"></i>
-                    <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
+                    <!-- <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
                         KARTU
-                    </span>
+                    </span> -->
                     <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
                 </div>
             </div>
@@ -271,3 +274,16 @@ const emit = defineEmits(['close'])
     </div>
 
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+</style>

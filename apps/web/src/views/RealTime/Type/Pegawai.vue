@@ -87,7 +87,7 @@ const handlePresenceUpdate = (data) => {
     turnOffListener();
     setTimeout(turnOnListener, 100);
     nextTick(() => {
-        scrollToBottom()
+        focusRow(data.pegawaiId)
         setTimeout(() => {
             successPresence.value = null
         }, 1500)
@@ -132,19 +132,6 @@ onMounted(() => {
 });
 
 
-const scrollToBottom = () => {
-    if (scrooltoBottomRealtimePage.value) {
-        scrooltoBottomRealtimePage.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-
-
-
-onMounted(() => {
-    scrollToBottom()
-})
-
-
 const handleRefresh = () => {
     refetch()
     resetAllPresences()
@@ -166,7 +153,21 @@ const clearSession = () => {
     emit('close')
 }
 
-const scrooltoBottomRealtimePage = ref(null);
+const rowRefs = ref({});
+const focusedRow = ref(null);
+
+const focusRow = (id) => {
+    if (rowRefs.value[id]) {
+        rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        focusedRow.value = id;
+    }
+};
+
+const setRowRef = (el, id) => {
+    if (el) {
+        rowRefs.value[id] = el;
+    }
+};
 
 </script>
 <template>
@@ -177,12 +178,13 @@ const scrooltoBottomRealtimePage = ref(null);
                 @click.prevent="clearSession" />
         </div>
         <div class="flex flex-column justify-content-center align-items-center">
-            <h3>
-                {{detailSession.name}}
+            <h3 class="font-bold text-3xl uppercase">
+                {{ detailSession.name }}
             </h3>
             <CurrentDay />
             <clock />
         </div>
+
         <div class="overflow-x-auto mx-5" style="height:600px">
             <Message size="large" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
             <Message size="large" v-if="successPresence" severity="success">
@@ -200,7 +202,7 @@ const scrooltoBottomRealtimePage = ref(null);
                     </tr>
                 </thead>
                 <tbody class="p-datatable-tbody" v-for="(pg, idx) in pegawai.data.data" :key="pg.id">
-                    <tr class="p-row">
+                    <tr class="p-row" :ref="(el) => setRowRef(el, pg.id)">
                         <td class="p-column-body">
                             {{ idx + 1 }}
                         </td>
@@ -214,9 +216,13 @@ const scrooltoBottomRealtimePage = ref(null);
                             {{ pg.group }}
                         </td>
                         <td class="p-column-body">
-                            <div class="flex flex-column gap-2 justify-content-center items-center w-fit" v-if="allPresences.get(pg.id)">
-                                <Tag icon="pi pi-clock" severity="success" :value="format(allPresences.get(pg.id).enter_time, 'HH:mm:ss', { locale: id })" />
-                                <Tag icon="pi pi-clock" severity="danger" :value="format(allPresences.get(pg.id).exit_time, 'HH:mm:ss', { locale: id })" v-if="allPresences.get(pg.id).exit_time" />
+                            <div class="flex flex-column gap-2 justify-content-center items-center w-fit"
+                                v-if="allPresences.get(pg.id)">
+                                <Tag icon="pi pi-clock" severity="success"
+                                    :value="format(allPresences.get(pg.id).enter_time, 'HH:mm:ss', { locale: id })" />
+                                <Tag icon="pi pi-clock" severity="danger"
+                                    :value="format(allPresences.get(pg.id).exit_time, 'HH:mm:ss', { locale: id })"
+                                    v-if="allPresences.get(pg.id).exit_time" />
                             </div>
                         </td>
                         <td class="p-column-body">
@@ -227,7 +233,6 @@ const scrooltoBottomRealtimePage = ref(null);
                     </tr>
                 </tbody>
             </table>
-            <div ref="scrooltoBottomRealtimePage"></div>
         </div>
     </div>
 </template>
