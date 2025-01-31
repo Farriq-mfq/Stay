@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, pegawai, presence_sessions, PresenceMethod, presences, presences_pegawai, siswa } from '@prisma/client';
-import { eachDayOfInterval, endOfMonth, format, isAfter, isBefore, startOfMonth } from 'date-fns';
+import { eachDayOfInterval, endOfDay, endOfMonth, format, isAfter, isBefore, parse, startOfDay, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
@@ -10,6 +10,7 @@ import { SiswaService } from 'src/siswa/siswa.service';
 import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
 import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+import * as JSZip from 'jszip';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -817,171 +818,314 @@ export class PresenceService {
     return buffer;
   }
 
-  async findAllRombel(
+  async findAllByDaily(
     sessionId: string,
     search?: string,
     date?: string,
     rombel?: string
-
   ) {
     const rombels = await this.siswaService.getGroupClass();
-    if (rombels.includes(rombel)) {
-      if (!isValidDateString(date, 'yyyy-MM-dd')) {
-        throw new BadRequestException("date invalid")
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
       }
+    })
+    if (!isValidDateString(date, 'yyyy-MM-dd')) {
+      throw new BadRequestException("date invalid")
+    }
 
+    const parseDate = parse(date, 'yyyy-MM-dd', new Date(), { locale: id });
+    const start = startOfDay(parseDate);
+    const end = endOfDay(parseDate);
 
-      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
-        where: {
-          id: parseInt(sessionId)
+    if (rombel) {
+      if (rombels.includes(rombel)) {
+        const siswa = await this.prismaService.client.siswa.findMany({
+          select: {
+            id: true,
+            name: true,
+            rombel: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            rombel: {
+              equals: rombel
+            }
+          }
+        })
+
+        const presences = await this.prismaService.client.presences.findMany({
+          include: {
+            gateway: true
+          },
+          where: {
+            createdAt: {
+              gte: start,
+              lt: end,
+            },
+            presence_sessionsId: session.id,
+          }
+        })
+
+        const checkSiswaHasPresence = siswa.map(sw => {
+          return {
+            ...sw,
+            hasPresence: presences.some(presence => presence.siswaId === sw.id),
+            detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
+          }
+        })
+
+        return {
+          rombel,
+          presences: checkSiswaHasPresence.map(presence => {
+            return {
+              id: presence.id,
+              name: presence.name,
+              rombel: presence.rombel,
+              createAt: presence.createdAt,
+              updateAt: presence.updatedAt,
+              hasPresence: presence.hasPresence,
+              detailPresence: presence.detailPresence,
+              gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+            }
+          })
         }
-      })
-      const presences = await this.prismaService.client.siswa.findMany({
+      } else {
+        throw new NotFoundException("Rombel Invalid")
+      }
+    } else {
+      const siswa = await this.prismaService.client.siswa.findMany({
         select: {
           id: true,
           name: true,
           rombel: true,
           createdAt: true,
           updatedAt: true,
-          presences: {
-            select: {
-              gateway: true,
-              presence_sessionsId: true,
-              createdAt: true,
-              enter_time: true,
-              exit_time: true
-            }
-          },
+        }
+      })
+      const presences = await this.prismaService.client.presences.findMany({
+        include: {
+          gateway: true
         },
         where: {
-          rombel: {
-            equals: rombel
+          createdAt: {
+            gte: start,
+            lt: end,
           },
-          ...search && {
-            OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: 'insensitive'
-                },
-              },
-            ],
-          },
+          presence_sessionsId: session.id,
         }
       })
 
-      const checkSiswaHasPresence = presences.map(presence => {
+
+      const checkSiswaHasPresence = siswa.map(sw => {
         return {
-          ...presence,
-          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
-          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          ...sw,
+          hasPresence: presences.some(presence => presence.siswaId === sw.id),
+          detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
         }
       })
 
-      return checkSiswaHasPresence.map(presence => {
-        return {
-          id: presence.id,
-          name: presence.name,
-          rombel: presence.rombel,
-          createAt: presence.createdAt,
-          updateAt: presence.updatedAt,
-          hasPresence: presence.hasPresence,
-          detailPresence: presence.detailPresence,
-          gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
-        }
-      })
-    } else {
-      throw new NotFoundException()
+
+      return {
+        rombel: null,
+        presences: rombels.map(rombel => {
+          const filterPresenceByRombel = checkSiswaHasPresence.map(presence => {
+            return {
+              id: presence.id,
+              name: presence.name,
+              rombel: presence.rombel,
+              createAt: presence.createdAt,
+              updateAt: presence.updatedAt,
+              hasPresence: presence.hasPresence,
+              detailPresence: presence.detailPresence,
+              gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+            }
+          }).filter(pr => pr.rombel == rombel)
+          return {
+            [rombel]: filterPresenceByRombel
+          }
+        })
+      }
     }
 
   }
 
-  async exportByClass(
+  async exportByDaily(
     sessionId: string,
     search?: string,
     date?: string,
     rombel?: string
   ) {
     const rombels = await this.siswaService.getGroupClass();
-    if (rombels.includes(rombel)) {
-      if (!isValidDateString(date, 'yyyy-MM-dd')) {
-        throw new BadRequestException("date invalid")
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
       }
+    })
+
+    if (!isValidDateString(date, 'yyyy-MM-dd')) {
+      throw new BadRequestException("date invalid")
+    }
 
 
-      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
-        where: {
-          id: parseInt(sessionId)
-        }
-      })
-      const presences = await this.prismaService.client.siswa.findMany({
+
+    const parseDate = parse(date, 'yyyy-MM-dd', new Date(), { locale: id });
+    const start = startOfDay(parseDate);
+    const end = endOfDay(parseDate);
+
+    if (rombel) {
+      if (rombels.includes(rombel)) {
+
+        const siswa = await this.prismaService.client.siswa.findMany({
+          select: {
+            id: true,
+            name: true,
+            rombel: true,
+            nis: true,
+            nisn: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            rombel: {
+              equals: rombel
+            }
+          }
+        })
+
+        const presences = await this.prismaService.client.presences.findMany({
+          include: {
+            gateway: true
+          },
+          where: {
+            createdAt: {
+              gte: start,
+              lt: end,
+            },
+            presence_sessionsId: session.id,
+          }
+        })
+
+        const checkSiswaHasPresence = siswa.map(sw => {
+          return {
+            ...sw,
+            hasPresence: presences.some(presence => presence.siswaId === sw.id),
+            detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
+          }
+        })
+
+
+        const mappingPresences = checkSiswaHasPresence.map(presence => ({
+          Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Nama: presence.name,
+          NISN: presence.nisn,
+          NIS: presence.nis,
+          Rombel: presence.rombel,
+          Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
+          Session: session.name,
+          Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+        }))
+
+
+        const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
+        const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+        return buffer;
+      } else {
+        throw new BadRequestException("rombel invalid")
+      }
+    } else {
+      const siswa = await this.prismaService.client.siswa.findMany({
         select: {
           id: true,
           name: true,
           rombel: true,
           createdAt: true,
           updatedAt: true,
-          presences: {
-            select: {
-              gateway: true,
-              presence_sessionsId: true,
-              createdAt: true,
-              enter_time: true,
-              exit_time: true
-            }
-          },
-          nis: true,
-          nisn: true,
-
+        }
+      })
+      const presences = await this.prismaService.client.presences.findMany({
+        include: {
+          gateway: true
         },
         where: {
-          rombel: {
-            equals: rombel
+          createdAt: {
+            gte: start,
+            lt: end,
           },
-          ...search && {
-            OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: 'insensitive'
-                },
-              },
-            ],
-          },
+          presence_sessionsId: session.id,
         }
       })
 
-      const checkSiswaHasPresence = presences.map(presence => {
+
+      const checkSiswaHasPresence = siswa.map(sw => {
         return {
-          ...presence,
-          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
-          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          ...sw,
+          hasPresence: presences.some(presence => presence.siswaId === sw.id),
+          detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
         }
       })
-      const mappingPresences = checkSiswaHasPresence.map(presence => ({
-        Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
-          locale: id
-        }) : '-' : '-',
-        Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
-          locale: id
-        }) : '-' : '-',
-        Nama: presence.name,
-        NISN: presence.nisn,
-        NIS: presence.nis,
-        Rombel: presence.rombel,
-        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
-        Session: session.name,
-        Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
-      }))
 
+      const allPresences = rombels.map(rombel => {
+        const filterPresenceByRombel = checkSiswaHasPresence.map(presence => {
+          return {
+            id: presence.id,
+            name: presence.name,
+            rombel: presence.rombel,
+            createAt: presence.createdAt,
+            updateAt: presence.updatedAt,
+            hasPresence: presence.hasPresence,
+            detailPresence: presence.detailPresence,
+            gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+          }
+        }).filter(pr => pr.rombel == rombel)
+        return {
+          [rombel]: filterPresenceByRombel
+        }
+      })
 
-      const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
-      const workbook = xlsx.utils.book_new();
-      xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
-      const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-      return buffer;
-    } else {
-      throw new NotFoundException()
+      let bufferExcels: { key: string, buffer: any }[] = [];
+
+      allPresences.forEach(daily => {
+        const key = Object.keys(daily)[0];
+        const mappingPresencesAsJson = daily[key].map(dt => ({
+          Masuk: dt.hasPresence ? dt.detailPresence.enter_time ? format(dt.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Keluar: dt.hasPresence ? dt.detailPresence.exit_time ? format(dt.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Nama: dt.name,
+          NISN: dt.nisn,
+          NIS: dt.nis,
+          Rombel: dt.rombel,
+          Status: dt.hasPresence ? "Presensi" : "Tidak Presensi",
+          Session: session.name,
+          Gateway: dt.hasPresence ? `${dt.detailPresence.gateway.name}-${dt.detailPresence.gateway.location}` : '-',
+        }))
+        const worksheet = xlsx.utils.json_to_sheet(mappingPresencesAsJson);
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workbook, worksheet, `daily-presences-${key}`);
+        const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+        bufferExcels.push({
+          key,
+          buffer
+        })
+      })
+
+      const zip = new JSZip();
+      bufferExcels.forEach(buffer => {
+        zip.file(`${buffer.key}.xlsx`, buffer.buffer, { binary: true });
+      })
+
+      return zip.generateAsync({ type: 'nodebuffer' });
     }
   }
 

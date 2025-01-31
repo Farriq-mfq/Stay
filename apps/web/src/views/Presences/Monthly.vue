@@ -10,6 +10,7 @@ const axios = proxy.axios
 const sessionId = ref(null)
 const filterDate = ref()
 const selectedRombel = ref();
+const detailSession = ref(null)
 
 
 const getAllPresences = async () => {
@@ -54,6 +55,7 @@ watch([sessionId, selectedRombel, filterDate], (val) => {
 
 const handleChangeSelectSession = (val) => {
     sessionId.value = val.id
+    detailSession.value = val
 }
 
 // export
@@ -99,6 +101,13 @@ const { handlePrint } = useVueToPrint({
     documentTitle: format(new Date(), 'yyyy-MM-dd') + "-presences",
     removeAfterPrint: true,
     copyStyles: true,
+    pageStyle: `
+        @page { size: A4; margin: 1cm; size: A4 landscape; }
+        body { font-family: Arial, sans-serif; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom:20px }
+        .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; }
+        .print-table th { background-color: #f2f2f2; font-weight: bold; }
+      `,
 });
 
 </script>
@@ -127,9 +136,18 @@ const { handlePrint } = useVueToPrint({
 
         </div>
 
-        <div class="overflow-x-auto">
-            <table ref="componentPrintRef" class="p-datatable p-datatable-gridlines p-component w-full"
-                v-if="sessionId && selectedRombel && filterDate && presences">
+        <div class="overflow-x-auto" v-if="sessionId && selectedRombel && filterDate && presences">
+            <!-- <Divider />
+            <div class="detail-session">
+                <h3>
+                    {{ detailSession.name }}
+                </h3>
+                <p>Dicetak pada {{ format(new Date(), "yyyy-MM-dd HH:mm:ss") }}</p>
+            </div>
+            <h4 class="filter-date">
+                {{ format(filterDate, "MMMM yyyy", { locale: id }) }}
+            </h4> -->
+            <table ref="componentPrintRef" class="print-table p-datatable p-datatable-gridlines p-component w-full">
                 <!-- Table Header -->
                 <thead class="p-datatable-thead">
                     <tr>

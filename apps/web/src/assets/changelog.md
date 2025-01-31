@@ -4,6 +4,7 @@
 -   menambah tipe sesi presensi
 ### Change
 -   mengubah "Confirmation" jadi "Konfirmasi"
+-   mengubah bagian rekap harian jika tidak di pilih rombel maka akan mendownload semua kelas dalam bentuk zip jika rombel di pilih maka akan mendownload dalam bentuk excel
 ### FIX 
 -   memperbaiki security login
 -   memperbaiki halaman not found

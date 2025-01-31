@@ -73,9 +73,9 @@ const router = createRouter({
                             },
                         },
                         {
-                            path: '/presences/rombel',
-                            name: 'presences-recap-rombel',
-                            component: () => import('@/views/Presences/Rombel.vue'),
+                            path: '/presences/daily',
+                            name: 'presences-recap-daily',
+                            component: () => import('@/views/Presences/Daily.vue'),
                             meta: {
                                 title: "Rombel Presences Harian",
                             },
@@ -88,14 +88,6 @@ const router = createRouter({
                                 title: "Rekap Presences Bulanan",
                             },
                         },
-                        // {
-                        //     path: '/presences/recap',
-                        //     name: 'presences-recap',
-                        //     component: () => import('@/views/Presences/Recap.vue'),
-                        //     meta: {
-                        //         title: "Recap Presences",
-                        //     },
-                        // }
                     ]
                 },
                 {
@@ -122,30 +114,24 @@ const router = createRouter({
                                 title: "Stats Presences By Rombel",
                             },
                         },
-                        // {
-                        //     path: '/presences/chart',
-                        //     name: 'presences-recap',
-                        //     component: () => import('@/views/Presences/Chart.vue'),
-                        //     meta: {
-                        //         title: "Chart Presences",
-                        //     },
-                        // },
-                        // {
-                        //     path: '/presences/rombel',
-                        //     name: 'presences-recap-rombel',
-                        //     component: () => import('@/views/Presences/Rombel.vue'),
-                        //     meta: {
-                        //         title: "Rombel Presences Harian",
-                        //     },
-                        // },
-                        // {
-                        //     path: '/presences/monthly',
-                        //     name: 'presences-recap-month',
-                        //     component: () => import('@/views/Presences/Monthly.vue'),
-                        //     meta: {
-                        //         title: "Rekap Presences Bulanan",
-                        //     },
-                        // },
+                    ]
+                },
+                {
+                    path: '/payment',
+                    name: 'payment',
+                    redirect: {
+                        name: 'payment-all'
+                    },
+                    component: () => import('@/views/Payment/Index.vue'),
+                    children: [
+                        {
+                            path: '/payment/all',
+                            name: 'payment-all',
+                            component: () => import('@/views/Payment/All.vue'),
+                            meta: {
+                                title: "Payment",
+                            },
+                        },
                     ]
                 },
                 {

@@ -7,6 +7,9 @@ import { PrimeVueResolver } from 'unplugin-vue-components/resolvers';
 import Markdown from 'unplugin-vue-markdown/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
+/**
+ * @type {import('vite').UserConfig}
+ */
 export default defineConfig(() => {
     return {
         plugins: [
@@ -78,6 +81,9 @@ export default defineConfig(() => {
                     api: 'modern',
                     silenceDeprecations: ["legacy-js-api"],
                 }
+            },
+            modules: {
+                generateScopedName: '[hash:base64:8]',
             }
         },
         resolve: {
