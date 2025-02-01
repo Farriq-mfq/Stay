@@ -9,22 +9,23 @@ datasource db {
 
 // master data
 model siswa {
-  id               Int               @id @default(autoincrement())
-  notelp           String?           @unique @db.VarChar()
-  name             String            @db.VarChar()
-  nisn             String            @unique @db.VarChar()
-  password         String
-  refreshToken     String?
-  rombel           String
-  nis              String?           @unique @db.VarChar()
-  rfid_token       String?           @unique
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  presences        presences[]
+  id                Int               @id @default(autoincrement())
+  notelp            String?           @unique @db.VarChar()
+  name              String            @db.VarChar()
+  nisn              String            @unique @db.VarChar()
+  password          String
+  refreshToken      String?
+  rombel            String
+  nis               String?           @unique @db.VarChar()
+  rfid_token        String?           @unique
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  presences         presences[]
   // TODO: remove field telegram
-  telegram_account telegram_account?
-  notifications    notifications[]
-  profile_picture  String?
+  telegram_account  telegram_account?
+  notifications     notifications[]
+  profile_picture   String?
+  picture_public_id String?
   // for mobile phone register
   // mobile_nfc_token String?           @unique not possible currently
 

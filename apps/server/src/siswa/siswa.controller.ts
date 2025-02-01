@@ -12,13 +12,28 @@ import { ApiTags } from '@nestjs/swagger';
 
 @Controller('siswa')
 @ApiTags("Siswa")
-@UseGuards(AccessTokenGuard)
+// @UseGuards(AccessTokenGuard)
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) { }
 
   @Post()
-  async create(@Body() createSiswaDto: CreateSiswaDto) {
-    return await this.siswaService.create(createSiswaDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png)$/i,
+        })
+        .addMaxSizeValidator({
+          maxSize: 1.5 * 1024 * 1024,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          fileIsRequired: false
+        }),
+    ) file: Express.Multer.File | undefined,
+    @Body() createSiswaDto: CreateSiswaDto,) {
+    return await this.siswaService.create(createSiswaDto, file);
   }
 
   @Get()
@@ -49,10 +64,26 @@ export class SiswaController {
   }
 
   @Patch(':id')
-  async update(@Param('id', new ParseIntPipe()) id: string, @Body() updateSiswaDto: UpdateSiswaDto) {
-    return await this.siswaService.update(+id, updateSiswaDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async update(@Param('id', new ParseIntPipe()) id: string, @UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: /(jpg|jpeg|png)$/i,
+      })
+      .addMaxSizeValidator({
+        maxSize: 1.5 * 1024 * 1024,
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        fileIsRequired: false
+      }),
+  ) file: Express.Multer.File | undefined, @Body() updateSiswaDto: UpdateSiswaDto) {
+    return await this.siswaService.update(+id, updateSiswaDto, file);
   }
 
+  /**
+   * @deprecated Reset Function
+   */
   @Delete('/reset')
   async reset() {
     // return await this.siswaService.reset()

@@ -2,30 +2,62 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException }
 import { hash } from 'argon2';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import { format } from 'date-fns';
 import { readFileSync } from 'fs';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { join } from 'path';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
+
 @Injectable()
 export class SiswaService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {
   }
-  async create(createSiswaDto: CreateSiswaDto) {
-    return await this.prismaService.client.siswa.create({
-      data: {
-        notelp: createSiswaDto.notelp,
-        name: createSiswaDto.name,
-        rombel: createSiswaDto.rombel,
-        nisn: createSiswaDto.nisn,
-        nis: createSiswaDto.nis,
-        password: await hash(createSiswaDto.nisn),
+  async create(createSiswaDto: CreateSiswaDto, file: Express.Multer.File | undefined) {
+
+    if (file) {
+      let result = null;
+      try {
+        result = await this.cloudinaryService.uploadImage(file, `${format(new Date(), "yyyy")}-${createSiswaDto.rombel}`, `${createSiswaDto.nisn}`)
+      } catch (e) {
+        throw new InternalServerErrorException()
       }
-    });
+
+      return await this.prismaService.client.siswa.create({
+        data: {
+          notelp: createSiswaDto.notelp,
+          name: createSiswaDto.name,
+          rombel: createSiswaDto.rombel,
+          nisn: createSiswaDto.nisn,
+          nis: createSiswaDto.nis,
+          password: await hash(createSiswaDto.nisn),
+          ...result && {
+            profile_picture: result.url,
+            picture_public_id: result.public_id
+          }
+        }
+      });
+
+    } else {
+      return await this.prismaService.client.siswa.create({
+        data: {
+          notelp: createSiswaDto.notelp,
+          name: createSiswaDto.name,
+          rombel: createSiswaDto.rombel,
+          nisn: createSiswaDto.nisn,
+          nis: createSiswaDto.nis,
+          password: await hash(createSiswaDto.nisn),
+        }
+      });
+
+    }
+
   }
 
   async findAll(
@@ -93,16 +125,57 @@ export class SiswaService {
     });
   }
 
-  async update(id: number, updateSiswaDto: UpdateSiswaDto) {
-    return await this.prismaService.client.siswa.update({
+  async update(id: number, updateSiswaDto: UpdateSiswaDto, file: Express.Multer.File | undefined) {
+    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
       where: {
         id
-      },
-      data: updateSiswaDto
-    });
+      }
+    })
+
+    if (file) {
+
+      if (siswa.picture_public_id) await this.cloudinaryService.deleteImage(siswa.picture_public_id)
+
+      let result = null;
+      try {
+        result = await this.cloudinaryService.uploadImage(file, `${format(new Date(), "yyyy")}-${updateSiswaDto.rombel}`, `${updateSiswaDto.nisn}`)
+      } catch (e) {
+        throw new InternalServerErrorException()
+      }
+
+
+      return await this.prismaService.client.siswa.update({
+        where: {
+          id
+        },
+        data: {
+          ...updateSiswaDto,
+          ...result && {
+            profile_picture: result.url,
+            picture_public_id: result.public_id
+          }
+        }
+      });
+    } else {
+      return await this.prismaService.client.siswa.update({
+        where: {
+          id
+        },
+        data: updateSiswaDto
+      });
+
+    }
   }
 
   async remove(id: number) {
+    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+      where: {
+        id
+      }
+    })
+
+    if (siswa.picture_public_id) await this.cloudinaryService.deleteImage(siswa.picture_public_id)
+
     return await this.prismaService.client.siswa.delete({
       where: {
         id
@@ -134,17 +207,43 @@ export class SiswaService {
             ...row.rombel && {
               rombel: row.rombel.toString().toUpperCase(),
             },
+            ...row.image_url && {
+              image_url: row.image_url.toString()
+            }
           }
           const createSiswaDto = plainToClass(ImportSiswaDto, rowData);
           const errors = await validate(createSiswaDto)
 
           if (!(errors.length > 0)) {
+
+            let result = null;
+            if (rowData.image_url) {
+              try {
+                result = await this.cloudinaryService.uploadImageFromUrl(rowData.image_url, `${format(new Date(), "yyyy")}-${rowData.rombel}`, rowData.nisn)
+              } catch (e) {
+              }
+            }
+
+            delete rowData.image_url;
+
             const created = await this.prismaService.client.siswa.upsert({
               where: {
                 nisn: rowData.nisn,
               },
-              create: rowData,
-              update: rowData
+              create: {
+                ...rowData,
+                ...result && {
+                  profile_picture: result.url,
+                  picture_public_id: result.public_id
+                }
+              },
+              update: {
+                ...rowData,
+                ...result && {
+                  profile_picture: result.url,
+                  picture_public_id: result.public_id
+                }
+              }
             })
             allData.push(created)
           }
@@ -155,6 +254,7 @@ export class SiswaService {
       }
 
     } catch (e) {
+      console.log(e)
       if (e instanceof BadRequestException) {
         throw new BadRequestException()
       } else {

@@ -5,6 +5,8 @@ import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import SelectGateway from '@/components/SelectGateway.vue'
 import { useConfirm } from "primevue/useconfirm";
 import { useStorage } from '@vueuse/core'
+import VLazyImage from "v-lazy-image";
+
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const toast = useToast();
@@ -20,6 +22,8 @@ const queryParams = ref({
 })
 
 const totalRecords = ref(0)
+const file = ref(null);
+
 
 const getAllSiswa = async () => {
   const queries = {
@@ -55,12 +59,33 @@ const handleDebounceFilter = (val) => {
   refetch()
 }
 
+const onFileChange = (event) => {
+  const target = event.target;
+  if (target.files && target.files[0]) {
+    file.value = target.files[0];
+  }
+};
+
+
 // add siswa
 const showDialogAddSiswa = ref(false)
 const errorsAddSiswa = ref(null)
 
 const addSiswa = async (data) => {
-  return await axios.post('/siswa', data)
+  const formData = new FormData();
+  formData.append("nis", data.nis);
+  formData.append("nisn", data.nisn);
+  formData.append("notelp", data.notelp);
+  formData.append("name", data.name);
+  formData.append("rombel", data.rombel);
+  if (file.value) {
+    formData.append('file', file.value);
+  }
+  return await axios.post('/siswa', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
 }
 
 const siswaData = ref({
@@ -68,7 +93,7 @@ const siswaData = ref({
   nisn: '',
   notelp: '',
   name: '',
-  rombel: ''
+  rombel: '',
 })
 
 const { mutateAsync: addSiswaMutate, isPending: addSiswaPending } = useMutation({
@@ -91,8 +116,9 @@ const handleSubmitAddSiswa = () => {
         nisn: '',
         notelp: '',
         name: '',
-        rombel: ''
+        rombel: '',
       }
+      file.value = null
       refetch()
     },
     onError(err) {
@@ -105,6 +131,17 @@ const handleSubmitAddSiswa = () => {
           detail: 'Data siswa sudah ada',
           life: 3000
         })
+      } else if (err.response.status === 422) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Mohon perbaiki file yang diupload',
+          life: 3000
+        })
+
+        errorsAddSiswa.value = {
+          file: 'Mohon perbaiki file yang diupload'
+        }
       } else {
         toast.add({
           severity: 'error',
@@ -168,11 +205,24 @@ const dataUpdateSiswa = ref({
   nisn: '',
   notelp: '',
   name: '',
-  rombel: ''
+  rombel: '',
 })
 
 const updateSiswaService = async (data) => {
-  return await axios.patch(`/siswa/${data.id}`, data)
+  const formData = new FormData();
+  formData.append("nis", data.nis);
+  formData.append("nisn", data.nisn);
+  formData.append("notelp", data.notelp);
+  formData.append("name", data.name);
+  formData.append("rombel", data.rombel);
+  if (file.value) {
+    formData.append('file', file.value);
+  }
+  return await axios.patch(`/siswa/${data.id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    }
+  })
 }
 
 const { mutateAsync: updateSiswaMutate, isPending: updateSiswaPending } = useMutation({
@@ -191,6 +241,7 @@ const handleSubmitUpdateSiswa = () => {
       })
       showDialogUpdateSiswa.value = false
       dataUpdateSiswa.value = null
+      file.value = null
       refetch()
     },
     onError(err) {
@@ -203,6 +254,17 @@ const handleSubmitUpdateSiswa = () => {
           detail: 'Data siswa sudah ada',
           life: 3000
         })
+      } else if (err.response.status === 422) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Mohon perbaiki file yang diupload',
+          life: 3000
+        })
+
+        errorsUpdateSiswa.value = {
+          file: 'Mohon perbaiki file yang diupload'
+        }
       } else {
         toast.add({
           severity: 'error',
@@ -222,8 +284,9 @@ const handleShowDialogUpdateSiswa = (data) => {
     nisn: data.nisn,
     notelp: data.notelp,
     name: data.name,
-    rombel: data.rombel
+    rombel: data.rombel,
   }
+  file.value = null
   showDialogUpdateSiswa.value = true
 }
 
@@ -236,6 +299,7 @@ const clearUpdateState = () => {
     rombel: ''
   }
   errorsUpdateSiswa.value = null
+  file.value = null
 }
 
 // register RFID card
@@ -314,7 +378,7 @@ const clearRegisterCard = () => {
     nisn: '',
     notelp: '',
     name: '',
-    rombel: ''
+    rombel: '',
   }
   errorsRegisterCard.value = null
   scannedToken.value = null
@@ -460,50 +524,50 @@ const resetDefaultGateway = () => {
 
 
 // reset data siswa
-const resetService = async () => {
-  return await axios.delete('siswa/reset')
-}
+// const resetService = async () => {
+//   return await axios.delete('siswa/reset')
+// }
 
-const {
-  mutateAsync: resetDataSiswa,
-  isPending: resetDataSiswaPending,
-} = useMutation({
-  mutationKey: ['resetDataSiswa'],
-  mutationFn: resetService,
-})
+// const {
+//   mutateAsync: resetDataSiswa,
+//   isPending: resetDataSiswaPending,
+// } = useMutation({
+//   mutationKey: ['resetDataSiswa'],
+//   mutationFn: resetService,
+// })
 
-const confirmResetSiswa = () => {
-  confirm.require({
-    message: 'Yakin ingin reset data siswa ?',
-    header: 'Konfirmasi',
-    icon: 'pi pi-info-circle',
-    rejectClass: 'p-button-secondary p-button-outlined',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Batalkan',
-    acceptLabel: 'Reset',
-    accept: () => {
-      resetDataSiswa({}, {
-        onSuccess() {
-          toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Data siswa berhasil direset',
-            life: 3000
-          })
-          refetch()
-        },
-        onError() {
-          toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Data siswa gagal direset',
-            life: 3000
-          })
-        }
-      })
-    },
-  });
-};
+// const confirmResetSiswa = () => {
+//   confirm.require({
+//     message: 'Yakin ingin reset data siswa ?',
+//     header: 'Konfirmasi',
+//     icon: 'pi pi-info-circle',
+//     rejectClass: 'p-button-secondary p-button-outlined',
+//     acceptClass: 'p-button-danger',
+//     rejectLabel: 'Batalkan',
+//     acceptLabel: 'Reset',
+//     accept: () => {
+//       resetDataSiswa({}, {
+//         onSuccess() {
+//           toast.add({
+//             severity: 'success',
+//             summary: 'Success',
+//             detail: 'Data siswa berhasil direset',
+//             life: 3000
+//           })
+//           refetch()
+//         },
+//         onError() {
+//           toast.add({
+//             severity: 'error',
+//             summary: 'Error',
+//             detail: 'Data siswa gagal direset',
+//             life: 3000
+//           })
+//         }
+//       })
+//     },
+//   });
+// };
 
 // import siswa
 const fileImport = ref(null)
@@ -685,6 +749,13 @@ const downloadTemplateService = async () => {
           </Column>
           <Column field="rombel" header="Rombel">
           </Column>
+          <Column field="profile_picture" header="Gambar Profil">
+            <template #body="{ data }">
+              <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture"
+                style="width: 100px;" />
+              <div v-else style="height: 100px;width: 100px;"></div>
+            </template>
+          </Column>
           <Column field="rfid_token" header="Status Kartu">
             <template #body="{ data }">
               <Tag :severity="data.rfid_token ? 'primary' : 'danger'">
@@ -801,6 +872,15 @@ const downloadTemplateService = async () => {
           {{ errorsAddSiswa.rombel[0] }}
         </p>
       </div>
+      <div class="field">
+        <label for="profile_picture">Gambar Profil (Optional)</label>
+        <input :disabled="addSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange"
+          class="border p-2 w-full" />
+        <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+        <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.file">
+          {{ errorsAddSiswa.file }}
+        </p>
+      </div>
 
       <template #footer>
         <Button label="Batal" :disabled="addSiswaPending" severity="danger" icon="pi pi-times" outlined
@@ -852,7 +932,15 @@ const downloadTemplateService = async () => {
           {{ errorsUpdateSiswa.rombel[0] }}
         </p>
       </div>
-
+      <div class="field">
+        <label for="profile_picture">Gambar Profil (Optional)</label>
+        <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange"
+          class="border p-2 w-full" />
+        <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+        <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.file">
+          {{ errorsUpdateSiswa.file }}
+        </p>
+      </div>
       <template #footer>
         <Button label="Batal" :disabled="updateSiswaPending" severity="danger" icon="pi pi-times" outlined
           @click.prevent="showDialogUpdateSiswa = false" />
@@ -929,3 +1017,15 @@ const downloadTemplateService = async () => {
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.v-lazy-image {
+    filter: blur(5px);
+    transition: filter 1.6s;
+    will-change: filter;
+}
+
+.v-lazy-image-loaded {
+    filter: blur(0);
+}
+</style>

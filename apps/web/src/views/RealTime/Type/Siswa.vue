@@ -74,7 +74,7 @@ const resetAllPresences = () => {
 
 const handlePresenceUpdate = (data) => {
     successPresence.value = data
-    allPresences.value.set(data.id, data)
+    allPresences.value.set(data.siswa.id, data)
     turnOffListener();
     setTimeout(turnOnListener, 100);
     nextTick(() => {
@@ -180,10 +180,13 @@ const emit = defineEmits(['close'])
                             Aktifitas Presensi secara realtime
                         </div>
                     </div>
-                    <div>
+                    <div class="flex flex-column gap-2">
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
                             allPresences.size
-                            }}</div>
+                        }}</div>
+                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{
+                            format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id })
+                        }}</div>
                     </div>
                 </div>
                 <DataView :value="dataPresences">
@@ -193,7 +196,7 @@ const emit = defineEmits(['close'])
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
                                 <div v-for="(item, index) in slotProps.items" :key="item.siswa.id"
                                     :class="`${(index + 1) === 1 ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`">
-                                    <div class="flex justify-content-between align-items-center">
+                                    <div class="flex justify-content-between align-items-center relative">
                                         <div>
                                             <div class="font-semibold text-xl mb-2">
                                                 {{ item.siswa.name }}
@@ -202,18 +205,11 @@ const emit = defineEmits(['close'])
                                                 <b>Rombel</b> : <Tag class="bg-primary">{{ item.siswa.rombel }}</Tag>
                                             </div>
                                         </div>
-                                        <div>
-                                            <Tag severity="info" v-if="item.method === 'card'">
-                                                <i class="pi pi-id-card mr-1" />
-                                                {{ item.method }}
-                                            </Tag>
-                                            <Tag severity="warning" v-if="item.method === 'qrcode'">
-                                                <i class="pi pi-id-card mr-1" />
-                                                {{ item.method }}
-                                            </Tag>
-                                            <Tag severity="secondary" v-if="item.method === 'other'">
-                                                {{ item.method }}
-                                            </Tag>
+                                        <div style="z-index: 50 !important;" class="absolute right-0 bottom-0 top-0">
+                                            <v-lazy-image class="shadow-xl border-solid rounded border-1"
+                                                v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture"
+                                                style="width: 110px;" />
+                                            <div v-else style="height: 100px;width: 100px;"></div>
                                         </div>
                                     </div>
                                     <Divider />
@@ -221,17 +217,31 @@ const emit = defineEmits(['close'])
                                         <b>Lokasi</b> : {{ item.gateway ? item.gateway.location : '-' }}
                                     </div>
                                     <div class="text-md mb-2" v-html="`${detailSession.allow_twice ? '<b>Masuk</b> : ' : '<b>Waktu</b> : '}${item.enter_time ?
-                                        format(item.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+                                        format(item.enter_time, 'HH:mm:ss', {
                                             locale: id
                                         }) :
                                         '-'}`">
                                     </div>
                                     <div class="text-md mb-2" v-if="detailSession.allow_twice">
                                         <b>Keluar</b> : {{ item.exit_time ?
-                                            format(item.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+                                            format(item.exit_time, 'HH:mm:ss', {
                                                 locale: id
                                             }) :
                                             '-' }}
+                                    </div>
+                                    <div>
+                                        <b>Metode </b> :
+                                        <Tag severity="info" v-if="item.method === 'card'">
+                                            <i class="pi pi-id-card mr-1" />
+                                            {{ item.method }}
+                                        </Tag>
+                                        <Tag severity="warning" v-if="item.method === 'qrcode'">
+                                            <i class="pi pi-id-card mr-1" />
+                                            {{ item.method }}
+                                        </Tag>
+                                        <Tag severity="secondary" v-if="item.method === 'other'">
+                                            {{ item.method }}
+                                        </Tag>
                                     </div>
                                 </div>
                             </TransitionGroup>
@@ -285,5 +295,15 @@ const emit = defineEmits(['close'])
 .list-leave-to {
     opacity: 0;
     transform: translateX(30px);
+}
+
+.v-lazy-image {
+    filter: blur(5px);
+    transition: filter 1.6s;
+    will-change: filter;
+}
+
+.v-lazy-image-loaded {
+    filter: blur(0);
 }
 </style>
