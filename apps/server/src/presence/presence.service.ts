@@ -9,7 +9,7 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { SiswaService } from 'src/siswa/siswa.service';
 import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
-import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+// import { CreatePresenceByNisDto } from './dto/create-presence.dto';
 import * as JSZip from 'jszip';
 type FilterDate = {
   start_date?: string,
@@ -852,6 +852,9 @@ export class PresenceService {
             rombel: {
               equals: rombel
             }
+          },
+          orderBy: {
+            name: 'asc'
           }
         })
 
@@ -902,6 +905,9 @@ export class PresenceService {
           rombel: true,
           createdAt: true,
           updatedAt: true,
+        },
+        orderBy: {
+          name: 'asc'
         }
       })
       const presences = await this.prismaService.client.presences.findMany({
@@ -991,6 +997,9 @@ export class PresenceService {
             rombel: {
               equals: rombel
             }
+          },
+          orderBy: {
+            name: 'asc'
           }
         })
 
@@ -1049,6 +1058,9 @@ export class PresenceService {
           rombel: true,
           createdAt: true,
           updatedAt: true,
+        },
+        orderBy: {
+          name: 'asc'
         }
       })
       const presences = await this.prismaService.client.presences.findMany({

@@ -197,10 +197,10 @@ export class GatewaysService {
 
           } catch (e) {
             if (e instanceof NotFoundException) {
+              client.emit(`PRESENCE_ERROR_${gateway.presence_sessionsId}`, e.message)
               return {
                 message: e.message
               }
-
             } else if (e instanceof Error) {
               const errorPayload = JSON.parse(e.message) as any
               // check error object 

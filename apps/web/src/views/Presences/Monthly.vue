@@ -165,20 +165,23 @@ const { handlePrint } = useVueToPrint({
                     <tr class="p-row">
                         <td class="p-column-body">{{ presence.name }}</td>
                         <td class="p-column-body"
-                            v-for="date in getRangeDate(presences.data.data.date.startDate, presences.data.data.date.endDate)"
+                            v-for="(date, idx) in getRangeDate(presences.data.data.date.startDate, presences.data.data.date.endDate)"
                             :key="date">
-                            <div v-if="presence.presences.find(pr => pr[parseInt(format(date, 'dd'))])">
-                                <Tag severity="success">
-                                    {{ format(presence.presences.find(pr => pr[parseInt(format(date,
-                                        'dd'))])[format(date,
-                                            'dd')].enter_time, 'HH:mm:ss') }}
+                            <div v-if="presence.presences[idx]" class="flex flex-column gap-1">
+                                <Tag severity="success"
+                                    v-if="presence.presences[idx][format(date, 'dd')] && presence.presences[idx][format(date, 'dd')].enter_time">
+                                    {{ format(presence.presences[idx][format(date, 'dd')].enter_time, 'HH:mm:ss') }}
                                 </Tag>
-                                <Tag severity="danger" v-if="presence.presences.find(pr => pr[parseInt(format(date, 'dd'))])[format(date,
+                                <Tag severity="danger"
+                                    v-if="presence.presences[idx][format(date, 'dd')] && presence.presences[idx][format(date, 'dd')].exit_time">
+                                    {{ format(presence.presences[idx][format(date, 'dd')].exit_time, 'HH:mm:ss') }}
+                                </Tag>
+                                <!-- <Tag severity="danger" v-if="presence.presences.find(pr => pr[parseInt(format(date, 'dd'))])[format(date,
                                     'dd')].exit_time">
                                     {{ format(presence.presences.find(pr => pr[parseInt(format(date,
                                         'dd'))])[format(date,
                                             'dd')].exit_time, 'HH:mm:ss') }}
-                                </Tag>
+                                </Tag> -->
                             </div>
                             <p v-else>-</p>
                         </td>

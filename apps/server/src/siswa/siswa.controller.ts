@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards, Res, StreamableFile, Header, ServiceUnavailableException } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
-import { CreateSiswaDto } from './dto/create-siswa.dto';
+import { CreateSiswaDto, UpdateRombelDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto'
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 @Controller('siswa')
 @ApiTags("Siswa")
-// @UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard)
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) { }
 
@@ -129,6 +129,13 @@ export class SiswaController {
     @Param('id', new ParseIntPipe()) id: number
   ) {
     return await this.siswaService.resetTelegram(id)
+  }
+
+  @Patch('rombel/update')
+  async updateRombel(
+    @Body() updateRombelDto: UpdateRombelDto
+  ) {
+    return await this.siswaService.updateRombel(updateRombelDto)
   }
 
 

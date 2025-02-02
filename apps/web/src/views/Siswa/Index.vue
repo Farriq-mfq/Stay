@@ -695,6 +695,78 @@ const downloadTemplateService = async () => {
 }
 
 
+// update rombel
+const dataUpdateRombel = ref({
+  rombel: "",
+  updated_rombel: ''
+})
+
+const errorUpdateRombel = ref({})
+const updateRombelService = async (data) => {
+  return await axios.patch("/siswa/rombel/update", {
+    rombel: data.rombel ? data.rombel.value : '',
+    updated_rombel: data.updated_rombel
+  });
+}
+
+const { mutateAsync: updateRombel, isPending: updateRombelPending } = useMutation({
+  mutationKey: ['updateRombel'],
+  mutationFn: updateRombelService,
+})
+
+const handleUpdateRombel = () => {
+  confirm.require({
+    header: 'Konfirmasi',
+    message: 'Yakin ingin update rombel ?',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+    acceptClass: 'p-button-sm p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Update',
+    accept: () => {
+      updateRombel(dataUpdateRombel.value, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Rombel berhasil diupdate',
+            life: 3000
+          })
+
+          showDialogUpdateRombel.value = false
+          dataUpdateRombel.value = {
+            rombel: "",
+            updated_rombel: ''
+          }
+          refetch()
+        },
+        onError(err) {
+          if (err.response.status === 400) {
+            errorUpdateRombel.value = err.response.data
+          } else {
+            toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Rombel gagal diupdate',
+              life: 3000
+            })
+          }
+        }
+      })
+    },
+  })
+
+}
+
+const showDialogUpdateRombel = ref(false)
+const getRombel = async () => {
+  return await axios.get('/siswa/rombel');
+}
+
+const { data: dataRombels, isLoading: loadingRombel } = useQuery({
+  queryKey: ['rombel'],
+  queryFn: getRombel
+})
 </script>
 
 <template>
@@ -713,6 +785,8 @@ const downloadTemplateService = async () => {
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
               <Button label="Download Format" @click.prevent="downloadTemplateService" icon="pi pi-download"
                 class="mr-2" />
+              <Button label="Update Rombel" @click.prevent="showDialogUpdateRombel = true" severity="info"
+                icon="pi pi-pencil" class="mr-2" />
             </div>
           </template>
         </Toolbar>
@@ -751,8 +825,7 @@ const downloadTemplateService = async () => {
           </Column>
           <Column field="profile_picture" header="Gambar Profil">
             <template #body="{ data }">
-              <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture"
-                style="width: 100px;" />
+              <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture" style="width: 100px;" />
               <div v-else style="height: 100px;width: 100px;"></div>
             </template>
           </Column>
@@ -934,8 +1007,8 @@ const downloadTemplateService = async () => {
       </div>
       <div class="field">
         <label for="profile_picture">Gambar Profil (Optional)</label>
-        <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange"
-          class="border p-2 w-full" />
+        <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png"
+          @change="onFileChange" class="border p-2 w-full" />
         <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
         <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.file">
           {{ errorsUpdateSiswa.file }}
@@ -1015,17 +1088,43 @@ const downloadTemplateService = async () => {
           @click.prevent="handleImportSiswa" />
       </template>
     </Dialog>
+    <Dialog header="Update Rombel" v-model:visible="showDialogUpdateRombel" :style="{ width: '450px' }" :modal="true"
+      class="p-fluid">
+      <div class="field">
+        <label for="rombel">Rombel</label>
+        <Dropdown :loading="loadingRombel" filter v-model="dataUpdateRombel.rombel"
+          :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
+          placeholder="Pilih Rombel" class="w-full" />
+        <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.rombel">
+          {{ errorUpdateRombel.rombel[0] }}
+        </p>
+      </div>
+      <div class="field">
+        <label for="update_rombel">Rombel baru</label>
+        <InputText id="update_rombel" v-model="dataUpdateRombel.updated_rombel"
+          placeholder="Ketikan rombel baru" />
+        <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.updated_rombel">
+          {{ errorUpdateRombel.updated_rombel[0] }}
+        </p>
+      </div>
+      <template #footer>
+        <Button label="Batalkan" :loading="updateRombelPending" :disabled="updateRombelPending" outlined
+          severity="danger" @click="showDialogUpdateRombel = false" />
+        <Button label="Update" :loading="updateRombelPending" :disabled="updateRombelPending"
+          @click.prevent="handleUpdateRombel" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <style scoped>
 .v-lazy-image {
-    filter: blur(5px);
-    transition: filter 1.6s;
-    will-change: filter;
+  filter: blur(5px);
+  transition: filter 1.6s;
+  will-change: filter;
 }
 
 .v-lazy-image-loaded {
-    filter: blur(0);
+  filter: blur(0);
 }
 </style>

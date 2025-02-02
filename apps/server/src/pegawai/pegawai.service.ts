@@ -10,26 +10,50 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import { CloudinaryService } from 'src/services/cloudinary.service';
+import { format } from 'date-fns';
 @Injectable()
 export class PegawaiService {
   constructor(
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly cloudinaryService: CloudinaryService
   ) {
   }
 
-  async create(CreatePegawaiDto: CreatePegawaiDto) {
-    return await this.prismaService.client.pegawai.create({
-      data: {
-        name: CreatePegawaiDto.name,
-        username: CreatePegawaiDto.username,
-        group: CreatePegawaiDto.group,
-        position: CreatePegawaiDto.position,
-        ...CreatePegawaiDto.sign_picture != null && {
-          sign_picture: CreatePegawaiDto.sign_picture
-        },
-        password: await hash(CreatePegawaiDto.username),
+  async create(CreatePegawaiDto: CreatePegawaiDto, file: Express.Multer.File | undefined) {
+
+    if (file) {
+      let result = null;
+      try {
+        result = await this.cloudinaryService.uploadImage(file, `${format(new Date(), "yyyy")}-${CreatePegawaiDto.group}`, `${CreatePegawaiDto.username}`)
+      } catch (e) {
+        throw new InternalServerErrorException()
       }
-    });
+      return await this.prismaService.client.pegawai.create({
+        data: {
+          name: CreatePegawaiDto.name,
+          username: CreatePegawaiDto.username,
+          group: CreatePegawaiDto.group,
+          position: CreatePegawaiDto.position,
+          ...result && {
+            sign_picture: result.url,
+            sign_picture_public_id: result.public_id
+          },
+          password: await hash(CreatePegawaiDto.username),
+        }
+      });
+    } else {
+      return await this.prismaService.client.pegawai.create({
+        data: {
+          name: CreatePegawaiDto.name,
+          username: CreatePegawaiDto.username,
+          group: CreatePegawaiDto.group,
+          position: CreatePegawaiDto.position,
+          password: await hash(CreatePegawaiDto.username),
+        }
+      });
+    }
+
   }
 
   async findAll(
@@ -69,6 +93,9 @@ export class PegawaiService {
         },
 
       },
+      orderBy: {
+        createdAt: 'desc'
+      }
     }).withPages({
       limit: limit ?? 10,
       includePageCount: true,
@@ -112,16 +139,60 @@ export class PegawaiService {
     });
   }
 
-  async update(id: number, updatepegawaiDto: UpdatePegawaiDto) {
-    return await this.prismaService.client.pegawai.update({
+  async update(id: number, updatepegawaiDto: UpdatePegawaiDto, file: Express.Multer.File | undefined) {
+    const pegawai = await this.prismaService.client.pegawai.findUniqueOrThrow({
       where: {
         id
-      },
-      data: updatepegawaiDto
-    });
+      }
+    })
+    if (file) {
+
+      if (pegawai.sign_picture_public_id) await this.cloudinaryService.deleteImage(pegawai.sign_picture_public_id)
+
+      let result = null;
+      try {
+        result = await this.cloudinaryService.uploadImage(file, `${format(new Date(), "yyyy")}-${updatepegawaiDto.group}`, `${updatepegawaiDto.username}`)
+      } catch (e) {
+        throw new InternalServerErrorException()
+      }
+
+
+      return await this.prismaService.client.pegawai.update({
+        where: {
+          id
+        },
+        data: {
+          ...updatepegawaiDto,
+          ...result && {
+            sign_picture: result.url,
+            sign_picture_public_id: result.public_id
+          }
+        }
+      });
+    } else {
+      return await this.prismaService.client.pegawai.update({
+        where: {
+          id
+        },
+        data: {
+          name: updatepegawaiDto.name,
+          position: updatepegawaiDto.position,
+          group: updatepegawaiDto.group,
+          username: updatepegawaiDto.username,
+        }
+      });
+    }
   }
 
   async remove(id: number) {
+    const pegawai = await this.prismaService.client.pegawai.findUniqueOrThrow({
+      where: {
+        id
+      }
+    })
+
+    if (pegawai.sign_picture_public_id) await this.cloudinaryService.deleteImage(pegawai.sign_picture_public_id)
+
     return await this.prismaService.client.pegawai.delete({
       where: {
         id
@@ -158,13 +229,34 @@ export class PegawaiService {
             const createPegawaiValidate = plainToClass(ImportPegawaiDto, rowData);
             const errors = await validate(createPegawaiValidate)
 
+            let result = null;
+            if (rowData.sign_picture) {
+              try {
+                result = await this.cloudinaryService.uploadImageFromUrl(rowData.sign_picture, `${format(new Date(), "yyyy")}-${rowData.group}`, rowData.username)
+              } catch (e) {
+              }
+            }
+            delete rowData.sign_picture
+
             if (!(errors.length > 0)) {
               const created = await this.prismaService.client.pegawai.upsert({
                 where: {
                   username: rowData.username,
                 },
-                create: rowData,
-                update: rowData
+                create: {
+                  ...rowData,
+                  ...result && {
+                    sign_picture: result.url,
+                    sign_picture_public_id: result.public_id
+                  }
+                },
+                update: {
+                  ...rowData,
+                  ...result && {
+                    sign_picture: result.url,
+                    sign_picture_public_id: result.public_id
+                  }
+                }
               })
               allData.push(created)
             }

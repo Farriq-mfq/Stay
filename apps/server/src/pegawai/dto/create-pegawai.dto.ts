@@ -28,10 +28,10 @@ export class CreatePegawaiDto {
     })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     position: string
-    @IsUrl({}, { message: "Link tanda tangan harus valid" })
-    @IsOptional()
-    @Transform(({ value }: TransformFnParams) => value?.trim())
-    sign_picture: string
+    // @IsUrl({}, { message: "Link tanda tangan harus valid" })
+    // @IsOptional()
+    // @Transform(({ value }: TransformFnParams) => value?.trim())
+    // sign_picture: string
 }
 
 
@@ -63,8 +63,8 @@ export class ImportPegawaiDto {
     })
     @Transform(({ value }: TransformFnParams) => value?.trim())
     position: string
-    @IsUrl({}, { message: "Link tanda tangan harus valid" })
-    @IsOptional()
-    @Transform(({ value }: TransformFnParams) => value?.trim())
-    sign_picture: string
+    // @IsUrl({}, { message: "Link tanda tangan harus valid" })
+    // @IsOptional()
+    // @Transform(({ value }: TransformFnParams) => value?.trim())
+    // sign_picture: string
 }

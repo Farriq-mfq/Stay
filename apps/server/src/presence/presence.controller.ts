@@ -65,7 +65,7 @@ export class PresenceController {
     )
   }
   @Get('/:sessionId/daily')
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
   async findAllByDaily(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
@@ -82,7 +82,7 @@ export class PresenceController {
   }
 
   @Get('/export/:sessionId/daily')
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
   async exportPresenceByRombel(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -90,7 +90,7 @@ export class PresenceController {
     @Query('search') search?: string,
     @Query('rombel') rombel?: string
   ) {
-    
+
     if (rombel != null && rombel != undefined && rombel != '') {
       res.set({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -114,7 +114,7 @@ export class PresenceController {
     res.send(buffer);
   }
   @Get('/:sessionId/:rombel/monthly')
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   async findAllPresenceByMonthClass(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,

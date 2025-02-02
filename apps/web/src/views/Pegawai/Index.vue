@@ -20,6 +20,8 @@ const queryParams = ref({
 })
 
 const totalRecords = ref(0)
+const file = ref(null);
+
 
 const getAllPegawai = async () => {
     const queries = {
@@ -55,12 +57,29 @@ const handleDebounceFilter = (val) => {
     refetch()
 }
 
+const onFileChange = (event) => {
+    const target = event.target;
+    if (target.files && target.files[0]) {
+        file.value = target.files[0];
+    }
+};
+
 // add pegawai
 const showDialogAddPegawai = ref(false)
 const errorsAddPegawai = ref(null)
 
 const addPegawai = async (data) => {
-    return await axios.post('/pegawai', data)
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("username", data.username);
+    formData.append("position", data.position);
+    formData.append("group", data.group);
+    if (file) formData.append("file", file.value);
+    return await axios.post('/pegawai', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
 }
 
 const pegawaiData = ref({
@@ -68,11 +87,10 @@ const pegawaiData = ref({
     username: '',
     position: '',
     group: '',
-    sign_picture: "",
 })
 
 const { mutateAsync: addPegawaiMutate, isPending: addPegawaiPending } = useMutation({
-    mutationKey: ['addSiswa'],
+    mutationKey: ['addPegawai'],
     mutationFn: addPegawai,
 })
 
@@ -91,9 +109,9 @@ const handleSubmitAddPegawai = () => {
                 username: '',
                 position: '',
                 group: '',
-                sign_picture: "",
             }
             errorsAddPegawai.value = null
+            file.value = null
             refetch()
         },
         onError(err) {
@@ -106,6 +124,17 @@ const handleSubmitAddPegawai = () => {
                     detail: 'Data pegawai sudah ada',
                     life: 3000
                 })
+            } else if (err.response.status === 422) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Mohon perbaiki file yang diupload',
+                    life: 3000
+                })
+
+                errorsAddPegawai.value = {
+                    file: 'Mohon perbaiki file yang diupload'
+                }
             } else {
                 toast.add({
                     severity: 'error',
@@ -188,7 +217,7 @@ const confirmRemovePegawai = (data) => {
         },
     });
 };
-// update data siswa
+// update data pegawai
 
 const showDialogUpdatePegawai = ref(false)
 const errorsUpdatePegawai = ref(null)
@@ -197,11 +226,20 @@ const dataUpdatePegawai = ref({
     username: '',
     position: '',
     group: '',
-    sign_picture: "",
 })
 
 const updatePegawaiService = async (data) => {
-    return await axios.patch(`/pegawai/${data.id}`, data)
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("username", data.username);
+    formData.append("position", data.position);
+    formData.append("group", data.group);
+    if (file) formData.append("file", file.value);
+    return await axios.patch(`/pegawai/${data.id}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    })
 }
 
 const { mutateAsync: updatePegawaiMutate, isPending: updatePegawaiPending } = useMutation({
@@ -209,7 +247,7 @@ const { mutateAsync: updatePegawaiMutate, isPending: updatePegawaiPending } = us
     mutationFn: updatePegawaiService,
 })
 
-const handleSubmitUpdateSiswa = () => {
+const handleSubmitUpdatePegawai = () => {
     updatePegawaiMutate(dataUpdatePegawai.value, {
         onSuccess() {
             toast.add({
@@ -220,6 +258,7 @@ const handleSubmitUpdateSiswa = () => {
             })
             showDialogUpdatePegawai.value = false
             dataUpdatePegawai.value = null
+            file.value = null
             refetch()
         },
         onError(err) {
@@ -232,6 +271,17 @@ const handleSubmitUpdateSiswa = () => {
                     detail: 'Data pegawai sudah ada',
                     life: 3000
                 })
+            } else if (err.response.status === 422) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Mohon perbaiki file yang diupload',
+                    life: 3000
+                })
+
+                errorsUpdatePegawai.value = {
+                    file: 'Mohon perbaiki file yang diupload'
+                }
             } else {
                 toast.add({
                     severity: 'error',
@@ -251,9 +301,9 @@ const handleshowDialogUpdatePegawai = (data) => {
         username: data.username,
         position: data.position,
         group: data.group,
-        sign_picture: data.sign_picture,
     }
     showDialogUpdatePegawai.value = true
+    file.value = null
 }
 
 const clearUpdateState = () => {
@@ -262,9 +312,9 @@ const clearUpdateState = () => {
         username: '',
         position: '',
         group: '',
-        sign_picture: "",
     }
     errorsUpdatePegawai.value = null
+    file.value = null
 }
 
 // register RFID card
@@ -534,7 +584,7 @@ const resetDefaultGateway = () => {
 //     });
 // };
 
-// import siswa
+// import pegawai
 const fileImport = ref(null)
 const showDialogImportPegawai = ref(false)
 const handleChangeImport = (e) => {
@@ -583,7 +633,7 @@ const handleImportPegawai = () => {
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Data siswa gagal diimport',
+                    detail: 'Data pegawai gagal diimport',
                     life: 3000
                 })
             }
@@ -632,7 +682,7 @@ const downloadTemplateService = async () => {
                     :rows="10" :filters="filters" lazy
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     :rowsPerPageOptions="[10, 25, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa" :first="first"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} pegawai" :first="first"
                     @page="onPage($event)">
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
@@ -647,7 +697,7 @@ const downloadTemplateService = async () => {
                         <div class="flex justify-content-center p-4 gap-3 align-items-center">
                             <i class="pi pi-folder-open"></i>
                             <span>
-                                Data siswa masih kosong
+                                Data pegawai masih kosong
                             </span>
                         </div>
                     </template>
@@ -678,8 +728,8 @@ const downloadTemplateService = async () => {
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
                                 <Button icon="pi pi-pencil" @click.prevent="handleshowDialogUpdatePegawai(data)" />
-                                <Button severity="danger" icon="pi pi-trash" :loading="removeSiswaPending"
-                                    :disabled="removeSiswaPending" @click.prevent="confirmRemovePegawai(data)" />
+                                <Button severity="danger" icon="pi pi-trash" :loading="removePegawaiPending"
+                                    :disabled="removePegawaiPending" @click.prevent="confirmRemovePegawai(data)" />
                                 <Button icon="pi pi-id-card" @click.prevent="handleShowDialogRegisterCard(data)" />
                             </div>
                         </template>
@@ -746,12 +796,12 @@ const downloadTemplateService = async () => {
                 </p>
             </div>
             <div class="field">
-                <label for="sign_picture">Link Gambar Tanda Tangan</label>
-                <InputText id="sign_picture" :disabled="addPegawaiPending"
-                    :invalid="errorsAddPegawai && errorsAddPegawai.sign_picture" required="true" autofocus
-                    v-model="pegawaiData.sign_picture" placeholder="Cth: https://drive.google.com/xxx" />
-                <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.sign_picture">
-                    {{ errorsAddPegawai.sign_picture[0] }}
+                <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
+                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onFileChange" class="border p-2 w-full" />
+                <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+                <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.file">
+                    {{ errorsAddPegawai.file }}
                 </p>
             </div>
 
@@ -764,10 +814,10 @@ const downloadTemplateService = async () => {
         </Dialog>
         <!-- update -->
         <Dialog v-model:visible="showDialogUpdatePegawai" @after-hide="clearUpdateState" :style="{ width: '450px' }"
-            header="Update Siswa" :modal="true" class="p-fluid">
+            header="Update Pegawai" :modal="true" class="p-fluid">
             <div class="field">
                 <label for="name">Nama</label>
-                <InputText id="name" :disabled="addPegawaiPending"
+                <InputText id="name" :disabled="updatePegawaiPending"
                     :invalid="errorsUpdatePegawai && errorsUpdatePegawai.name" required="true" autofocus
                     v-model="dataUpdatePegawai.name" placeholder="Cth: Sibudi" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.name">
@@ -776,7 +826,7 @@ const downloadTemplateService = async () => {
             </div>
             <div class="field">
                 <label for="username">Username</label>
-                <InputText id="username" :disabled="addPegawaiPending"
+                <InputText id="username" :disabled="updatePegawaiPending"
                     :invalid="errorsUpdatePegawai && errorsUpdatePegawai.username" required="true" autofocus
                     v-model="dataUpdatePegawai.username" placeholder="Cth: 1234" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.username">
@@ -785,7 +835,7 @@ const downloadTemplateService = async () => {
             </div>
             <div class="field">
                 <label for="position">Jabatan</label>
-                <InputText id="position" :disabled="addPegawaiPending"
+                <InputText id="position" :disabled="updatePegawaiPending"
                     :invalid="errorsUpdatePegawai && errorsUpdatePegawai.position" required="true" autofocus
                     v-model="dataUpdatePegawai.position" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.position">
@@ -794,7 +844,7 @@ const downloadTemplateService = async () => {
             </div>
             <div class="field">
                 <label for="group">Kelompok</label>
-                <InputText id="group" :disabled="addPegawaiPending"
+                <InputText id="group" :disabled="updatePegawaiPending"
                     :invalid="errorsUpdatePegawai && errorsUpdatePegawai.group" required="true" autofocus
                     v-model="dataUpdatePegawai.group" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.group">
@@ -802,12 +852,12 @@ const downloadTemplateService = async () => {
                 </p>
             </div>
             <div class="field">
-                <label for="sign_picture">Link Gambar Tanda Tangan</label>
-                <InputText id="sign_picture" :disabled="addPegawaiPending"
-                    :invalid="errorsUpdatePegawai && errorsUpdatePegawai.sign_picture" required="true" autofocus
-                    v-model="dataUpdatePegawai.sign_picture" placeholder="Cth: https://drive.google.com/xxx" />
-                <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.sign_picture">
-                    {{ errorsUpdatePegawai.sign_picture[0] }}
+                <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
+                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onFileChange" class="border p-2 w-full" />
+                <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+                <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.file">
+                    {{ errorsUpdatePegawai.file }}
                 </p>
             </div>
 
@@ -861,7 +911,7 @@ const downloadTemplateService = async () => {
                 <Button label="Batal" :disabled="updatePegawaiPending" severity="danger" icon="pi pi-times" outlined
                     @click.prevent="showDialogUpdatePegawai = false" />
                 <Button label="Update" :loading="updatePegawaiPending" :disabled="updatePegawaiPending"
-                    icon="pi pi-link" @click="handleSubmitUpdateSiswa" />
+                    icon="pi pi-link" @click="handleSubmitUpdatePegawai" />
             </template>
         </Dialog>
 
@@ -906,21 +956,7 @@ const downloadTemplateService = async () => {
                     @click.prevent="handleSubmitRegisterCard" />
             </template>
         </Dialog>
-      
-        <Dialog v-model:visible="showDialogQrcode" :modal="true" :closable="false">
-            <div class="w-full flex flex-column justify-content-center align-items-center"
-                :id="`qrcode-siswa-${qrCode.nisn}`">
-                <h1 class="text-6xl font-bold underline">
-                    {{ qrCode.name }}
-                </h1>
-                <vue-qrcode :value="qrCode.nisn" :options="{ width: 800 }"></vue-qrcode>
-            </div>
-            <template #footer>
-                <Button label="Batalkan" outlined severity="danger" @click="showDialogQrcode = false" />
-                <Button label="Cetak" outlined v-print="`#qrcode-siswa-${qrCode.nisn}`" icon="pi pi-print"
-                    :loading="resetTokenPending" :disabled="resetTokenPending" />
-            </template>
-        </Dialog>
+
         <Dialog :closable="!importPendingPegawai" :header="importPendingPegawai ? 'Loading...' : 'Import Pegawai'"
             v-model:visible="showDialogImportPegawai" :style="{ width: '450px' }" :modal="true">
 

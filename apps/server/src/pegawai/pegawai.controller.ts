@@ -16,8 +16,21 @@ export class PegawaiController {
 
   @UseGuards(AccessTokenGuard)
   @Post()
-  async create(@Body() createPegawaiDto: CreatePegawaiDto) {
-    return await this.pegawaiService.create(createPegawaiDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(@UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: /(jpg|jpeg|png)$/i,
+      })
+      .addMaxSizeValidator({
+        maxSize: 1.5 * 1024 * 1024,
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        fileIsRequired: false
+      }),
+  ) file: Express.Multer.File | undefined, @Body() createPegawaiDto: CreatePegawaiDto) {
+    return await this.pegawaiService.create(createPegawaiDto, file);
   }
 
   @UseGuards(AccessTokenGuard)
@@ -41,7 +54,7 @@ export class PegawaiController {
 
   @Get("/:sessionId/all")
   async findWithoutPaginate(
-    @Param('sessionId') sessionId:string
+    @Param('sessionId') sessionId: string
   ) {
     return await this.pegawaiService.findWithoutPaginate(sessionId)
   }
@@ -59,8 +72,21 @@ export class PegawaiController {
   }
 
   @Patch(':id')
-  async update(@Param('id', new ParseIntPipe()) id: string, @Body() updatePegawaiDto: UpdatePegawaiDto) {
-    return await this.pegawaiService.update(+id, updatePegawaiDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async update(@Param('id', new ParseIntPipe()) id: string, @UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({
+        fileType: /(jpg|jpeg|png)$/i,
+      })
+      .addMaxSizeValidator({
+        maxSize: 1.5 * 1024 * 1024,
+      })
+      .build({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        fileIsRequired: false
+      }),
+  ) file: Express.Multer.File | undefined, @Body() updatePegawaiDto: UpdatePegawaiDto) {
+    return await this.pegawaiService.update(+id, updatePegawaiDto, file);
   }
 
   // @Delete('/reset')

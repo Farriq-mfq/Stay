@@ -86,6 +86,7 @@ const handlePresenceUpdate = (data) => {
     allPresences.value.set(data.pegawaiId, data)
     turnOffListener();
     setTimeout(turnOnListener, 100);
+
     nextTick(() => {
         focusRow(data.pegawaiId)
         setTimeout(() => {
@@ -183,13 +184,13 @@ const setRowRef = (el, id) => {
             </h3>
             <CurrentDay />
             <clock />
-        </div>
-
-        <div class="overflow-x-auto mx-5" style="height:600px">
             <Message size="large" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
             <Message size="large" v-if="successPresence" severity="success">
                 Terimakasih : {{ successPresence.pegawai.name }}
             </Message>
+        </div>
+
+        <div class="overflow-x-auto mx-5" style="height:700px">
             <table ref="componentPrintRef" class="p-datatable p-datatable-gridlines p-component w-full" v-if="pegawai">
                 <thead class="p-datatable-thead">
                     <tr>

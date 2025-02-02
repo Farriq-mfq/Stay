@@ -34,19 +34,20 @@ model siswa {
 
 // employees
 model pegawai {
-  id           Int                 @id @default(autoincrement())
-  name         String              @db.VarChar()
-  username     String              @unique @db.VarChar() // di isi dengan NIP 
-  password     String
-  refreshToken String?
-  rfid_token   String?             @unique
+  id                     Int                 @id @default(autoincrement())
+  name                   String              @db.VarChar()
+  username               String              @unique @db.VarChar() // di isi dengan NIP 
+  password               String
+  refreshToken           String?
+  rfid_token             String?             @unique
   // mobile_nfc_token String?  @unique not possible currently
-  position     String?
-  group        String
-  sign_picture String? // gambar tanda tangan
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  presences    presences_pegawai[]
+  position               String?
+  group                  String
+  sign_picture           String? // gambar tanda tangan
+  sign_picture_public_id String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  presences              presences_pegawai[]
 }
 
 enum RoleUser {

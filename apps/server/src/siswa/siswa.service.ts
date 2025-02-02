@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { hash } from 'argon2';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -8,7 +8,7 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { join } from 'path';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CloudinaryService } from 'src/services/cloudinary.service';
-import { CreateSiswaDto, ImportSiswaDto } from './dto/create-siswa.dto';
+import { CreateSiswaDto, ImportSiswaDto, UpdateRombelDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
 
@@ -105,6 +105,9 @@ export class SiswaService {
       },
       include: {
         telegram_account: true
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     }).withPages({
       limit: limit ?? 10,
@@ -338,5 +341,21 @@ export class SiswaService {
       rombels.push(rombel.rombel)
     }
     return rombels;
+  }
+
+  async updateRombel(updateRombelDto: UpdateRombelDto) {
+    const rombels = await this.getGroupClass();
+    if (rombels.includes(updateRombelDto.rombel)) {
+      return await this.prismaService.client.siswa.updateMany({
+        data: {
+          rombel: updateRombelDto.updated_rombel
+        },
+        where: {
+          rombel: updateRombelDto.rombel
+        }
+      })
+    } else {
+      throw new NotFoundException("Rombel tidak ada")
+    }
   }
 }
