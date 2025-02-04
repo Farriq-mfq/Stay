@@ -1,5 +1,5 @@
 import { Transform, TransformFnParams } from "class-transformer"
-import { IsNotEmpty, IsNumberString, IsOptional, IsString, IsUppercase } from "class-validator"
+import { IsNotEmpty, IsNumberString, IsOptional, IsString, IsUppercase, IsUrl } from "class-validator"
 
 export class CreateSiswaDto {
     @IsNumberString()
@@ -57,4 +57,28 @@ export class ImportSiswaDto {
     @IsNumberString()
     @Transform(({ value }: TransformFnParams) => value?.trim())
     nis: string
+    @IsUrl()
+    @IsOptional()
+    @Transform(({ value }: TransformFnParams) => value?.trim())
+    image_url: string
+}
+
+
+export class UpdateRombelDto {
+    @IsString()
+    @IsNotEmpty({
+        message: "Rombel harus diisi"
+    })
+    @IsUppercase({
+        message:"Rombel harus diisi huruf kapital"
+    })
+    rombel: string
+    @IsString()
+    @IsNotEmpty({
+        message: "Rombel yang baru harus diisi"
+    })
+    @IsUppercase({
+        message:"Rombel yang baru harus diisi huruf kapital"
+    })
+    updated_rombel: string
 }

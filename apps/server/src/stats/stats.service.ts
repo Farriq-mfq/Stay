@@ -22,7 +22,8 @@ export class StatsService {
       gateways,
       sessions,
       siswa,
-      users
+      users,
+      pegawai
     ] = await Promise.all([
       this.prismaService.client.gateways.count(),
       this.prismaService.client.presence_sessions.count(),
@@ -32,13 +33,15 @@ export class StatsService {
           role: 'user'
         }
       }),
+      this.prismaService.client.pegawai.count()
     ])
 
     return {
       gateways,
       sessions,
       siswa,
-      users
+      users,
+      pegawai
     }
   }
 

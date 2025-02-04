@@ -1,0 +1,132 @@
+// async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
+  //   // check the session
+  //   const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+  //     where: {
+  //       id: CreatePresenceByQRDTO.session
+  //     }
+  //   })
+
+  //   // check the nisn
+  //   const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+  //     where: {
+  //       nisn: CreatePresenceByQRDTO.nisn
+  //     },
+  //     include: {
+  //       telegram_account: true
+  //     }
+  //   })
+  //   if (session && siswa) {
+  //     // check today already exists
+  //     const checkPresenceAlready = await this.prismaService.client.presences.findFirst({
+  //       where: {
+  //         siswaId: siswa.id,
+  //         presence_sessionsId: session.id,
+  //         createdAt: {
+  //           gte: new Date(new Date().setHours(0, 0, 0, 0))
+  //         }
+  //       }
+  //     })
+
+  //     if (checkPresenceAlready) {
+  //       throw new BadRequestException()
+  //     }
+  //     // create the presence
+  //     const presence = await this.prismaService.client.presences.create({
+  //       data: {
+  //         siswaId: siswa.id,
+  //         presence_sessionsId: session.id,
+  //         method: 'qrcode'
+  //       }
+  //     })
+  //     if (siswa.telegram_account) {
+  //       const htmlContent = `
+  //       Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
+  //       `;
+  //       await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
+  //         parse_mode: 'HTML'
+  //       })
+  //     }
+
+  //     return presence
+  //   } else {
+  //     throw new BadRequestException()
+  //   }
+  // }
+
+  async createPresenceByNis(createPresenceByNisDto: CreatePresenceByNisDto) {
+    // const siswa = await this.prismaService.client.siswa.findUnique({
+    //   where: {
+    //     nisn: createPresenceByNisDto.nisn
+    //   },
+    // })
+
+    // if (!siswa) throw new NotFoundException("NISN masih salah");
+
+    // const session = await this.prismaService.client.presence_sessions.findUnique({
+    //   where: {
+    //     id: createPresenceByNisDto.session
+    //   }
+    // })
+
+    // if (!session) throw new NotFoundException("Session not found");
+
+    // const current_time = new Date();
+
+
+    // if (session.start_time && session.end_time) {
+    //   if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
+    //     this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: "other"
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
+    // } else if (session.end_time) {
+    //   if (current_time >= session.start_time) {
+    //     return await this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: 'other'
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
+    // } else if (session.end_time) {
+    //   if (current_time <= session.end_time) {
+    //     return await this.createPresence({
+    //       session,
+    //       siswa,
+    //       method: 'other'
+
+    //     })
+    //   } else {
+    //     this.handlingPresenceError({
+    //       error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
+    //         locale: id
+    //       })}`,
+    //       siswa
+    //     })
+    //   }
+
+    // } else {
+    //   return await this.createPresence({
+    //     session,
+    //     siswa,
+    //     method: 'other'
+    //   })
+    // }
+  }

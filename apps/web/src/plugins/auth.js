@@ -13,11 +13,23 @@ export default (app) => {
             http: driverHttpAxios,
             auth: {
                 request: function (req, token) {
-                    this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + token })
+                    const parseToken = JSON.parse(token)
+                    if (parseToken && parseToken.accessToken && parseToken.refreshToken) {
+                        if (req.url === '/auth/refresh') {
+                            this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + parseToken.refreshToken })
+                        } else {
+                            this.drivers.http.setHeaders(req, { Authorization: 'Bearer ' + parseToken.accessToken })
+                        }
+                    }
+
                 },
                 response: function (res) {
                     if ('data' in res.data) {
-                        return res.data.data.accessToken;
+                        const { accessToken, refreshToken } = res.data.data
+                        if (accessToken && refreshToken) return JSON.stringify({
+                            accessToken,
+                            refreshToken
+                        });
                     }
                 },
             },

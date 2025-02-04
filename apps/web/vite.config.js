@@ -7,6 +7,9 @@ import { PrimeVueResolver } from 'unplugin-vue-components/resolvers';
 import Markdown from 'unplugin-vue-markdown/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
+/**
+ * @type {import('vite').UserConfig}
+ */
 export default defineConfig(() => {
     return {
         plugins: [
@@ -28,7 +31,9 @@ export default defineConfig(() => {
                 injectRegister: "auto",
                 workbox: {
                     globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
-                    cleanupOutdatedCaches: true
+                    cleanupOutdatedCaches: true,
+                    clientsClaim: true,
+                    skipWaiting: true,
                 },
                 devOptions: {
                     enabled: true
@@ -68,10 +73,6 @@ export default defineConfig(() => {
                     ],
                     orientation: "portrait"
                 },
-                workbox: {
-                    clientsClaim: true,
-                    skipWaiting: true,
-                },
             })
         ],
         css: {
@@ -80,6 +81,9 @@ export default defineConfig(() => {
                     api: 'modern',
                     silenceDeprecations: ["legacy-js-api"],
                 }
+            },
+            modules: {
+                generateScopedName: '[hash:base64:8]',
             }
         },
         resolve: {

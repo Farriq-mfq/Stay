@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 const items = ref([
   { label: 'Semua data', route: '/presences/all' },
-  { label: 'Rekap Harian', route: '/presences/rombel' },
+  { label: 'Rekap Harian', route: '/presences/daily' },
   { label: 'Rekap Bulanan', route: '/presences/monthly' },
   // { label: 'Rekap data', icon: 'pi pi-book', route: '/presences/recap' },
   // {

@@ -69,7 +69,7 @@ const handleLogout = () => {
 const confirmLogout = () => {
     confirm.require({
         target: event.currentTarget,
-        header: 'Confirmation',
+        header: 'Konfirmasi',
         message: 'Yakin ingin keluar dari aplikasi ?',
         icon: 'pi pi-info-circle',
         rejectClass: 'p-button-secondary p-button-outlined p-button-sm',

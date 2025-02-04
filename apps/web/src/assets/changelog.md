@@ -1,3 +1,13 @@
+## [1.4.1] - 2025-21-25
+### Added
+-   menambah fitur manajemen pegawai
+-   menambah tipe sesi presensi
+### Change
+-   mengubah "Confirmation" jadi "Konfirmasi"
+-   mengubah bagian rekap harian jika tidak di pilih rombel maka akan mendownload semua kelas dalam bentuk zip jika rombel di pilih maka akan mendownload dalam bentuk excel
+### FIX 
+-   memperbaiki security login
+-   memperbaiki halaman not found
 ## [1.4.0] - 2025-21-25
 ### Added
 -   menambah menu statistik

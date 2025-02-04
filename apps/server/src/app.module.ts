@@ -13,6 +13,7 @@ import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
 import { BackupModule } from './backup/backup.module';
+import { PegawaiModule } from './pegawai/pegawai.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -55,7 +56,8 @@ import { BackupModule } from './backup/backup.module';
     SessionsModule,
     StatsModule,
     // WhatsappModule,
-    BackupModule
+    BackupModule,
+    PegawaiModule
   ],
 })
 export class AppModule { }

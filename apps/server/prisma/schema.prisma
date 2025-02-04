@@ -9,31 +9,53 @@ datasource db {
 
 // master data
 model siswa {
-  id               Int               @id @default(autoincrement())
-  notelp           String?           @unique @db.VarChar()
-  name             String            @db.VarChar()
-  nisn             String            @unique @db.VarChar()
-  password         String
-  refreshToken     String?
-  rombel           String
-  nis              String?           @unique @db.VarChar()
-  rfid_token       String?           @unique
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  presences        presences[]
-  telegram_account telegram_account?
-  notifications    notifications[]
-  profile_picture  String?
+  id                Int               @id @default(autoincrement())
+  notelp            String?           @unique @db.VarChar()
+  name              String            @db.VarChar()
+  nisn              String            @unique @db.VarChar()
+  password          String
+  refreshToken      String?
+  rombel            String
+  nis               String?           @unique @db.VarChar()
+  rfid_token        String?           @unique
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  presences         presences[]
+  // TODO: remove field telegram
+  telegram_account  telegram_account?
+  notifications     notifications[]
+  profile_picture   String?
+  picture_public_id String?
   // for mobile phone register
-  nfc_token        String?
+  // mobile_nfc_token String?           @unique not possible currently
 
   @@index([nis, nisn])
+}
+
+// employees
+model pegawai {
+  id                     Int                 @id @default(autoincrement())
+  name                   String              @db.VarChar()
+  username               String              @unique @db.VarChar() // di isi dengan NIP 
+  password               String
+  refreshToken           String?
+  rfid_token             String?             @unique
+  // mobile_nfc_token String?  @unique not possible currently
+  position               String?
+  group                  String
+  sign_picture           String? // gambar tanda tangan
+  sign_picture_public_id String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  presences              presences_pegawai[]
 }
 
 enum RoleUser {
   admin
   user
 }
+
+// users system
 
 model users {
   id                 Int      @id @default(autoincrement())
@@ -54,18 +76,19 @@ enum GatewayRole {
 }
 
 model gateways {
-  id                  Int                @id @default(autoincrement())
-  token               String             @unique @db.VarChar()
-  ip                  String             @unique @db.VarChar()
+  id                  Int                 @id @default(autoincrement())
+  token               String              @unique @db.VarChar()
+  ip                  String              @unique @db.VarChar()
   location            String
   name                String
   role                GatewayRole
-  status              Boolean            @default(true)
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
+  status              Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
   presences           presences[]
-  presence_sessions   presence_sessions? @relation(fields: [presence_sessionsId], references: [id])
+  presence_sessions   presence_sessions?  @relation(fields: [presence_sessionsId], references: [id])
   presence_sessionsId Int?
+  presences_pegawai   presences_pegawai[]
 
   @@index([ip, token])
 }
@@ -73,24 +96,26 @@ model gateways {
 // only role presences are allowed
 enum SessionRoleType {
   PEGAWAI
-  ROLE
+  SISWA
 }
 
 model presence_sessions {
-  id          Int         @id @default(autoincrement())
-  name        String
-  qrcode      String      @unique @default(cuid())
-  allow_twice Boolean?    @default(false)
-  start_time  String?
-  end_time    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  gateways    gateways[]
-  presences   presences[]
+  id                Int                 @id @default(autoincrement())
+  name              String
+  qrcode            String              @unique @default(cuid())
+  allow_twice       Boolean?            @default(false)
+  start_time        String?
+  end_time          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  gateways          gateways[]
+  presences         presences[]
   // change to group
-  rombel      String?
+  // rombel            String?
+  group             String?
   // plan by allowed_role
-  // role_type SessionRoleType?
+  session_role_type SessionRoleType
+  presences_pegawai presences_pegawai[]
 
   @@index([qrcode])
 }
@@ -118,6 +143,24 @@ model presences {
   @@index([siswaId, gatewaysId, presence_sessionsId])
 }
 
+model presences_pegawai {
+  id                  Int                @id @default(autoincrement())
+  pegawai             pegawai            @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+  pegawaiId           Int
+  gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
+  gatewaysId          Int?
+  session             presence_sessions? @relation(fields: [presence_sessionsId], references: [id], onDelete: SetNull)
+  enter_time          DateTime
+  exit_time           DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  presence_sessionsId Int?
+  method              PresenceMethod     @default(other)
+
+  @@index([pegawaiId, gatewaysId, presence_sessionsId])
+}
+
+// TODO: remove model telegram_account
 model telegram_account {
   id        Int      @id @default(autoincrement())
   username  String
@@ -131,7 +174,7 @@ model telegram_account {
   @@index([siswaId, chat_id])
 }
 
-// plan for firebase notifications
+// TODO: plan for firebase notifications
 model notifications {
   id        Int      @id @default(autoincrement())
   title     String
@@ -143,6 +186,7 @@ model notifications {
   siswa     siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
 }
 
+// TODO: remove whatsapp session table
 // whatsapp session
 enum whatsapp_status {
   CONNECTED

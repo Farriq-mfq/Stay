@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { gateways, presence_sessions, PresenceMethod, presences, siswa } from '@prisma/client';
-import { eachDayOfInterval, endOfMonth, format, isAfter, isBefore, startOfMonth } from 'date-fns';
+import { gateways, pegawai, presence_sessions, PresenceMethod, presences, presences_pegawai, siswa } from '@prisma/client';
+import { eachDayOfInterval, endOfDay, endOfMonth, format, isAfter, isBefore, parse, startOfDay, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
@@ -9,7 +9,8 @@ import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { SiswaService } from 'src/siswa/siswa.service';
 import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange } from 'src/utils/helpers';
 import * as xlsx from 'xlsx';
-import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+// import { CreatePresenceByNisDto } from './dto/create-presence.dto';
+import * as JSZip from 'jszip';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -21,152 +22,8 @@ export class PresenceService {
     private readonly siswaService: SiswaService,
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) { }
-  // async createPresenceByQR(CreatePresenceByQRDTO: CreatePresenceByQRDTO) {
-  //   // check the session
-  //   const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
-  //     where: {
-  //       id: CreatePresenceByQRDTO.session
-  //     }
-  //   })
 
-  //   // check the nisn
-  //   const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
-  //     where: {
-  //       nisn: CreatePresenceByQRDTO.nisn
-  //     },
-  //     include: {
-  //       telegram_account: true
-  //     }
-  //   })
-  //   if (session && siswa) {
-  //     // check today already exists
-  //     const checkPresenceAlready = await this.prismaService.client.presences.findFirst({
-  //       where: {
-  //         siswaId: siswa.id,
-  //         presence_sessionsId: session.id,
-  //         createdAt: {
-  //           gte: new Date(new Date().setHours(0, 0, 0, 0))
-  //         }
-  //       }
-  //     })
-
-  //     if (checkPresenceAlready) {
-  //       throw new BadRequestException()
-  //     }
-  //     // create the presence
-  //     const presence = await this.prismaService.client.presences.create({
-  //       data: {
-  //         siswaId: siswa.id,
-  //         presence_sessionsId: session.id,
-  //         method: 'qrcode'
-  //       }
-  //     })
-  //     if (siswa.telegram_account) {
-  //       const htmlContent = `
-  //       Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut :\n\n<strong>Nama:</strong> ${siswa.name}\n<strong>Tanggal:</strong> ${format(new Date(presence.createdAt), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n<strong>Sesi:</strong> ${session.name}\n<strong>Metode:</strong> QRCode\n\nTerima kasih.
-  //       `;
-  //       await this.bot.telegram.sendMessage(siswa.telegram_account.chat_id, htmlContent, {
-  //         parse_mode: 'HTML'
-  //       })
-  //     }
-
-  //     return presence
-  //   } else {
-  //     throw new BadRequestException()
-  //   }
-  // }
-
-  async createPresenceByNis(createPresenceByNisDto: CreatePresenceByNisDto) {
-    // const siswa = await this.prismaService.client.siswa.findUnique({
-    //   where: {
-    //     nisn: createPresenceByNisDto.nisn
-    //   },
-    // })
-
-    // if (!siswa) throw new NotFoundException("NISN masih salah");
-
-    // const session = await this.prismaService.client.presence_sessions.findUnique({
-    //   where: {
-    //     id: createPresenceByNisDto.session
-    //   }
-    // })
-
-    // if (!session) throw new NotFoundException("Session not found");
-
-    // const current_time = new Date();
-
-
-    // if (session.start_time && session.end_time) {
-    //   if (current_time.getTime() >= session.start_time.getTime() && current_time.getTime() <= session.end_time.getTime()) {
-    //     this.createPresence({
-    //       session,
-    //       siswa,
-    //       method: "other"
-    //     })
-    //   } else {
-    //     this.handlingPresenceError({
-    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
-    //         locale: id
-    //       })} dan Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
-    //         locale: id
-    //       })}`,
-    //       siswa
-    //     })
-    //   }
-    // } else if (session.end_time) {
-    //   if (current_time >= session.start_time) {
-    //     return await this.createPresence({
-    //       session,
-    //       siswa,
-    //       method: 'other'
-    //     })
-    //   } else {
-    //     this.handlingPresenceError({
-    //       error: `Presensi Mulai pada ${format(session.start_time, 'dd/MM/yyyy HH:mm:ss', {
-    //         locale: id
-    //       })}`,
-    //       siswa
-    //     })
-    //   }
-    // } else if (session.end_time) {
-    //   if (current_time <= session.end_time) {
-    //     return await this.createPresence({
-    //       session,
-    //       siswa,
-    //       method: 'other'
-
-    //     })
-    //   } else {
-    //     this.handlingPresenceError({
-    //       error: `Presensi Sudah Selesai pada ${format(session.end_time, 'dd/MM/yyyy HH:mm:ss', {
-    //         locale: id
-    //       })}`,
-    //       siswa
-    //     })
-    //   }
-
-    // } else {
-    //   return await this.createPresence({
-    //     session,
-    //     siswa,
-    //     method: 'other'
-    //   })
-    // }
-  }
-
-
-  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences> {
-    const siswa = await this.prismaService.client.siswa.findUnique({
-      where: {
-        rfid_token: scanned.scan
-      },
-      include: {
-        telegram_account: true
-      }
-    })
-
-
-    if (!siswa) throw new NotFoundException("KARTU TDK TERDAFTAR");
+  async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences | presences_pegawai> {
 
     if (gateway.presence_sessionsId) {
       // presence
@@ -175,89 +32,186 @@ export class PresenceService {
           id: gateway.presence_sessionsId,
         }
       })
+
       if (!session) {
         throw new NotFoundException("SESI TIDAK DITEMUKAN")
       }
 
-      const now = format(Date.now(), "yyyy-MM-dd");
-      const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-      // check session have start_time and end_time
-      // range check
-      if (session.start_time && session.end_time) {
-        const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
-        const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
-        if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
-          return await this.createPresence({
-            gateway,
-            session,
-            siswa,
-            client,
-            method: 'card'
-          })
-        } else {
-          this.handlingPresenceError({
-            error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
-              locale: id
-            })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
-              locale: id
-            })}`,
-            siswa
-          })
-        }
-        // start time check
-      } else if (session.start_time) {
-        const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
-        if (isAfter(current_time, parseStartTime)) {
-          return await this.createPresence({
-            gateway,
-            session,
-            siswa,
-            client,
-            method: 'card'
-          })
-        } else {
-          this.handlingPresenceError({
-            error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
-              locale: id
-            })}`,
-            siswa
-          })
-        }
-        // end time check
-      } else if (session.end_time) {
-        const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
-        if (isBefore(current_time, parseEndTime)) {
-          return await this.createPresence({
-            gateway,
-            session,
-            siswa,
-            client,
-            method: 'card'
-
-          })
-        } else {
-          this.handlingPresenceError({
-            error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
-              locale: id
-            })}`,
-            siswa
-          })
-        }
-
-      } else {
-        // ignore some session start and end times
-        return await this.createPresence({
-          gateway,
-          session,
-          siswa,
-          client,
-          method: 'card'
+      // presence siswa
+      if (session.session_role_type === 'SISWA') {
+        const siswa = await this.prismaService.client.siswa.findUnique({
+          where: {
+            rfid_token: scanned.scan
+          },
         })
+
+        if (!siswa) throw new NotFoundException("KARTU TDK TERDAFTAR");
+
+        const now = format(Date.now(), "yyyy-MM-dd");
+        const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        // check session have start_time and end_time
+        // range check
+        if (session.start_time && session.end_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
+            return await this.createPresence({
+              gateway,
+              session,
+              siswa,
+              client,
+              method: 'card'
+            })
+          } else {
+            this.handlingPresenceError({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              siswa
+            })
+          }
+          // start time check
+        } else if (session.start_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime)) {
+            return await this.createPresence({
+              gateway,
+              session,
+              siswa,
+              client,
+              method: 'card'
+            })
+          } else {
+            this.handlingPresenceError({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              siswa
+            })
+          }
+          // end time check
+        } else if (session.end_time) {
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isBefore(current_time, parseEndTime)) {
+            return await this.createPresence({
+              gateway,
+              session,
+              siswa,
+              client,
+              method: 'card'
+
+            })
+          } else {
+            this.handlingPresenceError({
+              error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              siswa
+            })
+          }
+
+        } else {
+          // ignore some session start and end times
+          return await this.createPresence({
+            gateway,
+            session,
+            siswa,
+            client,
+            method: 'card'
+          })
+        }
+        // presence pegawai
+      } else if (session.session_role_type === 'PEGAWAI') {
+        const pegawai = await this.prismaService.client.pegawai.findUnique({
+          where: {
+            rfid_token: scanned.scan
+          },
+        })
+
+        if (!pegawai) throw new NotFoundException("KARTU TDK TERDAFTAR");
+
+        const now = format(Date.now(), "yyyy-MM-dd");
+        const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        // check session have start_time and end_time
+        // range check
+        if (session.start_time && session.end_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'card'
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+          // start time check
+        } else if (session.start_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'card'
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+          // end time check
+        } else if (session.end_time) {
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isBefore(current_time, parseEndTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'card'
+
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+
+        } else {
+          // ignore some session start and end times
+          return await this.createPresencePegawai({
+            gateway,
+            session,
+            pegawai,
+            client,
+            method: 'card'
+          })
+        }
       }
     } else {
-      this.handlingPresenceError({
+      this.handlingPresenceErrorPegawai({
         error: "GATEWAY TDK DITEMUKAN",
-        siswa
+        pegawai: null
       })
     }
   }
@@ -309,7 +263,7 @@ export class PresenceService {
             })
           } else {
             // validate by rombel
-            const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+            const parseRombel = session.group ? JSON.parse(session.group) : [];
             if (parseRombel.length > 0) {
               if (!parseRombel.includes(siswa.rombel)) {
                 this.handlingPresenceError({
@@ -331,20 +285,12 @@ export class PresenceService {
                 siswa: true
               }
             })
-            // if (this.whatsappProvider.client) {
-
-            //   await this.whatsappProvider.sendMessage({
-            //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(updateExitTime.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${format(new Date(updateExitTime.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${updateExitTime.method}`,
-            //     phone: [+siswa.notelp]
-            //   })
-            // }
-
             return updateExitTime
           }
 
         } else {
           // validate by rombel
-          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
           if (parseRombel.length > 0) {
             if (!parseRombel.includes(siswa.rombel)) {
               this.handlingPresenceError({
@@ -368,12 +314,7 @@ export class PresenceService {
               siswa: true
             }
           })
-          // if (this.whatsappProvider.client) {
-          //   await this.whatsappProvider.sendMessage({
-          //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresenceEnter.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Keluar (Check out)* :  ${createPresenceEnter.exit_time ? format(new Date(createPresenceEnter.exit_time), 'dd/MM/yyyy HH:mm:ss', { locale: id }) : '-'}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresenceEnter.method}`,
-          //     phone: [+siswa.notelp]
-          //   })
-          // }
+
           return createPresenceEnter;
         }
       } else {
@@ -398,7 +339,7 @@ export class PresenceService {
           })
         } else {
           // validate by rombel
-          const parseRombel = session.rombel ? JSON.parse(session.rombel) : [];
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
           if (parseRombel.length > 0) {
             if (!parseRombel.includes(siswa.rombel)) {
               this.handlingPresenceError({
@@ -422,12 +363,158 @@ export class PresenceService {
               siswa: true
             }
           })
-          // if (this.whatsappProvider.client) {
-          //   await this.whatsappProvider.sendMessage({
-          //     message: `*[Notification]*\n\n*Terimakasih Telah melakukan presensi dengan detail presensi sebagai berikut*  :\n\n*Nama* :  ${siswa.name}\n*Masuk (Check in)* :  ${format(new Date(createPresence.enter_time), 'dd/MM/yyyy HH:mm:ss', { locale: id })}\n*Lokasi* :  ${gateway.location}\n*Sesi* :  ${session.name}\n*Metode* :  ${createPresence.method}`,
-          //     phone: [+siswa.notelp]
-          //   })
-          // }
+          return createPresence;
+        }
+      }
+    })
+  }
+  protected async createPresencePegawai({
+    gateway,
+    session,
+    pegawai,
+    client,
+    method
+  }: {
+    pegawai: pegawai,
+    gateway?: gateways,
+    client?: Server,
+    session: presence_sessions,
+    method: PresenceMethod
+  }): Promise<presences_pegawai> {
+    return await this.prismaService.client.$transaction(async (tx) => {
+      if (session.allow_twice) {
+        const checkPresence = await tx.presences_pegawai.findFirst({
+          where: {
+            pegawaiId: pegawai.id,
+            presence_sessionsId: session.id,
+            enter_time: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0))
+            },
+            // method
+          }
+        })
+
+        if (checkPresence) {
+          const checkPresenceHaveExitTime = await tx.presences_pegawai.findFirst({
+            where: {
+              pegawaiId: pegawai.id,
+              presence_sessionsId: session.id,
+              enter_time: {
+                gte: new Date(new Date().setHours(0, 0, 0, 0))
+              },
+              exit_time: {
+                gte: new Date(new Date().setHours(0, 0, 0, 0))
+              },
+              // method
+            }
+          })
+          if (checkPresenceHaveExitTime) {
+            this.handlingPresenceErrorPegawai({
+              error: `ANDA SUDAH PRESENSI`,
+              pegawai
+            })
+          } else {
+            // validate by rombel
+            const parseRombel = session.group ? JSON.parse(session.group) : [];
+            if (parseRombel.length > 0) {
+              if (!parseRombel.includes(pegawai.group)) {
+                this.handlingPresenceErrorPegawai({
+                  error: `ANDA TIDAK DAPAT PRESENSI DI KELOMPOK INI`,
+                  pegawai
+                })
+              }
+            }
+            // update the exit_time
+            const updateExitTime = await tx.presences_pegawai.update({
+              where: {
+                id: checkPresence.id,
+              },
+              data: {
+                exit_time: new Date()
+              },
+              include: {
+                gateway: true,
+                pegawai: true
+              }
+            })
+            return updateExitTime
+          }
+
+        } else {
+          // validate by rombel
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
+          if (parseRombel.length > 0) {
+            if (!parseRombel.includes(pegawai.group)) {
+              this.handlingPresenceErrorPegawai({
+                error: `ANDA TIDAK DAPAT PRESENSI DI KELOMPOK INI`,
+                pegawai
+              })
+            }
+          }
+          const createPresenceEnter = await tx.presences_pegawai.create({
+            data: {
+              presence_sessionsId: session.id,
+              pegawaiId: pegawai.id,
+              ...gateway && {
+                gatewaysId: gateway.id,
+              },
+              enter_time: new Date(),
+              method,
+            },
+            include: {
+              gateway: true,
+              pegawai: true
+            }
+          })
+
+          return createPresenceEnter;
+        }
+      } else {
+        const checkPresence = await tx.presences_pegawai.findFirst({
+          where: {
+            pegawaiId: pegawai.id,
+            presence_sessionsId: session.id,
+            ...gateway && {
+              gatewaysId: gateway.id,
+            },
+            enter_time: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0))
+            },
+            // method
+          }
+        })
+
+        if (checkPresence) {
+          this.handlingPresenceErrorPegawai({
+            error: `ANDA SUDAH PRESENSI`,
+            pegawai
+          })
+        } else {
+          // validate by rombel
+          const parseRombel = session.group ? JSON.parse(session.group) : [];
+          if (parseRombel.length > 0) {
+            if (!parseRombel.includes(pegawai.group)) {
+              this.handlingPresenceErrorPegawai({
+                error: `ANDA TIDAK DAPAT PRESENSI DI KELOMPOK INI`,
+                pegawai
+              })
+            }
+          }
+          const createPresence = await tx.presences_pegawai.create({
+            data: {
+              presence_sessionsId: session.id,
+              pegawaiId: pegawai.id,
+              ...gateway && {
+                gatewaysId: gateway.id,
+              },
+              enter_time: new Date(),
+              method,
+            },
+            include: {
+              gateway: true,
+              pegawai: true
+            }
+          })
           return createPresence;
         }
       }
@@ -438,45 +525,82 @@ export class PresenceService {
   protected handlingPresenceError({
     error,
     siswa
-  }: { error: any, siswa: siswa }): Error {
+  }: { error: any, siswa?: siswa }): Error {
     throw new Error(JSON.stringify({ error, siswa }))
+  }
+
+  protected handlingPresenceErrorPegawai({
+    error,
+    pegawai
+  }: { error: any, pegawai: pegawai }): Error {
+    throw new Error(JSON.stringify({ error, pegawai }))
   }
 
 
   async findAllPresenceToday({ sessionId }: {
     sessionId: string,
   }) {
+
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: parseInt(sessionId)
       }
     })
 
-    return await this.prismaService.client.presences.findMany({
-      where: {
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0))
+    if (session.session_role_type === "SISWA") {
+      return await this.prismaService.client.presences.findMany({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          },
+          presence_sessionsId: session.id,
         },
-        presence_sessionsId: session.id,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      select: {
-        id: true,
-        presence_sessionsId: true,
-        gatewaysId: true,
-        siswaId: true,
-        createdAt: true,
-        updatedAt: true,
-        gateway: true,
-        siswa: true,
-        session: true,
-        method: true,
-        enter_time: true,
-        exit_time: true,
-      },
-    })
+        orderBy: {
+          createdAt: 'desc'
+        },
+        select: {
+          id: true,
+          presence_sessionsId: true,
+          gatewaysId: true,
+          siswaId: true,
+          createdAt: true,
+          updatedAt: true,
+          gateway: true,
+          siswa: true,
+          session: true,
+          method: true,
+          enter_time: true,
+          exit_time: true,
+        },
+      })
+    } else if (session.session_role_type === 'PEGAWAI') {
+      return await this.prismaService.client.presences_pegawai.findMany({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          },
+          presence_sessionsId: session.id,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        select: {
+          id: true,
+          presence_sessionsId: true,
+          gatewaysId: true,
+          pegawaiId: true,
+          createdAt: true,
+          updatedAt: true,
+          gateway: true,
+          pegawai: true,
+          session: true,
+          method: true,
+          enter_time: true,
+          exit_time: true,
+        },
+      })
+    }
+
   }
 
 
@@ -694,171 +818,326 @@ export class PresenceService {
     return buffer;
   }
 
-  async findAllRombel(
+  async findAllByDaily(
     sessionId: string,
     search?: string,
     date?: string,
     rombel?: string
-
   ) {
     const rombels = await this.siswaService.getGroupClass();
-    if (rombels.includes(rombel)) {
-      if (!isValidDateString(date, 'yyyy-MM-dd')) {
-        throw new BadRequestException("date invalid")
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
       }
+    })
+    if (!isValidDateString(date, 'yyyy-MM-dd')) {
+      throw new BadRequestException("date invalid")
+    }
 
+    const parseDate = parse(date, 'yyyy-MM-dd', new Date(), { locale: id });
+    const start = startOfDay(parseDate);
+    const end = endOfDay(parseDate);
 
-      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
-        where: {
-          id: parseInt(sessionId)
+    if (rombel) {
+      if (rombels.includes(rombel)) {
+        const siswa = await this.prismaService.client.siswa.findMany({
+          select: {
+            id: true,
+            name: true,
+            rombel: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            rombel: {
+              equals: rombel
+            }
+          },
+          orderBy: {
+            name: 'asc'
+          }
+        })
+
+        const presences = await this.prismaService.client.presences.findMany({
+          include: {
+            gateway: true
+          },
+          where: {
+            createdAt: {
+              gte: start,
+              lt: end,
+            },
+            presence_sessionsId: session.id,
+          }
+        })
+
+        const checkSiswaHasPresence = siswa.map(sw => {
+          return {
+            ...sw,
+            hasPresence: presences.some(presence => presence.siswaId === sw.id),
+            detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
+          }
+        })
+
+        return {
+          rombel,
+          presences: checkSiswaHasPresence.map(presence => {
+            return {
+              id: presence.id,
+              name: presence.name,
+              rombel: presence.rombel,
+              createAt: presence.createdAt,
+              updateAt: presence.updatedAt,
+              hasPresence: presence.hasPresence,
+              detailPresence: presence.detailPresence,
+              gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+            }
+          })
         }
-      })
-      const presences = await this.prismaService.client.siswa.findMany({
+      } else {
+        throw new NotFoundException("Rombel Invalid")
+      }
+    } else {
+      const siswa = await this.prismaService.client.siswa.findMany({
         select: {
           id: true,
           name: true,
           rombel: true,
           createdAt: true,
           updatedAt: true,
-          presences: {
-            select: {
-              gateway: true,
-              presence_sessionsId: true,
-              createdAt: true,
-              enter_time: true,
-              exit_time: true
-            }
-          },
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+      const presences = await this.prismaService.client.presences.findMany({
+        include: {
+          gateway: true
         },
         where: {
-          rombel: {
-            equals: rombel
+          createdAt: {
+            gte: start,
+            lt: end,
           },
-          ...search && {
-            OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: 'insensitive'
-                },
-              },
-            ],
-          },
+          presence_sessionsId: session.id,
         }
       })
 
-      const checkSiswaHasPresence = presences.map(presence => {
+
+      const checkSiswaHasPresence = siswa.map(sw => {
         return {
-          ...presence,
-          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
-          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          ...sw,
+          hasPresence: presences.some(presence => presence.siswaId === sw.id),
+          detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
         }
       })
 
-      return checkSiswaHasPresence.map(presence => {
-        return {
-          id: presence.id,
-          name: presence.name,
-          rombel: presence.rombel,
-          createAt: presence.createdAt,
-          updateAt: presence.updatedAt,
-          hasPresence: presence.hasPresence,
-          detailPresence: presence.detailPresence,
-          gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
-        }
-      })
-    } else {
-      throw new NotFoundException()
+
+      return {
+        rombel: null,
+        presences: rombels.map(rombel => {
+          const filterPresenceByRombel = checkSiswaHasPresence.map(presence => {
+            return {
+              id: presence.id,
+              name: presence.name,
+              rombel: presence.rombel,
+              createAt: presence.createdAt,
+              updateAt: presence.updatedAt,
+              hasPresence: presence.hasPresence,
+              detailPresence: presence.detailPresence,
+              gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+            }
+          }).filter(pr => pr.rombel == rombel)
+          return {
+            [rombel]: filterPresenceByRombel
+          }
+        })
+      }
     }
 
   }
 
-  async exportByClass(
+  async exportByDaily(
     sessionId: string,
     search?: string,
     date?: string,
     rombel?: string
   ) {
     const rombels = await this.siswaService.getGroupClass();
-    if (rombels.includes(rombel)) {
-      if (!isValidDateString(date, 'yyyy-MM-dd')) {
-        throw new BadRequestException("date invalid")
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: parseInt(sessionId)
       }
+    })
+
+    if (!isValidDateString(date, 'yyyy-MM-dd')) {
+      throw new BadRequestException("date invalid")
+    }
 
 
-      const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
-        where: {
-          id: parseInt(sessionId)
-        }
-      })
-      const presences = await this.prismaService.client.siswa.findMany({
+
+    const parseDate = parse(date, 'yyyy-MM-dd', new Date(), { locale: id });
+    const start = startOfDay(parseDate);
+    const end = endOfDay(parseDate);
+
+    if (rombel) {
+      if (rombels.includes(rombel)) {
+
+        const siswa = await this.prismaService.client.siswa.findMany({
+          select: {
+            id: true,
+            name: true,
+            rombel: true,
+            nis: true,
+            nisn: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            rombel: {
+              equals: rombel
+            }
+          },
+          orderBy: {
+            name: 'asc'
+          }
+        })
+
+        const presences = await this.prismaService.client.presences.findMany({
+          include: {
+            gateway: true
+          },
+          where: {
+            createdAt: {
+              gte: start,
+              lt: end,
+            },
+            presence_sessionsId: session.id,
+          }
+        })
+
+        const checkSiswaHasPresence = siswa.map(sw => {
+          return {
+            ...sw,
+            hasPresence: presences.some(presence => presence.siswaId === sw.id),
+            detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
+          }
+        })
+
+
+        const mappingPresences = checkSiswaHasPresence.map(presence => ({
+          Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Nama: presence.name,
+          NISN: presence.nisn,
+          NIS: presence.nis,
+          Rombel: presence.rombel,
+          Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
+          Session: session.name,
+          Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+        }))
+
+
+        const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
+        const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+        return buffer;
+      } else {
+        throw new BadRequestException("rombel invalid")
+      }
+    } else {
+      const siswa = await this.prismaService.client.siswa.findMany({
         select: {
           id: true,
           name: true,
           rombel: true,
           createdAt: true,
           updatedAt: true,
-          presences: {
-            select: {
-              gateway: true,
-              presence_sessionsId: true,
-              createdAt: true,
-              enter_time: true,
-              exit_time: true
-            }
-          },
-          nis: true,
-          nisn: true,
-
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+      const presences = await this.prismaService.client.presences.findMany({
+        include: {
+          gateway: true
         },
         where: {
-          rombel: {
-            equals: rombel
+          createdAt: {
+            gte: start,
+            lt: end,
           },
-          ...search && {
-            OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: 'insensitive'
-                },
-              },
-            ],
-          },
+          presence_sessionsId: session.id,
         }
       })
 
-      const checkSiswaHasPresence = presences.map(presence => {
+
+      const checkSiswaHasPresence = siswa.map(sw => {
         return {
-          ...presence,
-          hasPresence: presence.presences.some(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
-          detailPresence: presence.presences.find(presence => presence.presence_sessionsId === session.id && format(presence.createdAt, 'yyyy-MM-dd') === date),
+          ...sw,
+          hasPresence: presences.some(presence => presence.siswaId === sw.id),
+          detailPresence: presences.find(presence => presence.siswaId === sw.id) ?? null,
         }
       })
-      const mappingPresences = checkSiswaHasPresence.map(presence => ({
-        Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
-          locale: id
-        }) : '-' : '-',
-        Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
-          locale: id
-        }) : '-' : '-',
-        Nama: presence.name,
-        NISN: presence.nisn,
-        NIS: presence.nis,
-        Rombel: presence.rombel,
-        Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
-        Session: session.name,
-        Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
-      }))
 
+      const allPresences = rombels.map(rombel => {
+        const filterPresenceByRombel = checkSiswaHasPresence.map(presence => {
+          return {
+            id: presence.id,
+            name: presence.name,
+            rombel: presence.rombel,
+            createAt: presence.createdAt,
+            updateAt: presence.updatedAt,
+            hasPresence: presence.hasPresence,
+            detailPresence: presence.detailPresence,
+            gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+          }
+        }).filter(pr => pr.rombel == rombel)
+        return {
+          [rombel]: filterPresenceByRombel
+        }
+      })
 
-      const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
-      const workbook = xlsx.utils.book_new();
-      xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
-      const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-      return buffer;
-    } else {
-      throw new NotFoundException()
+      let bufferExcels: { key: string, buffer: any }[] = [];
+
+      allPresences.forEach(daily => {
+        const key = Object.keys(daily)[0];
+        const mappingPresencesAsJson = daily[key].map(dt => ({
+          Masuk: dt.hasPresence ? dt.detailPresence.enter_time ? format(dt.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Keluar: dt.hasPresence ? dt.detailPresence.exit_time ? format(dt.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+            locale: id
+          }) : '-' : '-',
+          Nama: dt.name,
+          NISN: dt.nisn,
+          NIS: dt.nis,
+          Rombel: dt.rombel,
+          Status: dt.hasPresence ? "Presensi" : "Tidak Presensi",
+          Session: session.name,
+          Gateway: dt.hasPresence ? `${dt.detailPresence.gateway.name}-${dt.detailPresence.gateway.location}` : '-',
+        }))
+        const worksheet = xlsx.utils.json_to_sheet(mappingPresencesAsJson);
+        const workbook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workbook, worksheet, `daily-presences-${key}`);
+        const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+        bufferExcels.push({
+          key,
+          buffer
+        })
+      })
+
+      const zip = new JSZip();
+      bufferExcels.forEach(buffer => {
+        zip.file(`${buffer.key}.xlsx`, buffer.buffer, { binary: true });
+      })
+
+      return zip.generateAsync({ type: 'nodebuffer' });
     }
   }
 

@@ -5,6 +5,8 @@ import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import SelectGateway from '@/components/SelectGateway.vue'
 import { useConfirm } from "primevue/useconfirm";
 import { useStorage } from '@vueuse/core'
+import VLazyImage from "v-lazy-image";
+
 const { proxy } = getCurrentInstance()
 const axios = proxy.axios
 const toast = useToast();
@@ -20,6 +22,8 @@ const queryParams = ref({
 })
 
 const totalRecords = ref(0)
+const file = ref(null);
+
 
 const getAllSiswa = async () => {
   const queries = {
@@ -55,12 +59,33 @@ const handleDebounceFilter = (val) => {
   refetch()
 }
 
+const onFileChange = (event) => {
+  const target = event.target;
+  if (target.files && target.files[0]) {
+    file.value = target.files[0];
+  }
+};
+
+
 // add siswa
 const showDialogAddSiswa = ref(false)
 const errorsAddSiswa = ref(null)
 
 const addSiswa = async (data) => {
-  return await axios.post('/siswa', data)
+  const formData = new FormData();
+  formData.append("nis", data.nis);
+  formData.append("nisn", data.nisn);
+  formData.append("notelp", data.notelp);
+  formData.append("name", data.name);
+  formData.append("rombel", data.rombel);
+  if (file.value) {
+    formData.append('file', file.value);
+  }
+  return await axios.post('/siswa', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
 }
 
 const siswaData = ref({
@@ -68,7 +93,7 @@ const siswaData = ref({
   nisn: '',
   notelp: '',
   name: '',
-  rombel: ''
+  rombel: '',
 })
 
 const { mutateAsync: addSiswaMutate, isPending: addSiswaPending } = useMutation({
@@ -91,8 +116,9 @@ const handleSubmitAddSiswa = () => {
         nisn: '',
         notelp: '',
         name: '',
-        rombel: ''
+        rombel: '',
       }
+      file.value = null
       refetch()
     },
     onError(err) {
@@ -105,6 +131,17 @@ const handleSubmitAddSiswa = () => {
           detail: 'Data siswa sudah ada',
           life: 3000
         })
+      } else if (err.response.status === 422) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Mohon perbaiki file yang diupload',
+          life: 3000
+        })
+
+        errorsAddSiswa.value = {
+          file: 'Mohon perbaiki file yang diupload'
+        }
       } else {
         toast.add({
           severity: 'error',
@@ -128,8 +165,8 @@ const { mutateAsync: removeSiswaMutate, isPending: removeSiswaPending } = useMut
 
 const confirmRemoveSiswa = (data) => {
   confirm.require({
-    message: 'Yakin ingin hapus data siswa ?',
-    header: 'Confirmation',
+    message: 'Yakin ingin hapus data siswa ini ?',
+    header: 'Konfirmasi',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
@@ -168,11 +205,24 @@ const dataUpdateSiswa = ref({
   nisn: '',
   notelp: '',
   name: '',
-  rombel: ''
+  rombel: '',
 })
 
 const updateSiswaService = async (data) => {
-  return await axios.patch(`/siswa/${data.id}`, data)
+  const formData = new FormData();
+  formData.append("nis", data.nis);
+  formData.append("nisn", data.nisn);
+  formData.append("notelp", data.notelp);
+  formData.append("name", data.name);
+  formData.append("rombel", data.rombel);
+  if (file.value) {
+    formData.append('file', file.value);
+  }
+  return await axios.patch(`/siswa/${data.id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    }
+  })
 }
 
 const { mutateAsync: updateSiswaMutate, isPending: updateSiswaPending } = useMutation({
@@ -191,6 +241,7 @@ const handleSubmitUpdateSiswa = () => {
       })
       showDialogUpdateSiswa.value = false
       dataUpdateSiswa.value = null
+      file.value = null
       refetch()
     },
     onError(err) {
@@ -203,6 +254,17 @@ const handleSubmitUpdateSiswa = () => {
           detail: 'Data siswa sudah ada',
           life: 3000
         })
+      } else if (err.response.status === 422) {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Mohon perbaiki file yang diupload',
+          life: 3000
+        })
+
+        errorsUpdateSiswa.value = {
+          file: 'Mohon perbaiki file yang diupload'
+        }
       } else {
         toast.add({
           severity: 'error',
@@ -222,8 +284,9 @@ const handleShowDialogUpdateSiswa = (data) => {
     nisn: data.nisn,
     notelp: data.notelp,
     name: data.name,
-    rombel: data.rombel
+    rombel: data.rombel,
   }
+  file.value = null
   showDialogUpdateSiswa.value = true
 }
 
@@ -236,6 +299,7 @@ const clearUpdateState = () => {
     rombel: ''
   }
   errorsUpdateSiswa.value = null
+  file.value = null
 }
 
 // register RFID card
@@ -314,7 +378,7 @@ const clearRegisterCard = () => {
     nisn: '',
     notelp: '',
     name: '',
-    rombel: ''
+    rombel: '',
   }
   errorsRegisterCard.value = null
   scannedToken.value = null
@@ -404,7 +468,7 @@ const confirmResetRFID = (event, data) => {
   confirm.require({
     target: event.currentTarget,
     message: 'Yakin ingin reset kartu RFID ?',
-    header: 'Confirmation',
+    header: 'Konfirmasi',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
     acceptClass: 'p-button-sm p-button-danger',
@@ -460,50 +524,50 @@ const resetDefaultGateway = () => {
 
 
 // reset data siswa
-const resetService = async () => {
-  return await axios.delete('siswa/reset')
-}
+// const resetService = async () => {
+//   return await axios.delete('siswa/reset')
+// }
 
-const {
-  mutateAsync: resetDataSiswa,
-  isPending: resetDataSiswaPending,
-} = useMutation({
-  mutationKey: ['resetDataSiswa'],
-  mutationFn: resetService,
-})
+// const {
+//   mutateAsync: resetDataSiswa,
+//   isPending: resetDataSiswaPending,
+// } = useMutation({
+//   mutationKey: ['resetDataSiswa'],
+//   mutationFn: resetService,
+// })
 
-const confirmResetSiswa = () => {
-  confirm.require({
-    message: 'Yakin ingin reset data siswa ?',
-    header: 'Confirmation',
-    icon: 'pi pi-info-circle',
-    rejectClass: 'p-button-secondary p-button-outlined',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Batalkan',
-    acceptLabel: 'Reset',
-    accept: () => {
-      resetDataSiswa({}, {
-        onSuccess() {
-          toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Data siswa berhasil direset',
-            life: 3000
-          })
-          refetch()
-        },
-        onError() {
-          toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Data siswa gagal direset',
-            life: 3000
-          })
-        }
-      })
-    },
-  });
-};
+// const confirmResetSiswa = () => {
+//   confirm.require({
+//     message: 'Yakin ingin reset data siswa ?',
+//     header: 'Konfirmasi',
+//     icon: 'pi pi-info-circle',
+//     rejectClass: 'p-button-secondary p-button-outlined',
+//     acceptClass: 'p-button-danger',
+//     rejectLabel: 'Batalkan',
+//     acceptLabel: 'Reset',
+//     accept: () => {
+//       resetDataSiswa({}, {
+//         onSuccess() {
+//           toast.add({
+//             severity: 'success',
+//             summary: 'Success',
+//             detail: 'Data siswa berhasil direset',
+//             life: 3000
+//           })
+//           refetch()
+//         },
+//         onError() {
+//           toast.add({
+//             severity: 'error',
+//             summary: 'Error',
+//             detail: 'Data siswa gagal direset',
+//             life: 3000
+//           })
+//         }
+//       })
+//     },
+//   });
+// };
 
 // import siswa
 const fileImport = ref(null)
@@ -578,7 +642,7 @@ const {
 const confirmResetTelegram = (event, data) => {
   confirm.require({
     target: event.currentTarget,
-    header: 'Confirmation',
+    header: 'Konfirmasi',
     message: 'Yakin ingin reset Telegram ?',
     icon: 'pi pi-info-circle',
     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
@@ -631,6 +695,78 @@ const downloadTemplateService = async () => {
 }
 
 
+// update rombel
+const dataUpdateRombel = ref({
+  rombel: "",
+  updated_rombel: ''
+})
+
+const errorUpdateRombel = ref({})
+const updateRombelService = async (data) => {
+  return await axios.patch("/siswa/rombel/update", {
+    rombel: data.rombel ? data.rombel.value : '',
+    updated_rombel: data.updated_rombel
+  });
+}
+
+const { mutateAsync: updateRombel, isPending: updateRombelPending } = useMutation({
+  mutationKey: ['updateRombel'],
+  mutationFn: updateRombelService,
+})
+
+const handleUpdateRombel = () => {
+  confirm.require({
+    header: 'Konfirmasi',
+    message: 'Yakin ingin update rombel ?',
+    icon: 'pi pi-info-circle',
+    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+    acceptClass: 'p-button-sm p-button-danger',
+    rejectLabel: 'Batalkan',
+    acceptLabel: 'Update',
+    accept: () => {
+      updateRombel(dataUpdateRombel.value, {
+        onSuccess() {
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Rombel berhasil diupdate',
+            life: 3000
+          })
+
+          showDialogUpdateRombel.value = false
+          dataUpdateRombel.value = {
+            rombel: "",
+            updated_rombel: ''
+          }
+          refetch()
+        },
+        onError(err) {
+          if (err.response.status === 400) {
+            errorUpdateRombel.value = err.response.data
+          } else {
+            toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Rombel gagal diupdate',
+              life: 3000
+            })
+          }
+        }
+      })
+    },
+  })
+
+}
+
+const showDialogUpdateRombel = ref(false)
+const getRombel = async () => {
+  return await axios.get('/siswa/rombel');
+}
+
+const { data: dataRombels, isLoading: loadingRombel } = useQuery({
+  queryKey: ['rombel'],
+  queryFn: getRombel
+})
 </script>
 
 <template>
@@ -649,6 +785,8 @@ const downloadTemplateService = async () => {
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
               <Button label="Download Format" @click.prevent="downloadTemplateService" icon="pi pi-download"
                 class="mr-2" />
+              <Button label="Update Rombel" @click.prevent="showDialogUpdateRombel = true" severity="info"
+                icon="pi pi-pencil" class="mr-2" />
             </div>
           </template>
         </Toolbar>
@@ -685,6 +823,12 @@ const downloadTemplateService = async () => {
           </Column>
           <Column field="rombel" header="Rombel">
           </Column>
+          <Column field="profile_picture" header="Gambar Profil">
+            <template #body="{ data }">
+              <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture" style="width: 100px;" />
+              <div v-else style="height: 100px;width: 100px;"></div>
+            </template>
+          </Column>
           <Column field="rfid_token" header="Status Kartu">
             <template #body="{ data }">
               <Tag :severity="data.rfid_token ? 'primary' : 'danger'">
@@ -706,46 +850,42 @@ const downloadTemplateService = async () => {
           <template #expansion="{ data }">
             <Card>
               <template #content>
-                <table style="border-spacing: 0.6rem;">
-                  <tr v-if="data.rfid_token">
-                    <th>
-                      ID Kartu
-                    </th>
-                    <td>:</td>
-                    <td>
-                      <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
-                    </td>
-                  </tr>
-                  <tr v-if="data.telegram_account">
-                    <th>
-                      Telegram
-                    </th>
-                    <td>:</td>
-                    <td>
-                      <Tag class="p-2">
-                        <table>
-                          <tr>
-                            <th>Nama</th>
-                            <td>:</td>
-                            <td>
-                              {{ data.telegram_account.name }}
-                            </td>
-                          </tr>
-                          <tr>
-                            <th>Username</th>
-                            <td>:</td>
-                            <td>{{ data.telegram_account.username }}</td>
-                          </tr>
-                          <tr>
-                            <th>Chat id</th>
-                            <td>:</td>
-                            <td>{{ data.telegram_account.chat_id }}</td>
-                          </tr>
-                        </table>
-                      </Tag>
-                    </td>
-                  </tr>
-                </table>
+                <tr v-if="data.rfid_token">
+                  <th>
+                    ID Kartu
+                  </th>
+                  <td>:</td>
+                  <td>
+                    <Tag class="border-solid border-1 p-2 border-round">{{ data.rfid_token }}</Tag>
+                  </td>
+                </tr>
+                <!-- <tr v-if="data.telegram_account">
+                  <th>
+                    Telegram
+                  </th>
+                  <td>:</td>
+                  <td>
+                    <Tag class="p-2">
+                <tr>
+                  <th>Nama</th>
+                  <td>:</td>
+                  <td>
+                    {{ data.telegram_account.name }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Username</th>
+                  <td>:</td>
+                  <td>{{ data.telegram_account.username }}</td>
+                </tr>
+                <tr>
+                  <th>Chat id</th>
+                  <td>:</td>
+                  <td>{{ data.telegram_account.chat_id }}</td>
+                </tr>
+                </Tag>
+                </td>
+                </tr> -->
               </template>
               <template #footer>
                 <div class="flex gap-2">
@@ -805,6 +945,15 @@ const downloadTemplateService = async () => {
           {{ errorsAddSiswa.rombel[0] }}
         </p>
       </div>
+      <div class="field">
+        <label for="profile_picture">Gambar Profil (Optional)</label>
+        <input :disabled="addSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange"
+          class="border p-2 w-full" />
+        <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+        <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.file">
+          {{ errorsAddSiswa.file }}
+        </p>
+      </div>
 
       <template #footer>
         <Button label="Batal" :disabled="addSiswaPending" severity="danger" icon="pi pi-times" outlined
@@ -856,7 +1005,15 @@ const downloadTemplateService = async () => {
           {{ errorsUpdateSiswa.rombel[0] }}
         </p>
       </div>
-
+      <div class="field">
+        <label for="profile_picture">Gambar Profil (Optional)</label>
+        <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png"
+          @change="onFileChange" class="border p-2 w-full" />
+        <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+        <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.file">
+          {{ errorsUpdateSiswa.file }}
+        </p>
+      </div>
       <template #footer>
         <Button label="Batal" :disabled="updateSiswaPending" severity="danger" icon="pi pi-times" outlined
           @click.prevent="showDialogUpdateSiswa = false" />
@@ -931,5 +1088,43 @@ const downloadTemplateService = async () => {
           @click.prevent="handleImportSiswa" />
       </template>
     </Dialog>
+    <Dialog header="Update Rombel" v-model:visible="showDialogUpdateRombel" :style="{ width: '450px' }" :modal="true"
+      class="p-fluid">
+      <div class="field">
+        <label for="rombel">Rombel</label>
+        <Dropdown :loading="loadingRombel" filter v-model="dataUpdateRombel.rombel"
+          :options="dataRombels ? dataRombels.data.data.map(item => ({ value: item })) : []" optionLabel="value"
+          placeholder="Pilih Rombel" class="w-full" />
+        <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.rombel">
+          {{ errorUpdateRombel.rombel[0] }}
+        </p>
+      </div>
+      <div class="field">
+        <label for="update_rombel">Rombel baru</label>
+        <InputText id="update_rombel" v-model="dataUpdateRombel.updated_rombel"
+          placeholder="Ketikan rombel baru" />
+        <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.updated_rombel">
+          {{ errorUpdateRombel.updated_rombel[0] }}
+        </p>
+      </div>
+      <template #footer>
+        <Button label="Batalkan" :loading="updateRombelPending" :disabled="updateRombelPending" outlined
+          severity="danger" @click="showDialogUpdateRombel = false" />
+        <Button label="Update" :loading="updateRombelPending" :disabled="updateRombelPending"
+          @click.prevent="handleUpdateRombel" />
+      </template>
+    </Dialog>
   </div>
 </template>
+
+<style scoped>
+.v-lazy-image {
+  filter: blur(5px);
+  transition: filter 1.6s;
+  will-change: filter;
+}
+
+.v-lazy-image-loaded {
+  filter: blur(0);
+}
+</style>

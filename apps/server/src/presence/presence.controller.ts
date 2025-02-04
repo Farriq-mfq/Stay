@@ -64,16 +64,16 @@ export class PresenceController {
       date
     )
   }
-  @Get('/:sessionId/:rombel')
+  @Get('/:sessionId/daily')
   @UseGuards(AccessTokenGuard)
-  async findAllByRombel(
+  async findAllByDaily(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
     @Query('search') search?: string,
-    @Param('rombel') rombel?: string
+    @Query('rombel') rombel?: string
   ) {
 
-    return await this.presenceService.findAllRombel(
+    return await this.presenceService.findAllByDaily(
       sessionId,
       search,
       date,
@@ -81,29 +81,40 @@ export class PresenceController {
     )
   }
 
-  @Get('/export/:sessionId/:rombel')
+  @Get('/export/:sessionId/daily')
   @UseGuards(AccessTokenGuard)
   async exportPresenceByRombel(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
     @Query('search') search?: string,
-    @Param('rombel') rombel?: string
+    @Query('rombel') rombel?: string
   ) {
 
-    const buffer = await this.presenceService.exportByClass(
+    if (rombel != null && rombel != undefined && rombel != '') {
+      res.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
+      });
+    } else {
+      res.set({
+        'Content-Type': 'application/zip',
+        'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-files.zip`,
+      })
+    }
+
+    const buffer = await this.presenceService.exportByDaily(
       sessionId,
       search,
       date,
-      rombel)
-    res.set({
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
-    });
+      rombel,
+    )
+
+
     res.send(buffer);
   }
   @Get('/:sessionId/:rombel/monthly')
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   async findAllPresenceByMonthClass(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
