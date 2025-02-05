@@ -7,6 +7,7 @@ import { computed, getCurrentInstance, onMounted, ref, watch, nextTick, Transiti
 // import RfidJson from './rfid.json'
 import CurrentDay from '../../../components/CurrentDay.vue';
 import VLazyImage from 'v-lazy-image';
+import { onUnmounted } from 'vue';
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -15,6 +16,7 @@ const socket = proxy.socket;
 const allPresences = ref(new Map());
 const errorMessage = ref(null);
 const successPresence = ref(null);
+const currentDate = ref(format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id }));
 
 const { sessionId, detailSession } = defineProps({
     sessionId: {
@@ -81,7 +83,7 @@ const handlePresenceUpdate = (data) => {
     turnOffListener();
     setTimeout(turnOnListener, 100);
     nextTick(() => {
-        scrollToBottom();
+        // scrollToBottom();
         setTimeout(() => {
             successPresence.value = null;
         }, 500);
@@ -126,19 +128,17 @@ onMounted(() => {
 
 const dataPresences = computed(() => Array.from(allPresences.value.values()));
 
-const scrollToBottom = () => {
-    if (scrooltoBottomRealtimePage.value) {
-        scrooltoBottomRealtimePage.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-};
-
-onMounted(() => {
-    scrollToBottom();
-});
+// const scrollToBottom = () => {
+//     if (scrooltoBottomRealtimePage.value) {
+//         scrooltoBottomRealtimePage.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+//     }
+// };
 
 const handleRefresh = () => {
+    console.info('refresh', Date.now());
     refetch();
     resetAllPresences();
+    currentDate.value = format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id });
     if (presences.value) {
         if (presences.value.data.data.length > 0) {
             presences.value.data.data.map((presence) => {
@@ -159,6 +159,16 @@ const clearSession = () => {
 const scrooltoBottomRealtimePage = ref(null);
 
 const emit = defineEmits(['close']);
+let intervalId = null;
+
+onMounted(() => {
+    // scrollToBottom();
+    intervalId = setInterval(() => handleRefresh(), 10000);
+});
+
+onUnmounted(() => {
+    clearInterval(intervalId);
+});
 </script>
 <template>
     <div>
@@ -192,7 +202,7 @@ const emit = defineEmits(['close']);
                     </div>
                     <div class="flex flex-column gap-2">
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{ allPresences.size }}</div>
-                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id }) }}</div>
+                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div>
                     </div>
                 </div>
                 <DataView :value="dataPresences.reverse()">
