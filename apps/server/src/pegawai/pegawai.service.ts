@@ -229,34 +229,22 @@ export class PegawaiService {
             const createPegawaiValidate = plainToClass(ImportPegawaiDto, rowData);
             const errors = await validate(createPegawaiValidate)
 
-            let result = null;
-            if (rowData.sign_picture) {
-              try {
-                result = await this.cloudinaryService.uploadImageFromUrl(rowData.sign_picture, `${format(new Date(), "yyyy")}-${rowData.group}`, rowData.username)
-              } catch (e) {
-              }
-            }
-            delete rowData.sign_picture
+            // let result = null;
+            // if (rowData.sign_picture) {
+            //   try {
+            //     result = await this.cloudinaryService.uploadImageFromUrl(rowData.sign_picture, `${format(new Date(), "yyyy")}-${rowData.group}`, rowData.username)
+            //   } catch (e) {
+            //   }
+            // }
+            // delete rowData.sign_picture
 
             if (!(errors.length > 0)) {
               const created = await this.prismaService.client.pegawai.upsert({
                 where: {
                   username: rowData.username,
                 },
-                create: {
-                  ...rowData,
-                  ...result && {
-                    sign_picture: result.url,
-                    sign_picture_public_id: result.public_id
-                  }
-                },
-                update: {
-                  ...rowData,
-                  ...result && {
-                    sign_picture: result.url,
-                    sign_picture_public_id: result.public_id
-                  }
-                }
+                create: rowData,
+                update: rowData,
               })
               allData.push(created)
             }
