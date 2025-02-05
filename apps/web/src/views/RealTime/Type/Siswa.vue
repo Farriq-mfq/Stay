@@ -167,6 +167,23 @@ const emit = defineEmits(['close']);
             <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger" @click.prevent="clearSession" />
         </div>
         <div class="flex flex-wrap">
+            <div class="xl:col-5 col-12">
+                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column" style="height: fit-content">
+                    <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px; object-fit: cover" />
+                    <div class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
+                        <CurrentDay />
+                        <clock />
+                    </div>
+                    <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
+                    <i class="pi pi-times text-red-500" v-if="errorMessage" style="font-size: 200px; font-weight: 100"></i>
+                    <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
+                    <i class="pi pi-check text-primary" v-if="successPresence" style="font-size: 200px; font-weight: 100"></i>
+                    <!-- <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
+                        KARTU
+                    </span> -->
+                    <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
+                </div>
+            </div>
             <div class="xl:col-7 col-12">
                 <div class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
                     <div>
@@ -178,7 +195,7 @@ const emit = defineEmits(['close']);
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id }) }}</div>
                     </div>
                 </div>
-                <DataView :value="dataPresences">
+                <DataView :value="dataPresences.reverse()">
                     <template #list="slotProps">
                         <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2" style="max-height: 75vh; height: fit-content">
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
@@ -192,9 +209,8 @@ const emit = defineEmits(['close']);
                                                 <b>Rombel</b> : <Tag class="bg-primary">{{ item.siswa.rombel }}</Tag>
                                             </div>
                                         </div>
-                                        <div style="z-index: 50 !important" class="absolute right-0 bottom-0 top-0">
-                                            <!-- TODO : fix image -->
-                                            <v-lazy-image class="shadow-xl border-solid rounded border-1" v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" style="width: 110px; height: full" />
+                                        <div style="z-index: 50 !important" class="absolute right-0 top-0 bottom-0">
+                                            <v-lazy-image class="shadow-xl border-solid rounded border-1" v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" style="width: 110px; height: 180px;object-fit: cover;" />
                                             <div v-else style="height: 100px; width: 100px"></div>
                                         </div>
                                     </div>
@@ -250,23 +266,7 @@ const emit = defineEmits(['close']);
                     </template>
                 </DataView>
             </div>
-            <div class="xl:col-5 col-12">
-                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column" style="height: fit-content">
-                    <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px; object-fit: cover" />
-                    <div class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
-                        <CurrentDay />
-                        <clock />
-                    </div>
-                    <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
-                    <i class="pi pi-times text-red-500" v-if="errorMessage" style="font-size: 200px; font-weight: 100"></i>
-                    <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
-                    <i class="pi pi-check text-primary" v-if="successPresence" style="font-size: 200px; font-weight: 100"></i>
-                    <!-- <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
-                        KARTU
-                    </span> -->
-                    <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
-                </div>
-            </div>
+            
         </div>
     </div>
 </template>

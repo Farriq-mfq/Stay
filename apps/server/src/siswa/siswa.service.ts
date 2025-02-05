@@ -233,20 +233,8 @@ export class SiswaService {
               where: {
                 nisn: rowData.nisn,
               },
-              create: {
-                ...rowData,
-                ...result && {
-                  profile_picture: result.url,
-                  picture_public_id: result.public_id
-                }
-              },
-              update: {
-                ...rowData,
-                ...result && {
-                  profile_picture: result.url,
-                  picture_public_id: result.public_id
-                }
-              }
+              create: rowData,
+              update: rowData,
             })
             allData.push(created)
           }

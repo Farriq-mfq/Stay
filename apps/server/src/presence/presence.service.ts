@@ -556,7 +556,7 @@ export class PresenceService {
           presence_sessionsId: session.id,
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: 'asc'
         },
         select: {
           id: true,
