@@ -17,6 +17,7 @@ const allPresences = ref(new Map());
 const errorMessage = ref(null);
 const successPresence = ref(null);
 const currentDate = ref(format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id }));
+const reloadText = ref(null);
 
 const { sessionId, detailSession } = defineProps({
     sessionId: {
@@ -146,6 +147,11 @@ const handleRefresh = () => {
             });
         }
     }
+
+    reloadText.value = `Reloaded ${format(Date.now(), 'HH:mm:ss', { locale: id })}`;
+    setTimeout(() => {
+        reloadText.value = null;
+    }, 1000);
 };
 
 const clearSession = () => {
@@ -178,7 +184,11 @@ onUnmounted(() => {
         </div>
         <div class="flex flex-wrap">
             <div class="xl:col-5 col-12">
-                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column" style="height: fit-content">
+                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column relative" style="height: fit-content">
+                    <div class="absolute top-0 right-0 m-3 text-xs flex items-center" v-if="reloadText">
+                        <i class="pi pi-refresh text-primary rotate"></i>
+                        <span class="ml-2">{{ reloadText }}</span>
+                    </div>
                     <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px; object-fit: cover" />
                     <div class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
                         <CurrentDay />
@@ -300,5 +310,17 @@ onUnmounted(() => {
 
 .v-lazy-image-loaded {
     filter: blur(0);
+}
+
+.rotate {
+    animation: rotation 2s infinite linear;
+}
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>
