@@ -210,7 +210,7 @@ const emit = defineEmits(['close']);
                                             </div>
                                         </div>
                                         <div style="z-index: 50 !important" class="absolute right-0 top-0 bottom-0">
-                                            <v-lazy-image class="shadow-xl border-solid rounded border-1" v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" style="width: 110px; height: 180px;object-fit: cover;" />
+                                            <v-lazy-image class="shadow-xl border-solid rounded border-1 w-7rem h-11rem object-cover" v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" />
                                             <div v-else style="height: 100px; width: 100px"></div>
                                         </div>
                                     </div>
@@ -266,7 +266,6 @@ const emit = defineEmits(['close']);
                     </template>
                 </DataView>
             </div>
-            
         </div>
     </div>
 </template>
