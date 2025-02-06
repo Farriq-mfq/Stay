@@ -1,6 +1,9 @@
 <script setup></script>
 <template>
   <div>
-    <slot></slot>
+    <div class="pb-8">
+      <slot></slot>
+    </div>
+    <AppNav />
   </div>
 </template>

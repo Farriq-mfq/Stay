@@ -7,16 +7,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AppLayout: typeof import('./src/components/layouts/AppLayout.vue')['default']
-    AuthLayout: typeof import('./src/components/layouts/AuthLayout.vue')['default']
+    AppNav: typeof import('./src/components/AppNav.vue')['default']
     Button: typeof import('primevue/button')['default']
-    Card: typeof import('primevue/card')['default']
     Copyright: typeof import('./src/components/Copyright.vue')['default']
+    DataView: typeof import('primevue/dataview')['default']
     Divider: typeof import('primevue/divider')['default']
     FloatLabel: typeof import('primevue/floatlabel')['default']
-    IftaLabel: typeof import('primevue/iftalabel')['default']
     InputText: typeof import('primevue/inputtext')['default']
-    MainLayout: typeof import('./src/components/layouts/MainLayout.vue')['default']
     Password: typeof import('primevue/password')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

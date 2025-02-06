@@ -18,7 +18,7 @@ const state = ref({
       <FloatLabel>
         <InputText
           type="text"
-          class="w-full"
+          class="w-full py-3"
           placeholder="Masukan username"
           id="username"
           v-model="state.username"
@@ -35,7 +35,7 @@ const state = ref({
           :toggleMask="true"
           class="w-full"
           v-model="state.password"
-          inputClass="w-full"
+          inputClass="w-full py-3"
         />
         <label for="password">Password</label>
       </FloatLabel>

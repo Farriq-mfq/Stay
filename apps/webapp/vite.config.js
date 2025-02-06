@@ -4,6 +4,9 @@ import { fileURLToPath, URL } from 'node:url';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 // https://vite.dev/config/
+/**
+ * @type {import('vite').UserConfig}
+ */
 export default defineConfig({
   plugins: [
     vue(),
@@ -17,6 +20,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3001
+    port: 3001,
+    host: true
   }
 })

@@ -1,9 +1,7 @@
 <script setup>
-import { isEmpty } from "lodash";
 </script>
-
 <template>
-  <div class="surface-ground min-h-screen w-full">
+  <div class="surface-ground relative min-h-screen">
     <component :is="this.$route.meta.layoutComponent">
       <slot></slot>
     </component>
