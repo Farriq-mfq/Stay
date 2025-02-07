@@ -15,7 +15,6 @@ import { createPinia } from 'pinia'
 import { pegawaiRouter } from './routes';
 
 import '@/assets/style.css';
-import 'primevue/resources/themes/lara-light-green/theme.css';
 import '/node_modules/primeflex/primeflex.css';
 import 'primeicons/primeicons.css'
 

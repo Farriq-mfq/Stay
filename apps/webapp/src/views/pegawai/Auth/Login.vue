@@ -10,7 +10,7 @@ const state = ref({
 
 <template>
   <form class="text-center px-3 w-full">
-    <img src="/logo.png" alt="logo" class="h-2 w-2 object-cover" />
+    <img src="@/assets/logo.png" alt="logo" class="h-4rem object-cover" />
     <h2>Selamat Datang</h2>
     <p class="text-color-secondary text-sm">Silakan masuk untuk melanjutkan</p>
     <Divider align="center" />
@@ -41,7 +41,7 @@ const state = ref({
       </FloatLabel>
     </div>
     <div class="mb-4">
-      <Button size="large" label="Log in" class="w-full" rounded />
+      <Button size="large" label="Masuk" class="w-full" rounded />
     </div>
     <div class="mb-4">
       <span class="text-color-secondary text-sm"

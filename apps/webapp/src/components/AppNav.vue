@@ -4,22 +4,20 @@
   <div
     class="app-nav p-card shadow-2 flex justify-content-evenly align-items-center"
   >
-    <a
-      href=""
-      class="flex flex-column align-items-center no-underline text-center"
+    <router-link
+      :to="{ name: 'dashboard' }"
+      class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
-      <i class="pi pi-home text-xl text-primary"></i>
-      <span class="text-xs text-primary mt-2 font-semibold">Home</span>
-    </a>
-    <a
-      href=""
-      class="flex flex-column align-items-center no-underline text-center"
+      <i class="pi pi-home text-xl"></i>
+      <span class="text-xs mt-2 font-semibold">Home</span>
+    </router-link>
+    <router-link
+      :to="{ name: 'payment' }"
+      class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
-      <i class="pi pi-wallet text-xl text-color-secondary"></i>
-      <span class="text-xs text-color-secondary mt-2 font-semibold"
-        >Payment</span
-      >
-    </a>
+      <i class="pi pi-wallet text-xl"></i>
+      <span class="text-xs mt-2 font-semibold">Payment</span>
+    </router-link>
     <div
       class="flex flex-column align-items-center no-underline text-center mb-6"
     >
@@ -28,19 +26,17 @@
     </div>
     <a
       href=""
-      class="flex flex-column align-items-center no-underline text-center"
+      class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
-      <i class="pi pi-pencil text-xl text-color-secondary"></i>
-      <span class="text-xs text-color-secondary mt-2 font-semibold"
-        >Presensi</span
-      >
+      <i class="pi pi-pencil text-xl"></i>
+      <span class="text-xs mt-2 font-semibold">Presensi</span>
     </a>
     <a
       href=""
-      class="flex flex-column align-items-center no-underline text-center"
+      class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
-      <i class="pi pi-user text-xl text-color-secondary"></i>
-      <span class="text-xs text-color-secondary mt-2 font-semibold">Akun</span>
+      <i class="pi pi-user text-xl"></i>
+      <span class="text-xs mt-2 font-semibold">Akun</span>
     </a>
   </div>
 </template>
@@ -55,5 +51,9 @@
   margin: auto;
   height: 4rem;
   border-radius: 0 !important;
+  z-index: 99999;
+}
+.router-link-active {
+  color: var(--primary-color) !important;
 }
 </style>

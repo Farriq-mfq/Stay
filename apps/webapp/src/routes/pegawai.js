@@ -15,6 +15,14 @@ const routes = [
         }
     },
     {
+        path: '/payment',
+        name: 'payment',
+        component: () => import('@/views/pegawai/Payment/Index.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: () => import("@/views/pegawai/Auth/Login.vue"),

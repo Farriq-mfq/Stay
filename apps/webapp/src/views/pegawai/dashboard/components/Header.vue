@@ -9,27 +9,12 @@ const toggleShowSaldo = () => {
 
 <template>
   <div class="relative px-3 pt-3" style="z-index: 99">
-    <div class="flex justify-content-between align-items-center">
-      <Button
-        icon="pi pi-user"
-        rounded
-        variant="outlined"
-        class="border-none bg-opacity shadow-1"
-      />
-      <Button
-        icon="pi pi-bell"
-        rounded
-        variant="outlined"
-        class="border-none bg-opacity shadow-1"
-      />
-    </div>
-
     <div class="mt-4">
-      <div class="bg-opacity h-full w-full border-round-2xl relative shadow-1">
+      <div class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-8">
         <div class="text-white pt-4 px-4 pb-2 flex-1">
-          <h4 class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis">Hai, Lorem ipsum dolor sit amet consectetur, adipisicing elit. Excepturi, obcaecati?</h4>
+          <h4 class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis">Hai, Farriq Muwaffaq</h4>
           <h2 class="text-3xl mx-0 mb-0 mt-1">
-            {{ showSaldo ? "Rp. 1.000.000" : "xxx.xxx" }}
+            {{ showSaldo ? "Rp. 1.000.000" : "Rp.***.***" }}
           </h2>
           <p class="text-xs mt-3 mx-0 font-semibold">Saldo saat ini</p>
           <div
