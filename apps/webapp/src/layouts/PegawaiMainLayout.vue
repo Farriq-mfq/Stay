@@ -1,11 +1,13 @@
 <script setup>
 import "primevue/resources/themes/lara-light-blue/theme.css";
 import { useScan } from "@/store/scan";
+import { useApp } from "@/store/app";
 import { ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
 const scan = useScan();
+const app = useApp();
 const isVisible = ref(false);
 
 watch(
@@ -29,18 +31,23 @@ onUnmounted(() => {
 </script>
 <template>
   <div>
-    <div style="padding-bottom: 7rem">
+    <div :class="{ 'main-app': app.getShowAppNav }">
       <Transition>
         <slot></slot>
       </Transition>
     </div>
-    <AppNav />
+    <AppNav v-if="app.getShowAppNav" />
     <Sidebar
       v-model:visible="isVisible"
       :baseZIndex="99999"
       blockScroll
       position="bottom"
-      style="max-width: 414px; margin: 0 auto; border-radius: 1rem 1rem 0 0;height: auto;"
+      style="
+        max-width: 414px;
+        margin: 0 auto;
+        border-radius: 1rem 1rem 0 0;
+        height: auto;
+      "
       :header="scan.title"
       @hide="scan.closeScan()"
     >
@@ -68,5 +75,8 @@ onUnmounted(() => {
   margin: 0 auto;
   min-height: 12rem;
   background: #000;
+}
+.main-app {
+  padding-bottom: 7rem;
 }
 </style>

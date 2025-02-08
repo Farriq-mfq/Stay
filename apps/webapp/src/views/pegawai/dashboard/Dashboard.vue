@@ -42,7 +42,7 @@ const mockPresensi = ref([
     <AppHeader :bg="false" />
     <Header />
     <div
-      class="mx-3 p-card shadow-2 h-6rem border-round-xl"
+      class="mx-3 p-card shadow-1 h-6rem border-round-xl"
       style="margin: -10px; z-index: 99"
     >
       <div class="p-3 overflow-hidden">
@@ -53,7 +53,7 @@ const mockPresensi = ref([
       </div>
     </div>
     <div class="grid grid-nogutter gap-4">
-      <div class="p-card shadow-2 border-round-xl p-3 mx-3 w-full">
+      <div class="p-card shadow-1 border-round-xl p-3 mx-3 w-full">
         <div
           class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-2"
         >
@@ -90,7 +90,7 @@ const mockPresensi = ref([
         </DataView>
       </div>
 
-      <div class="p-card shadow-2 border-round-xl p-3 mx-3 w-full">
+      <div class="p-card shadow-1 border-round-xl p-3 mx-3 w-full">
         <div
           class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-3"
         >
@@ -100,9 +100,7 @@ const mockPresensi = ref([
         <DataView :value="mockPresensi" class="mt-2">
           <template #list="slotProps">
             <div class="flex flex-column gap-2">
-              <div v-for="(item, index) in slotProps.items" :key="index">
-               <ListTransaction />
-              </div>
+              <ListTransaction :items="slotProps.items" />
             </div>
           </template>
           <template #empty>

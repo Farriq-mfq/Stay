@@ -1,7 +1,6 @@
 <script setup>
 import { useQRCode } from "@vueuse/integrations/useQRCode";
 import { ref } from "vue";
-import Banner from "../../views/pegawai/dashboard/components/Banner.vue";
 const qrcode = useQRCode("text-to-encode");
 const showSaldo = ref(false);
 const toggleShowSaldo = () => {
@@ -12,7 +11,7 @@ const toggleShowSaldo = () => {
 <template>
   <div class="p-3">
     <div
-      class="w-full h-30rem border-2 border-primary border-round-2xl overflow-hidden relative shadow-6"
+      class="w-full h-30rem border-round-2xl overflow-hidden relative shadow-1"
     >
       <div class="relative px-3 pt-3">
         <div class="flex justify-content-center mb-3">
@@ -42,11 +41,11 @@ const toggleShowSaldo = () => {
       >
         <div
           class="bg-primary-reverse opacity-10 h-25rem w-25rem absolute border-circle"
-          style="right: -15rem; top: -1rem"
+          style="right: -15rem; top: 15rem"
         ></div>
         <div
           class="bg-primary-reverse opacity-10 h-30rem w-30rem absolute border-circle"
-          style="left: -20rem; top: -10rem; opacity: 5"
+          style="left: -20rem; top: -15rem;"
         ></div>
       </div>
       <p class="mt-4 mx-0 text-center text-xs text-white font-semibold" style="font-style: italic;">

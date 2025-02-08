@@ -10,9 +10,15 @@ const toggleShowSaldo = () => {
 <template>
   <div class="relative px-3 pt-3" style="z-index: 99">
     <div class="mt-4">
-      <div class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-8">
+      <div
+        class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-8"
+      >
         <div class="text-white pt-4 px-4 pb-2 flex-1">
-          <h4 class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis">Hai, Farriq Muwaffaq</h4>
+          <h4
+            class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis"
+          >
+            Hai, Farriq Muwaffaq
+          </h4>
           <h2 class="text-3xl mx-0 mb-0 mt-1">
             {{ showSaldo ? "Rp. 1.000.000" : "Rp.***.***" }}
           </h2>
@@ -27,6 +33,7 @@ const toggleShowSaldo = () => {
                 class="shadow-none"
                 rounded
                 variant="outlined"
+                @click="$router.push({ name: 'payment-topup' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Top up</p>
             </div>
@@ -37,6 +44,7 @@ const toggleShowSaldo = () => {
                 class="shadow-none"
                 rounded
                 variant="outlined"
+                @click="$router.push({ name: 'payment-transfer' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Transfer</p>
             </div>
@@ -57,6 +65,7 @@ const toggleShowSaldo = () => {
                 class="shadow-none"
                 rounded
                 variant="outlined"
+                @click="$router.push({ name: 'payment' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Riwayat</p>
             </div>

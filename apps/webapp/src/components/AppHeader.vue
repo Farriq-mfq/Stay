@@ -1,6 +1,6 @@
 <script setup>
 import { useWindowScroll } from "@vueuse/core";
-import { useTemplateRef, watch } from "vue";
+import { onMounted, useTemplateRef, watch } from "vue";
 
 const { x, y } = useWindowScroll();
 const { bg } = defineProps({
@@ -22,14 +22,18 @@ watch([x, y], () => {
     }
   }
 });
+
+onMounted(() => {
+  window.scrollTo(0, 0);
+});
 </script>
 
 <template>
   <div
     ref="app-header"
-    class="flex justify-content-between align-items-center fixed left-0 right-0 top-0 px-3 py-2 mx-auto app-header"
+    class="flex justify-content-between align-items-center fixed left-0 right-0 top-0 px-3 py-3 mx-auto app-header"
     :class="{ 'bg-primary': bg, 'bg-transparent': !bg }"
-    style="z-index: 99999"
+    style="z-index: 999"
   >
     <Button
       icon="pi pi-id-card"

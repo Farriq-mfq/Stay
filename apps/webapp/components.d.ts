@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppDrawer: typeof import('./src/components/AppDrawer.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
+    AppHeaderBack: typeof import('./src/components/AppHeaderBack.vue')['default']
     AppNav: typeof import('./src/components/AppNav.vue')['default']
     Button: typeof import('primevue/button')['default']
     Camera: typeof import('./src/components/Camera.vue')['default']
@@ -31,5 +32,6 @@ declare module 'vue' {
     Skeleton: typeof import('primevue/skeleton')['default']
     Tag: typeof import('primevue/tag')['default']
     Test: typeof import('./src/components/Test.vue')['default']
+    Toast: typeof import('primevue/toast')['default']
   }
 }

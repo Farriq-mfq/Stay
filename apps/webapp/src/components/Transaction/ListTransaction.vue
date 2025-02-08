@@ -1,7 +1,20 @@
-<script setup></script>
+<script setup>
+const { items } = defineProps({
+  items: {
+    type: Array,
+    default: [],
+    required: true,
+  },
+});
+</script>
 
 <template>
-  <div class="flex align-items-center py-3 border-bottom-1 surface-border hover:surface-hover">
+  <router-link
+    v-for="(item, idx) in items"
+    :key="idx"
+    :to="{ name: 'payment-detail', params: { transaction_id: 1 } }"
+    class="flex align-items-center py-3 border-bottom-1 surface-border hover:surface-hover no-underline text-color list-transaction"
+  >
     <div class="flex-1 flex align-items-center gap-3">
       <div
         class="h-3rem w-3rem border-1 border-primary border-round-2xl flex justify-content-center align-items-center"
@@ -45,11 +58,15 @@
       <i class="pi pi-plus text-primary text-xs"></i>
       <span> Rp.100.000 </span>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <style scoped>
 .tag-status {
   font-size: 10px;
+}
+
+.list-transaction:last-child {
+  border-bottom: none !important;
 }
 </style>

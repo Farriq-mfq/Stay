@@ -172,7 +172,7 @@ watch(result, (val) => {
 <template>
   <div class="p-3">
     <div
-      class="w-full h-30rem border-2 border-primary border-round-2xl overflow-hidden relative shadow-4"
+      class="w-full h-30rem border-2 border-primary border-round-2xl overflow-hidden relative shadow-1"
     >
       <qrcode-stream
         v-if="!result.length"

@@ -23,6 +23,30 @@ const routes = [
         }
     },
     {
+        path: '/payment/topup',
+        name: 'payment-topup',
+        component: () => import('@/views/pegawai/Payment/Topup.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
+        path: '/payment/transfer',
+        name: 'payment-transfer',
+        component: () => import('@/views/pegawai/Payment/Transfer.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
+        path: '/payment/:transaction_id',
+        name: 'payment-detail',
+        component: () => import('@/views/pegawai/Payment/Detail.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: () => import("@/views/pegawai/Auth/Login.vue"),

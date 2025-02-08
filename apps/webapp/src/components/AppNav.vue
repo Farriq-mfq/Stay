@@ -65,4 +65,8 @@ const scan = useScan();
 .router-link-active {
   color: var(--primary-color) !important;
 }
+
+.router-link-exact-active {
+  color: var(--primary-color) !important;
+}
 </style>

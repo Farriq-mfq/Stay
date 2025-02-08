@@ -3,148 +3,78 @@ import { ref } from "vue";
 
 const mockPresensi = ref([
   {
-    id: 1,
-    name: "Farriq",
     date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
+    transactions: [
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+    ],
   },
   {
-    id: 1,
-    name: "Farriq",
     date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
-  },
-  {
-    id: 1,
-    name: "Farriq",
-    date: "2022-01-01",
-    time: "10:00",
-    status: "Hadir",
-    method: "card",
+    transactions: [
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+      {
+        id: 1,
+        name: "Farriq",
+        date: "2022-01-01",
+        time: "10:00",
+        status: "Hadir",
+        method: "card",
+      },
+    ],
   },
 ]);
 </script>
@@ -152,8 +82,11 @@ const mockPresensi = ref([
 <template>
   <div>
     <AppHeader />
-    <div class="flex flex-column mt-7">
-      <div class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1" style="top: 4rem;">
+    <div class="flex flex-column mt-8">
+      <div
+        class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1"
+        style="top: 5rem"
+      >
         <InputText class="w-full flex-1" placeholder="Cari transaksi" />
         <Button icon="pi pi-filter" />
       </div>
@@ -162,7 +95,25 @@ const mockPresensi = ref([
           <template #list="slotProps">
             <div class="flex flex-column gap-2">
               <div v-for="(item, index) in slotProps.items" :key="index">
-                <ListTransaction />
+                <div class="flex flex-column">
+                  <div class="flex justify-content-between align-items-center px-1">
+                    <h3 class="text-lg">Januari 2022</h3>
+                    <div
+                      class="text-sm flex align-items-center justify-content-center gap-1"
+                    >
+                      <!-- <i class="pi pi-minus text-red-500 text-xs"></i> -->
+                      <i class="pi pi-plus text-primary text-xs"></i>
+                      <span class="text-color-secondary"> Rp.100.000 </span>
+                    </div>
+                  </div>
+                  <div
+                    class="px-3 p-card shadow-1 border-round-xl py-2"
+                  >
+                    <ListTransaction
+                      :items="slotProps.items[index].transactions"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </template>
