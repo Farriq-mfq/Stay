@@ -1,4 +1,7 @@
-<script setup></script>
+<script setup>
+import { useScan } from "@/store/scan";
+const scan = useScan();
+</script>
 
 <template>
   <div
@@ -21,7 +24,13 @@
     <div
       class="flex flex-column align-items-center no-underline text-center mb-6"
     >
-      <Button icon="pi pi-qrcode" size="large" class="h-4rem w-4rem" rounded />
+      <Button
+        @click="scan.openScan('default')"
+        icon="pi pi-qrcode"
+        size="large"
+        class="h-4rem w-4rem"
+        rounded
+      />
       <span class="text-xs text-primary mt-2 font-semibold">Scan</span>
     </div>
     <a

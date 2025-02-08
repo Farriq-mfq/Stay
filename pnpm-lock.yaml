@@ -322,7 +322,7 @@ importers:
         version: 4.2.5
       '@vueuse/integrations':
         specifier: ^12.5.0
-        version: 12.5.0(nprogress@0.2.0)
+        version: 12.5.0(nprogress@0.2.0)(qrcode@1.5.4)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -338,12 +338,18 @@ importers:
       primevue:
         specifier: 3.49.1
         version: 3.49.1(vue@3.5.13)
+      qrcode:
+        specifier: ^1
+        version: 1.5.4
       unplugin-vue-components:
         specifier: ^0.27.4
         version: 0.27.5(rollup@2.79.2)(vue@3.5.13)
       vue:
         specifier: ^3.5.13
         version: 3.5.13
+      vue-qrcode-reader:
+        specifier: ^5.7.0
+        version: 5.7.0
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13)
@@ -3971,7 +3977,7 @@ packages:
       - typescript
     dev: false
 
-  /@vueuse/integrations@12.5.0(nprogress@0.2.0):
+  /@vueuse/integrations@12.5.0(nprogress@0.2.0)(qrcode@1.5.4):
     resolution: {integrity: sha512-HYLt8M6mjUfcoUOzyBcX2RjpfapIwHPBmQJtTmXOQW845Y/Osu9VuTJ5kPvnmWJ6IUa05WpblfOwZ+P0G4iZsQ==}
     peerDependencies:
       async-validator: ^4
@@ -4015,6 +4021,7 @@ packages:
       '@vueuse/core': 12.5.0
       '@vueuse/shared': 12.5.0
       nprogress: 0.2.0
+      qrcode: 1.5.4
       vue: 3.5.13
     transitivePeerDependencies:
       - typescript

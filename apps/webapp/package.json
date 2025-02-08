@@ -17,8 +17,10 @@
     "pinia": "^2.3.1",
     "primeflex": "^3.3.1",
     "primevue": "3.49.1",
+    "qrcode": "^1",
     "unplugin-vue-components": "^0.27.4",
     "vue": "^3.5.13",
+    "vue-qrcode-reader": "^5.7.0",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
