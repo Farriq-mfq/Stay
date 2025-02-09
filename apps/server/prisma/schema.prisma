@@ -26,8 +26,6 @@ model siswa {
   notifications     notifications[]
   profile_picture   String?
   picture_public_id String?
-  // for mobile phone register
-  // mobile_nfc_token String?           @unique not possible currently
 
   @@index([nis, nisn])
 }
@@ -117,6 +115,9 @@ model presence_sessions {
   session_role_type SessionRoleType
   presences_pegawai presences_pegawai[]
 
+  meeting_session    meeting_sessions? @relation(fields: [meeting_sessionsId], references: [id])
+  meeting_sessionsId Int?              @unique
+
   @@index([qrcode])
 }
 
@@ -186,19 +187,28 @@ model notifications {
   siswa     siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
 }
 
-// TODO: remove whatsapp session table
-// whatsapp session
-enum whatsapp_status {
-  CONNECTED
-  DISCONNECTED
-  INITIALIZED
+model meeting_sessions {
+  id                Int                @id @default(autoincrement())
+  name              String
+  date              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  presence_sessions presence_sessions?
 }
 
-model whatsapp_sessions {
-  id        Int             @id @default(autoincrement())
-  name      String          @db.VarChar(255)
-  token     String?         @db.VarChar(255)
-  status    whatsapp_status @default(INITIALIZED)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-}
+// // TODO: remove whatsapp session table
+// // whatsapp session
+// enum whatsapp_status {
+//   CONNECTED
+//   DISCONNECTED
+//   INITIALIZED
+// }
+
+// model whatsapp_sessions {
+//   id        Int             @id @default(autoincrement())
+//   name      String          @db.VarChar(255)
+//   token     String?         @db.VarChar(255)
+//   status    whatsapp_status @default(INITIALIZED)
+//   createdAt DateTime        @default(now())
+//   updatedAt DateTime        @updatedAt
+// }

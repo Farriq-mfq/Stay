@@ -18,7 +18,8 @@ const model = ref([
                 label: 'Data Presensi',
                 icon: 'pi pi-fw pi-server',
                 items: [
-                    { label: 'Siswa', icon: 'pi pi-fw pi-bars', to: '/presences' },
+                    { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' },
+                    { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/presences/pegawai' },
                     { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' },
                 ]
             },

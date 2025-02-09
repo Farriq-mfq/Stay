@@ -186,7 +186,7 @@ onUnmounted(() => {
             <div class="xl:col-5 col-12">
                 <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column relative" style="height: fit-content">
                     <div class="absolute top-0 right-0 m-3 text-xs flex items-center" v-if="reloadText">
-                        <i class="pi pi-refresh text-primary rotate"></i>
+                        <i class="pi pi-spinner text-primary pi-spin"></i>
                         <span class="ml-2">{{ reloadText }}</span>
                     </div>
                     <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px; object-fit: cover" />
@@ -212,7 +212,7 @@ onUnmounted(() => {
                     </div>
                     <div class="flex flex-column gap-2">
                         <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{ allPresences.size }}</div>
-                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div>
+                        <!-- <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div> -->
                     </div>
                 </div>
                 <DataView :value="dataPresences.reverse()">
@@ -312,15 +312,4 @@ onUnmounted(() => {
     filter: blur(0);
 }
 
-.rotate {
-    animation: rotation 2s infinite linear;
-}
-@keyframes rotation {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
 </style>

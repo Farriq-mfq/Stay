@@ -124,6 +124,7 @@ export class SessionsService {
         }
       },
       include: {
+        meeting_session: true,
         gateways: {
           select: {
             id: true,
