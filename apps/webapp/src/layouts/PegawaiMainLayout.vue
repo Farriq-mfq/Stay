@@ -9,10 +9,11 @@ import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
 import TransferConfirmation from "../components/drawer/TransferConfirmation.vue";
 import Loading from "../components/drawer/Loading.vue";
+import { useToast } from "primevue/usetoast";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
-
+const toast = useToast();
 watch(
   () => drawer.isDrawer,
   (val) => {
@@ -27,6 +28,7 @@ const draweComponents = {
 };
 
 onMounted(() => {
+  toast.removeAllGroups();
   isVisible.value = drawer.isDrawer;
 });
 
@@ -36,9 +38,7 @@ onUnmounted(() => {
 </script>
 <template>
   <div>
-    <div
-      :class="{ 'main-app': app.getShowAppNav ,'pb-3': !app.getShowAppNav }"
-    >
+    <div :class="{ 'main-app': app.getShowAppNav, 'pb-3': !app.getShowAppNav }">
       <Transition>
         <slot></slot>
       </Transition>

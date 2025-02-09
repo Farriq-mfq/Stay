@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 
 import { QrcodeStream } from "vue-qrcode-reader";
 import { useDrawer } from "@/store/drawer";
+import { useToast } from "primevue/usetoast";
 const loading = ref(true);
 const result = ref("");
 const torchActive = ref(false);
@@ -167,6 +168,15 @@ watch(result, (val) => {
     drawer.closeScan();
   }
 });
+const toast = useToast();
+const showToast = () => {
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: "Message Content",
+    life: 10000000,
+  });
+};
 </script>
 
 <template>
@@ -216,6 +226,7 @@ watch(result, (val) => {
       </qrcode-stream>
     </div>
     Result : {{ result }}
+    <Button @click="showToast" label="Toast" />
   </div>
 </template>
 
