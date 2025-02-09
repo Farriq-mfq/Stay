@@ -8,7 +8,7 @@ import { watch } from "vue";
 const app = useApp();
 
 const hasHistory = computed(() => {
-  return window.history.length > 2;
+  return window.history.length > 2 && window.history.state.back != null;
 });
 
 onMounted(() => {

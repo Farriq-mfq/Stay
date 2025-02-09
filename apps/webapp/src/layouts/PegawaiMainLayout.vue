@@ -1,17 +1,20 @@
 <script setup>
 import "primevue/resources/themes/lara-light-blue/theme.css";
-import { useScan } from "@/store/scan";
+
+import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
 import { ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
-const scan = useScan();
+import TransferConfirmation from "../components/drawer/TransferConfirmation.vue";
+import Loading from "../components/drawer/Loading.vue";
+const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
 
 watch(
-  () => scan.isScan,
+  () => drawer.isDrawer,
   (val) => {
     isVisible.value = val;
   }
@@ -19,10 +22,12 @@ watch(
 
 const draweComponents = {
   default: DrawerContent,
+  TransferConfirmation,
+  Loading,
 };
 
 onMounted(() => {
-  isVisible.value = scan.isScan;
+  isVisible.value = drawer.isDrawer;
 });
 
 onUnmounted(() => {
@@ -31,7 +36,9 @@ onUnmounted(() => {
 </script>
 <template>
   <div>
-    <div :class="{ 'main-app': app.getShowAppNav }">
+    <div
+      :class="{ 'main-app': app.getShowAppNav ,'pb-3': !app.getShowAppNav }"
+    >
       <Transition>
         <slot></slot>
       </Transition>
@@ -48,12 +55,12 @@ onUnmounted(() => {
         border-radius: 1rem 1rem 0 0;
         height: auto;
       "
-      :header="scan.title"
-      @hide="scan.closeScan()"
+      :header="drawer.getTitle"
+      @hide="drawer.closeDrawer()"
     >
       <component
-        :is="draweComponents[scan.getComponentName]"
-        v-if="scan.getComponentName"
+        :is="draweComponents[drawer.getComponentName]"
+        v-if="drawer.getComponentName"
       ></component>
     </Sidebar>
   </div>

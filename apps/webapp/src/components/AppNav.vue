@@ -1,6 +1,6 @@
 <script setup>
-import { useScan } from "@/store/scan";
-const scan = useScan();
+import { useDrawer } from "@/store/drawer";
+const drawer = useDrawer();
 </script>
 
 <template>
@@ -25,7 +25,7 @@ const scan = useScan();
       class="flex flex-column align-items-center no-underline text-center mb-6"
     >
       <Button
-        @click="scan.openScan('default')"
+        @click="drawer.openDrawer('default')"
         icon="pi pi-qrcode"
         size="large"
         class="h-4rem w-4rem"
@@ -44,8 +44,8 @@ const scan = useScan();
       href=""
       class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
-      <i class="pi pi-user text-xl"></i>
-      <span class="text-xs mt-2 font-semibold">Akun</span>
+      <i class="pi pi-cog text-xl"></i>
+      <span class="text-xs mt-2 font-semibold">Setting</span>
     </a>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { useScan } from "@/store/scan";
+import { useDrawer } from "@/store/drawer";
 import { onMounted } from "vue";
 import OpenQrcode from "./drawer/OpenQrcode.vue";
 const scans = [
@@ -10,17 +10,17 @@ const scans = [
     name: "qrcode",
   },
 ];
-const scan = useScan();
+const drawer = useDrawer();
 const updatePage = (page) => {
   if (page === 0) {
-    scan.setTitle("Pindai");
+    drawer.setTitle("Pindai");
   } else if (page === 1) {
-    scan.setTitle("QRCode");
+    drawer.setTitle("QRCode");
   }
 };
 
 onMounted(() => {
-  scan.setTitle("Pindai");
+  drawer.setTitle("Pindai");
 });
 </script>
 

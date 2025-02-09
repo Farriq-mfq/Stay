@@ -39,7 +39,15 @@ const routes = [
         }
     },
     {
-        path: '/payment/:transaction_id',
+        path: '/payment/withdraw',
+        name: 'payment-withdraw',
+        component: () => import('@/views/pegawai/Payment/Withdraw.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
+        path: '/payment/:transaction_id/detail',
         name: 'payment-detail',
         component: () => import('@/views/pegawai/Payment/Detail.vue'),
         meta: {

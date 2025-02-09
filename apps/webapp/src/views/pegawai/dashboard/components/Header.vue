@@ -55,6 +55,7 @@ const toggleShowSaldo = () => {
                 class="shadow-none"
                 rounded
                 variant="outlined"
+                @click="$router.push({ name: 'payment-withdraw' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Tarik</p>
             </div>

@@ -2,11 +2,11 @@
 import { ref, computed, watch } from "vue";
 
 import { QrcodeStream } from "vue-qrcode-reader";
-import { useScan } from "@/store/scan";
+import { useDrawer } from "@/store/drawer";
 const loading = ref(true);
 const result = ref("");
 const torchActive = ref(false);
-const scan = useScan();
+const drawer = useDrawer();
 
 function onDetect(detectedCodes) {
   console.log(detectedCodes);
@@ -164,7 +164,7 @@ function switchTorch() {
 
 watch(result, (val) => {
   if (val.length) {
-    scan.closeScan();
+    drawer.closeScan();
   }
 });
 </script>

@@ -36,18 +36,23 @@ onMounted(() => {
     style="z-index: 999"
   >
     <Button
-      icon="pi pi-id-card"
+      icon="pi pi-user"
       rounded
       variant="outlined"
-      class="border-none bg-opacity shadow-1"
+      class="border-none text-white shadow-none"
+      text
     />
     <img src="@/assets/logo.png" alt="" class="w-7rem" />
     <Button
-      icon="pi pi-bell"
       rounded
       variant="outlined"
-      class="border-none bg-opacity shadow-1"
-    />
+      class="border-none text-white shadow-none"
+      text
+    >
+      <template #icon>
+        <i v-badge.danger="'5'" class="pi pi-bell"></i>
+      </template>
+    </Button>
   </div>
 </template>
 
