@@ -4,6 +4,8 @@ import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import Calendar from 'primevue/calendar';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 const toast = useToast();
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -205,7 +207,7 @@ const handleShowDialogUpdateSesion = (data) => {
     dataUpdateSession.value = {
         id: data.id,
         name: data.name,
-        date: data.date
+        date: new Date(data.date)
     };
 };
 
@@ -238,7 +240,6 @@ const handleSubmitUpdateSesion = () => {
                 clearUpdateSession();
                 refetch();
                 parentRefresh();
-
             },
             onError: (err) => {
                 if (!err.response) return;
@@ -378,7 +379,11 @@ const handleUnSelectedMeetingSession = (data) => {
                         </div>
                     </template>
                     <Column field="name" header="Nama"> </Column>
-                    <Column field="date" header="Tanggal"> </Column>
+                    <Column field="date" header="Tanggal">
+                        <template #body="{ data }">
+                            {{ format(data.date, 'EEEE, dd MMMM yyyy', { locale: id }) }}
+                        </template>
+                    </Column>
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
@@ -410,6 +415,9 @@ const handleUnSelectedMeetingSession = (data) => {
             </div>
             <div class="field">
                 <Calendar v-model="sessionData.date" dateFormat="dd/mm/yy" :disabled="addSessionLoading" placeholder="Tanggal" class="w-full" />
+                <p class="text-red-500" v-if="errorsUpdateSession && errorsAddSession.date">
+                    {{ errorsAddSession.date[0] }}
+                </p>
             </div>
             <div class="field">
                 <Button :loading="addSessionLoading" :disabled="addSessionLoading" label="Simpan" @click.prevent="handleAddSession" />
@@ -425,6 +433,9 @@ const handleUnSelectedMeetingSession = (data) => {
             </div>
             <div class="field">
                 <Calendar v-model="dataUpdateSession.date" dateFormat="dd/mm/yy" :disabled="updateSessionLoading" placeholder="Tanggal" class="w-full" />
+                <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.date">
+                    {{ errorsUpdateSession.date[0] }}
+                </p>
             </div>
             <div class="field">
                 <Button :loading="updateSessionLoading" :disabled="updateSessionLoading" label="Update" @click.prevent="handleSubmitUpdateSesion" />

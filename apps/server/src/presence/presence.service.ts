@@ -459,7 +459,11 @@ export class PresenceService {
                 gatewaysId: gateway.id,
               },
               enter_time: new Date(),
+              ...session.meeting_sessionsId && {
+                meeting_sessionsId: session.meeting_sessionsId
+              },
               method,
+
             },
             include: {
               gateway: true,
@@ -508,6 +512,9 @@ export class PresenceService {
                 gatewaysId: gateway.id,
               },
               enter_time: new Date(),
+              ...session.meeting_sessionsId && {
+                meeting_sessionsId: session.meeting_sessionsId
+              },
               method,
             },
             include: {

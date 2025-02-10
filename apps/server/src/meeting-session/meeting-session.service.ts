@@ -52,7 +52,14 @@ export class MeetingSessionService {
       }
     })
     return await this.prismaService.client.meeting_sessions.update({
-      data: updateMeetingSessionDto,
+      data: {
+        ...updateMeetingSessionDto.name && {
+          name: updateMeetingSessionDto.name
+        },
+        ...updateMeetingSessionDto.date && {
+          date: updateMeetingSessionDto.date
+        }
+      },
       where: {
         id
       }

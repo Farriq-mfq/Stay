@@ -1,8 +1,12 @@
-import { IsString } from "class-validator"
+import { IsDateString, IsNotEmpty, IsString } from "class-validator"
 
 export class CreateMeetingSessionDto {
     @IsString()
+    @IsNotEmpty()
     name: string
-    @IsString()
+    @IsDateString({
+        strict: true,
+    })
+    @IsNotEmpty()
     date: string
 }

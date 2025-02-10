@@ -205,6 +205,17 @@ export class SessionsService {
       }
     })
     if (updateSessionDto.gateways && updateSessionDto.gateways.length) {
+      // update meeting sesion when siswa selected
+      if (findSession.meeting_sessionsId && findSession.session_role_type === 'SISWA') {
+        await this.prismaService.client.presence_sessions.update({
+          where: {
+            id: findSession.id
+          },
+          data: {
+            meeting_sessionsId: null
+          }
+        })
+      }
       const session = await this.prismaService.client.presence_sessions.update({
         where: {
           id
@@ -230,6 +241,17 @@ export class SessionsService {
       })
       return session
     } else {
+      // update meeting sesion when siswa selected
+      if (findSession.meeting_sessionsId && findSession.session_role_type === 'SISWA') {
+        await this.prismaService.client.presence_sessions.update({
+          where: {
+            id: findSession.id
+          },
+          data: {
+            meeting_sessionsId: null
+          }
+        })
+      }
       const session = await this.prismaService.client.presence_sessions.update({
         where: {
           id

@@ -157,6 +157,9 @@ model presences_pegawai {
   updatedAt           DateTime           @updatedAt
   presence_sessionsId Int?
   method              PresenceMethod     @default(other)
+  // add meeting session field
+  meeting_session     meeting_sessions?  @relation(fields: [meeting_sessionsId], references: [id], onDelete: SetNull)
+  meeting_sessionsId  Int?
 
   @@index([pegawaiId, gatewaysId, presence_sessionsId])
 }
@@ -188,12 +191,13 @@ model notifications {
 }
 
 model meeting_sessions {
-  id                Int                @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   name              String
-  date              String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  date              DateTime
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
   presence_sessions presence_sessions?
+  presences_pegawai presences_pegawai[]
 }
 
 // // TODO: remove whatsapp session table
