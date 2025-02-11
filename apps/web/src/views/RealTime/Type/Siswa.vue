@@ -271,6 +271,9 @@ onUnmounted(() => {
                                         <Tag severity="secondary" v-if="item.method === 'other'">
                                             {{ item.method }}
                                         </Tag>
+                                        <Tag severity="contrast" v-if="item.method === 'manual'">
+                                            {{ item.method }}
+                                        </Tag>
                                     </div>
                                 </div>
                             </TransitionGroup>

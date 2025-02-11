@@ -91,6 +91,14 @@ const router = createRouter({
                     ]
                 },
                 {
+                    path: '/input/presences',
+                    name: 'presences-input',
+                    component: () => import('@/views/Presences/Input.vue'),
+                    meta: {
+                        title: "Input Presence",
+                    },
+                },
+                {
                     path: '/stats',
                     name: 'stats',
                     redirect: {

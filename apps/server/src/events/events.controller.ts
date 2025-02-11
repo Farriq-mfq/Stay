@@ -1,9 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
 import { GatewaysHttpGuard } from "src/gateways/gateways.http.guard";
+import { CreatePresenceByManual } from "src/presence/dto/create-presence.dto";
 import { ScanDto } from "./dto/scan.dto";
 import { EventsGateway } from "./events.gateway";
-import { CreatePresenceByNisDto } from "src/presence/dto/create-presence.dto";
-import { presences, siswa } from "@prisma/client";
 
 @Controller('events')
 export class EventController {
@@ -44,6 +43,11 @@ export class EventController {
 
 
 
+    @Post('/manual')
+    @HttpCode(HttpStatus.OK)
+    async httpManualByNIS(@Body() createPresenceByManual:CreatePresenceByManual) {
+        return await this.eventsGateway.handleHttpPresenceManual(createPresenceByManual);
+    }
     // @Post('/nis')
     // @HttpCode(HttpStatus.OK)
     // async httpManualByNIS(@Body() createPresenceByNisDto: CreatePresenceByNisDto) {

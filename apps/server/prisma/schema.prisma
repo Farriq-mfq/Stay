@@ -124,6 +124,7 @@ model presence_sessions {
 enum PresenceMethod {
   card
   qrcode
+  manual
   other
 }
 

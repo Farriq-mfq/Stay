@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { gateways, pegawai, presence_sessions, PresenceMethod, presences, presences_pegawai, siswa } from '@prisma/client';
 import { eachDayOfInterval, endOfDay, endOfMonth, format, isAfter, isBefore, parse, startOfDay, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -11,6 +11,7 @@ import { isJSON, isValidDateString, validateAndFormatDateYear, validateDateRange
 import * as xlsx from 'xlsx';
 // import { CreatePresenceByNisDto } from './dto/create-presence.dto';
 import * as JSZip from 'jszip';
+import { CreatePresenceByManual } from './dto/create-presence.dto';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -22,6 +23,37 @@ export class PresenceService {
     private readonly siswaService: SiswaService,
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) { }
+
+  async createPresenceByManual(createPresenceByManual: CreatePresenceByManual) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +createPresenceByManual.sessionId,
+      },
+      include: {
+        gateways: true
+      }
+    })
+    if (session.session_role_type === 'SISWA') {
+      const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+        where: {
+          id: +createPresenceByManual.siswaId
+        },
+      })
+      try {
+        return await this.createPresence({
+          gateway: null,
+          session,
+          siswa,
+          client: null,
+          method: 'manual'
+        })
+      } catch (e) {
+        throw e
+      }
+    } else {
+      throw new BadRequestException("this role not support")
+    }
+  }
 
   async createPresenceByScanned(scanned: ScannedDto, gateway: gateways, client: Server): Promise<presences | presences_pegawai> {
 

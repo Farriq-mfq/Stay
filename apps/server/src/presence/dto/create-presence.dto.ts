@@ -24,3 +24,15 @@ export class CreatePresenceByNisDto {
     @IsNumber()
     session: number
 }
+export class CreatePresenceByManual {
+    @IsNumber()
+    @IsNotEmpty({
+        message:"Sesi Presensi tidak boleh kosong"
+    })
+    sessionId: string
+    @IsNumber()
+    @IsNotEmpty({
+        message:"Siswa tidak boleh kosong"
+    })
+    siswaId: string
+}

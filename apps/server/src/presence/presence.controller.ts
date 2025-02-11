@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { format } from 'date-fns';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
-import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
+import { CreatePresenceByManual, CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
 
 @Controller('presence')

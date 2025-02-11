@@ -193,10 +193,10 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
             <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger" @click.prevent="clearSession" />
         </div>
         <div class="flex flex-wrap" v-if="!detailSession.meeting_session">
-            <div class="xl:col-3 col-12 px-4">
+            <div class="xl:col-4 col-12 px-4">
                 <div class="border-2 border-round-xl p-4" :class="{ 'border-red-500': errorMessage, 'surface-border': !successPresence && !errorMessage, 'border-green-500': successPresence }">
                     <!-- header -->
-                    <div class="flex flex-column align-items-center">
+                    <div class="flex flex-column align-items-center justify-content-center text-center">
                         <CurrentDay />
                         <Clock />
                     </div>
@@ -224,7 +224,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                     </div>
                 </div>
             </div>
-            <div class="xl:col-9 col-12 px-4">
+            <div class="xl:col-8 col-12 px-4">
                 <div class="flex flex-column border-1 surface-border border-round-xl gap-3 overflow-hidden pb-4">
                     <div class="bg-primary border-b flex justify-content-between p-4">
                         <h2 class="text-3xl m-0 text-white">{{ detailSession.name }}</h2>

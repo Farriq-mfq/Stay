@@ -11,7 +11,7 @@ import { Server } from 'socket.io';
 import { WsExceptionFilter } from 'src/exceptions/wsExceptionFilter';
 import { GatewaysGuard } from 'src/gateways/gateways.guard';
 import { GatewaysService } from 'src/gateways/gateways.service';
-import { CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
+import { CreatePresenceByManual, CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
 import { PresenceService } from 'src/presence/presence.service';
 import { ScanDto } from './dto/scan.dto';
 import { ConfigService } from '@nestjs/config';
@@ -59,6 +59,27 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
         return await this.gatewaysService.handleScanned(data, this.server)
     }
 
+    // presence by manual
+    async handleHttpPresenceManual(createPresenceByManual: CreatePresenceByManual) {
+        try {
+            const presence = await this.presenceService.createPresenceByManual(createPresenceByManual);
+            this.server.emit(`PRESENCE_UPDATED_${presence.presence_sessionsId}`, presence)
+            return presence
+        } catch (e) {
+            if (e instanceof NotFoundException) {
+                return {
+                    message: e.message
+                }
+            } else if (e instanceof Error) {
+                const errorPayload = JSON.parse(e.message) as any
+                if (errorPayload.error) {
+                    throw new BadRequestException({ message: errorPayload.error })
+                }
+            } else {
+                throw new InternalServerErrorException('Internal server error')
+            }
+        }
+    }
     // async handleHttpByNIS(createPresenceByNisDto: CreatePresenceByNisDto) {
     //     try {
     //         const presence = await this.presenceService.createPresenceByNis(createPresenceByNisDto)
