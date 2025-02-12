@@ -55,6 +55,30 @@ const routes = [
         }
     },
     {
+        path: "/presences",
+        name: 'presences',
+        component: () => import('@/views/pegawai/Presences/Index.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
+        path: "/presences/:id/detail",
+        name: 'presences-detail',
+        component: () => import('@/views/pegawai/Presences/Detail.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
+        path: "/setting",
+        name: 'setting',
+        component: () => import('@/views/pegawai/Setting/Index.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout'
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: () => import("@/views/pegawai/Auth/Login.vue"),

@@ -32,24 +32,10 @@ const { items } = defineProps({
         </h4>
         <p class="text-color-secondary m-0 text-xs mt-2">06 Feb 2025 - 10:00</p>
         <div class="text-xs flex align-items-center mt-2 gap-1">
-          <!-- <Tag
-            icon="pi pi-times"
-            severity="danger"
-            value="Gagal"
-            class="tag-status"
-          ></Tag> -->
-          <Tag
-            icon="pi pi-check"
-            severity="success"
-            value="Berhasil"
-            class="tag-status"
-          ></Tag>
-          <!-- <Tag
-            icon="pi pi-clock"
-            severity="warning"
-            value="Menunggu"
-            class="tag-status"
-          ></Tag> -->
+          <div class="flex justify-content-center align-items-center gap-2">
+            <i class="pi pi-check-circle text-primary"></i>
+            <span> Berhasil</span>
+          </div>
         </div>
       </div>
     </div>

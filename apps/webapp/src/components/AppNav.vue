@@ -33,20 +33,20 @@ const drawer = useDrawer();
       />
       <span class="text-xs text-primary mt-2 font-semibold">Scan</span>
     </div>
-    <a
-      href=""
+    <router-link
+      :to="{ name: 'presences' }"
       class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
       <i class="pi pi-pencil text-xl"></i>
       <span class="text-xs mt-2 font-semibold">Presensi</span>
-    </a>
-    <a
-      href=""
+    </router-link>
+    <router-link
+      :to="{ name: 'setting' }"
       class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
       <i class="pi pi-cog text-xl"></i>
       <span class="text-xs mt-2 font-semibold">Setting</span>
-    </a>
+    </router-link>
   </div>
 </template>
 

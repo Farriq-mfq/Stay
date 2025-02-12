@@ -26,6 +26,7 @@ declare module 'vue' {
     InputIcon: typeof import('primevue/inputicon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
+    ListPresence: typeof import('./src/components/Presence/ListPresence.vue')['default']
     ListTransaction: typeof import('./src/components/Transaction/ListTransaction.vue')['default']
     Loading: typeof import('./src/components/drawer/Loading.vue')['default']
     OpenCamera: typeof import('./src/components/drawer/OpenCamera.vue')['default']
