@@ -9,21 +9,12 @@ async function main() {
             name: 'farriq',
             username: 'farriq',
             password: await hash('farriq'),
+            role: 'admin'
         },
     });
 
     console.log({ user1 });
 
-    // for (let i = 0; i < 1000; i++) {
-    //     await prisma.presences.create({
-    //         data: {
-    //             siswaId: 1,
-    //             method: 'other',
-    //             presence_sessionsId: 4,
-    //             createdAt: faker.date.anytime()
-    //         },
-    //     })
-    // }
 }
 
 main()

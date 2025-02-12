@@ -95,7 +95,7 @@ const handlePresenceUpdate = (data) => {
         focusRow(data.pegawaiId);
         setTimeout(() => {
             successPresence.value = null;
-        }, 1500);
+        }, 2000);
     });
 };
 
@@ -106,7 +106,7 @@ const handlePresenceError = (error) => {
     nextTick(() => {
         setTimeout(() => {
             errorMessage.value = null;
-        }, 1500);
+        }, 2000);
     });
 };
 
@@ -235,7 +235,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                             <div class="flex flex-wrap">
                                 <TransitionGroup name="list" mode="out-in">
                                     <div class="lg:col-2 col-6" v-for="item in slotProps.items" :key="item">
-                                        <div class="border-1 p-4 surface-border border-round-xl flex flex-column align-items-center">
+                                        <div class="flex flex-column align-items-center">
                                             <div class="h-8rem w-8rem border-round-xl overflow-hidden surface-card border-1 surface-border">
                                                 <img src="https://picsum.photos/200/300" class="w-full h-full" style="object-fit: cover" />
                                             </div>

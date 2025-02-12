@@ -51,7 +51,7 @@ export class PresenceService {
         throw e
       }
     } else {
-      throw new BadRequestException("this role not support")
+      throw new BadRequestException("ROLE_NOT_SUPPORT")
     }
   }
 

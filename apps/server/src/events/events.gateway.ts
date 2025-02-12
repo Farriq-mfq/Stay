@@ -71,6 +71,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
                     message: e.message
                 }
             } else if (e instanceof Error) {
+                if (e.message === 'ROLE_NOT_SUPPORT') {
+                    throw new BadRequestException({ message: "Sesi Presensi tidak memiliki role SISWA" })
+                }
                 const errorPayload = JSON.parse(e.message) as any
                 if (errorPayload.error) {
                     throw new BadRequestException({ message: errorPayload.error })
