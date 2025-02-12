@@ -834,10 +834,10 @@ export class PresenceService {
     })
 
     const mappingPresences = presences.map(presence => ({
-      Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+      Masuk: presence.enter_time ? format(presence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
         locale: id
       }) : '-',
-      Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+      Keluar: presence.exit_time ? format(presence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
         locale: id
       }) : '-',
       Nama: presence.siswa.name,
@@ -1065,10 +1065,10 @@ export class PresenceService {
 
 
         const mappingPresences = checkSiswaHasPresence.map(presence => ({
-          Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+          Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
             locale: id
           }) : '-' : '-',
-          Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+          Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
             locale: id
           }) : '-' : '-',
           Nama: presence.name,
@@ -1147,10 +1147,10 @@ export class PresenceService {
       allPresences.forEach(daily => {
         const key = Object.keys(daily)[0];
         const mappingPresencesAsJson = daily[key].map(dt => ({
-          Masuk: dt.hasPresence ? dt.detailPresence.enter_time ? format(dt.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:sss', {
+          Masuk: dt.hasPresence ? dt.detailPresence.enter_time ? format(dt.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
             locale: id
           }) : '-' : '-',
-          Keluar: dt.hasPresence ? dt.detailPresence.exit_time ? format(dt.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:sss', {
+          Keluar: dt.hasPresence ? dt.detailPresence.exit_time ? format(dt.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
             locale: id
           }) : '-' : '-',
           Nama: dt.name,
