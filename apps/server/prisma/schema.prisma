@@ -26,6 +26,7 @@ model siswa {
   notifications     notifications[]
   profile_picture   String?
   picture_public_id String?
+  account           account[]         @relation("SiswaAccount")
 
   @@index([nis, nisn])
 }
@@ -47,6 +48,7 @@ model pegawai {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
   presences                 presences_pegawai[]
+  account                   account[]           @relation("PegawaiAccount")
 }
 
 enum RoleUser {
@@ -57,15 +59,16 @@ enum RoleUser {
 // users system
 
 model users {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   name               String
-  username           String   @unique @db.VarChar(255)
-  password           String   @db.VarChar(255)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  refreshToken       String?  @db.Text
-  role               RoleUser @default(user)
-  telegram_accountId Int?     @unique
+  username           String    @unique @db.VarChar(255)
+  password           String    @db.VarChar(255)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  refreshToken       String?   @db.Text
+  role               RoleUser  @default(user)
+  telegram_accountId Int?      @unique
+  account            account[] @relation("UserAccount")
 }
 
 // fitur data
@@ -218,3 +221,90 @@ model meeting_sessions {
 //   createdAt DateTime        @default(now())
 //   updatedAt DateTime        @updatedAt
 // }
+
+// polymorphism payment info
+// info payment yang digunakan untuk user,admin,siswa bahkan pegawai
+enum AccountableType {
+  USER // ini untuk table users
+  SISWA // ini untuk table siswa 
+  PEGAWAI // ini untuk table pegawai
+}
+
+model account {
+  id              Int             @id @default(autoincrement())
+  name            String
+  accountNumber   String          @unique
+  balance         Float           @default(0)
+  accountableId   Int
+  accountableType AccountableType
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  user               users?         @relation("UserAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "user_accountableId")
+  siswa              siswa?         @relation("SiswaAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "siswa_accountableId")
+  pegawai            pegawai?       @relation("PegawaiAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "pegawai_accountableId")
+  asFromtransactions transactions[] @relation("asFromtransactions")
+  asTotransactions   transactions[] @relation("asTotransactions")
+
+  @@unique([accountableId, accountableType])
+  @@index([accountNumber, accountableId, accountableType])
+}
+
+enum TransactionFlow {
+  UP
+  DOWN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  TRANSFER
+  PAYMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+// not currently
+// enum PaymentMethod {
+//   BALANCE
+//   BANK
+//   CASH
+// }
+
+model transactions {
+  id                  Int                   @id @default(autoincrement())
+  title               String? // generate by system ex : deposit from user 1 to user 2
+  flow                TransactionFlow
+  amount              Float
+  type                TransactionType       @default(PAYMENT)
+  status              TransactionStatus     @default(PENDING)
+  code                String                @unique
+  note                String?
+  payment_method      String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  detail_transactions detail_transactions[]
+  from                account               @relation("asFromtransactions", fields: [fromAccountId], references: [id], onDelete: Cascade)
+  to                  account               @relation("asTotransactions", fields: [toAccountId], references: [id], onDelete: Cascade)
+  fromAccountId       Int
+  toAccountId         Int
+  accountId           Int?
+
+  @@index([code])
+}
+
+model detail_transactions {
+  id            Int          @id @default(autoincrement())
+  transaction   transactions @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId Int
+  title         String
+  amount        Float
+  quantity      Int
+  subtotal      Float
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
