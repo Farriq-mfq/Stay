@@ -3,7 +3,7 @@ import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import * as xlsx from 'xlsx';
-import { CreatePegawaiDto } from './dto/create-pegawai.dto';
+import { CreatePegawaiDto, UpdatePasswordPegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { PegawaiService } from './pegawai.service';
@@ -14,7 +14,7 @@ import { PegawaiService } from './pegawai.service';
 export class PegawaiController {
   constructor(private readonly pegawaiService: PegawaiService) { }
 
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
   @Post()
   @UseInterceptors(FileFieldsInterceptor([{
     name: 'sign_picture',
@@ -110,6 +110,10 @@ export class PegawaiController {
   //   // return await this.siswaService.reset()
   //   throw new ServiceUnavailableException()
   // }
+  @Post(':id/reset-password')
+  async resetPassword(@Param('id', new ParseIntPipe()) id: string, @Body() updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
+    return await this.pegawaiService.resetPassword(+id, updatePasswordPegawaiDto)
+  }
 
   @UseGuards(AccessTokenGuard)
   @Delete(':id')

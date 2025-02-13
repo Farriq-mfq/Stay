@@ -1,5 +1,6 @@
 import { Transform, TransformFnParams } from "class-transformer"
 import { IsNotEmpty, IsOptional, IsString, IsUppercase, IsUrl } from "class-validator"
+import { IsEqualTo } from "src/decorators/match.decorator"
 
 export class CreatePegawaiDto {
     @IsString()
@@ -67,4 +68,26 @@ export class ImportPegawaiDto {
     // @IsOptional()
     // @Transform(({ value }: TransformFnParams) => value?.trim())
     // sign_picture: string
+}
+
+
+export class UpdatePasswordPegawaiDto {
+    @IsString()
+    @IsNotEmpty({
+        message: "Password harus diisi"
+    })
+    password: string
+    @IsString()
+    @IsNotEmpty({
+        message: "Password baru harus diisi"
+    })
+    new_password: string
+    @IsString()
+    @IsNotEmpty({
+        message: "Konfirmasi password harus diisi"
+    })
+    @IsEqualTo('new_password', {
+        message: "Konfirmasi password harus sama dengan password"
+    })
+    confirmation_password: string
 }

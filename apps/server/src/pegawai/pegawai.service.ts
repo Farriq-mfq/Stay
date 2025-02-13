@@ -3,7 +3,7 @@ import { hash } from 'argon2';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 // import { UpdateSiswaDto } from './dto/update-siswa.dto';
-import { CreatePegawaiDto, ImportPegawaiDto } from './dto/create-pegawai.dto';
+import { CreatePegawaiDto, ImportPegawaiDto, UpdatePasswordPegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { readFileSync } from 'fs';
@@ -351,5 +351,22 @@ export class PegawaiService {
       groups.push(group.group)
     }
     return groups;
+  }
+
+  async resetPassword(id: number, updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
+    await this.prismaService.client.pegawai.findFirstOrThrow({
+      where: {
+        id
+      }
+    })
+
+    return await this.prismaService.client.pegawai.update({
+      where: {
+        id
+      },
+      data: {
+        password: await hash(updatePasswordPegawaiDto.new_password)
+      }
+    })
   }
 }

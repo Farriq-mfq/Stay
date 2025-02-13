@@ -1,3 +1,10 @@
+## [1.5.1] - 2025-21-25
+### Added
+-   menambah fitur input presensi
+-   menambah fitur upload foto profile di bagian menu pegawai
+-   menambah sesi rapat
+### Change
+-   mengubah tampilan realtime presensi ketika ada sesi rapat maka kan menampilkan realtime dengan tanda tanggan ketika tidak maka akan tampil orang yang presensi
 ## [1.4.1] - 2025-21-25
 ### Added
 -   menambah fitur manajemen pegawai

@@ -20,7 +20,8 @@ const queryParams = ref({
 });
 
 const totalRecords = ref(0);
-const file = ref(null);
+const signPictureFile = ref(null);
+const profilePictureFile = ref(null);
 
 const getAllPegawai = async () => {
     const queries = {
@@ -59,10 +60,16 @@ const handleDebounceFilter = (val) => {
     refetch();
 };
 
-const onFileChange = (event) => {
+const onChangeSignPicture = (event) => {
     const target = event.target;
     if (target.files && target.files[0]) {
-        file.value = target.files[0];
+        signPictureFile.value = target.files[0];
+    }
+};
+const onChangeProfilePicture = (event) => {
+    const target = event.target;
+    if (target.files && target.files[0]) {
+        profilePictureFile.value = target.files[0];
     }
 };
 
@@ -76,7 +83,8 @@ const addPegawai = async (data) => {
     formData.append('username', data.username);
     formData.append('position', data.position);
     formData.append('group', data.group);
-    if (file) formData.append('file', file.value);
+    if (signPictureFile.value) formData.append('sign_picture', signPictureFile.value);
+    if (profilePictureFile.value) formData.append('profile_picture', profilePictureFile.value);
     return await axios.post('/pegawai', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -113,7 +121,8 @@ const handleSubmitAddPegawai = () => {
                 group: ''
             };
             errorsAddPegawai.value = null;
-            file.value = null;
+            signPictureFile.value = null;
+            profilePictureFile.value = null;
             refetch();
         },
         onError(err) {
@@ -149,32 +158,8 @@ const handleSubmitAddPegawai = () => {
     });
 };
 
-/**
- * TODO: confirm if has been filled but not saved
- */
 const handleHideDialogAddPegawai = () => {
-    // confirm.require({
-    //     message: 'Yakin ingin menutup form tambah pegawai ?',
-    //     header: 'Konfirmasi',
-    //     icon: 'pi pi-info-circle',
-    //     rejectClass: 'p-button-secondary p-button-outlined',
-    //     acceptClass: 'p-button-danger',
-    //     rejectLabel: 'Batalkan',
-    //     acceptLabel: 'Ya',
-    //     accept: () => {
-    //         showDialogAddPegawai.value = false
-    //         pegawaiData.value = {
-    //             name: '',
-    //             username: '',
-    //             position: '',
-    //             group: '',
-    //             sign_picture: "",
-    //         }
-    //     },
-    //     reject: () => {
-    //         showDialogAddPegawai.value = true
-    //     },
-    // })
+    errorsAddPegawai.value = null;
 };
 // remove
 const removePegawai = async (data) => {
@@ -236,7 +221,8 @@ const updatePegawaiService = async (data) => {
     formData.append('username', data.username);
     formData.append('position', data.position);
     formData.append('group', data.group);
-    if (file) formData.append('file', file.value);
+    if (signPictureFile.value) formData.append('sign_picture', signPictureFile.value);
+    if (profilePictureFile.value) formData.append('profile_picture', profilePictureFile.value);
     return await axios.patch(`/pegawai/${data.id}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -260,7 +246,9 @@ const handleSubmitUpdatePegawai = () => {
             });
             showDialogUpdatePegawai.value = false;
             dataUpdatePegawai.value = null;
-            file.value = null;
+            errorsUpdatePegawai.value = null;
+            signPictureFile.value = null;
+            profilePictureFile.value = null;
             refetch();
         },
         onError(err) {
@@ -305,7 +293,8 @@ const handleshowDialogUpdatePegawai = (data) => {
         group: data.group
     };
     showDialogUpdatePegawai.value = true;
-    file.value = null;
+    signPictureFile.value = null;
+    profilePictureFile.value = null;
 };
 
 const clearUpdateState = () => {
@@ -316,7 +305,8 @@ const clearUpdateState = () => {
         group: ''
     };
     errorsUpdatePegawai.value = null;
-    file.value = null;
+    signPictureFile.value = null;
+    profilePictureFile.value = null;
 };
 
 // register RFID card
@@ -702,6 +692,11 @@ const downloadTemplateService = async () => {
                             <v-lazy-image :src="data.sign_picture" style="width: 100px; height: 100px; object-fit: cover" />
                         </template>
                     </Column>
+                    <Column field="profile_picture" header="Foto Profil">
+                        <template #body="{ data }">
+                            <v-lazy-image :src="data.profile_picture" style="width: 100px; height: 100px; object-fit: cover" />
+                        </template>
+                    </Column>
                     <Column field="rfid_token" header="Status Kartu">
                         <template #body="{ data }">
                             <Tag :severity="data.rfid_token ? 'primary' : 'danger'">
@@ -716,6 +711,7 @@ const downloadTemplateService = async () => {
                                 <Button icon="pi pi-pencil" @click.prevent="handleshowDialogUpdatePegawai(data)" />
                                 <Button severity="danger" icon="pi pi-trash" :loading="removePegawaiPending" :disabled="removePegawaiPending" @click.prevent="confirmRemovePegawai(data)" />
                                 <Button icon="pi pi-id-card" @click.prevent="handleShowDialogRegisterCard(data)" />
+                                <!-- <Button icon="pi pi-key" severity="warning" @click.prevent="handleShowDialogRegisterCard(data)" /> -->
                             </div>
                         </template>
                     </Column>
@@ -771,8 +767,15 @@ const downloadTemplateService = async () => {
             </div>
             <div class="field">
                 <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
-                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange" class="border p-2 w-full" />
+                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+            </div>
+            <div class="field">
+                <label for="sign_picture">Foto Profile (Optional)</label>
+                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
+                <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+            </div>
+            <div class="field">
                 <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.file">
                     {{ errorsAddPegawai.file }}
                 </p>
@@ -815,8 +818,15 @@ const downloadTemplateService = async () => {
             </div>
             <div class="field">
                 <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
-                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange" class="border p-2 w-full" />
+                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+            </div>
+            <div class="field">
+                <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
+                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
+                <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
+            </div>
+            <div class="field">
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.file">
                     {{ errorsUpdatePegawai.file }}
                 </p>
