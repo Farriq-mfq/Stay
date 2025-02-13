@@ -39,6 +39,7 @@ declare module 'vue' {
     SelectSession: typeof import('./src/components/SelectSession.vue')['default']
     SelectSiswa: typeof import('./src/components/SelectSiswa.vue')['default']
     Sidebar: typeof import('primevue/sidebar')['default']
+    Skeleton: typeof import('primevue/skeleton')['default']
     TabMenu: typeof import('primevue/tabmenu')['default']
     Tag: typeof import('primevue/tag')['default']
     Toolbar: typeof import('primevue/toolbar')['default']

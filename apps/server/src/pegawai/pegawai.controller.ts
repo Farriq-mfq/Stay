@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseFilePipeBuilder, ParseIntPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpStatus, Param, ParseFilePipeBuilder, ParseIntPipe, Patch, Post, Query, Res, UnprocessableEntityException, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
+import * as xlsx from 'xlsx';
 import { CreatePegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { PegawaiService } from './pegawai.service';
-import { Response } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
-import * as xlsx from 'xlsx'
 
 
 @Controller('pegawai')
@@ -14,23 +14,32 @@ import * as xlsx from 'xlsx'
 export class PegawaiController {
   constructor(private readonly pegawaiService: PegawaiService) { }
 
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile(
-    new ParseFilePipeBuilder()
-      .addFileTypeValidator({
-        fileType: /(jpg|jpeg|png)$/i,
-      })
-      .addMaxSizeValidator({
-        maxSize: 1.5 * 1024 * 1024,
-      })
-      .build({
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        fileIsRequired: false
-      }),
-  ) file: Express.Multer.File | undefined, @Body() createPegawaiDto: CreatePegawaiDto) {
-    return await this.pegawaiService.create(createPegawaiDto, file);
+  @UseInterceptors(FileFieldsInterceptor([{
+    name: 'sign_picture',
+    maxCount: 1,
+  },
+  {
+    name: "profile_picture",
+    maxCount: 1
+  },
+  ], {
+    fileFilter(req, file, callback) {
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        return callback(new UnprocessableEntityException('File format not supported'), false);
+      }
+      callback(null, true);
+    },
+    limits: {
+      fileSize: 1.5 * 1024 * 1024
+    },
+  }))
+
+  async create(@UploadedFiles() files: { sign_picture?: Express.Multer.File, profile_picture?: Express.Multer.File } | undefined, @Body() createPegawaiDto: CreatePegawaiDto) {
+
+    return await this.pegawaiService.create(createPegawaiDto, files);
   }
 
   @UseGuards(AccessTokenGuard)
@@ -72,21 +81,28 @@ export class PegawaiController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file'))
-  async update(@Param('id', new ParseIntPipe()) id: string, @UploadedFile(
-    new ParseFilePipeBuilder()
-      .addFileTypeValidator({
-        fileType: /(jpg|jpeg|png)$/i,
-      })
-      .addMaxSizeValidator({
-        maxSize: 1.5 * 1024 * 1024,
-      })
-      .build({
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        fileIsRequired: false
-      }),
-  ) file: Express.Multer.File | undefined, @Body() updatePegawaiDto: UpdatePegawaiDto) {
-    return await this.pegawaiService.update(+id, updatePegawaiDto, file);
+  @UseInterceptors(FileFieldsInterceptor([{
+    name: 'sign_picture',
+    maxCount: 1,
+  },
+  {
+    name: "profile_picture",
+    maxCount: 1
+  },
+  ], {
+    fileFilter(req, file, callback) {
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        return callback(new UnprocessableEntityException('File format not supported'), false);
+      }
+      callback(null, true);
+    },
+    limits: {
+      fileSize: 1.5 * 1024 * 1024
+    },
+  }))
+  async update(@Param('id', new ParseIntPipe()) id: string, @UploadedFiles() files: { sign_picture?: Express.Multer.File, profile_picture?: Express.Multer.File } | undefined, @Body() updatePegawaiDto: UpdatePegawaiDto) {
+    return await this.pegawaiService.update(+id, updatePegawaiDto, files);
   }
 
   // @Delete('/reset')
