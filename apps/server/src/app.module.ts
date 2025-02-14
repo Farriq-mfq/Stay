@@ -3,18 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CustomPrismaModule } from 'nestjs-prisma';
 import { AuthModule } from './auth/auth.module';
+import { BackupModule } from './backup/backup.module';
 import configuration from './config/configuration';
 import { EventsModule } from './events/events.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { MeetingSessionModule } from './meeting-session/meeting-session.module';
+import { PegawaiModule } from './pegawai/pegawai.module';
+import { PresencePegawaiModule } from './presence-pegawai/presence-pegawai.module';
 import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
 import { SessionsModule } from './sessions/sessions.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
-import { BackupModule } from './backup/backup.module';
-import { PegawaiModule } from './pegawai/pegawai.module';
-import { MeetingSessionModule } from './meeting-session/meeting-session.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -59,6 +60,7 @@ import { MeetingSessionModule } from './meeting-session/meeting-session.module';
     // WhatsappModule,
     BackupModule,
     PegawaiModule,
+    PresencePegawaiModule,
     MeetingSessionModule
   ],
 })
