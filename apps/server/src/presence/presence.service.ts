@@ -62,6 +62,9 @@ export class PresenceService {
       const session = await this.prismaService.client.presence_sessions.findUnique({
         where: {
           id: gateway.presence_sessionsId,
+        },
+        include: {
+          meeting_session: true
         }
       })
 
@@ -164,8 +167,30 @@ export class PresenceService {
 
         if (!pegawai) throw new NotFoundException("KARTU TDK TERDAFTAR");
 
-        const now = format(Date.now(), "yyyy-MM-dd");
         const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        const now = format(Date.now(), "yyyy-MM-dd");
+        const current_date = format(new Date(), 'yyyy-MM-dd');
+
+        // if has meeting session
+        if (session.meeting_sessionsId) {
+          // check meeting date
+          if (isBefore(current_date, format(session.meeting_session.date, 'yyyy-MM-dd'))) {
+            this.handlingPresenceErrorPegawai({
+              error: `Rapat di mulai pada ${format(session.meeting_session.date, 'dd MMMM yyyy', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          } if (isAfter(current_date, format(session.meeting_session.date, 'yyyy-MM-dd'))) {
+            this.handlingPresenceErrorPegawai({
+              error: `Rapat sudah selesai pada ${format(session.meeting_session.date, 'dd MMMM yyyy', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+        }
+
         // check session have start_time and end_time
         // range check
         if (session.start_time && session.end_time) {
@@ -621,7 +646,7 @@ export class PresenceService {
           presence_sessionsId: session.id,
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: 'asc'
         },
         select: {
           id: true,

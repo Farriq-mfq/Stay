@@ -671,4 +671,57 @@ export class PresencePegawaiService {
         }
 
     }
+
+    async findByMeetingSession(
+        meetingSessionId: string,
+    ) {
+        const meetingSession = await this.prismaService.client.meeting_sessions.findUniqueOrThrow({
+            where: {
+                id: parseInt(meetingSessionId)
+            },
+            include: {
+                presence_sessions: true
+            }
+        })
+
+        const presences = await this.prismaService.client.presences_pegawai.findMany({
+            where: {
+                meeting_sessionsId: meetingSession.id,
+            }
+        })
+
+        const pegawai = await this.prismaService.client.pegawai.findMany({
+            orderBy: {
+                name: 'asc'
+            },
+        })
+
+        let mappingPresences = [];
+        if (meetingSession.presence_sessions && meetingSession.presence_sessions.group && JSON.parse(meetingSession.presence_sessions.group).length > 0) {
+            const groups = JSON.parse(meetingSession.presence_sessions.group)
+            mappingPresences = pegawai.filter(pg => groups.includes(pg.group)).map(pg => {
+                const getPresence = presences.find(presence => presence.pegawaiId === pg.id);
+                return {
+                    name: pg.name,
+                    username: pg.username,
+                    sign_picture: getPresence ? pg.sign_picture : null,
+                    isPresence: getPresence ? true : false
+
+                }
+            })
+        } else {
+            mappingPresences = pegawai.map(pg => {
+                const getPresence = presences.find(presence => presence.pegawaiId === pg.id);
+                return {
+                    name: pg.name,
+                    username: pg.username,
+                    sign_picture: getPresence ? pg.sign_picture : null,
+                    isPresence: getPresence ? true : false
+                }
+            })
+        }
+
+        return mappingPresences;
+
+    }
 }

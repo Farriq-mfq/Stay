@@ -121,7 +121,12 @@ export class PresencePegawaiController {
         // res.send(buffer);
     }
 
-    async findByMeetingSession() { }
+    @Get('/:meetingSessionId/meeting')
+    async findByMeetingSession(
+        @Param('meetingSessionId', new ParseIntPipe()) meetingSessionId: string,
+    ) {
+        return await this.presencePegawaiService.findByMeetingSession(meetingSessionId);
+    }
 
 
     async exportByMeetingSession() { }

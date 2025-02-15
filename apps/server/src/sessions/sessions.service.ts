@@ -139,7 +139,7 @@ export class SessionsService {
             role: true,
             status: true,
             // todo : needed to remove
-            // token: true
+            token: true
           }
         }
       },

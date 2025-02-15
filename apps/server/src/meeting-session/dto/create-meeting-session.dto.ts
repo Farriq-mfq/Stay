@@ -9,4 +9,13 @@ export class CreateMeetingSessionDto {
     })
     @IsNotEmpty()
     date: string
+    @IsString()
+    @IsNotEmpty()
+    location: string
+    @IsString()
+    @IsNotEmpty()
+    agenda: string
+    @IsString()
+    @IsNotEmpty()
+    time: string
 }

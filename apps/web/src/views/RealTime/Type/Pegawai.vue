@@ -7,7 +7,6 @@ import { id } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { computed } from 'vue';
 
-
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const socket = proxy.socket;
@@ -181,9 +180,6 @@ onUnmounted(() => {
 });
 
 const dataPresences = computed(() => Array.from(allPresences.value.values()));
-
-
-
 </script>
 <template>
     <div>
@@ -201,8 +197,14 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                     </div>
                     <Divider class="mb-3 mt-0" />
                     <div class="flex flex-column align-items-center gap-3">
-                        <div class="h-20rem w-15rem border-round-xl surface-card border-1 surface-border overflow-hidden">
-                            <!-- <img src="https://picsum.photos/200/300" class="w-full h-full" style="object-fit: cover" /> -->
+                        <div
+                            class="h-20rem w-15rem border-round-xl border-1 surface-border overflow-hidden"
+                            :class="{
+                                'bg-red-500': errorMessage,
+                                'surface-card': !errorMessage
+                            }"
+                        >
+                            <v-lazy-image :src="successPresence.pegawai.profile_picture" class="w-full h-full" style="object-fit: cover" v-if="successPresence" />
                         </div>
                         <h2 class="text-3xl m-0 font-semibold" v-if="successPresence">
                             {{ successPresence.pegawai.name }}
@@ -229,34 +231,36 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                         <h2 class="text-3xl m-0 text-white">{{ detailSession.name }}</h2>
                         <h4 class="text-xl mb-2 mt-2 text-white">Jumlah presensi : {{ allPresences.size }}</h4>
                     </div>
-                    <DataView :value="dataPresences" unstyled>
-                        <template #list="slotProps">
-                            <div class="flex flex-wrap">
-                                <TransitionGroup name="list" mode="out-in">
-                                    <div class="lg:col-2 col-6" v-for="item in slotProps.items" :key="item">
-                                        <div class="flex flex-column align-items-center">
-                                            <div class="h-8rem w-8rem border-round-xl overflow-hidden surface-card border-1 surface-border">
-                                                <img src="https://picsum.photos/200/300" class="w-full h-full" style="object-fit: cover" />
-                                            </div>
-                                            <div class="flex flex-column gap-2 align-items-center justify-content-center">
-                                                <h3 class="text-xl font-semibold text-center mb-0 mt-2">{{ item.pegawai.name }}</h3>
-                                                <div class="flex flex-column gap-2">
-                                                    <Tag icon="pi pi-clock" severity="success" :value="format(item.enter_time, 'HH:mm:ss', { locale: id })" />
-                                                    <Tag icon="pi pi-clock" severity="danger" :value="format(item.exit_time, 'HH:mm:ss', { locale: id })" v-if="item.exit_time" />
+                    <div class="h-20rem overflow-y-auto">
+                        <DataView :value="dataPresences" unstyled>
+                            <template #list="slotProps">
+                                <div class="flex flex-wrap">
+                                    <TransitionGroup name="list" mode="out-in">
+                                        <div class="lg:col-2 col-6" v-for="item in slotProps.items.reverse()" :key="item.pegawai.id">
+                                            <div class="flex flex-column align-items-center">
+                                                <div class="h-8rem w-8rem border-round-xl overflow-hidden surface-card border-1 surface-border">
+                                                    <v-lazy-image :src="item.pegawai.profile_picture" class="w-full h-full" style="object-fit: cover" />
+                                                </div>
+                                                <div class="flex flex-column gap-2 align-items-center justify-content-center">
+                                                    <h3 class="text-xl font-semibold text-center mb-0 mt-2">{{ item.pegawai.name }}</h3>
+                                                    <div class="flex flex-column gap-2">
+                                                        <Tag icon="pi pi-clock" severity="success" :value="format(item.enter_time, 'HH:mm:ss', { locale: id })" />
+                                                        <Tag icon="pi pi-clock" severity="danger" :value="format(item.exit_time, 'HH:mm:ss', { locale: id })" v-if="item.exit_time" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </TransitionGroup>
-                            </div>
-                        </template>
-                        <template #empty>
-                            <div class="flex justify-content-center p-4 gap-3 align-items-center">
-                                <i class="pi pi-folder-open"></i>
-                                <span> Data Presensi Hari Ini Belum ada </span>
-                            </div>
-                        </template>
-                    </DataView>
+                                    </TransitionGroup>
+                                </div>
+                            </template>
+                            <template #empty>
+                                <div class="flex justify-content-center p-4 gap-3 align-items-center">
+                                    <i class="pi pi-folder-open"></i>
+                                    <span> Data Presensi Hari Ini Belum ada </span>
+                                </div>
+                            </template>
+                        </DataView>
+                    </div>
                 </div>
             </div>
         </div>

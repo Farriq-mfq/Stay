@@ -504,12 +504,10 @@ const onCloseDialogMeetingSession = () => {
                                 <Divider />
                                 <div class="flex justify-content-between align-items-center gap-4">
                                     <h6 class="m-0 text-sm">Tanggal Rapat</h6>
-                                    <span>{{ data.meeting_session.date }}</span>
+                                    <span>{{ format(data.meeting_session.date, 'dd MMMM yyyy', { locale: id }) }}</span>
                                 </div>
                             </div>
-                            <p v-else class="text-sm text-red-500">
-                                -
-                            </p>
+                            <p v-else class="text-sm text-red-500">-</p>
                         </template>
                     </Column>
                     <Column headerStyle="width:4rem">
