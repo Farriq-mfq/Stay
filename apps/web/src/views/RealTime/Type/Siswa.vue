@@ -189,7 +189,7 @@ onUnmounted(() => {
                         <i class="pi pi-spinner text-primary pi-spin"></i>
                         <span class="ml-2">{{ reloadText }}</span>
                     </div>
-                    <v-lazy-image src="/main-logo.png" style="width: 250px; height: 250px; object-fit: cover" />
+                    <v-lazy-image src="/logo.png" style="width: 250px; height: 250px; object-fit: cover" />
                     <div class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
                         <CurrentDay />
                         <clock />

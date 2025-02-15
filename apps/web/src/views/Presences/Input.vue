@@ -63,7 +63,7 @@ const handlePresnceManualSubmit = async () => {
                 <p>Inputkan ketika siswa tidak membawa kartu</p>
                 <hr />
                 <div class="field">
-                    <SelectSession @input="handleChangeSelectSession" :inputValue="dataManual.sessionId" />
+                    <SelectSession role="SISWA" @input="handleChangeSelectSession" :inputValue="dataManual.sessionId" />
                     <p class="text-red-500" v-if="errorMessage && errorMessage.sessionId">
                         {{ errorMessage.sessionId[0] }}
                     </p>

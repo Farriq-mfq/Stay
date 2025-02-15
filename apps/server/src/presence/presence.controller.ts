@@ -114,7 +114,7 @@ export class PresenceController {
     res.send(buffer);
   }
   @Get('/:sessionId/:rombel/monthly')
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
   async findAllPresenceByMonthClass(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,

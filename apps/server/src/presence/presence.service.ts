@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { gateways, pegawai, presence_sessions, PresenceMethod, presences, presences_pegawai, siswa } from '@prisma/client';
 import { eachDayOfInterval, endOfDay, endOfMonth, format, isAfter, isBefore, parse, startOfDay, startOfMonth } from 'date-fns';
 import { id } from 'date-fns/locale';

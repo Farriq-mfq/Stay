@@ -9,18 +9,18 @@ const axios = proxy.axios;
 // the datatable queries server side
 const sessionId = ref(null);
 const filterDate = ref();
-const selectedRombel = ref();
+const selectedgroup = ref();
 const detailSession = ref(null);
 
 const getAllPresences = async () => {
-    if (sessionId.value && selectedRombel.value && filterDate.value) {
+    if (sessionId.value && selectedgroup.value && filterDate.value) {
         const queries = {
             date: format(filterDate.value, 'yyyy-MM')
         };
 
         const params = new URLSearchParams(queries);
 
-        return await axios.get(`/presence/${sessionId.value}/${selectedRombel.value.value}/monthly?${params}`);
+        return await axios.get(`/presence-pegawai/${sessionId.value}/${selectedgroup.value.value}/monthly?${params}`);
     } else {
         throw new Error();
     }
@@ -31,7 +31,7 @@ const {
     isLoading,
     refetch
 } = useQuery({
-    queryKey: [`presences-all-recap-month`, sessionId.value, selectedRombel.value, filterDate.value],
+    queryKey: [`presences-pegawai-all-recap-month`, sessionId.value, selectedgroup.value, filterDate.value],
     queryFn: getAllPresences
 });
 
@@ -40,16 +40,16 @@ const onPage = (event) => {
     refetch();
 };
 
-const getRombel = async () => {
-    return await axios.get('/siswa/rombel');
+const getGroup = async () => {
+    return await axios.get('/pegawai/group');
 };
 
-const { data: dataRombels, isLoading: loadingRombel } = useQuery({
-    queryKey: ['rombel'],
-    queryFn: getRombel
+const { data: dataGroups, isLoading: loadinggroup } = useQuery({
+    queryKey: ['group'],
+    queryFn: getGroup
 });
 
-watch([sessionId, selectedRombel, filterDate], (val) => {
+watch([sessionId, selectedgroup, filterDate], (val) => {
     refetch();
 });
 
@@ -62,20 +62,20 @@ const handleChangeSelectSession = (val) => {
 const loadingExport = ref(false);
 const handleExportService = async () => {
     loadingExport.value = true;
-    if (sessionId.value && selectedRombel.value && filterDate.value) {
+    if (sessionId.value && selectedgroup.value && filterDate.value) {
         const queries = {
             date: format(filterDate.value, 'yyyy-MM')
         };
 
         const params = new URLSearchParams(queries);
 
-        const response = await axios.get(`/presence/${sessionId.value}/${selectedRombel.value.value}/monthly/export?${params}`, {
+        const response = await axios.get(`/presence-pegawai/${sessionId.value}/${selectedgroup.value.value}/monthly/export?${params}`, {
             responseType: 'blob'
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `${format(new Date(), 'yyyy-MM')}-presences-${selectedRombel.value.value}.xlsx`);
+        link.setAttribute('download', `${format(new Date(), 'yyyy-MM')}-presences-${selectedgroup.value.value}.xlsx`);
         document.body.appendChild(link);
         link.click();
         loadingExport.value = false;
@@ -87,7 +87,7 @@ const handleExportService = async () => {
 
 const resetAll = () => {
     sessionId.value = null;
-    selectedRombel.value = null;
+    selectedgroup.value = null;
     filterDate.value = null;
 };
 
@@ -113,19 +113,19 @@ const { handlePrint } = useVueToPrint({
 <template>
     <div>
         <div class="field">
-            <select-session role="SISWA" @input="handleChangeSelectSession" />
-            <Dropdown :loading="loadingRombel" v-model="selectedRombel" :options="dataRombels ? dataRombels.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih Rombel" class="w-full mt-3" />
+            <select-session role="PEGAWAI" @input="handleChangeSelectSession" />
+            <Dropdown :loading="loadinggroup" v-model="selectedgroup" :options="dataGroups ? dataGroups.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih group" class="w-full mt-3" />
             <Calendar v-model="filterDate" placeholder="Pilih Bulan dan Tahun" view="month" dateFormat="yy/mm" showButtonBar :manualInput="false" class="mt-3 w-full" />
 
             <div class="flex gap-2">
-                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
-                <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print" @click.prevent="handlePrint" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
-                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
-                <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger" v-if="sessionId && selectedRombel && filterDate" />
+                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && selectedgroup && filterDate" />
+                <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print" @click.prevent="handlePrint" class="mt-3" v-if="sessionId && selectedgroup && filterDate" />
+                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId && selectedgroup && filterDate" />
+                <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger" v-if="sessionId && selectedgroup && filterDate" />
             </div>
         </div>
 
-        <div class="overflow-x-auto" v-if="sessionId && selectedRombel && filterDate && presences">
+        <div class="overflow-x-auto" v-if="sessionId && selectedgroup && filterDate && presences">
             <!-- <Divider />
             <div class="detail-session">
                 <h3>

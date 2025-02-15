@@ -20,7 +20,7 @@ const model = ref([
                 items: [
                     { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' },
                     { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' },
-                    { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/presences/pegawai' },
+                    { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' },
                     { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' },
                 ]
             },

@@ -10,21 +10,21 @@ const axios = proxy.axios;
 // the datatable queries server side
 const sessionId = ref(null);
 const filterDate = ref();
-const selectedRombel = ref();
+const selectedGroup = ref();
 const detailSession = ref(null);
 
 const getAllPresences = async () => {
     if (sessionId.value && filterDate.value) {
         const queries = {
             date: format(filterDate.value, 'yyyy-MM-dd'),
-            ...(selectedRombel.value && {
-                rombel: selectedRombel.value.value
+            ...(selectedGroup.value && {
+                group: selectedGroup.value.value
             })
         };
 
         const params = new URLSearchParams(queries);
 
-        return await axios.get(`/presence/${sessionId.value}/daily?${params}`);
+        return await axios.get(`/presence-pegawai/${sessionId.value}/daily?${params}`);
     } else {
         throw new Error();
     }
@@ -39,16 +39,16 @@ const {
     queryFn: getAllPresences
 });
 
-const getRombel = async () => {
-    return await axios.get('/siswa/rombel');
+const getGroup = async () => {
+    return await axios.get('/pegawai/group');
 };
 
-const { data: dataRombels, isLoading: loadingRombel } = useQuery({
-    queryKey: ['rombel'],
-    queryFn: getRombel
+const { data: dataGroups, isLoading: loadinggroup } = useQuery({
+    queryKey: ['group'],
+    queryFn: getGroup
 });
 
-watch([sessionId, filterDate, selectedRombel], (val) => {
+watch([sessionId, filterDate, selectedGroup], (val) => {
     refetch();
 });
 
@@ -61,14 +61,14 @@ const handleChangeSelectSession = (val) => {
 const loadingExport = ref(false);
 const handleExportService = async () => {
     loadingExport.value = true;
-    if (sessionId.value && filterDate.value && presences.value && presences.value.data.data.rombel === null) {
+    if (sessionId.value && filterDate.value && presences.value && presences.value.data.data.group === null) {
         const queries = {
             date: format(filterDate.value, 'yyyy-MM-dd')
         };
 
         const params = new URLSearchParams(queries);
 
-        const response = await axios.get(`/presence/export/${sessionId.value}/daily?${params}`, {
+        const response = await axios.get(`/presence-pegawai/export/${sessionId.value}/daily?${params}`, {
             responseType: 'blob'
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -78,17 +78,17 @@ const handleExportService = async () => {
         document.body.appendChild(link);
         link.click();
         loadingExport.value = false;
-    } else if (sessionId.value && filterDate.value && presences.value && presences.value.data.data.rombel !== null) {
+    } else if (sessionId.value && filterDate.value && presences.value && presences.value.data.data.group !== null) {
         const queries = {
             date: format(filterDate.value, 'yyyy-MM-dd'),
-            ...(selectedRombel.value && {
-                rombel: selectedRombel.value.value
+            ...(selectedGroup.value && {
+                group: selectedGroup.value.value
             })
         };
 
         const params = new URLSearchParams(queries);
 
-        const response = await axios.get(`/presence/export/${sessionId.value}/daily?${params}`, {
+        const response = await axios.get(`/presence-pegawai/export/${sessionId.value}/daily?${params}`, {
             responseType: 'blob'
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -106,7 +106,7 @@ const handleExportService = async () => {
 
 const resetAll = () => {
     sessionId.value = null;
-    selectedRombel.value = null;
+    selectedGroup.value = null;
     filterDate.value = null;
 };
 
@@ -130,9 +130,9 @@ const { handlePrint } = useVueToPrint({
 <template>
     <div>
         <div class="field">
-            <select-session role="SISWA" @input="handleChangeSelectSession" />
+            <select-session role="PEGAWAI" @input="handleChangeSelectSession" />
             <Calendar v-model="filterDate" placeholder="Filter Tanggal Presensi" showButtonBar :manualInput="false" class="mt-3 w-full" />
-            <Dropdown :loading="loadingRombel" v-model="selectedRombel" :options="dataRombels ? dataRombels.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih Rombel" class="w-full mt-3" showClear />
+            <Dropdown :loading="loadinggroup" v-model="selectedGroup" :options="dataGroups ? dataGroups.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih group" class="w-full mt-3" showClear />
 
             <div class="flex gap-2">
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && filterDate" />
@@ -142,7 +142,7 @@ const { handlePrint } = useVueToPrint({
             </div>
         </div>
 
-        <div ref="componentPrintRef" class="overflow-x-auto" v-if="filterDate && presences && presences.data.data.rombel === null">
+        <div ref="componentPrintRef" class="overflow-x-auto" v-if="filterDate && presences && presences.data.data.group === null">
             <div class="detail-session">
                 <h3>
                     {{ detailSession.name }}
@@ -162,7 +162,7 @@ const { handlePrint } = useVueToPrint({
                     <thead class="p-datatable-thead">
                         <tr>
                             <th class="p-column-header">Nama</th>
-                            <th class="p-column-header">Rombel</th>
+                            <th class="p-column-header">group</th>
                             <th class="p-column-header">Status</th>
                             <th class="p-column-header">Gateway</th>
                             <th class="p-column-header">Masuk</th>
@@ -176,7 +176,7 @@ const { handlePrint } = useVueToPrint({
                                 {{ dt.name }}
                             </td>
                             <td class="p-column-body">
-                                {{ dt.rombel }}
+                                {{ dt.group }}
                             </td>
                             <td class="p-column-body">
                                 <Tag value="Presensi" severity="success" v-if="dt.hasPresence" />
@@ -200,7 +200,7 @@ const { handlePrint } = useVueToPrint({
             </div>
         </div>
 
-        <div ref="componentPrintRef" v-if="sessionId && filterDate && presences && presences.data.data.rombel != null && selectedRombel">
+        <div ref="componentPrintRef" v-if="sessionId && filterDate && presences && presences.data.data.group != null && selectedGroup">
             <div class="detail-session">
                 <h3>
                     {{ detailSession.name }}
@@ -213,13 +213,13 @@ const { handlePrint } = useVueToPrint({
             <Divider />
             <div>
                 <h3>
-                    {{ selectedRombel.value }}
+                    {{ selectedGroup.value }}
                 </h3>
                 <table class="print-table p-datatable p-datatable-gridlines p-component w-full mb-4">
                     <thead class="p-datatable-thead">
                         <tr>
                             <th class="p-column-header">Nama</th>
-                            <th class="p-column-header">Rombel</th>
+                            <th class="p-column-header">Group</th>
                             <th class="p-column-header">Status</th>
                             <th class="p-column-header">Gateway</th>
                             <th class="p-column-header">Masuk</th>
@@ -233,7 +233,7 @@ const { handlePrint } = useVueToPrint({
                                 {{ dt.name }}
                             </td>
                             <td class="p-column-body">
-                                {{ dt.rombel }}
+                                {{ dt.group }}
                             </td>
                             <td class="p-column-body">
                                 <Tag value="Presensi" severity="success" v-if="dt.hasPresence" />

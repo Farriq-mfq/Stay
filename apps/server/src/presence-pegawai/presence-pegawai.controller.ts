@@ -50,6 +50,77 @@ export class PresencePegawaiController {
     ) {
         return await this.presencePegawaiService.findAllByDaily(sessionId, search, date, group);
     }
+
+
+    @Get('/export/:sessionId/daily')
+    // @UseGuards(AccessTokenGuard)
+    async exportPresenceBygroup(
+        @Res() res: Response,
+        @Param('sessionId', new ParseIntPipe()) sessionId: string,
+        @Query("date") date: string,
+        @Query('search') search?: string,
+        @Query('group') group?: string
+    ) {
+
+        if (group != null && group != undefined && group != '') {
+            res.set({
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
+            });
+        } else {
+            res.set({
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-files.zip`,
+            })
+        }
+
+        const buffer = await this.presencePegawaiService.exportByDaily(
+            sessionId,
+            search,
+            date,
+            group,
+        )
+
+
+        res.send(buffer);
+    }
+
+    @Get('/:sessionId/:group/monthly')
+    // @UseGuards(AccessTokenGuard)
+    async findAllPresenceByMonthClass(
+        @Param('sessionId', new ParseIntPipe()) sessionId: string,
+        @Query("date") date: string,
+        @Param('group') group?: string
+    ) {
+
+        return await this.presencePegawaiService.findAllPresenceByMonthClass(
+            sessionId,
+            date,
+            group
+        )
+    }
+
+    @Get('/:sessionId/:group/monthly/export')
+    //   @UseGuards(AccessTokenGuard)
+    async exportPresenceByMonthClass(
+        @Res() res: Response,
+        @Param('sessionId', new ParseIntPipe()) sessionId: string,
+        @Query("date") date: string,
+        @Param('group') group?: string,
+    ) {
+
+        const buffer = await this.presencePegawaiService.exportPresenceByMonthClass(
+            sessionId,
+            date,
+            group)
+        res.send(buffer)
+        // res.set({
+        //   'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        //   'Content-Disposition': `attachment; filename=${format(new Date(), 'yyyy-MM-dd')}-presences.xlsx`,
+        // });
+        // res.send(buffer);
+    }
+
     async findByMeetingSession() { }
 
 

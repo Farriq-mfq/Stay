@@ -1,12 +1,13 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { isJSON } from "class-validator";
-import { endOfDay, startOfDay, parse, format } from "date-fns";
+import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { id } from "date-fns/locale";
 import { CustomPrismaService } from "nestjs-prisma";
 import { PegawaiService } from "src/pegawai/pegawai.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
-import { isValidDateString, validateDateRange } from "src/utils/helpers";
+import { isValidDateString, validateAndFormatDateYear, validateDateRange } from "src/utils/helpers";
 import * as xlsx from 'xlsx';
+import * as JSZip from 'jszip';
 
 type FilterDate = {
     start_date?: string,
@@ -284,7 +285,7 @@ export class PresencePegawaiService {
 
                 return {
                     group,
-                    presences_pegawai: checkpegawaiHasPresence.map(presence => {
+                    presences: checkpegawaiHasPresence.map(presence => {
                         return {
                             id: presence.id,
                             name: presence.name,
@@ -338,7 +339,7 @@ export class PresencePegawaiService {
 
             return {
                 group: null,
-                presences_pegawai: groups.map(group => {
+                presences: groups.map(group => {
                     const filterPresenceBygroup = checkpegawaiHasPresence.map(presence => {
                         return {
                             id: presence.id,
@@ -360,4 +361,314 @@ export class PresencePegawaiService {
 
     }
 
+
+    async exportByDaily(
+        sessionId: string,
+        search?: string,
+        date?: string,
+        group?: string
+    ) {
+        const groups = await this.pegawaiService.getGroup();
+        const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+            where: {
+                id: parseInt(sessionId)
+            }
+        })
+
+        if (!isValidDateString(date, 'yyyy-MM-dd')) {
+            throw new BadRequestException("date invalid")
+        }
+
+
+
+        const parseDate = parse(date, 'yyyy-MM-dd', new Date(), { locale: id });
+        const start = startOfDay(parseDate);
+        const end = endOfDay(parseDate);
+
+        if (group) {
+            if (groups.includes(group)) {
+
+                const pegawai = await this.prismaService.client.pegawai.findMany({
+                    select: {
+                        id: true,
+                        name: true,
+                        group: true,
+                        position: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    },
+                    where: {
+                        group: {
+                            equals: group
+                        }
+                    },
+                    orderBy: {
+                        name: 'asc'
+                    }
+                })
+
+                const presences = await this.prismaService.client.presences_pegawai.findMany({
+                    include: {
+                        gateway: true
+                    },
+                    where: {
+                        createdAt: {
+                            gte: start,
+                            lt: end,
+                        },
+                        presence_sessionsId: session.id,
+                    }
+                })
+
+                const checkpegawaiHasPresence = pegawai.map(sw => {
+                    return {
+                        ...sw,
+                        hasPresence: presences.some(presence => presence.pegawaiId === sw.id),
+                        detailPresence: presences.find(presence => presence.pegawaiId === sw.id) ?? null,
+                    }
+                })
+
+
+                const mappingPresences = checkpegawaiHasPresence.map(presence => ({
+                    Masuk: presence.hasPresence ? presence.detailPresence.enter_time ? format(presence.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+                        locale: id
+                    }) : '-' : '-',
+                    Keluar: presence.hasPresence ? presence.detailPresence.exit_time ? format(presence.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+                        locale: id
+                    }) : '-' : '-',
+                    Nama: presence.name,
+                    Jabatan: presence.position,
+                    Kelompok: presence.group,
+                    Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
+                    Session: session.name,
+                    Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                }))
+
+
+                const worksheet = xlsx.utils.json_to_sheet(mappingPresences);
+                const workbook = xlsx.utils.book_new();
+                xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences');
+                const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+                return buffer;
+            } else {
+                throw new BadRequestException("group invalid")
+            }
+        } else {
+            const pegawai = await this.prismaService.client.pegawai.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    group: true,
+                    position: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+                orderBy: {
+                    name: 'asc'
+                }
+            })
+            const presences = await this.prismaService.client.presences_pegawai.findMany({
+                include: {
+                    gateway: true
+                },
+                where: {
+                    createdAt: {
+                        gte: start,
+                        lt: end,
+                    },
+                    presence_sessionsId: session.id,
+                }
+            })
+
+
+            const checkpegawaiHasPresence = pegawai.map(sw => {
+                return {
+                    ...sw,
+                    hasPresence: presences.some(presence => presence.pegawaiId === sw.id),
+                    detailPresence: presences.find(presence => presence.pegawaiId === sw.id) ?? null,
+                }
+            })
+
+            const allPresences = groups.map(group => {
+                const filterPresenceBygroup = checkpegawaiHasPresence.map(presence => {
+                    return {
+                        id: presence.id,
+                        name: presence.name,
+                        group: presence.group,
+                        position: presence.position,
+                        createAt: presence.createdAt,
+                        updateAt: presence.updatedAt,
+                        hasPresence: presence.hasPresence,
+                        detailPresence: presence.detailPresence,
+                        gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                    }
+                }).filter(pr => pr.group == group)
+                return {
+                    [group]: filterPresenceBygroup
+                }
+            })
+
+            let bufferExcels: { key: string, buffer: any }[] = [];
+
+            allPresences.forEach(daily => {
+                const key = Object.keys(daily)[0];
+                const mappingPresencesAsJson = daily[key].map(dt => ({
+                    Masuk: dt.hasPresence ? dt.detailPresence.enter_time ? format(dt.detailPresence.enter_time, 'dd/MM/yyyy HH:mm:ss', {
+                        locale: id
+                    }) : '-' : '-',
+                    Keluar: dt.hasPresence ? dt.detailPresence.exit_time ? format(dt.detailPresence.exit_time, 'dd/MM/yyyy HH:mm:ss', {
+                        locale: id
+                    }) : '-' : '-',
+                    Nama: dt.name,
+                    Kelompok: dt.group,
+                    Jabatan: dt.position,
+                    Status: dt.hasPresence ? "Presensi" : "Tidak Presensi",
+                    Session: session.name,
+                    Gateway: dt.hasPresence ? `${dt.detailPresence.gateway.name}-${dt.detailPresence.gateway.location}` : '-',
+                }))
+                const worksheet = xlsx.utils.json_to_sheet(mappingPresencesAsJson);
+                const workbook = xlsx.utils.book_new();
+                xlsx.utils.book_append_sheet(workbook, worksheet, `daily-presences-${key}`);
+                const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+                bufferExcels.push({
+                    key,
+                    buffer
+                })
+            })
+
+            const zip = new JSZip();
+            bufferExcels.forEach(buffer => {
+                zip.file(`${buffer.key}.xlsx`, buffer.buffer, { binary: true });
+            })
+
+            return zip.generateAsync({ type: 'nodebuffer' });
+        }
+    }
+
+
+    async findAllPresenceByMonthClass(sessionId: string, date?: string, group?: string) {
+
+        const groups = await this.pegawaiService.getGroup();
+        if (groups.includes(group)) {
+            const parseDateYearMonth = validateAndFormatDateYear(date);
+            if (!parseDateYearMonth) {
+                throw new BadRequestException("date invalid")
+            }
+
+            const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+            const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+            const dateInterval = eachDayOfInterval({
+                start: startDate, end: endDate
+            })
+
+            const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+                where: {
+                    id: parseInt(sessionId)
+                }
+            })
+
+            const presences = await this.prismaService.client.presences_pegawai.findMany({
+                where: {
+                    presence_sessionsId: session.id,
+                    createdAt: {
+                        gte: startDate,
+                        lte: endDate
+                    }
+                }
+            })
+
+            const pegawai = await this.prismaService.client.pegawai.findMany({
+                where: {
+                    group
+                },
+                orderBy: {
+                    name: 'asc'
+                }
+            })
+
+
+            const mappingPresences = pegawai.map(s => {
+                return {
+                    name: s.name,
+                    presences: dateInterval.map(d => {
+                        return {
+                            [format(d, "dd")]: presences.find(presence => presence.pegawaiId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd")) ?? null
+                        }
+                    })
+                }
+            })
+            return {
+                date: {
+                    startDate,
+                    endDate
+                },
+                presences: mappingPresences
+            }
+
+        } else {
+            throw new BadRequestException("group not found")
+        }
+    }
+    async exportPresenceByMonthClass(sessionId: string, date?: string, group?: string) {
+        const groups = await this.pegawaiService.getGroup();
+        if (groups.includes(group)) {
+            const parseDateYearMonth = validateAndFormatDateYear(date);
+            if (!parseDateYearMonth) {
+                throw new BadRequestException("date invalid")
+            }
+
+            const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+            const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+            const dateInterval = eachDayOfInterval({
+                start: startDate, end: endDate
+            })
+
+            const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+                where: {
+                    id: parseInt(sessionId)
+                }
+            })
+
+            const presences = await this.prismaService.client.presences_pegawai.findMany({
+                where: {
+                    presence_sessionsId: session.id,
+                    createdAt: {
+                        gte: startDate,
+                        lte: endDate
+                    }
+                }
+            })
+
+            const pegawai = await this.prismaService.client.pegawai.findMany({
+                where: {
+                    group
+                },
+                orderBy: {
+                    name: 'asc'
+                }
+            })
+
+            const transformedData = pegawai.map((s) => {
+                const transformed = new Map();
+                // transformed["Nama"] = s.name;
+                transformed.set("Nama", s.name)
+                dateInterval.forEach((d) => {
+                    const dt = presences.find(presence => presence.pegawaiId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+                    transformed.set(`-${parseInt(format(d, "dd"))}-`, dt ? `${format(dt.enter_time, 'HH:mm:ss', { locale: id })}${dt.exit_time ? `- ` + format(dt.exit_time, 'HH:mm:ss', { locale: id }) : ''}` : "-");
+                });
+
+                return Object.fromEntries(transformed)
+            });
+
+
+            const worksheet = xlsx.utils.json_to_sheet(transformedData);
+            const workbook = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(workbook, worksheet, 'Presences-' + `${group}-` + date);
+            const buffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+            return buffer;
+        } else {
+            throw new BadRequestException()
+        }
+
+    }
 }

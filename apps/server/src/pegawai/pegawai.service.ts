@@ -111,7 +111,6 @@ export class PegawaiService {
   }
 
   async findWithoutPaginate(sessionId: string) {
-
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: +sessionId
@@ -121,6 +120,7 @@ export class PegawaiService {
       select: {
         id: true,
         name: true,
+        username: true,
         position: true,
         group: true,
         sign_picture: true,

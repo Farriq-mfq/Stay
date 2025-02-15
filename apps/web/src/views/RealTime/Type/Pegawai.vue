@@ -6,7 +6,6 @@ import CurrentDay from '../../../components/CurrentDay.vue';
 import { id } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { computed } from 'vue';
-import { useStorage } from '@vueuse/core'
 
 
 const { proxy } = getCurrentInstance();

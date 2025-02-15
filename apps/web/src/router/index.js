@@ -91,6 +91,48 @@ const router = createRouter({
                     ]
                 },
                 {
+                    path: '/pegawai-presences',
+                    name: 'pegawai-presences',
+                    redirect: {
+                        name: 'pegawai-presences-all'
+                    },
+                    component: () => import('@/views/Presences/Pegawai/Index.vue'),
+                    children: [
+                        {
+                            path: '/pegawai-presences/all',
+                            name: 'pegawai-presences-all',
+                            component: () => import('@/views/Presences/Pegawai/All.vue'),
+                            meta: {
+                                title: "All Presences Pegawai",
+                            },
+                        },
+                        {
+                            path: '/pegawai-presences/daily',
+                            name: 'pegawai-presences-recap-daily',
+                            component: () => import('@/views/Presences/Pegawai/Daily.vue'),
+                            meta: {
+                                title: "Group Presences Harian",
+                            },
+                        },
+                        {
+                            path: '/pegawai-presences/monthly',
+                            name: 'pegawai-presences-month',
+                            component: () => import('@/views/Presences/Pegawai/Monthly.vue'),
+                            meta: {
+                                title: "Rekap Presences Bulanan",
+                            },
+                        },
+                        {
+                            path: '/pegawai-presences/meeting-session',
+                            name: 'pegawai-presences-meeting-session',
+                            component: () => import('@/views/Presences/Pegawai/Meeting.vue'),
+                            meta: {
+                                title: "Rekap Presences Bulanan",
+                            },
+                        },
+                    ]
+                },
+                {
                     path: '/input/presences',
                     name: 'presences-input',
                     component: () => import('@/views/Presences/Input.vue'),

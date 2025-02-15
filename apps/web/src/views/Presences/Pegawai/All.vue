@@ -35,7 +35,7 @@ const getAllPresences = async () => {
 
         const params = new URLSearchParams(queries);
 
-        return await axios.get(`/presence/${sessionId.value}?${params}`);
+        return await axios.get(`/presence-pegawai/${sessionId.value}?${params}`);
     } else {
         throw new Error();
     }
@@ -46,7 +46,7 @@ const {
     isLoading,
     refetch
 } = useQuery({
-    queryKey: [`presences-all`, sessionId.value, queryParams.value],
+    queryKey: [`presences-pegawai-all`, sessionId.value, queryParams.value],
     queryFn: getAllPresences
 });
 
@@ -92,7 +92,7 @@ const handleExportService = async () => {
 
         const params = new URLSearchParams(queries);
 
-        const response = await axios.get(`/presence/export/${sessionId.value}?${params}`, {
+        const response = await axios.get(`/presence-pegawai/export/${sessionId.value}?${params}`, {
             responseType: 'blob'
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -115,7 +115,7 @@ const handleFilter = () => {
 <template>
     <div>
         <div class="field">
-            <select-session role="SISWA" @input="handleChangeSelectSession" />
+            <select-session role="PEGAWAI" @input="handleChangeSelectSession" />
             <div class="flex gap-2">
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId" />
@@ -163,12 +163,12 @@ const handleFilter = () => {
             <!-- <Column expander /> -->
             <Column header="Nama">
                 <template #body="{ data }">
-                    {{ data.siswa.name }}
+                    {{ data.pegawai.name }}
                 </template>
             </Column>
-            <Column header="Rombel">
+            <Column header="Kelompok">
                 <template #body="{ data }">
-                    {{ data.siswa.rombel }}
+                    {{ data.pegawai.group }}
                 </template>
             </Column>
             <Column header="Lokasi">
@@ -183,7 +183,7 @@ const handleFilter = () => {
             </Column>
             <Column header="Keluar">
                 <template #body="{ data }">
-                    {{ data.exit_time ? format(data.exit_time, 'yyyy-MM-dd HH:mm:ss') : '-' }}
+                  {{ data.exit_time ? format(data.exit_time, 'yyyy-MM-dd HH:mm:ss') : '-' }}
                 </template>
             </Column>
             <Column header="Metode">

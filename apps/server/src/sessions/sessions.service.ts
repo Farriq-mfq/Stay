@@ -5,6 +5,7 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { SiswaService } from 'src/siswa/siswa.service';
 import { PegawaiService } from 'src/pegawai/pegawai.service';
+import { SessionRoleType } from '@prisma/client';
 
 @Injectable()
 export class SessionsService {
@@ -109,6 +110,7 @@ export class SessionsService {
     page?: number,
     limit?: number,
     search?: string,
+    role?: SessionRoleType
   ) {
     const [items, meta] = await this.prismaService.client.presence_sessions.paginate({
       where: {
@@ -121,6 +123,9 @@ export class SessionsService {
               },
             }
           ]
+        },
+        ...role && {
+          session_role_type: role
         }
       },
       include: {
