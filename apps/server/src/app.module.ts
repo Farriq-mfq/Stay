@@ -16,6 +16,8 @@ import { SessionsModule } from './sessions/sessions.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
+import { PublicModule } from './public/public.module';
+import { ConnectedClientModule } from './connected-client/connected-client.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -61,7 +63,9 @@ import { UsersModule } from './users/users.module';
     BackupModule,
     PegawaiModule,
     PresencePegawaiModule,
-    MeetingSessionModule
+    MeetingSessionModule,
+    PublicModule,
+    ConnectedClientModule
   ],
 })
 export class AppModule { }

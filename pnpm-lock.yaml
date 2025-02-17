@@ -247,6 +247,9 @@ importers:
       socket.io-client:
         specifier: ^4.7.5
         version: 4.8.1
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       v-lazy-image:
         specifier: ^2.1.1
         version: 2.1.1

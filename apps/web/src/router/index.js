@@ -208,6 +208,14 @@ const router = createRouter({
                         title: "Backup",
                     }
                 },
+                {
+                    path: '/connected-client',
+                    name: 'connected-client',
+                    component: () => import('@/views/Client/Index.vue'),
+                    meta: {
+                        title: "Connected Client",
+                    }
+                },
                 // {
                 //     path: '/whatsapp',
                 //     name: 'whatsapp',

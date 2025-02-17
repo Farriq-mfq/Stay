@@ -35,7 +35,7 @@ const getAllSession = async () => {
     };
 
     const params = new URLSearchParams(queries);
-    return await axios.get(`/sessions?${params}`);
+    return await axios.get(`/public/sessions?${params}`);
 };
 
 const selectSession = ref();

@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { MeetingSessionService } from './meeting-session.service';
 import { CreateMeetingSessionDto } from './dto/create-meeting-session.dto';
 import { UpdateMeetingSessionDto } from './dto/update-meeting-session.dto';
+import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 
 @Controller('meeting-session')
+@UseGuards(AccessTokenGuard)
 export class MeetingSessionController {
   constructor(private readonly meetingSessionService: MeetingSessionService) { }
 

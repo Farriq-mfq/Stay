@@ -339,3 +339,14 @@ model role_permissions {
   updatedAt    DateTime    @updatedAt
   usersId      Int?
 }
+
+// connected client socket io
+model connected_clients {
+  id        Int      @id @default(autoincrement())
+  clientId  String   @unique
+  socketId  String
+  userAgent String
+  ip        String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

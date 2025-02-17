@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import VLazyImage from 'v-lazy-image';
 import html2pdf from 'html2pdf.js';
 import { getCurrentInstance } from 'vue';
@@ -41,6 +41,10 @@ const { data: presences } = useQuery({
     queryKey: ['presence-pegawai-meeting', selectedMeetingSession],
     queryFn: getPresences
 });
+
+const hostname = computed(() => {
+    return window.location.hostname;
+});
 </script>
 
 <template>
@@ -61,7 +65,7 @@ const { data: presences } = useQuery({
                             {{ selectedMeetingSession.name }}
                         </h1>
                         <h2 class="font-semibold text-lg">SMK Negeri 1 Pekalongan</h2>
-                        <span class="text-xs" style="font-style: italic">Dicetak oleh stay</span>
+                        <span class="text-xs" style="font-style: italic"> Online Report by {{ hostname }} </span>
                     </div>
                 </div>
                 <!-- keterangan header -->

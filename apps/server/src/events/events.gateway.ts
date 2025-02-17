@@ -1,4 +1,4 @@
-import { BadRequestException, InternalServerErrorException, Logger, NotFoundException, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Inject, InternalServerErrorException, Logger, NotFoundException, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
     MessageBody,
     OnGatewayConnection,
@@ -7,15 +7,16 @@ import {
     WebSocketGateway,
     WebSocketServer
 } from '@nestjs/websockets';
+import { presence_sessions, presences, presences_pegawai } from '@prisma/client';
+import { CustomPrismaService } from 'nestjs-prisma';
 import { Server } from 'socket.io';
 import { WsExceptionFilter } from 'src/exceptions/wsExceptionFilter';
 import { GatewaysGuard } from 'src/gateways/gateways.guard';
 import { GatewaysService } from 'src/gateways/gateways.service';
-import { CreatePresenceByManual, CreatePresenceByNisDto } from 'src/presence/dto/create-presence.dto';
+import { CreatePresenceByManual } from 'src/presence/dto/create-presence.dto';
 import { PresenceService } from 'src/presence/presence.service';
+import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { ScanDto } from './dto/scan.dto';
-import { ConfigService } from '@nestjs/config';
-import { presences, presences_pegawai } from '@prisma/client';
 
 // solve socket io not connected to esp32: 
 // https://stackoverflow.com/questions/54800516/socketio-server-not-connecting-to-esp8266
@@ -32,12 +33,65 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     constructor(
         private readonly gatewaysService: GatewaysService,
         private readonly presenceService: PresenceService,
-        private readonly configService: ConfigService
+        @Inject("PrismaService") private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) {
 
     }
-    handleConnection(client: any, ...args: any[]) {
+    async handleConnection(client: any, ...args: any[]) {
+        const address = client.handshake.address;
+        const userAgent = client.handshake.headers['user-agent'];
+        const authToken = client.handshake.auth;
+        const queries = client.handshake.query
+
         Logger.debug(`Connected client: ${client.id}`);
+
+        try {
+            if (!queries.clientId) throw Error("clientId is required")
+            // store connected client
+            await this.prismaService.client.connected_clients.upsert({
+                where: {
+                    clientId: queries.clientId,
+                },
+                create: {
+                    clientId: queries.clientId,
+                    ip: address,
+                    userAgent: userAgent,
+                    socketId: client.id
+                },
+                update: {
+                    socketId: client.id
+                }
+            })
+        } catch {
+            Logger.error("error while insert connected client")
+        }
+    }
+    async handleDisconnect(client: any) {
+        // const address = client.handshake.address;
+        // const userAgent = client.handshake.headers['user-agent'];
+        // const authToken = client.handshake.auth;
+        const queries = client.handshake.query
+        Logger.debug(`Disconnected client: ${client.id}`);
+
+        try {
+            // remove when disconnect
+            const checkClientExist = await this.prismaService.client.connected_clients.findFirst({
+                where: {
+                    clientId: queries.clientId
+                }
+            })
+
+            if (checkClientExist) {
+                await this.prismaService.client.connected_clients.delete({
+                    where: {
+                        id: checkClientExist.id
+                    }
+                })
+            }
+
+        } catch {
+            Logger.error("Error remove connected client");
+        }
     }
     async afterInit(server: any) {
         Logger.debug(`Connected client: ${server}`);
@@ -83,6 +137,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
             }
         }
     }
+
+    async handleSetSession(socket_id: string, session: presence_sessions) {
+        this.server.to(socket_id).emit('session', session)
+    }
+
     // async handleHttpByNIS(createPresenceByNisDto: CreatePresenceByNisDto) {
     //     try {
     //         const presence = await this.presenceService.createPresenceByNis(createPresenceByNisDto)

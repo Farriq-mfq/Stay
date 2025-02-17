@@ -1,11 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe, Query, Res } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Query, Res, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PresencePegawaiService } from "./presence-pegawai.service";
 import { Response } from "express";
 import { format } from "date-fns";
+import { AccessTokenGuard } from "src/guards/accessToken.guard";
 
 @Controller('presence-pegawai')
 @ApiTags('prensence-pegawai')
+@UseGuards(AccessTokenGuard)
 export class PresencePegawaiController {
     constructor(
         private readonly presencePegawaiService: PresencePegawaiService
@@ -28,7 +30,6 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId')
-    //  @UseGuards(AccessTokenGuard)
     async findAll(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -41,7 +42,6 @@ export class PresencePegawaiController {
 
 
     @Get('/:sessionId/daily')
-    //  @UseGuards(AccessTokenGuard)
     async findAllByDaily(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query("date") date: string,
@@ -53,7 +53,6 @@ export class PresencePegawaiController {
 
 
     @Get('/export/:sessionId/daily')
-    // @UseGuards(AccessTokenGuard)
     async exportPresenceBygroup(
         @Res() res: Response,
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -86,7 +85,6 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId/:group/monthly')
-    // @UseGuards(AccessTokenGuard)
     async findAllPresenceByMonthClass(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query("date") date: string,
@@ -129,5 +127,4 @@ export class PresencePegawaiController {
     }
 
 
-    async exportByMeetingSession() { }
 }

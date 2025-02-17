@@ -1,5 +1,11 @@
 ## [1.5.1] - 2025-21-25
 ### Added
+-   menambah field lokasi,agenda dan waktu pada sesi rapat
+-   menambah endpoint public yang bisa di akses public (security reason)
+### Change
+-   menambah ubah sesi secara realtime
+## [1.5.1] - 2025-21-25
+### Added
 -   menambah fitur input presensi
 -   menambah fitur upload foto profile di bagian menu pegawai
 -   menambah sesi rapat

@@ -7,3 +7,22 @@ export function isEmptyObject(obj) {
 
     return true
 }
+
+
+
+export function detectBrowser(userAgent) {
+    if (/chrome/i.test(userAgent) && !/edg/i.test(userAgent) && !/opr/i.test(userAgent)) {
+        return "Google Chrome";
+    } else if (/edg/i.test(userAgent)) {
+        return "Microsoft Edge";
+    } else if (/firefox/i.test(userAgent)) {
+        return "Mozilla Firefox";
+    } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
+        return "Apple Safari";
+    } else if (/opr|opera/i.test(userAgent)) {
+        return "Opera";
+    } else if (/msie|trident/i.test(userAgent)) {
+        return "Internet Explorer";
+    }
+    return "Unknown Browser";
+}

@@ -8,5 +8,6 @@ import { EventController } from './events.controller';
     imports: [GatewaysModule],
     controllers: [EventController],
     providers: [EventsGateway, PrismaService, GatewaysService],
+    exports: [EventsGateway]
 })
 export class EventsModule { }

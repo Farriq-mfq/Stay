@@ -1,22 +1,31 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import AppConfig from '../../layout/AppConfig.vue';
 import SiswaType from './Type/Siswa.vue';
 import PegawaiType from './Type/Pegawai.vue';
+import { useToast } from 'primevue/usetoast';
+const { proxy } = getCurrentInstance();
+const socket = proxy.socket;
 
-
-const sessionId = ref(null)
-const detailSession = ref(null)
+const sessionId = ref(null);
+const detailSession = ref(null);
 
 const handleChangeSelectSession = (val) => {
-    sessionId.value = val.id
-    detailSession.value = val
-}
+    sessionId.value = val.id;
+    detailSession.value = val;
+};
 
 const clearSession = () => {
-    sessionId.value = null
-    detailSession.value = null
-}
+    sessionId.value = null;
+    detailSession.value = null;
+};
+
+// set session id
+socket.on('session', (data) => {
+    // toast.add({ severity: 'success', summary: 'Success', detail: data, life: 3000 });
+    sessionId.value = data.id;
+    detailSession.value = data;
+});
 </script>
 
 <template>

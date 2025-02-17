@@ -191,14 +191,20 @@ const confirmDeleteSession = (id) => {
 const showDialogUpdateSession = ref(false);
 const dataUpdateSession = ref({
     name: '',
-    date: ''
+    date: '',
+    time: '',
+    agenda: '',
+    location: ''
 });
 const errorsUpdateSession = ref({});
 
 const updateService = async (data) => {
     return await axios.patch(`/meeting-session/${data.id}`, {
         name: data.name,
-        date: data.date
+        date: data.date,
+        time: data.time,
+        agenda: data.agenda,
+        location: data.location
     });
 };
 
@@ -213,14 +219,20 @@ const handleShowDialogUpdateSesion = (data) => {
     dataUpdateSession.value = {
         id: data.id,
         name: data.name,
-        date: new Date(data.date)
+        date: new Date(data.date),
+        time: data.time,
+        agenda: data.agenda,
+        location: data.location
     };
 };
 
 const clearUpdateSession = () => {
     dataUpdateSession.value = {
         name: '',
-        date: null
+        date: null,
+        time: '',
+        agenda: '',
+        location: ''
     };
 
     showDialogUpdateSession.value = false;
@@ -231,7 +243,10 @@ const handleSubmitUpdateSesion = () => {
         {
             id: dataUpdateSession.value.id,
             name: dataUpdateSession.value.name,
-            date: dataUpdateSession.value.date
+            date: dataUpdateSession.value.date,
+            time: dataUpdateSession.value.time,
+            agenda: dataUpdateSession.value.agenda,
+            location: dataUpdateSession.value.location
         },
         {
             onSuccess() {
@@ -442,7 +457,7 @@ const handleUnSelectedMeetingSession = (data) => {
             </div>
             <div class="field">
                 <label for="agenda">Agenda</label>
-                <InputText id="agenda" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.agenda" required="true" autofocus v-model="sessionData.agenda" class="p-4" />
+                <Textarea id="agenda" :disabled="addSessionLoading" :invalid="errorsAddSession && errorsAddSession.agenda" required="true" autofocus v-model="sessionData.agenda" />
                 <p class="text-red-500" v-if="errorsAddSession && errorsAddSession.agenda">
                     {{ errorsAddSession.agenda[0] }}
                 </p>
@@ -460,9 +475,31 @@ const handleUnSelectedMeetingSession = (data) => {
                 </p>
             </div>
             <div class="field">
+                <label for="location">Tempat</label>
+                <InputText id="location" :disabled="updateSessionLoading" :invalid="errorsUpdateSession && errorsUpdateSession.location" required="true" autofocus v-model="dataUpdateSession.location" />
+                <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.location">
+                    {{ errorsUpdateSession.location[0] }}
+                </p>
+            </div>
+            <div class="field">
+                <label for="time">Waktu</label>
+                <InputText id="time" :disabled="updateSessionLoading" :invalid="errorsUpdateSession && errorsUpdateSession.time" required="true" autofocus v-model="dataUpdateSession.time" />
+                <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.time">
+                    {{ errorsUpdateSession.time[0] }}
+                </p>
+            </div>
+            <div class="field">
+                <label for="date">Tanggal</label>
                 <Calendar v-model="dataUpdateSession.date" dateFormat="dd/mm/yy" :disabled="updateSessionLoading" placeholder="Tanggal" class="w-full" />
                 <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.date">
                     {{ errorsUpdateSession.date[0] }}
+                </p>
+            </div>
+            <div class="field">
+                <label for="agenda">Agenda</label>
+                <Textarea id="agenda" :disabled="updateSessionLoading" :invalid="errorsUpdateSession && errorsUpdateSession.agenda" required="true" autofocus v-model="dataUpdateSession.agenda" />
+                <p class="text-red-500" v-if="errorsUpdateSession && errorsUpdateSession.agenda">
+                    {{ errorsUpdateSession.agenda[0] }}
                 </p>
             </div>
             <div class="field">

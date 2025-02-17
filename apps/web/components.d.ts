@@ -44,6 +44,7 @@ declare module 'vue' {
     Skeleton: typeof import('primevue/skeleton')['default']
     TabMenu: typeof import('primevue/tabmenu')['default']
     Tag: typeof import('primevue/tag')['default']
+    Textarea: typeof import('primevue/textarea')['default']
     Toolbar: typeof import('primevue/toolbar')['default']
   }
 }

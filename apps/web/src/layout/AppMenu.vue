@@ -27,6 +27,7 @@ const model = ref([
             // { label: 'Payment', icon: 'pi pi-fw pi-wallet', to: '/payment' },
             { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' },
             { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' },
+            { label: 'Client', icon: 'pi pi-fw pi-bolt', to: '/connected-client' },
             // {
             //     label: 'Notifications', icon: 'pi pi-fw pi-bell',
             //     items: [
