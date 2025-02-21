@@ -1,5 +1,6 @@
 import pegawaiRouter from './pegawai.js'
-
+import mainRouter from './main.js'
 export {
-    pegawaiRouter
+    pegawaiRouter,
+    mainRouter
 }

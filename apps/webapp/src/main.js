@@ -12,7 +12,7 @@ import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { createPinia } from 'pinia'
-import { pegawaiRouter } from './routes';
+import { mainRouter, pegawaiRouter } from './routes';
 
 import '@/assets/style.css';
 import '/node_modules/primeflex/primeflex.css';
@@ -35,7 +35,7 @@ app.component('ConfirmPopup', ConfirmPopup);
 app.component('Toast', Toast);
 app.use(pinia)
 
-app.use(pegawaiRouter)
+app.use(mainRouter)
 
 
 app.mount('#app');

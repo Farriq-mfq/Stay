@@ -77,6 +77,14 @@ const handleChangeSession = () => {
         }
     );
 };
+
+const showDialogMessage = ref(false);
+const handleShowMessage = (client) => {
+    showDialogMessage.value = true;
+    selectedClient.value = client;
+}
+
+const sendMessage = () => {};
 </script>
 
 <template>
@@ -102,8 +110,9 @@ const handleChangeSession = () => {
                             <td class="p-column-body">{{ detectBrowser(client.userAgent) }}</td>
                             <td class="p-column-body">{{ client.clientId }}</td>
                             <td class="p-column-body">{{ client.socketId }}</td>
-                            <td class="p-column-body">
+                            <td class="p-column-body flex flex-column gap-3">
                                 <Button icon="pi pi-refresh" class="p-button-sm" severity="warning" label="Ubah sesi Presensi" @click="handleShowDialogChangeSession(client)" />
+                                <Button icon="pi pi-send" class="p-button-sm" severity="info" label="Kirim Pengumuman" @click="handleShowMessage(client)" />
                             </td>
                         </tr>
                     </tbody>
@@ -116,6 +125,14 @@ const handleChangeSession = () => {
             </div>
             <div class="field">
                 <Button label="Ubah" @click="handleChangeSession" :loading="changeSessionPending" />
+            </div>
+        </Dialog>
+        <Dialog v-model:visible="showDialogMessage" modal class="w-30rem" header="Pesan">
+            <div class="field">
+                <InputText v-model="message" class="w-full" placeholder="Masukan pesan" />
+            </div>
+            <div class="field">
+                <Button label="Kirim" @click="sendMessage" :loading="sendMessagePending" />
             </div>
         </Dialog>
     </div>

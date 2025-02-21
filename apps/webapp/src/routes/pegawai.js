@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware'
+import { checkRoleSelectedMiddleware } from './middleware/role-selected'
 
 
 /**
@@ -94,6 +95,7 @@ const router = createRouter({
     routes
 })
 
+router.beforeEach(checkRoleSelectedMiddleware)
 router.beforeEach(loadLayoutMiddleware)
 
 export default router

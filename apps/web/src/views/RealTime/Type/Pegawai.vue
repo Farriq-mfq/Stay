@@ -187,7 +187,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
             <Button label="Reload" icon="pi pi-refresh" @click.prevent="handleRefresh" size="small" />
             <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger" @click.prevent="clearSession" />
         </div>
-        <div class="flex flex-wrap" v-if="!detailSession.meeting_session">
+        <div class="flex flex-wrap">
             <div class="xl:col-4 col-12 px-4">
                 <div class="border-2 border-round-xl p-4" :class="{ 'border-red-500': errorMessage, 'surface-border': !successPresence && !errorMessage, 'border-green-500': successPresence }">
                     <!-- header -->
@@ -227,7 +227,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
             </div>
             <div class="xl:col-8 col-12 px-4">
                 <div class="flex flex-column border-1 surface-border border-round-xl gap-3 overflow-hidden pb-4">
-                    <div class="bg-primary border-b flex justify-content-between p-4">
+                    <div class="bg-primary border-b flex justify-content-between p-4 flex-column md:flex-row">
                         <h2 class="text-3xl m-0 text-white">{{ detailSession.name }}</h2>
                         <h4 class="text-xl mb-2 mt-2 text-white">Jumlah presensi : {{ allPresences.size }}</h4>
                     </div>
@@ -236,7 +236,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                             <template #list="slotProps">
                                 <div class="flex flex-wrap">
                                     <TransitionGroup name="list" mode="out-in">
-                                        <div class="lg:col-2 col-6" v-for="item in slotProps.items.reverse()" :key="item.pegawai.id">
+                                        <div class="lg:col-2 col-6" v-for="item in slotProps.items.reverse()" :key="item.pegawai.id" :ref="(el) => setRowRef(el, item.pegawai.id)">
                                             <div class="flex flex-column align-items-center">
                                                 <div class="h-8rem w-8rem border-round-xl overflow-hidden surface-card border-1 surface-border">
                                                     <v-lazy-image :src="item.pegawai.profile_picture" class="w-full h-full" style="object-fit: cover" />
@@ -262,53 +262,6 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                         </DataView>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div v-if="detailSession.meeting_session">
-            <div class="flex flex-column justify-content-center align-items-center">
-                <h3 class="font-bold text-3xl uppercase">
-                    {{ detailSession.name }}
-                </h3>
-                <CurrentDay />
-                <clock />
-                <div class="absolute top-0 right-0 m-3 text-xs flex items-center" v-if="reloadText">
-                    <i class="pi pi-spinner text-primary pi-spin"></i>
-                    <span class="ml-2">{{ reloadText }}</span>
-                </div>
-                <Message size="large" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
-                <Message size="large" v-if="successPresence" severity="success"> Terimakasih : {{ successPresence.pegawai.name }} </Message>
-            </div>
-            <div class="overflow-x-auto mx-5" style="height: 700px">
-                <table ref="componentPrintRef" class="p-datatable p-datatable-gridlines p-component w-full" v-if="pegawai">
-                    <thead class="p-datatable-thead">
-                        <tr>
-                            <th class="p-column-header">No</th>
-                            <th class="p-column-header">Nama</th>
-                            <th class="p-column-header">Waktu</th>
-                            <th class="p-column-header">TTD</th>
-                        </tr>
-                    </thead>
-                    <tbody class="p-datatable-tbody" v-for="(pg, idx) in pegawai.data.data" :key="pg.id">
-                        <tr class="p-row" :ref="(el) => setRowRef(el, pg.id)">
-                            <td class="p-column-body">
-                                {{ idx + 1 }}
-                            </td>
-                            <td class="p-column-body">
-                                {{ pg.name }}
-                            </td>
-                            <td class="p-column-body">
-                                <div class="flex flex-column gap-2 justify-content-center items-center w-fit" v-if="allPresences.get(pg.id)">
-                                    <Tag icon="pi pi-clock" severity="success" :value="format(allPresences.get(pg.id).enter_time, 'HH:mm:ss', { locale: id })" />
-                                    <Tag icon="pi pi-clock" severity="danger" :value="format(allPresences.get(pg.id).exit_time, 'HH:mm:ss', { locale: id })" v-if="allPresences.get(pg.id).exit_time" />
-                                </div>
-                            </td>
-                            <td class="p-column-body">
-                                <v-lazy-image v-if="allPresences.has(pg.id)" :src="pg.sign_picture" style="width: 100px; height: 100px; object-fit: cover" />
-                                <div v-else style="height: 100px; width: 100px"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
