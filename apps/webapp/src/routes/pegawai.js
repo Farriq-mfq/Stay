@@ -89,13 +89,4 @@ const routes = [
     }
 ]
 
-
-const router = createRouter({
-    history: createWebHistory(),
-    routes
-})
-
-router.beforeEach(checkRoleSelectedMiddleware)
-router.beforeEach(loadLayoutMiddleware)
-
-export default router
+export default routes;

@@ -1,10 +1,13 @@
 <script setup>
 import "primevue/resources/themes/lara-light-purple/theme.css";
 import { useRole } from "@/store/role.js";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const roleState = useRole();
 
 const changeRole = (role) => {
   roleState.setRole(role);
+  window.location.href = "/";
 };
 </script>
 

@@ -1,10 +1,14 @@
 import { config } from "../../config";
 
 export const ROLES = ["SISWA", "PEGAWAI"];
-export async function checkRoleSelectedMiddleware(route) {
+/**
+ * @type {import('vue-router').RouteMiddleware}
+ */
+export async function checkRoleSelectedMiddleware(to) {
     const getRole = localStorage.getItem(config.STORAGE_KEY + "/role");
     if (getRole != null && ROLES.includes(getRole)) {
-        // window.location.reload()
-        console.log(getRole);
+        return {
+            name: 'dashboard'
+        };
     }
 }

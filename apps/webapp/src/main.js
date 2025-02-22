@@ -1,5 +1,4 @@
-import { createApp } from 'vue';
-import App from './App.vue';
+import { createPinia } from 'pinia';
 import BadgeDirective from 'primevue/badgedirective';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -11,12 +10,13 @@ import StyleClass from 'primevue/styleclass';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import { createPinia } from 'pinia'
-import { mainRouter, pegawaiRouter } from './routes';
+import { createApp } from 'vue';
+import App from './App.vue';
+import { router } from './routes';
 
 import '@/assets/style.css';
+import 'primeicons/primeicons.css';
 import '/node_modules/primeflex/primeflex.css';
-import 'primeicons/primeicons.css'
 
 
 
@@ -33,9 +33,6 @@ app.directive('styleclass', StyleClass);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('Toast', Toast);
+app.use(router)
 app.use(pinia)
-
-app.use(mainRouter)
-
-
 app.mount('#app');
