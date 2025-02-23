@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware'
 import { checkRoleSelectedMiddleware, ROLES } from './middleware/role-selected'
 import { config } from '../config';
-import { pegawaiRouter } from '.';
+import { pegawaiRouter, siswaRouter } from '.';
 
 const role = localStorage.getItem(`${config.STORAGE_KEY}/role`);
 
@@ -10,38 +10,31 @@ const role = localStorage.getItem(`${config.STORAGE_KEY}/role`);
 /**
  * @type {import('vue-router').RouteRecordRaw[]}
  */
-let routes = [
-    {
-        path: '/role',
-        name: 'role',
-        component: () => import('@/views/main/SelectRole.vue'),
-        meta: {
-            layout: 'SelectRoleLayout'
-        }
-    }
-]
+let routes = []
 
 const checkRole = role && ROLES.includes(role);
 
 if (checkRole && role === "PEGAWAI") {
-    routes = [
-        ...routes,
-        ...pegawaiRouter
-    ]
+    routes = pegawaiRouter
 } else if (checkRole && role === "SISWA") {
-    routes = [
-        ...routes,
-    ]
+    routes = siswaRouter
 } else {
     routes = [
-        ...routes,
-        ...[{
+        {
+            path: '/role',
+            name: 'role',
+            component: () => import('@/views/main/SelectRole.vue'),
+            meta: {
+                layout: 'SelectRoleLayout'
+            }
+        },
+        {
             path: '/:pathMatch(.*)',
             name: 'dashboard',
             redirect: {
                 name: 'role'
             }
-        }]
+        }
     ]
 }
 
@@ -51,6 +44,5 @@ const router = createRouter({
 })
 
 router.beforeEach(loadLayoutMiddleware)
-// router.beforeEach(checkRoleSelectedMiddleware)
 
 export default router

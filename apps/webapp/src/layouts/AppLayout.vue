@@ -1,11 +1,11 @@
 <script setup>
-import { useScreenOrientation } from "@vueuse/core";
+// import { useScreenOrientation } from "@vueuse/core";
 import { useToast } from "primevue/usetoast";
 import { ref, onMounted, onUnmounted, watch } from "vue";
 
-const { lockOrientation } = useScreenOrientation();
+// const { lockOrientation } = useScreenOrientation();
 
-lockOrientation("portrait-primary");
+// lockOrientation("portrait-primary");
 
 const isOnline = ref(navigator.onLine);
 

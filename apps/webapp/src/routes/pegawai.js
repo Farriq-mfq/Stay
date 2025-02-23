@@ -1,7 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware'
-import { checkRoleSelectedMiddleware } from './middleware/role-selected'
-
+import Login from "@/views/pegawai/Auth/Login.vue"
 
 /**
  * @type {import('vue-router').RouteRecordRaw[]}
@@ -82,7 +79,7 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import("@/views/pegawai/Auth/Login.vue"),
+        component: Login,
         meta: {
             layout: 'AuthLayout'
         }

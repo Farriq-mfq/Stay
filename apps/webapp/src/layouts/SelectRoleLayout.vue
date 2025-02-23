@@ -1,9 +1,7 @@
 <script setup></script>
 
 <template>
-    <div class="flex flex-column justify-content-between align-items-center">
-        Header
+    <div class="flex w-full min-h-screen align-items-center justify-content-center flex-column">
         <slot></slot>
-        footer
     </div>
 </template>
