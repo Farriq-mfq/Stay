@@ -89,23 +89,42 @@ export class PresenceService {
         if (session.start_time && session.end_time) {
           const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
           const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
-          if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
-            return await this.createPresence({
-              gateway,
-              session,
-              siswa,
-              client,
-              method: 'card'
-            })
+          if (session.allow_twice) {
+            if (isAfter(current_time, parseStartTime)) {
+              return await this.createPresence({
+                gateway,
+                session,
+                siswa,
+                client,
+                method: 'card'
+              })
+            } else {
+              this.handlingPresenceError({
+                error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                  locale: id
+                })}`,
+                siswa
+              })
+            }
           } else {
-            this.handlingPresenceError({
-              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
-                locale: id
-              })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
-                locale: id
-              })}`,
-              siswa
-            })
+            if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
+              return await this.createPresence({
+                gateway,
+                session,
+                siswa,
+                client,
+                method: 'card'
+              })
+            } else {
+              this.handlingPresenceError({
+                error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                  locale: id
+                })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                  locale: id
+                })}`,
+                siswa
+              })
+            }
           }
           // start time check
         } else if (session.start_time) {
@@ -329,20 +348,50 @@ export class PresenceService {
                 })
               }
             }
-            // update the exit_time
-            const updateExitTime = await tx.presences.update({
-              where: {
-                id: checkPresence.id,
-              },
-              data: {
-                exit_time: new Date()
-              },
-              include: {
-                gateway: true,
-                siswa: true
+            const now = format(Date.now(), "yyyy-MM-dd");
+            const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+            if (session.end_time) {
+              const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+              if (isAfter(current_time, parseEndTime)) {
+                // update the exit_time
+                const updateExitTime = await tx.presences.update({
+                  where: {
+                    id: checkPresence.id,
+                  },
+                  data: {
+                    exit_time: new Date()
+                  },
+                  include: {
+                    gateway: true,
+                    siswa: true
+                  }
+                })
+                return updateExitTime
+              } else {
+                this.handlingPresenceError({
+                  error: `Presensi Keluar Mulai pada ${format(parseEndTime, 'HH:mm:ss', {
+                    locale: id
+                  })}`,
+                  siswa
+                })
               }
-            })
-            return updateExitTime
+            } else {
+              const updateExitTime = await tx.presences.update({
+                where: {
+                  id: checkPresence.id,
+                },
+                data: {
+                  exit_time: new Date()
+                },
+                include: {
+                  gateway: true,
+                  siswa: true
+                }
+              })
+
+              return updateExitTime
+            }
+
           }
 
         } else {
