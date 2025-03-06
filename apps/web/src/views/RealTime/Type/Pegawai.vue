@@ -14,6 +14,8 @@ const allPresences = ref(new Map());
 const errorMessage = ref(null);
 const successPresence = ref(null);
 const reloadText = ref(null);
+const lastFocusedRow = ref(null);
+
 
 const { sessionId, detailSession } = defineProps({
     sessionId: {
@@ -157,6 +159,7 @@ const focusRow = (id) => {
     if (rowRefs.value[id]) {
         rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'center' });
         focusedRow.value = id;
+        lastFocusedRow.value = id;
     }
 };
 
@@ -237,7 +240,7 @@ const dataPresences = computed(() => Array.from(allPresences.value.values()));
                                 <div class="flex flex-wrap">
                                     <TransitionGroup name="list" mode="out-in">
                                         <div class="lg:col-2 col-6" v-for="item in slotProps.items.reverse()" :key="item.pegawai.id" :ref="(el) => setRowRef(el, item.pegawai.id)">
-                                            <div class="flex flex-column align-items-center">
+                                            <div class="flex flex-column align-items-center" :class="{ 'border-bottom-1 border-primary py-4': lastFocusedRow === item.pegawai.id }">
                                                 <div class="h-8rem w-8rem border-round-xl overflow-hidden surface-card border-1 surface-border">
                                                     <v-lazy-image :src="item.pegawai.profile_picture" class="w-full h-full" style="object-fit: cover" />
                                                 </div>

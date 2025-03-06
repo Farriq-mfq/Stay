@@ -19,14 +19,15 @@ const successPresence = ref(null);
 const currentDate = ref(format(Date.now(), 'EEEE, dd MMM yyyy', { locale: id }));
 const reloadText = ref(null);
 
-
 const rowRefs = ref({});
 const focusedRow = ref(null);
+const lastFocusedRow = ref(null);
 
 const focusRow = (id) => {
     if (rowRefs.value[id]) {
         rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'center' });
         focusedRow.value = id;
+        lastFocusedRow.value = id;
     }
 };
 
@@ -35,7 +36,6 @@ const setRowRef = (el, id) => {
         rowRefs.value[id] = el;
     }
 };
-
 
 const { sessionId, detailSession } = defineProps({
     sessionId: {
@@ -238,7 +238,12 @@ onUnmounted(() => {
                     <template #list="slotProps">
                         <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2" style="max-height: 75vh; height: fit-content">
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
-                                <div v-for="(item, index) in slotProps.items" :key="item.siswa.id" :class="`${index + 1 === 1 ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`" :ref="(el) => setRowRef(el, item.siswa.id)">
+                                <div
+                                    v-for="item in slotProps.items"
+                                    :key="item.siswa.id"
+                                    :class="`${lastFocusedRow === item.siswa.id ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`"
+                                    :ref="(el) => setRowRef(el, item.siswa.id)"
+                                >
                                     <div class="flex justify-content-between align-items-center relative">
                                         <div>
                                             <div class="font-semibold text-xl mb-2">
@@ -333,5 +338,4 @@ onUnmounted(() => {
 .v-lazy-image-loaded {
     filter: blur(0);
 }
-
 </style>

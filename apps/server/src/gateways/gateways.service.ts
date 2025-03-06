@@ -202,6 +202,7 @@ export class GatewaysService {
                 message: e.message
               }
             } else if (e instanceof Error) {
+              console.log(e)
               const errorPayload = JSON.parse(e.message) as any
               // check error object 
               if (errorPayload.error) {
