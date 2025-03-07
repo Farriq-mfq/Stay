@@ -13,3 +13,6 @@ Sistem infromasi presensi siswa berbasis IOT.
 - [ ] membuat webapp auth
 - [ ] membuat webapp list presensi
 - [ ] membuat api topup,transfer dll
+
+## Requester
+https://github.com/Farriq-mfq/requester-rfid
