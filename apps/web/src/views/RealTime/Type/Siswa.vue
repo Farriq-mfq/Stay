@@ -25,7 +25,7 @@ const lastFocusedRow = ref(null);
 
 const focusRow = (id) => {
     if (rowRefs.value[id]) {
-        rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'start' });
         focusedRow.value = id;
         lastFocusedRow.value = id;
     }
@@ -106,7 +106,7 @@ const handlePresenceUpdate = (data) => {
         focusRow(data.siswaId);
         setTimeout(() => {
             successPresence.value = null;
-        }, 500);
+        }, 1000);
     });
 };
 
@@ -117,7 +117,7 @@ const handlePresenceError = (error) => {
     nextTick(() => {
         setTimeout(() => {
             errorMessage.value = null;
-        }, 500);
+        }, 1000);
     });
 };
 
@@ -202,8 +202,12 @@ onUnmounted(() => {
             <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger" @click.prevent="clearSession" />
         </div>
         <div class="flex flex-wrap">
-            <div class="xl:col-5 col-12">
-                <div class="border-solid border-round-xl py-4 surface-border border-1 shadow-1 flex align-items-center flex-column relative" style="height: fit-content">
+            <div class="xl:col-5 col-12" style="z-index: 999 !important">
+                <div
+                    class="surface-card border-2 shadow-2 border-round-top-xl lg:border-round-xl py-4 flex align-items-center flex-column relative"
+                    :class="{ 'border-red-500': errorMessage, 'border-green-500': successPresence, 'surface-border': !successPresence && !errorMessage }"
+                    style="height: fit-content"
+                >
                     <div class="absolute top-0 right-0 m-3 text-xs flex items-center" v-if="reloadText">
                         <i class="pi pi-spinner text-primary pi-spin"></i>
                         <span class="ml-2">{{ reloadText }}</span>
@@ -222,9 +226,19 @@ onUnmounted(() => {
                     </span> -->
                     <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
                 </div>
+                <div class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round-bottom lg:hidden">
+                    <div>
+                        <div class="font-semibold lg:text-xl text-lg">{{ detailSession.name }}</div>
+                        <div class="mt-2 text-md">Aktifitas Presensi secara realtime</div>
+                    </div>
+                    <div class="flex flex-column gap-2">
+                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{ allPresences.size }}</div>
+                        <!-- <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div> -->
+                    </div>
+                </div>
             </div>
             <div class="xl:col-7 col-12">
-                <div class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round">
+                <div class="flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round-top hidden lg:flex">
                     <div>
                         <div class="font-semibold lg:text-xl text-lg">{{ detailSession.name }}</div>
                         <div class="mt-2 text-md">Aktifitas Presensi secara realtime</div>
