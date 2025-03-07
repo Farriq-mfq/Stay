@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref } from 'vue';
-import VLazyImage from 'v-lazy-image';
 import html2pdf from 'html2pdf.js';
 import { getCurrentInstance } from 'vue';
 import { useQuery } from '@tanstack/vue-query';

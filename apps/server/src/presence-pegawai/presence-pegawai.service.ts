@@ -294,7 +294,7 @@ export class PresencePegawaiService {
                             updateAt: presence.updatedAt,
                             hasPresence: presence.hasPresence,
                             detailPresence: presence.detailPresence,
-                            gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                            gateway: presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-',
                         }
                     })
                 }
@@ -349,7 +349,7 @@ export class PresencePegawaiService {
                             updateAt: presence.updatedAt,
                             hasPresence: presence.hasPresence,
                             detailPresence: presence.detailPresence,
-                            gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                            gateway: presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-'
                         }
                     }).filter(pr => pr.group == group)
                     return {
@@ -441,7 +441,7 @@ export class PresencePegawaiService {
                     Kelompok: presence.group,
                     Status: presence.hasPresence ? "Presensi" : "Tidak Presensi",
                     Session: session.name,
-                    Gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                    Gateway: presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-',
                 }))
 
 
@@ -500,7 +500,7 @@ export class PresencePegawaiService {
                         updateAt: presence.updatedAt,
                         hasPresence: presence.hasPresence,
                         detailPresence: presence.detailPresence,
-                        gateway: presence.hasPresence ? `${presence.detailPresence.gateway.name}-${presence.detailPresence.gateway.location}` : '-',
+                        gateway: presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-',
                     }
                 }).filter(pr => pr.group == group)
                 return {
@@ -524,7 +524,7 @@ export class PresencePegawaiService {
                     Jabatan: dt.position,
                     Status: dt.hasPresence ? "Presensi" : "Tidak Presensi",
                     Session: session.name,
-                    Gateway: dt.hasPresence ? `${dt.detailPresence.gateway.name}-${dt.detailPresence.gateway.location}` : '-',
+                    Gateway: dt.hasPresence ? `${dt.detailPresence.gateway ? dt.detailPresence.gateway.name : '-'}-${dt.detailPresence.gateway ? dt.detailPresence.gateway.location : '-'}` : '-',
                 }))
                 const worksheet = xlsx.utils.json_to_sheet(mappingPresencesAsJson);
                 const workbook = xlsx.utils.book_new();

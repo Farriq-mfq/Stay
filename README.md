@@ -7,8 +7,8 @@ Sistem infromasi presensi siswa berbasis IOT.
 
 
 ## TODO
-- [ ] fix error rekap harian siswa dan pegawai
-- [ ] print rekap harian dan bulanan diganti dengan pdf
+- [x] fix error rekap harian siswa dan pegawai
+- [X] print rekap harian dan bulanan diganti dengan pdf
 - [ ] fix backup
 - [ ] add role & permission pada pengguna admin 
 - [ ] membuat webapp auth

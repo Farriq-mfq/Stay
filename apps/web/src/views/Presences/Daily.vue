@@ -4,6 +4,8 @@ import { format } from 'date-fns';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useVueToPrint } from 'vue-to-print';
 import { id } from 'date-fns/locale';
+import html2pdf from 'html2pdf.js';
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -126,6 +128,21 @@ const { handlePrint } = useVueToPrint({
         .detail-session { display:block !important }
       `
 });
+
+const generatePdf = () => {
+    if (componentPrintRef.value) {
+        html2pdf()
+            .set({
+                margin: 5,
+                filename: `${format(new Date(), 'yyyy-MM-dd')}-presences.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, imageTimeout: 15000 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            })
+            .from(componentPrintRef.value)
+            .save();
+    }
+};
 </script>
 <template>
     <div>
@@ -137,6 +154,7 @@ const { handlePrint } = useVueToPrint({
             <div class="flex gap-2">
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && filterDate" />
                 <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print" @click.prevent="handlePrint" class="mt-3" v-if="sessionId && filterDate" />
+                <Button severity="help" :disabled="isLoading" :loading="isLoading" icon="pi pi-file-pdf" label="Download PDF" @click.prevent="generatePdf" class="mt-3" v-if="sessionId && filterDate" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId && filterDate" />
                 <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger" v-if="sessionId && filterDate" />
             </div>
@@ -163,7 +181,7 @@ const { handlePrint } = useVueToPrint({
                         <tr>
                             <th class="p-column-header">Nama</th>
                             <th class="p-column-header">Rombel</th>
-                            <th class="p-column-header">Status</th>
+                            <th class="p-column-header">Status Presensi</th>
                             <th class="p-column-header">Gateway</th>
                             <th class="p-column-header">Masuk</th>
                             <th class="p-column-header">Keluar</th>
@@ -179,8 +197,8 @@ const { handlePrint } = useVueToPrint({
                                 {{ dt.rombel }}
                             </td>
                             <td class="p-column-body">
-                                <Tag value="Presensi" severity="success" v-if="dt.hasPresence" />
-                                <Tag value="Tidak Presensi" severity="danger" v-if="!dt.hasPresence" />
+                                <span class="text-green-500" v-if="dt.hasPresence">Presensi</span>
+                                <span class="text-red-500" v-if="!dt.hasPresence">Tidak Presensi</span>
                             </td>
                             <td class="p-column-body">
                                 {{ dt.gateway }}
@@ -220,7 +238,7 @@ const { handlePrint } = useVueToPrint({
                         <tr>
                             <th class="p-column-header">Nama</th>
                             <th class="p-column-header">Rombel</th>
-                            <th class="p-column-header">Status</th>
+                            <th class="p-column-header">Status Presensi</th>
                             <th class="p-column-header">Gateway</th>
                             <th class="p-column-header">Masuk</th>
                             <th class="p-column-header">Keluar</th>
@@ -236,8 +254,8 @@ const { handlePrint } = useVueToPrint({
                                 {{ dt.rombel }}
                             </td>
                             <td class="p-column-body">
-                                <Tag value="Presensi" severity="success" v-if="dt.hasPresence" />
-                                <Tag value="Tidak Presensi" severity="danger" v-if="!dt.hasPresence" />
+                                <span class="text-green-500" v-if="dt.hasPresence">Presensi</span>
+                                <span class="text-red-500" v-if="!dt.hasPresence">Tidak Presensi</span>
                             </td>
                             <td class="p-column-body">
                                 {{ dt.gateway }}

@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/vue-query';
 import { eachDayOfInterval, format } from 'date-fns';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useVueToPrint } from 'vue-to-print';
+import html2pdf from 'html2pdf.js';
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -109,6 +111,21 @@ const { handlePrint } = useVueToPrint({
         .print-table th { background-color: #f2f2f2; font-weight: bold; }
       `
 });
+
+const generatePdf = () => {
+    if (componentPrintRef.value) {
+        html2pdf()
+            .set({
+                margin: 5,
+                filename: `${format(new Date(), 'yyyy-MM-dd')}-presences.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, imageTimeout: 15000 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            })
+            .from(componentPrintRef.value)
+            .save();
+    }
+};
 </script>
 <template>
     <div>
@@ -120,6 +137,16 @@ const { handlePrint } = useVueToPrint({
             <div class="flex gap-2">
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
                 <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print" @click.prevent="handlePrint" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
+                <Button
+                    :disabled="isLoading || loadingExport"
+                    :loading="isLoading || loadingExport"
+                    icon="pi pi-file-pdf"
+                    severity="help"
+                    label="Download PDF"
+                    @click.prevent="generatePdf"
+                    class="mt-3"
+                    v-if="sessionId && selectedRombel && filterDate"
+                />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId && selectedRombel && filterDate" />
                 <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger" v-if="sessionId && selectedRombel && filterDate" />
             </div>
@@ -150,8 +177,8 @@ const { handlePrint } = useVueToPrint({
                 <!-- Table Body -->
                 <tbody class="p-datatable-tbody" v-for="(presence, idx) in presences.data.data.presences" :key="idx">
                     <tr class="p-row">
-                        <td class="p-column-body">{{ presence.name }}</td>
-                        <td class="p-column-body" v-for="(date, idx) in getRangeDate(presences.data.data.date.startDate, presences.data.data.date.endDate)" :key="date">
+                        <td class="p-column-body" style="min-width: 200px">{{ presence.name }}</td>
+                        <td class="p-column-body" style="min-width: 100px" v-for="(date, idx) in getRangeDate(presences.data.data.date.startDate, presences.data.data.date.endDate)" :key="date">
                             <div v-if="presence.presences[idx]" class="flex flex-column gap-1">
                                 <Tag severity="success" v-if="presence.presences[idx][format(date, 'dd')] && presence.presences[idx][format(date, 'dd')].enter_time">
                                     {{ format(presence.presences[idx][format(date, 'dd')].enter_time, 'HH:mm:ss') }}

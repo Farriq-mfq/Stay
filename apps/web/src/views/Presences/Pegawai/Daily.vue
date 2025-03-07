@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { getCurrentInstance, ref, watch } from 'vue';
 import { useVueToPrint } from 'vue-to-print';
 import { id } from 'date-fns/locale';
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -12,6 +13,7 @@ const sessionId = ref(null);
 const filterDate = ref();
 const selectedGroup = ref();
 const detailSession = ref(null);
+
 
 const getAllPresences = async () => {
     if (sessionId.value && filterDate.value) {
