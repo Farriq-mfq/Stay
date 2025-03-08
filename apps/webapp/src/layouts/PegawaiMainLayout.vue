@@ -3,7 +3,7 @@ import "primevue/resources/themes/lara-light-blue/theme.css";
 
 import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
-import { ref, watch } from "vue";
+import { inject, ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
@@ -35,13 +35,22 @@ onMounted(() => {
 onUnmounted(() => {
   isVisible.value = false;
 });
+
+const auth = inject("auth");
 </script>
 <template>
   <div>
     <div :class="{ 'main-app': app.getShowAppNav, 'pb-3': !app.getShowAppNav }">
-      <Transition>
+      <Transition v-if="auth.ready()">
         <slot></slot>
       </Transition>
+      <div
+        v-if="!auth.ready()"
+        class="flex justify-content-center align-items-center h-screen flex-column gap-4"
+      >
+        <ProgressSpinner />
+        <span class="text-sm font-semibold">Tunggu sebentar...</span>
+      </div>
     </div>
     <AppNav v-if="app.getShowAppNav" />
     <Sidebar

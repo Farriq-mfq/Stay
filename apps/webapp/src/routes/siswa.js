@@ -75,6 +75,20 @@ const routes = [
             layout: 'SiswaMainLayput'
         }
     },
+
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('@/views/siswa/auth/Login.vue'),
+        meta: {
+            layout: 'AuthLayoutSiswa'
+        }
+    },
+    {
+        path: '/:pathNotFound(.*)*',
+        name: 'not-found',
+        component: () => import('@/views/Errors/NotFound.vue'),
+    }
 ]
 
 export default routes;

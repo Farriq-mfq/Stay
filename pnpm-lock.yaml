@@ -326,9 +326,21 @@ importers:
       '@primevue/themes':
         specifier: ^4.2.5
         version: 4.2.5
+      '@tanstack/vue-query':
+        specifier: ^5.53.2
+        version: 5.66.0(vue@3.5.13)
       '@vueuse/integrations':
         specifier: ^12.5.0
-        version: 12.5.0(nprogress@0.2.0)(qrcode@1.5.4)
+        version: 12.5.0(axios@1.7.9)(nprogress@0.2.0)(qrcode@1.5.4)
+      '@websanova/vue-auth':
+        specifier: ^4.2.1
+        version: 4.2.1
+      axios:
+        specifier: ^1.7.7
+        version: 1.7.9
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -357,7 +369,7 @@ importers:
         specifier: ^5.7.0
         version: 5.7.0
       vue-router:
-        specifier: ^4.5.0
+        specifier: ^4.4.3
         version: 4.5.0(vue@3.5.13)
     devDependencies:
       '@vitejs/plugin-vue':
@@ -3988,7 +4000,7 @@ packages:
       - typescript
     dev: false
 
-  /@vueuse/integrations@12.5.0(nprogress@0.2.0)(qrcode@1.5.4):
+  /@vueuse/integrations@12.5.0(axios@1.7.9)(nprogress@0.2.0)(qrcode@1.5.4):
     resolution: {integrity: sha512-HYLt8M6mjUfcoUOzyBcX2RjpfapIwHPBmQJtTmXOQW845Y/Osu9VuTJ5kPvnmWJ6IUa05WpblfOwZ+P0G4iZsQ==}
     peerDependencies:
       async-validator: ^4
@@ -4031,6 +4043,7 @@ packages:
     dependencies:
       '@vueuse/core': 12.5.0
       '@vueuse/shared': 12.5.0
+      axios: 1.7.9
       nprogress: 0.2.0
       qrcode: 1.5.4
       vue: 3.5.13

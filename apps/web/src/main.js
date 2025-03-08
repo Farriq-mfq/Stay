@@ -21,6 +21,7 @@ import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 
+
 import '@/assets/styles.scss';
 
 const app = createApp(App);

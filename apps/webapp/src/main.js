@@ -13,15 +13,20 @@ import Tooltip from 'primevue/tooltip';
 import { createApp } from 'vue';
 import App from './App.vue';
 import { router } from './routes';
+import { VueQueryPlugin } from '@tanstack/vue-query';
 
 import '@/assets/style.css';
 import 'primeicons/primeicons.css';
 import '/node_modules/primeflex/primeflex.css';
+import auth from './plugins/auth';
+import http from './plugins/http';
 
 
 
 const app = createApp(App);
 const pinia = createPinia()
+
+
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(DialogService);
@@ -33,6 +38,9 @@ app.directive('styleclass', StyleClass);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('Toast', Toast);
+app.use(http);
 app.use(router)
+app.use(auth);
 app.use(pinia)
+app.use(VueQueryPlugin)
 app.mount('#app');

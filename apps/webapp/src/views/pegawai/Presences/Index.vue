@@ -1,82 +1,19 @@
 <script setup>
-import { ref } from "vue";
+import { getCurrentInstance } from "vue";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { useQuery } from "@tanstack/vue-query";
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
 
-const mockPresensi = ref([
-  {
-    date: "2022-01-01",
-    transactions: [
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-    ],
-  },
-  {
-    date: "2022-01-01",
-    transactions: [
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-      {
-        id: 1,
-        name: "Farriq",
-        date: "2022-01-01",
-        time: "10:00",
-        status: "Hadir",
-        method: "card",
-      },
-    ],
-  },
-]);
+const getPresnces = async () => {
+  return await axios.get("/pegawai/modules/presence");
+};
+
+const { data: presences, isPending: loading } = useQuery({
+  queryKey: ["presences"],
+  queryFn: getPresnces,
+});
 </script>
 
 <template>
@@ -91,20 +28,22 @@ const mockPresensi = ref([
         <Button icon="pi pi-filter" />
       </div>
       <div class="p-card shadow-none p-3 w-full">
-        <DataView :value="mockPresensi">
+        <DataView :value="presences.data.data" v-if="!loading">
           <template #list="slotProps">
             <div class="flex flex-column gap-2">
-              <div v-for="(item, index) in slotProps.items" :key="index">
+              <div v-for="(item, index) in slotProps.items[0]" :key="index">
                 <div class="flex flex-column">
                   <div
                     class="flex justify-content-between align-items-center px-1"
                   >
-                    <h3 class="text-lg">Januari 2022</h3>
+                    <h3 class="text-lg">
+                      {{
+                        format(item.date, "dd MMMM yyyy", { locale: id })
+                      }}
+                    </h3>
                   </div>
                   <div class="px-3 p-card shadow-1 border-round-xl py-2">
-                    <ListPresence
-                      :items="slotProps.items[index].transactions"
-                    />
+                    <ListPresence :items="item.presences" />
                   </div>
                 </div>
               </div>
@@ -114,6 +53,11 @@ const mockPresensi = ref([
             <p>Presensi Kosong</p>
           </template>
         </DataView>
+        <div class="flex flex-column gap-4" v-else>
+          <Skeleton height="10rem"></Skeleton>
+          <Skeleton height="10rem"></Skeleton>
+          <Skeleton height="10rem"></Skeleton>
+        </div>
       </div>
     </div>
   </div>

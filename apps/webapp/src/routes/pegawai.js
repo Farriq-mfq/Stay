@@ -9,7 +9,8 @@ const routes = [
         name: 'dashboard',
         component: () => import('@/views/pegawai/dashboard/Dashboard.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -17,7 +18,8 @@ const routes = [
         name: 'payment',
         component: () => import('@/views/pegawai/Payment/Index.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -25,7 +27,8 @@ const routes = [
         name: 'payment-topup',
         component: () => import('@/views/pegawai/Payment/Topup.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -33,7 +36,8 @@ const routes = [
         name: 'payment-transfer',
         component: () => import('@/views/pegawai/Payment/Transfer.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -41,7 +45,8 @@ const routes = [
         name: 'payment-withdraw',
         component: () => import('@/views/pegawai/Payment/Withdraw.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -49,7 +54,8 @@ const routes = [
         name: 'payment-detail',
         component: () => import('@/views/pegawai/Payment/Detail.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -57,7 +63,8 @@ const routes = [
         name: 'presences',
         component: () => import('@/views/pegawai/Presences/Index.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -65,7 +72,8 @@ const routes = [
         name: 'presences-detail',
         component: () => import('@/views/pegawai/Presences/Detail.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -73,7 +81,8 @@ const routes = [
         name: 'setting',
         component: () => import('@/views/pegawai/Setting/Index.vue'),
         meta: {
-            layout: 'PegawaiMainLayout'
+            layout: 'PegawaiMainLayout',
+            auth: true
         }
     },
     {
@@ -81,9 +90,18 @@ const routes = [
         name: 'login',
         component: Login,
         meta: {
-            layout: 'AuthLayout'
+            layout: 'AuthLayout',
+            auth: false,
         }
-    }
+    },
+    {
+        path: '/:pathNotFound(.*)*',
+        name: 'not-found',
+        component: () => import('@/views/Errors/NotFound.vue'),
+        meta: {
+            title: "404"
+        }
+    },
 ]
 
 export default routes;
