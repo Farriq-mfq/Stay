@@ -9,12 +9,20 @@ export class PegawaiModulesPresenceService {
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
 
     ) { }
-    async findAll(user: any, limit: number, after: string, before: string) {
+    async findAll(user: any, limit: string, after: string, before: string, search: string) {
         if (!user) return {}
 
         const presences = await this.prismaService.client.presences_pegawai.paginate({
             where: {
-                id: user.id
+                pegawaiId: parseInt(user.sub),
+                ...search && {
+                    session: {
+                        name: {
+                            contains: search,
+                            mode: 'insensitive'
+                        }
+                    }
+                }
             },
             include: {
                 session: true,
@@ -24,9 +32,13 @@ export class PegawaiModulesPresenceService {
                         location: true
                     }
                 }
-            }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+
         }).withCursor({
-            limit: limit ?? 1,
+            limit: 10,
             after: after ?? null,
             before: before ?? null,
         });
@@ -46,5 +58,27 @@ export class PegawaiModulesPresenceService {
             parseDatabyCreatedAt,
             presences[1]
         ]
+    }
+
+    async find(user: any, id: string) {
+        if (!user) return {}
+
+        const presence = await this.prismaService.client.presences_pegawai.findUniqueOrThrow({
+            where: {
+                id: parseInt(id),
+                pegawaiId: parseInt(user.sub)
+            },
+            include: {
+                session: true,
+                meeting_session: true,
+                gateway: {
+                    select: {
+                        location: true
+                    }
+                }
+            },
+        })
+
+        return presence
     }
 }

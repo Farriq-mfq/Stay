@@ -13,6 +13,7 @@ import { validate } from 'class-validator';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { format } from 'date-fns';
 import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
+import { AccountableType } from '@prisma/client';
 @Injectable()
 export class PegawaiService {
   constructor(
@@ -138,6 +139,13 @@ export class PegawaiService {
     return await this.prismaService.client.pegawai.findUniqueOrThrow({
       where: {
         id
+      },
+      include: {
+        account: {
+          where: {
+            accountableType: AccountableType.PEGAWAI
+          }
+        }
       }
     });
   }

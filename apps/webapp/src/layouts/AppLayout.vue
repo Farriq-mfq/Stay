@@ -51,5 +51,6 @@ watch(isOnline, (val) => {
       class="px-3"
       style="z-index: 9999 !important"
     />
+    <ConfirmDialog class="px-3"></ConfirmDialog>
   </div>
 </template>

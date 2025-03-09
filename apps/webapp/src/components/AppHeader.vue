@@ -1,6 +1,7 @@
 <script setup>
 import { useWindowScroll } from "@vueuse/core";
-import { onMounted, useTemplateRef, watch } from "vue";
+import { computed } from "vue";
+import { inject, onMounted, useTemplateRef, watch } from "vue";
 
 const { x, y } = useWindowScroll();
 const { bg } = defineProps({
@@ -26,6 +27,12 @@ watch([x, y], () => {
 onMounted(() => {
   window.scrollTo(0, 0);
 });
+
+const auth = inject("auth");
+
+const profilePict = computed(() => {
+  return auth.user().profile_picture;
+});
 </script>
 
 <template>
@@ -35,13 +42,20 @@ onMounted(() => {
     :class="{ 'bg-primary': bg, 'bg-transparent': !bg }"
     style="z-index: 999"
   >
-    <Button
-      icon="pi pi-user"
-      rounded
-      variant="outlined"
-      class="border-none text-white shadow-none"
-      text
+    <Avatar
+      v-if="profilePict"
+      :image="profilePict"
+      size="large"
+      shape="circle"
     />
+    <Avatar
+      v-if="!profilePict"
+      icon="pi pi-user"
+      style="background-color: transparent !important; color: white"
+      size="large"
+      shape="circle"
+    />
+
     <img src="@/assets/logo.png" alt="" class="w-7rem" />
     <Button
       rounded

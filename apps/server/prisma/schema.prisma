@@ -26,7 +26,8 @@ model siswa {
   notifications     notifications[]
   profile_picture   String?
   picture_public_id String?
-  account           account[]         @relation("SiswaAccount")
+  accountId         Int?              @unique
+  account           account?          @relation(fields: [accountId], references: [id])
 
   @@index([nis, nisn])
 }
@@ -48,7 +49,8 @@ model pegawai {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
   presences                 presences_pegawai[]
-  account                   account[]           @relation("PegawaiAccount")
+  accountId                 Int?                @unique
+  account                   account?            @relation(fields: [accountId], references: [id])
 }
 
 enum RoleUser {
@@ -68,7 +70,8 @@ model users {
   refreshToken       String?            @db.Text
   role               RoleUser           @default(user)
   telegram_accountId Int?               @unique
-  account            account[]          @relation("UserAccount")
+  accountId          Int?               @unique
+  account            account?           @relation(fields: [accountId], references: [id])
   role_permissions   role_permissions[] @relation("UserPermissions")
 }
 
@@ -244,11 +247,11 @@ model account {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  user               users?         @relation("UserAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "user_accountableId")
-  siswa              siswa?         @relation("SiswaAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "siswa_accountableId")
-  pegawai            pegawai?       @relation("PegawaiAccount", fields: [accountableId], references: [id], onDelete: Cascade, map: "pegawai_accountableId")
   asFromtransactions transactions[] @relation("asFromtransactions")
   asTotransactions   transactions[] @relation("asTotransactions")
+  siswa              siswa?
+  pegawai            pegawai?
+  users              users?
 
   @@unique([accountableId, accountableType])
   @@index([accountNumber, accountableId, accountableType])

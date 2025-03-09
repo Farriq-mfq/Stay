@@ -15,6 +15,7 @@ declare module 'vue' {
     Button: typeof import('primevue/button')['default']
     Camera: typeof import('./src/components/Camera.vue')['default']
     Carousel: typeof import('primevue/carousel')['default']
+    ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     Copyright: typeof import('./src/components/Copyright.vue')['default']
     DataView: typeof import('primevue/dataview')['default']
     Divider: typeof import('primevue/divider')['default']

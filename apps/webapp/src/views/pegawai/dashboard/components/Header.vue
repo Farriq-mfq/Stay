@@ -1,10 +1,14 @@
 <script setup>
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import Banner from "./Banner.vue";
-const showSaldo = ref(false);
+import { rupiahFormat } from "@/utils/money";
+import CreateAccount from "./CreateAccount.vue";
+const showSaldo = ref(true);
 const toggleShowSaldo = () => {
   showSaldo.value = !showSaldo.value;
 };
+
+const auth = inject("auth");
 </script>
 
 <template>
@@ -17,12 +21,18 @@ const toggleShowSaldo = () => {
           <h4
             class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis"
           >
-            Hai, Farriq Muwaffaq
+            Hai, {{ auth.user().name }}
           </h4>
-          <h2 class="text-3xl mx-0 mb-0 mt-1">
-            {{ showSaldo ? "Rp. 1.000.000" : "Rp.***.***" }}
+          <h2 class="text-3xl mx-0 mb-0 mt-1" v-if="auth.user().account">
+            {{
+              showSaldo ? rupiahFormat(auth.user().account.balance) : "***"
+            }}
           </h2>
-          <p class="text-xs mt-3 mx-0 font-semibold">Saldo saat ini</p>
+          <CreateAccount v-if="!auth.user().account" />
+
+          <p class="text-xs mt-3 mx-0 font-semibold" v-if="auth.user().account">
+            Saldo saat ini
+          </p>
           <div
             class="mt-4 flex gap-4 align-items-center justify-content-evenly"
           >
@@ -73,6 +83,7 @@ const toggleShowSaldo = () => {
           </div>
           <Button
             @click="toggleShowSaldo"
+            v-if="auth.user().account"
             icon="pi pi-eye"
             rounded
             class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-8"
