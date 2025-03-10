@@ -289,16 +289,18 @@ model transactions {
   amount              Float
   type                TransactionType       @default(PAYMENT)
   status              TransactionStatus     @default(PENDING)
-  code                String                @unique
+  code                String
   note                String?
   payment_method      String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   detail_transactions detail_transactions[]
-  from                account               @relation("asFromtransactions", fields: [fromAccountId], references: [id], onDelete: Cascade)
-  to                  account               @relation("asTotransactions", fields: [toAccountId], references: [id], onDelete: Cascade)
+  from                account               @relation("asFromtransactions", fields: [fromAccountId], references: [id])
+  to                  account               @relation("asTotransactions", fields: [toAccountId], references: [id])
   fromAccountId       Int
   toAccountId         Int
+  fromAccountType     AccountableType
+  toAccountType       AccountableType
 
   @@index([code])
 }

@@ -10,46 +10,46 @@ export class TransactionService {
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) { }
 
-    async Deposit(from: account, to: account, paymentMethod: PaymentMethodType, depositTransactionDto: DepositTransactionDto) {
-        const transcation = this.prismaService.client.$transaction(async (prisma) => {
+    // async Deposit(from: account, to: account, paymentMethod: PaymentMethodType, depositTransactionDto: DepositTransactionDto) {
+    //     const transcation = this.prismaService.client.$transaction(async (prisma) => {
 
-            const account = await prisma.account.findUniqueOrThrow({
-                where: {
-                    id: to.id
-                }
-            })
+    //         const account = await prisma.account.findUniqueOrThrow({
+    //             where: {
+    //                 id: to.id
+    //             }
+    //         })
 
-            const updateAccount = await prisma.account.update({
-                where: {
-                    id: to.id
-                },
-                data: {
-                    balance: account.balance + depositTransactionDto.amount
-                }
-            })
+    //         const updateAccount = await prisma.account.update({
+    //             where: {
+    //                 id: to.id
+    //             },
+    //             data: {
+    //                 balance: account.balance + depositTransactionDto.amount
+    //             }
+    //         })
 
-            if (!updateAccount) {
-                throw new BadRequestException("Deposit failed")
-            }
+    //         if (!updateAccount) {
+    //             throw new BadRequestException("Deposit failed")
+    //         }
 
-            await prisma.transactions.create({
-                data: {
-                    amount: depositTransactionDto.amount,
-                    code: uuidv4(),
-                    flow: 'UP',
-                    payment_method: paymentMethod,
-                    fromAccountId: from.id,
-                    toAccountId: to.id,
-                    status: 'SUCCESS',
-                    type: "DEPOSIT",
-                    title: `Deposit untuk ${to.name}`,
-                    note: depositTransactionDto.note
-                }
-            })
-        })
+    //         await prisma.transactions.create({
+    //             data: {
+    //                 amount: depositTransactionDto.amount,
+    //                 code: uuidv4(),
+    //                 flow: 'UP',
+    //                 payment_method: paymentMethod,
+    //                 fromAccountId: from.id,
+    //                 toAccountId: to.id,
+    //                 status: 'SUCCESS',
+    //                 type: "DEPOSIT",
+    //                 title: `Deposit untuk ${to.name}`,
+    //                 note: depositTransactionDto.note
+    //             }
+    //         })
+    //     })
 
-        return transcation;
-    }
+    //     return transcation;
+    // }
 
 
     async Transfer(from: account, paymentMethod: PaymentMethodType, transferTransactionDto: TransferTransactionDto) {
@@ -66,6 +66,11 @@ export class TransactionService {
                     id: transferTransactionDto.toAccountId
                 }
             })
+
+
+            if (fromAccount.balance < transferTransactionDto.amount) {
+                throw new BadRequestException("Insufficient balance")
+            }
 
             // update balance sender
             const updateSender = await prisma.account.update({
@@ -96,98 +101,120 @@ export class TransactionService {
             }
 
             // create transaction
-            await prisma.transactions.create({
+            const idTrasaction = uuidv4();
+            // from account
+            const fromTransaction = await prisma.transactions.create({
                 data: {
                     amount: transferTransactionDto.amount,
-                    code: uuidv4(),
+                    code: idTrasaction,
                     flow: 'DOWN',
                     payment_method: paymentMethod,
                     fromAccountId: fromAccount.id,
                     toAccountId: toAccount.id,
                     status: 'SUCCESS',
                     type: "TRANSFER",
-                    title: `Transfer untuk ${toAccount.name}`,
-                    note: transferTransactionDto.note
+                    title: `Kirim untuk ${toAccount.name}`,
+                    note: transferTransactionDto.note,
+                    fromAccountType: fromAccount.accountableType,
+                    toAccountType: toAccount.accountableType
+                }
+            })
+            // to account
+            await prisma.transactions.create({
+                data: {
+                    amount: transferTransactionDto.amount,
+                    code: idTrasaction,
+                    flow: 'UP',
+                    payment_method: paymentMethod,
+                    fromAccountId: toAccount.id,
+                    toAccountId: fromAccount.id,
+                    status: 'SUCCESS',
+                    type: "DEPOSIT",
+                    title: `Mendapatkan dari ${fromAccount.name}`,
+                    note: transferTransactionDto.note,
+                    fromAccountType: toAccount.accountableType,
+                    toAccountType: fromAccount.accountableType
                 }
             })
 
+            return fromTransaction
         })
         return transcation;
 
     }
 
 
-    async Payment(from: account, paymentMethod: PaymentMethodType, paymentTransactionDto: PaymentTransactionDto) {
-        const transcation = this.prismaService.client.$transaction(async (prisma) => {
+    // async Payment(from: account, paymentMethod: PaymentMethodType, paymentTransactionDto: PaymentTransactionDto) {
+    //     const transcation = this.prismaService.client.$transaction(async (prisma) => {
 
-            const fromAccount = await prisma.account.findUniqueOrThrow({
-                where: {
-                    id: from.id
-                }
-            })
+    //         const fromAccount = await prisma.account.findUniqueOrThrow({
+    //             where: {
+    //                 id: from.id
+    //             }
+    //         })
 
-            const toAccount = await prisma.account.findUniqueOrThrow({
-                where: {
-                    id: paymentTransactionDto.toAccountId
-                }
-            })
+    //         const toAccount = await prisma.account.findUniqueOrThrow({
+    //             where: {
+    //                 id: paymentTransactionDto.toAccountId
+    //             }
+    //         })
 
-            // update balance sender
-            const updateSender = await prisma.account.update({
-                where: {
-                    id: fromAccount.id
-                },
-                data: {
-                    balance: fromAccount.balance - paymentTransactionDto.amount
-                }
-            })
+    //         // update balance sender
+    //         const updateSender = await prisma.account.update({
+    //             where: {
+    //                 id: fromAccount.id
+    //             },
+    //             data: {
+    //                 balance: fromAccount.balance - paymentTransactionDto.amount
+    //             }
+    //         })
 
-            if (!updateSender) {
-                throw new BadRequestException("Payment failed")
-            }
+    //         if (!updateSender) {
+    //             throw new BadRequestException("Payment failed")
+    //         }
 
-            // update balance receiver
-            const updateReceiver = await prisma.account.update({
-                where: {
-                    id: paymentTransactionDto.toAccountId
-                },
-                data: {
-                    balance: toAccount.balance + paymentTransactionDto.amount
-                }
-            })
+    //         // update balance receiver
+    //         const updateReceiver = await prisma.account.update({
+    //             where: {
+    //                 id: paymentTransactionDto.toAccountId
+    //             },
+    //             data: {
+    //                 balance: toAccount.balance + paymentTransactionDto.amount
+    //             }
+    //         })
 
-            if (!updateReceiver) {
-                throw new BadRequestException("Payment failed")
-            }
+    //         if (!updateReceiver) {
+    //             throw new BadRequestException("Payment failed")
+    //         }
 
-            // create transaction
-            await prisma.transactions.create({
-                data: {
-                    amount: paymentTransactionDto.amount,
-                    code: uuidv4(),
-                    flow: 'DOWN',
-                    payment_method: paymentMethod,
-                    fromAccountId: fromAccount.id,
-                    toAccountId: toAccount.id,
-                    status: 'SUCCESS',
-                    type: "PAYMENT",
-                    title: paymentTransactionDto.title,
-                    note: paymentTransactionDto.note,
-                    detail_transactions: {
-                        createMany: {
-                            data: paymentTransactionDto.details.map((detail) => ({
-                                amount: detail.amount,
-                                title: detail.title,
-                                quantity: detail.quantity,
-                                subtotal: detail.amount * detail.quantity
-                            }))
-                        }
-                    }
-                }
-            })
+    //         // create transaction
+    //         await prisma.transactions.create({
+    //             data: {
+    //                 amount: paymentTransactionDto.amount,
+    //                 code: uuidv4(),
+    //                 flow: 'DOWN',
+    //                 payment_method: paymentMethod,
+    //                 fromAccountId: fromAccount.id,
+    //                 toAccountId: toAccount.id,
+    //                 status: 'SUCCESS',
+    //                 type: "PAYMENT",
+    //                 title: paymentTransactionDto.title,
+    //                 note: paymentTransactionDto.note,
+    //                 detail_transactions: {
+    //                     createMany: {
+    //                         data: paymentTransactionDto.details.map((detail) => ({
+    //                             amount: detail.amount,
+    //                             title: detail.title,
+    //                             quantity: detail.quantity,
+    //                             subtotal: detail.amount * detail.quantity
+    //                         }))
+    //                     }
+    //                 }
+    //             }
+    //         })
 
-        })
+    //     })
 
-        return transcation
-    }
+    //     return transcation
+    // }
 }

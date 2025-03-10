@@ -11,7 +11,7 @@ const createAccount = async () => {
   return response.data;
 };
 
-const { mutateAsync: createAccountMutate } = useMutation({
+const { mutateAsync: createAccountMutate,isPending } = useMutation({
   mutationKey: ["createAccount"],
   mutationFn: createAccount,
 });
@@ -45,6 +45,6 @@ const handleCreateAccount = async () => {
 <template>
   <div class="flex flex-column">
     <p class="text-sm m-0 mb-3">Kamu tidak memiliki account</p>
-    <Button @click.prevent="handleCreateAccount" label="Buat Account Baru" icon="pi pi-plus" size="small" />
+    <Button :loading="isPending" @click.prevent="handleCreateAccount" label="Buat Account Baru" icon="pi pi-plus" size="small" />
   </div>
 </template>

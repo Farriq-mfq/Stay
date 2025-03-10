@@ -43,7 +43,7 @@ const auth = inject("auth");
                 class="shadow-none"
                 rounded
                 variant="outlined"
-                @click="$router.push({ name: 'payment-topup' })"
+                @click="$router.push({ name: 'transactions-topup' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Top up</p>
             </div>
@@ -54,7 +54,7 @@ const auth = inject("auth");
                 class="shadow-none"
                 rounded
                 variant="outlined"
-                @click="$router.push({ name: 'payment-transfer' })"
+                @click="$router.push({ name: 'transactions-transfer' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Transfer</p>
             </div>
@@ -65,7 +65,7 @@ const auth = inject("auth");
                 class="shadow-none"
                 rounded
                 variant="outlined"
-                @click="$router.push({ name: 'payment-withdraw' })"
+                @click="$router.push({ name: 'transactions-withdraw' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Tarik</p>
             </div>
@@ -76,7 +76,7 @@ const auth = inject("auth");
                 class="shadow-none"
                 rounded
                 variant="outlined"
-                @click="$router.push({ name: 'payment' })"
+                @click="$router.push({ name: 'transactions' })"
               />
               <p class="text-xs mt-2 mx-0 text-center">Riwayat</p>
             </div>

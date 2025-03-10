@@ -15,11 +15,11 @@ const drawer = useDrawer();
       <span class="text-xs mt-2 font-semibold">Home</span>
     </router-link>
     <router-link
-      :to="{ name: 'payment' }"
+      :to="{ name: 'transactions' }"
       class="flex flex-column align-items-center no-underline text-center text-color-secondary"
     >
       <i class="pi pi-wallet text-xl"></i>
-      <span class="text-xs mt-2 font-semibold">Payment</span>
+      <span class="text-xs mt-2 font-semibold">Transaksi</span>
     </router-link>
     <div
       class="flex flex-column align-items-center no-underline text-center mb-6"

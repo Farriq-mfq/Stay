@@ -8,7 +8,6 @@ import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
 import TransferConfirmation from "../components/drawer/TransferConfirmation.vue";
-import Loading from "../components/drawer/Loading.vue";
 import { useToast } from "primevue/usetoast";
 const drawer = useDrawer();
 const app = useApp();
@@ -24,7 +23,6 @@ watch(
 const draweComponents = {
   default: DrawerContent,
   TransferConfirmation,
-  Loading,
 };
 
 onMounted(() => {

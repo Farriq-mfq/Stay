@@ -12,7 +12,7 @@ const { items } = defineProps({
   <router-link
     v-for="(item, idx) in items"
     :key="idx"
-    :to="{ name: 'payment-detail', params: { transaction_id: 1 } }"
+    :to="{ name: 'transactions-detail', params: { transaction_id: 1 } }"
     class="flex align-items-center py-3 border-bottom-1 surface-border hover:surface-hover no-underline text-color list-transaction"
   >
     <div class="flex-1 flex align-items-center gap-3">

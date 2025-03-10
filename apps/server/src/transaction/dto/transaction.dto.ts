@@ -73,4 +73,4 @@ export class PaymentTransactionDetailDto {
 
 }
 
-export type PaymentMethodType = "CARD" | "CASH" | "QRCODE";
+export type PaymentMethodType = "CARD" | "CASH" | "QRCODE" | "BALANCE";

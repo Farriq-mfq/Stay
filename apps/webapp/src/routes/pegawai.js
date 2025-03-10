@@ -14,45 +14,45 @@ const routes = [
         }
     },
     {
-        path: '/payment',
-        name: 'payment',
-        component: () => import('@/views/pegawai/Payment/Index.vue'),
+        path: '/transactions',
+        name: 'transactions',
+        component: () => import('@/views/pegawai/Transactions/Index.vue'),
         meta: {
             layout: 'PegawaiMainLayout',
             auth: true
         }
     },
     {
-        path: '/payment/topup',
-        name: 'payment-topup',
-        component: () => import('@/views/pegawai/Payment/Topup.vue'),
+        path: '/transactions/topup',
+        name: 'transactions-topup',
+        component: () => import('@/views/pegawai/Transactions/Topup.vue'),
         meta: {
             layout: 'PegawaiMainLayout',
             auth: true
         }
     },
     {
-        path: '/payment/transfer',
-        name: 'payment-transfer',
-        component: () => import('@/views/pegawai/Payment/Transfer.vue'),
+        path: '/transactions/transfer',
+        name: 'transactions-transfer',
+        component: () => import('@/views/pegawai/Transactions/Transfer.vue'),
         meta: {
             layout: 'PegawaiMainLayout',
             auth: true
         }
     },
     {
-        path: '/payment/withdraw',
-        name: 'payment-withdraw',
-        component: () => import('@/views/pegawai/Payment/Withdraw.vue'),
+        path: '/transactions/withdraw',
+        name: 'transactions-withdraw',
+        component: () => import('@/views/pegawai/Transactions/Withdraw.vue'),
         meta: {
             layout: 'PegawaiMainLayout',
             auth: true
         }
     },
     {
-        path: '/payment/:transaction_id/detail',
-        name: 'payment-detail',
-        component: () => import('@/views/pegawai/Payment/Detail.vue'),
+        path: '/transactions/:transaction_id/detail',
+        name: 'transactions-detail',
+        component: () => import('@/views/pegawai/Transactions/Detail.vue'),
         meta: {
             layout: 'PegawaiMainLayout',
             auth: true
