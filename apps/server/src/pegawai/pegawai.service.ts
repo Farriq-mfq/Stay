@@ -140,13 +140,6 @@ export class PegawaiService {
       where: {
         id
       },
-      include: {
-        account: {
-          where: {
-            accountableType: AccountableType.PEGAWAI
-          }
-        }
-      }
     });
   }
 

@@ -247,6 +247,8 @@ model account {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  qrCode String? @unique
+
   asFromtransactions transactions[] @relation("asFromtransactions")
   asTotransactions   transactions[] @relation("asTotransactions")
   siswa              siswa?
@@ -283,7 +285,7 @@ enum TransactionStatus {
 // }
 
 model transactions {
-  id                  Int                   @id @default(autoincrement())
+  id                  BigInt                @id @default(autoincrement())
   title               String? // generate by system ex : deposit from user 1 to user 2
   flow                TransactionFlow
   amount              Float
@@ -308,7 +310,7 @@ model transactions {
 model detail_transactions {
   id            Int          @id @default(autoincrement())
   transaction   transactions @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  transactionId Int
+  transactionId BigInt
   title         String
   amount        Float
   quantity      Int

@@ -87,8 +87,17 @@ watch(filter, (val) => {
         class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1"
         style="top: 5rem"
       >
-        <InputText class="w-full flex-1" placeholder="Cari transaksi" />
-        <Button icon="pi pi-filter" />
+        <InputText
+          class="w-full flex-1"
+          v-model="filter"
+          placeholder="Cari transaksi"
+        />
+        <Button
+          icon="pi pi-filter"
+          :disabled="filter == null || filter == '' || loading"
+          :loading="loading"
+          @click.prevent="handleSearch"
+        />
       </div>
       <div class="p-card shadow-none p-3 w-full">
         <DataView :value="items" v-if="!loading">

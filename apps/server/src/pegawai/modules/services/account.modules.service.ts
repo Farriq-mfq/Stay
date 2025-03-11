@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountableType, pegawai } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
@@ -15,6 +15,22 @@ export class PegawaiAccountModuleService {
 
         private readonly transactionService: TransactionService
     ) { }
+
+    async myAccount(user: any) {
+        if (!user) throw new UnauthorizedException()
+        const userId = parseInt(user.sub)
+
+        const account = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: userId,
+                accountableType: AccountableType.PEGAWAI
+            }
+        })
+
+        if (!account) throw new NotFoundException("Account not found")
+
+        return account
+    }
 
     async createAccount(user: any) {
         if (!user) throw new UnauthorizedException()
@@ -112,7 +128,7 @@ export class PegawaiAccountModuleService {
         if (fromAccount.accountNumber === toAccount.accountNumber) throw new BadRequestException("Transfer to same account not allowed")
 
 
-        return await this.transactionService.Transfer(fromAccount,"BALANCE",{
+        return await this.transactionService.Transfer(fromAccount, "BALANCE", {
             toAccountId: toAccount.id,
             amount: transferDto.nominal,
             note: transferDto.note

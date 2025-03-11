@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { TransactionPegawaiModuleService } from '../services/transactions.modules.service';
 import { Request } from 'express';
 import { AccessTokenPegawaiGuard } from 'src/pegawai/guards/accessTokenPegawai.guard';
@@ -9,7 +9,7 @@ import { AccessTokenPegawaiGuard } from 'src/pegawai/guards/accessTokenPegawai.g
 export class TransactionPegawaiModuleController {
     constructor(
         private readonly pegawaiModulesTransactionService: TransactionPegawaiModuleService
-    ){}
+    ) { }
 
     @Get('/')
     async getTransaction(
@@ -21,4 +21,16 @@ export class TransactionPegawaiModuleController {
     ) {
         return await this.pegawaiModulesTransactionService.listTransaction(req.user, limit, after, before, search);
     }
+
+
+
+    @Get('/:id')
+    async findTransaction(
+        @Req() req: Request,
+        @Param('id', new ParseIntPipe()) id: number
+    ) {
+        return await this.pegawaiModulesTransactionService.findTransaction(req.user, id);
+    }
+
+
 }  

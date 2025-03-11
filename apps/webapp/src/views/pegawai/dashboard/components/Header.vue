@@ -1,12 +1,25 @@
 <script setup>
-import { inject, ref } from "vue";
+import { inject, ref, getCurrentInstance } from "vue";
+import { useQuery } from "@tanstack/vue-query";
 import Banner from "./Banner.vue";
 import { rupiahFormat } from "@/utils/money";
 import CreateAccount from "./CreateAccount.vue";
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
 const showSaldo = ref(true);
 const toggleShowSaldo = () => {
   showSaldo.value = !showSaldo.value;
 };
+
+const getAccount = async () => {
+  const response = await axios.get("/pegawai/modules/account");
+  return response.data;
+};
+
+const { data: account, isLoading: accountLoading } = useQuery({
+  queryKey: ["account"],
+  queryFn: getAccount,
+});
 
 const auth = inject("auth");
 </script>
@@ -17,20 +30,18 @@ const auth = inject("auth");
       <div
         class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-8"
       >
-        <div class="text-white pt-4 px-4 pb-2 flex-1">
+        <div class="text-white pt-4 px-4 pb-2 flex-1" v-if="!accountLoading">
           <h4
             class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis"
           >
-            Hai, {{ auth.user().name }}
+            Hai, {{ account.data.name }}
           </h4>
-          <h2 class="text-3xl mx-0 mb-0 mt-1" v-if="auth.user().account">
-            {{
-              showSaldo ? rupiahFormat(auth.user().account.balance) : "***"
-            }}
+          <h2 class="text-3xl mx-0 mb-0 mt-1" v-if="account.data">
+            {{ showSaldo ? rupiahFormat(account.data.balance) : "***" }}
           </h2>
-          <CreateAccount v-if="!auth.user().account" />
+          <CreateAccount v-if="!account.data" />
 
-          <p class="text-xs mt-3 mx-0 font-semibold" v-if="auth.user().account">
+          <p class="text-xs mt-3 mx-0 font-semibold" v-if="account.data">
             Saldo saat ini
           </p>
           <div
@@ -83,12 +94,17 @@ const auth = inject("auth");
           </div>
           <Button
             @click="toggleShowSaldo"
-            v-if="auth.user().account"
+            v-if="account.data.account"
             icon="pi pi-eye"
             rounded
             class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-8"
             variant="text"
           />
+        </div>
+        <div class="text-white pt-4 px-4 pb-2 flex-1" v-if="accountLoading">
+          <div class="h-12rem">
+            <p>Memuat...</p>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountableType } from "@prisma/client";
 import { format } from "date-fns";
 import { CustomPrismaService } from "nestjs-prisma";
@@ -26,7 +26,27 @@ export class TransactionPegawaiModuleService {
         const transactions = await this.prismaService.client.transactions.paginate({
             where: {
                 fromAccountId: account.id,
-                fromAccountType: AccountableType.PEGAWAI
+                fromAccountType: AccountableType.PEGAWAI,
+                ...search && {
+                    OR: [
+                        {
+                            to: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                        {
+                            from: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                    ]
+                }
             },
             orderBy: {
                 createdAt: 'desc'
@@ -55,5 +75,24 @@ export class TransactionPegawaiModuleService {
             parseDatabyCreatedAt,
             transactions[1]
         ]
+    }
+
+    async findTransaction(user: any, id: number) {
+        if (!user) throw new UnauthorizedException();
+        const account = await this.prismaService.client.account.findFirstOrThrow({
+            where: {
+                accountableId: parseInt(user.sub),
+                accountableType: AccountableType.PEGAWAI
+            }
+        })
+        return await this.prismaService.client.transactions.findUniqueOrThrow({
+            where: {
+                id,
+                fromAccountId: account.id,
+            },
+            include: {
+                to: true
+            }
+        })
     }
 }

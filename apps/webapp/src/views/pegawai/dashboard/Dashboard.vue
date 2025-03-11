@@ -48,9 +48,9 @@ const mockPresensi = ref([
       style="margin: -10px; z-index: 99"
     >
       <div class="p-3 overflow-hidden">
-        <h3 class="m-0">Quote of <span class="text-primary">The day</span></h3>
+        <h3 class="m-0">Fitur <span class="text-primary">Sistem</span></h3>
         <p class="text-xs mt-2 font-semibold">
-          Settle up via your bank app. No app required on their end!
+          Comming soon
         </p>
       </div>
     </div>

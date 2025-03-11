@@ -16,16 +16,29 @@ const { items } = defineProps({
   <router-link
     v-for="item in items"
     :key="item.id"
-    :to="{ name: 'transactions-detail', params: { transaction_id: 1 } }"
+    :to="{ name: 'transactions-detail', params: { transaction_id: item.id } }"
     class="flex align-items-center py-3 border-bottom-1 surface-border hover:surface-hover no-underline text-color list-transaction"
   >
     <div class="flex-1 flex align-items-center gap-3">
       <div
         class="h-3rem w-3rem border-1 border-primary border-round-2xl flex justify-content-center align-items-center"
       >
-        <i class="pi pi-arrow-right text-primary"></i>
-        <!-- <i class="pi pi-qrcode text-primary"></i> -->
-        <!-- <i class="pi pi-shopping-cart text-primary"></i> -->
+        <i
+          class="pi pi-arrow-down-right text-primary"
+          v-if="item.type === 'TRANSFER'"
+        ></i>
+        <i
+          class="pi pi-arrow-up-right text-primary"
+          v-if="item.type === 'DEPOSIT'"
+        ></i>
+        <i
+          class="pi pi-money-bill text-primary"
+          v-if="item.type === 'WITHDRAW'"
+        ></i>
+        <i
+          class="pi pi-credit-card text-primary"
+          v-if="item.type === 'PAYMENT'"
+        ></i>
       </div>
       <div>
         <h4
@@ -35,10 +48,13 @@ const { items } = defineProps({
           {{ item.title }}
         </h4>
         <p class="text-color-secondary m-0 text-xs mt-2">
-          {{ format(item.createdAt, "dd MMMM yyyy - HH:mm", { locale: id }) }}
+          {{ format(item.createdAt, "dd MMMM yyyy", { locale: id }) }} - {{ item.type }}
         </p>
         <div class="text-xs flex align-items-center mt-2 gap-1">
-          <div class="flex justify-content-center align-items-center gap-2" v-if="item.status === 'SUCCESS'">
+          <div
+            class="flex justify-content-center align-items-center gap-2"
+            v-if="item.status === 'SUCCESS'"
+          >
             <i class="pi pi-check-circle text-primary"></i>
             <span> Berhasil</span>
           </div>

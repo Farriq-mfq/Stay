@@ -11,11 +11,18 @@ export class PegawaiAccountModuleServiceController {
         private readonly pegawaiAccountModuleService: PegawaiAccountModuleService
     ) { }
 
+    @Get('/')
+    async myAccount(
+        @Req() req: Request
+    ) {
+        return await this.pegawaiAccountModuleService.myAccount(req.user)
+    }
+
     @Post('/create')
     async create(
         @Req() req: Request
     ) {
-        return this.pegawaiAccountModuleService.createAccount(req.user)
+        return await this.pegawaiAccountModuleService.createAccount(req.user)
     }
 
     @Get('/search')
