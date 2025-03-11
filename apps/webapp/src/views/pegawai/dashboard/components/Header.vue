@@ -41,9 +41,9 @@ const auth = inject("auth");
           </h2>
           <CreateAccount v-if="!account.data" />
 
-          <p class="text-xs mt-3 mx-0 font-semibold" v-if="account.data">
-            Saldo saat ini
-          </p>
+          <div class="text-xs mt-3 mx-0 font-semibold" v-if="account.data">
+            Rekening : {{ account.data.accountNumber }}
+          </div>
           <div
             class="mt-4 flex gap-4 align-items-center justify-content-evenly"
           >
@@ -94,7 +94,7 @@ const auth = inject("auth");
           </div>
           <Button
             @click="toggleShowSaldo"
-            v-if="account.data.account"
+            v-if="account.data"
             icon="pi pi-eye"
             rounded
             class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-8"

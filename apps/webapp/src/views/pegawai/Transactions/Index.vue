@@ -116,11 +116,11 @@ watch(filter, (val) => {
                     >
                       <!-- <i class="pi pi-minus text-red-500 text-xs"></i> -->
                       <i
-                        class="pi pi-plus text-primary text-xs"
+                        class="pi pi-arrow-up-right text-primary text-xs"
                         v-if="item.total.in > item.total.out"
                       ></i>
                       <i
-                        class="pi pi-minus text-red-500 text-xs"
+                        class="pi pi-arrow-down-left text-red-500 text-xs"
                         v-if="item.total.out > item.total.in"
                       ></i>
                       <span class="text-color-secondary">

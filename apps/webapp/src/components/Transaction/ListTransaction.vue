@@ -63,10 +63,10 @@ const { items } = defineProps({
     </div>
     <div class="text-xs flex align-items-center justify-content-center gap-1">
       <i
-        class="pi pi-minus text-red-500 text-xs"
+        class="pi pi-arrow-down-left text-red-500 text-xs"
         v-if="item.flow === 'DOWN'"
       ></i>
-      <i class="pi pi-plus text-primary text-xs" v-if="item.flow === 'UP'"></i>
+      <i class="pi pi-arrow-up-right text-primary text-xs" v-if="item.flow === 'UP'"></i>
       <span>
         {{ rupiahFormat(item.amount) }}
       </span>
