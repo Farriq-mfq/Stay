@@ -1,15 +1,15 @@
 import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { AccountableType, pegawai } from "@prisma/client";
-import { CustomPrismaService } from "nestjs-prisma";
-import { ExtendedPrismaClient } from "src/prisma.extension";
-import { SearchAccountPegawaiDto, TransferAccountPegawaiDto } from "../dto/account.dto";
+import { AccountableType, siswa } from "@prisma/client";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { formattedErrors } from "src/utils/error";
+import { CustomPrismaService } from "nestjs-prisma";
+import { ExtendedPrismaClient } from "src/prisma.extension";
 import { TransactionService } from "src/transaction/transaction.service";
+import { formattedErrors } from "src/utils/error";
+import { SearchAccountSiswaDto, TransferAccountSiswaDto } from "../dto/account.dto";
 
 @Injectable()
-export class PegawaiAccountModuleService {
+export class SiswaAccountModuleService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
 
@@ -23,7 +23,7 @@ export class PegawaiAccountModuleService {
         const account = await this.prismaService.client.account.findFirst({
             where: {
                 accountableId: userId,
-                accountableType: AccountableType.PEGAWAI
+                accountableType: AccountableType.SISWA
             }
         })
 
@@ -34,33 +34,33 @@ export class PegawaiAccountModuleService {
 
     async createAccount(user: any) {
         if (!user) throw new UnauthorizedException()
-        const pegawai = await this.prismaService.client.pegawai.findUniqueOrThrow({
+        const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
             where: {
                 id: parseInt(user.sub)
             },
             include: {
                 account: {
                     where: {
-                        accountableType: AccountableType.PEGAWAI
+                        accountableType: AccountableType.SISWA
                     }
                 }
             }
         })
 
-        if (pegawai.account) throw new BadRequestException("Account already created")
+        if (siswa.account) throw new BadRequestException("Account already created")
 
         const account = await this.prismaService.client.account.create({
             data: {
-                name: pegawai.name,
-                accountNumber: this.generateAccountNumber(pegawai),
-                accountableType: AccountableType.PEGAWAI,
-                accountableId: pegawai.id,
+                name: siswa.name,
+                accountNumber: this.generateAccountNumber(siswa),
+                accountableType: AccountableType.SISWA,
+                accountableId: siswa.id,
             }
         })
 
-        await this.prismaService.client.pegawai.update({
+        await this.prismaService.client.siswa.update({
             where: {
-                id: pegawai.id
+                id: siswa.id
             },
             data: {
                 accountId: account.id
@@ -71,9 +71,9 @@ export class PegawaiAccountModuleService {
     }
 
 
-    protected generateAccountNumber(pegawai: pegawai) {
-        const createYear = new Date(pegawai.createdAt).getFullYear().toString().substring(2)
-        const userId = pegawai.id.toString()
+    protected generateAccountNumber(siswa: siswa) {
+        const createYear = new Date(siswa.createdAt).getFullYear().toString().substring(2)
+        const userId = siswa.id.toString()
         const checkDigit = userId.length
 
         const ROLE_CODE = {
@@ -82,13 +82,13 @@ export class PegawaiAccountModuleService {
             "USER": "03",
         }
 
-        return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.PEGAWAI]}`
+        return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.SISWA]}`
     }
 
     async searchAccount(user: any, account_number: string) {
         if (!user) throw new UnauthorizedException()
 
-        const dto = plainToInstance(SearchAccountPegawaiDto, { account_number })
+        const dto = plainToInstance(SearchAccountSiswaDto, { account_number })
         const errors = await validate(dto)
 
         if (errors.length > 0) throw new BadRequestException(formattedErrors(errors))
@@ -96,17 +96,22 @@ export class PegawaiAccountModuleService {
         const myAccount = await this.prismaService.client.account.findFirst({
             where: {
                 accountableId: parseInt(user.sub),
-                accountableType: AccountableType.PEGAWAI
+                accountableType: AccountableType.SISWA
             },
         });
 
         if (!myAccount) throw new BadRequestException("Please create account first")
-
         if (myAccount.accountNumber === account_number) throw new BadRequestException("Transfer to same account not allowed")
 
         const account = await this.prismaService.client.account.findUniqueOrThrow({
             where: {
                 accountNumber: account_number,
+                accountableId: {
+                    not: parseInt(user.sub)
+                },
+                accountableType: {
+                    not: AccountableType.PEGAWAI // not allow transfer to pegawai
+                }
             }
         })
 
@@ -114,13 +119,13 @@ export class PegawaiAccountModuleService {
     }
 
 
-    async transfer(user: any, transferDto: TransferAccountPegawaiDto) {
+    async transfer(user: any, transferDto: TransferAccountSiswaDto) {
         if (!user) throw new UnauthorizedException()
 
         const fromAccount = await this.prismaService.client.account.findFirst({
             where: {
                 accountableId: parseInt(user.sub),
-                accountableType: AccountableType.PEGAWAI
+                accountableType: AccountableType.SISWA
             },
         });
         if (!fromAccount) throw new BadRequestException("Account not found")
@@ -144,6 +149,5 @@ export class PegawaiAccountModuleService {
 
 
 
-        // return await this.transactionService.Transfer()
     }
 }

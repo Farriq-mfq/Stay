@@ -12,7 +12,7 @@ const toggleShowSaldo = () => {
 };
 
 const getAccount = async () => {
-  const response = await axios.get("/pegawai/modules/account");
+  const response = await axios.get("/siswa/modules/account");
   return response.data;
 };
 
@@ -39,9 +39,11 @@ const auth = inject("auth");
           <h2 class="text-3xl mx-0 mb-0 mt-1" v-if="account.data">
             {{ showSaldo ? rupiahFormat(account.data.balance) : "***" }}
           </h2>
+          <CreateAccount v-if="!account.data" />
 
           <div class="text-xs mt-3 mx-0 font-semibold" v-if="account.data">
-            Rekening : {{ account.data.accountNumber }}
+            Rekening : {{ account.data.accountNumber }} 
+            <!-- <Button label="Copy" icon="pi pi-copy" size="small" /> -->
           </div>
           <div
             class="mt-4 flex gap-4 align-items-center justify-content-evenly"

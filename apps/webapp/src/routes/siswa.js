@@ -8,71 +8,89 @@ const routes = [
         name: 'dashboard',
         component: () => import('@/views/siswa/dashboard/Dashboard.vue'),
         meta: {
-            layout: 'SiswaMainLayout'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
-        path: '/payment',
-        name: 'payment',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        path: '/transactions',
+        name: 'transactions',
+        component: () => import('@/views/siswa/Transactions/Index.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
-        path: '/payment/topup',
-        name: 'payment-topup',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        path: '/transactions/topup',
+        name: 'transactions-topup',
+        component: () => import('@/views/siswa/Transactions/Topup.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
-        path: '/payment/transfer',
-        name: 'payment-transfer',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        path: '/transactions/transfer',
+        name: 'transactions-transfer',
+        component: () => import('@/views/siswa/Transactions/Transfer.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
-        path: '/payment/withdraw',
-        name: 'payment-withdraw',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        path: '/transactions/withdraw',
+        name: 'transactions-withdraw',
+        component: () => import('@/views/siswa/Transactions/Withdraw.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
-        path: '/payment/:transaction_id/detail',
-        name: 'payment-detail',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        path: '/transactions/:transaction_id/detail',
+        name: 'transactions-detail',
+        component: () => import('@/views/siswa/Transactions/Detail.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
         path: "/presences",
         name: 'presences',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        component: () => import('@/views/siswa/Presences/Index.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
         path: "/presences/:id/detail",
         name: 'presences-detail',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        component: () => import('@/views/siswa/Presences/Detail.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
         path: "/setting",
         name: 'setting',
-        component: () => "<h1>Lorem ipsum dolor sit amet</h1>",
+        component: () => import('@/views/siswa/Setting/Index.vue'),
         meta: {
-            layout: 'SiswaMainLayput'
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('@/views/siswa/Auth/Login.vue'),
+        meta: {
+            layout: 'AuthLayout',
+            auth: false,
         }
     },
 
@@ -81,7 +99,8 @@ const routes = [
         name: 'login',
         component: () => import('@/views/siswa/auth/Login.vue'),
         meta: {
-            layout: 'AuthLayoutSiswa'
+            layout: 'AuthLayoutSiswa',
+            auth: false
         }
     },
     {

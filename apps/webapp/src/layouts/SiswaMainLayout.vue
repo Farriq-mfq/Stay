@@ -8,6 +8,7 @@ import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
 import { useToast } from "primevue/usetoast";
+import TransferConfirmationSiswa from "../components/drawer/TransferConfirmationSiswa.vue";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
@@ -21,6 +22,7 @@ watch(
 
 const draweComponents = {
   default: DrawerContent,
+  TransferConfirmationSiswa
 };
 
 onMounted(() => {

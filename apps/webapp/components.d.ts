@@ -16,6 +16,7 @@ declare module 'vue' {
     Camera: typeof import('./src/components/Camera.vue')['default']
     Carousel: typeof import('primevue/carousel')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
+    copy: typeof import('./src/components/drawer/TransferConfirmation copy.vue')['default']
     Copyright: typeof import('./src/components/Copyright.vue')['default']
     DataView: typeof import('primevue/dataview')['default']
     Divider: typeof import('primevue/divider')['default']
@@ -45,6 +46,7 @@ declare module 'vue' {
     Test: typeof import('./src/components/Test.vue')['default']
     Toast: typeof import('primevue/toast')['default']
     TransferConfirmation: typeof import('./src/components/drawer/TransferConfirmation.vue')['default']
+    TransferConfirmationSiswa: typeof import('./src/components/drawer/TransferConfirmationSiswa.vue')['default']
   }
   export interface ComponentCustomProperties {
     BadgeDirective: typeof import('primevue/badgedirective')['default']
