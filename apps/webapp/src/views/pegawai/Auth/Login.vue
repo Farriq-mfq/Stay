@@ -43,7 +43,7 @@ function errors(res) {
       toast.add({
         severity: "error",
         summary: "Error",
-        detail: "Internal server error",
+        detail: "Sistem sedang sibuk",
         life: 3000,
       });
     }
