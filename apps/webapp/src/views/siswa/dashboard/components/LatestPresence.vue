@@ -24,7 +24,7 @@ const { data: latest, isPending: loading } = useQuery({
     <div
       class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-2"
     >
-      <h4 class="m-0 text-xl">Presensi Hari Ini</h4>
+      <h4 class="m-0 text-xl">Presensi Terakhir</h4>
       <router-link
         :to="{ name: 'presences' }"
         class="text-xs no-underline text-primary"

@@ -98,7 +98,7 @@ watch(status, () => {
 <template>
   <div v-if="status != 'pending'">
     <div class="flex align-items-center gap-2">
-      <Avatar label="P" class="mr-2" size="large" shape="circle" />
+      <Avatar :label="account.name.slice(0, 1)" class="mr-2" size="large" shape="circle" />
       <div>
         <h3 class="m-0 text-lg">Kirim saldo ke {{ account.name }}</h3>
       </div>

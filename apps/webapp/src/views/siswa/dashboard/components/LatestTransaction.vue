@@ -5,7 +5,7 @@
     <div
       class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-3"
     >
-      <h4 class="m-0 text-xl">Transaksi Hari Ini</h4>
+      <h4 class="m-0 text-xl">Transaksi Terakhir</h4>
       <router-link
         :to="{ name: 'transactions' }"
         class="text-xs no-underline text-primary"
