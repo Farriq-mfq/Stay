@@ -11,9 +11,10 @@ Sistem infromasi presensi siswa berbasis IOT.
 - [X] print rekap harian dan bulanan diganti dengan pdf
 - [ ] fix backup
 - [ ] add role & permission pada pengguna admin 
-- [ ] membuat webapp auth
-- [ ] membuat webapp list presensi
+- [X] membuat webapp auth
+- [X] membuat webapp list presensi
 - [ ] membuat api topup,transfer dll
+- [ ] membuat feature qrcode topup dan presensi
 
 ## Requester
 https://github.com/Farriq-mfq/requester-rfid
