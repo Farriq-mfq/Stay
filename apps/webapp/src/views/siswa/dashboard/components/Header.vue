@@ -41,9 +41,12 @@ const auth = inject("auth");
           </h2>
           <CreateAccount v-if="!account.data" />
 
-          <div class="text-xs mt-3 mx-0 font-semibold" v-if="account.data">
-            Rekening : {{ account.data.accountNumber }} 
-            <!-- <Button label="Copy" icon="pi pi-copy" size="small" /> -->
+          <div
+            class="text-xs mt-3 mx-0 font-semibold flex align-items-center mt-4 gap-2"
+            v-if="account.data"
+          >
+            <span class="text-md">{{ account.data.accountNumber }}</span>
+            <i class="pi pi-copy cursor-pointer"></i>
           </div>
           <div
             class="mt-4 flex gap-4 align-items-center justify-content-evenly"

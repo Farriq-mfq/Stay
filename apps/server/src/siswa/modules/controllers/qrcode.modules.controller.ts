@@ -1,0 +1,20 @@
+import { Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { QrCodeSiswaModulesService } from "../services/qrcode.modules.service";
+import { Request } from "express";
+import { AccessTokenSiswaGuard } from "src/siswa/guards/accessTokenSiswa.guard";
+
+@Controller('/siswa/modules/qrcode')
+@UseGuards(AccessTokenSiswaGuard)
+export class QrCodeSiswaModulesController {
+
+    constructor(
+        private readonly qrCodeSiswaModulesService: QrCodeSiswaModulesService
+    ) { }
+
+    @Get('/')
+    async createQrCodeTransfer(
+        @Req() req: Request
+    ) {
+        return await this.qrCodeSiswaModulesService.createQrCodeTransfer(req.user)
+    }
+}

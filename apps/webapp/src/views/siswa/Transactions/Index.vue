@@ -138,7 +138,10 @@ watch(filter, (val) => {
             </div>
           </template>
           <template #empty>
-            <p>Transaksi Kosong</p>
+            <div class="flex gap-2 align-items-center text-center justify-content-center py-5">
+              <i class="pi pi-folder-open text-2xl"></i>
+              <span class="m-0">Transaksi Kosong</span>
+            </div>
           </template>
         </DataView>
         <div class="flex flex-column gap-4" v-else>
