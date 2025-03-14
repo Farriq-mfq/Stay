@@ -110,7 +110,7 @@ watch(filter, (val) => {
                       {{ format(item.date, "dd MMMM yyyy", { locale: id }) }}
                     </h3>
                   </div>
-                  <div class="px-3 p-card shadow-1 border-round-xl py-2">
+                  <div class="px-3 p-card shadow-none border-1 surface-border border-round-lg py-2">
                     <ListPresence :items="item.presences" />
                   </div>
                 </div>

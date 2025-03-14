@@ -15,7 +15,7 @@ const { items } = defineProps({
     v-for="(item, index) in items"
     :key="index"
     :to="{ name: 'presences-detail', params: { id: item.id } }"
-    class="flex flex-column py-2 border-bottom-1 surface-border no-underline text-color"
+    class="flex flex-column py-2 no-underline text-color border-bottom-1 surface-border list-presence"
   >
     <h4 class="m-0 mb-2">{{ item.session.name }}</h4>
     <div class="text-xs my-1 font-semibold">
@@ -38,3 +38,11 @@ const { items } = defineProps({
     </div>
   </router-link>
 </template>
+
+
+<style scoped>
+
+.list-presence:last-child {
+  border-bottom: none !important;
+}
+</style>
