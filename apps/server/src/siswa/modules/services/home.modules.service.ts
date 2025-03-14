@@ -37,7 +37,7 @@ export class HomeModulesSiswaService {
         })
         return await this.prismaService.client.transactions.findMany({
             where: {
-                toAccountId: account.id
+                fromAccountId: account.id
             },
             orderBy: {
                 createdAt: 'desc'

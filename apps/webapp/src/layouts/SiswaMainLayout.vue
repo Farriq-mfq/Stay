@@ -6,10 +6,10 @@ import { useApp } from "@/store/app";
 import { ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
-import DrawerContent from "../components/DrawerContent.vue";
 import { useToast } from "primevue/usetoast";
 import TransferConfirmationSiswa from "../components/drawer/TransferConfirmationSiswa.vue";
 import DrawerContentSiswa from "../components/DrawerContentSiswa.vue";
+import TransferScanSiswa from "../components/drawer/TransferScanSiswa.vue";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
@@ -23,7 +23,8 @@ watch(
 
 const draweComponents = {
   default: DrawerContentSiswa,
-  TransferConfirmationSiswa
+  TransferConfirmationSiswa,
+  TransferScanSiswa,
 };
 
 onMounted(() => {

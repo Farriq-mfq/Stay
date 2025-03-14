@@ -1,4 +1,24 @@
-<script setup></script>
+<script setup>
+import { useQuery } from "@tanstack/vue-query";
+import { useToast } from "primevue/usetoast";
+import { getCurrentInstance, inject } from "vue";
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
+const auth = inject("auth");
+const toast = useToast();
+
+const getLatestService = async () => {
+  const response = await axios.get("/siswa/modules/home/latest/transaction");
+  return response.data;
+};
+
+const { data: latest, isPending: loading } = useQuery({
+  queryKey: ["latest-transaction"],
+  queryFn: getLatestService,
+});
+
+
+</script>
 
 <template>
   <div class="p-card shadow-1 border-round-xl p-3 mx-3 w-full">
@@ -12,7 +32,7 @@
         >Lihat semua</router-link
       >
     </div>
-    <DataView :value="mockPresensi" class="mt-2">
+    <DataView :value="latest.data" class="mt-2" v-if="!loading">
       <template #list="slotProps">
         <div class="flex flex-column gap-2">
           <ListTransaction :items="slotProps.items" />

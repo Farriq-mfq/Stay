@@ -2,12 +2,13 @@
 import { useDrawer } from "@/store/drawer";
 import { onMounted } from "vue";
 import OpenQrcode from "./drawer/OpenQrcode.vue";
+import OpenCameraSiswa from "./drawer/OpenCameraSiswa.vue";
 const scans = [
   {
-    name: "qrcode",
+    name: "camera",
   },
   {
-    name: "camera",
+    name: "qrcode",
   },
 ];
 const drawer = useDrawer();
@@ -30,12 +31,12 @@ onMounted(() => {
     :numVisible="1"
     :numScroll="2"
     :showNavigators="false"
-    :showIndicators="false"
+    :showIndicators="true"
     :responsiveOptions="responsiveOptions"
     @update:page="updatePage"
   >
     <template #item="slotProps">
-      <!-- <OpenCamera v-if="slotProps.data.name === 'camera'" /> -->
+      <OpenCameraSiswa v-if="slotProps.data.name === 'camera'" />
       <OpenQrcodeSiswa v-if="slotProps.data.name === 'qrcode'" />
     </template>
   </Carousel>

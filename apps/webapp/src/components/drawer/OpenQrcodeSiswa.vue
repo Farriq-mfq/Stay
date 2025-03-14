@@ -1,9 +1,9 @@
 <script setup>
+import { useDrawer } from "@/store/drawer";
+import { rupiahFormat } from "@/utils/money";
 import { useQuery } from "@tanstack/vue-query";
 import { useQRCode } from "@vueuse/integrations/useQRCode";
-import { getCurrentInstance, ref, watch } from "vue";
-import { shallowRef } from "vue";
-import { rupiahFormat } from "@/utils/money";
+import { getCurrentInstance, ref, shallowRef, watch } from "vue";
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -11,6 +11,7 @@ const axios = proxy.axios;
 const qrValue = shallowRef("");
 const qrcode = useQRCode(qrValue);
 const showSaldo = ref(true);
+const drawer = useDrawer();
 const toggleShowSaldo = () => {
   showSaldo.value = !showSaldo.value;
 };
@@ -40,6 +41,7 @@ const { data: account, isLoading: accountLoading } = useQuery({
   queryKey: ["account"],
   queryFn: getAccount,
 });
+
 </script>
 
 <template>

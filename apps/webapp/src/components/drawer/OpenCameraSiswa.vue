@@ -1,18 +1,81 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, getCurrentInstance } from "vue";
 
 import { QrcodeStream } from "vue-qrcode-reader";
 import { useDrawer } from "@/store/drawer";
 import { useToast } from "primevue/usetoast";
+import { useMutation } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
+
 const loading = ref(true);
-const result = ref("");
 const torchActive = ref(false);
 const drawer = useDrawer();
 
+const toast = useToast();
+const scanService = async (data) => {
+  const response = await axios.post(`/siswa/modules/qrcode/scan`, data);
+  return response.data;
+};
+
+const { mutateAsync: scanMutate, isPending: scanPending } = useMutation({
+  mutationKey: ["scan"],
+  mutationFn: scanService,
+});
+const result = ref("");
+
+const handleScan = async (code) => {
+  await scanMutate(
+    {
+      code,
+    },
+    {
+      onSuccess: (data) => {
+        switch (data.data.action) {
+          case "TRANSFER":
+            drawer.openDrawer(
+              "TransferScanSiswa",
+              "Transfer",
+              () => {},
+              data.data.data
+            );
+            break;
+          default:
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: "Aksi tidak valid",
+              life: 3000,
+            });
+            break;
+        }
+      },
+      onError: (err) => {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Terjadi kendala",
+          life: 3000,
+        });
+      },
+      onSettled: () => {
+        result.value = "";
+      },
+    }
+  );
+};
+
 function onDetect(detectedCodes) {
-  console.log(detectedCodes);
-  result.value = JSON.stringify(detectedCodes.map((code) => code.rawValue));
+  result.value = detectedCodes[0].rawValue;
 }
+
+watch(result, (newValue) => {
+  if (newValue) {
+    handleScan(newValue);
+  }
+});
 
 const selectedConstraints = ref({ facingMode: "environment" });
 const defaultConstraintOptions = [
@@ -162,26 +225,15 @@ function switchTorch() {
   loading.value = true;
   torchActive.value = !torchActive.value;
 }
-
-watch(result, (val) => {
-  if (val.length) {
-    drawer.closeScan();
-  }
-});
-const toast = useToast();
-const showToast = () => {
-  toast.add({
-    severity: "success",
-    summary: "Success",
-    detail: "Message Content",
-    life: 10000000,
-  });
-};
 </script>
 
 <template>
   <div class="p-3">
+    <div class="flex flex-column" v-if="scanPending">
+      <ProgressSpinner />
+    </div>
     <div
+      v-if="!scanPending"
       class="w-full h-30rem border-2 border-primary border-round-2xl overflow-hidden relative shadow-1"
     >
       <qrcode-stream
@@ -225,8 +277,6 @@ const showToast = () => {
         <!-- <div class="animation-qr" v-if="!loading"></div> -->
       </qrcode-stream>
     </div>
-    Result : {{ result }}
-    <Button @click="showToast" label="Toast" />
   </div>
 </template>
 

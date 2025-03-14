@@ -51,6 +51,7 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     TransferConfirmation: typeof import('./src/components/drawer/TransferConfirmation.vue')['default']
     TransferConfirmationSiswa: typeof import('./src/components/drawer/TransferConfirmationSiswa.vue')['default']
+    TransferScanSiswa: typeof import('./src/components/drawer/TransferScanSiswa.vue')['default']
   }
   export interface ComponentCustomProperties {
     BadgeDirective: typeof import('primevue/badgedirective')['default']

@@ -1,8 +1,7 @@
 <script setup>
-import { onActivated } from "vue";
-import { getCurrentInstance, inject, ref, watch } from "vue";
-import { useMutation, useQuery } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 import { useToast } from "primevue/usetoast";
+import { getCurrentInstance, inject } from "vue";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const auth = inject("auth");

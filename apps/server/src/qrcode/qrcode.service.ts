@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as CryptoJS from 'crypto-js';
 import { QrAction } from '../config/qr-actions';
+import { QrCodeDecodeType } from "src/types";
 
 @Injectable()
 export class QRCodeService {
@@ -16,9 +17,9 @@ export class QRCodeService {
         return CryptoJS.AES.encrypt(encryptData, this.configService.get("APP_KEY")).toString()
     }
 
-    async decryptQrCode(qrCode) {
+    async decryptQrCode<T>(qrCode): Promise<QrCodeDecodeType<T>> {
         const bytes = CryptoJS.AES.decrypt(qrCode, this.configService.get("APP_KEY"));
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        return JSON.parse(originalText)
+        return JSON.parse(originalText);
     }
 }

@@ -42,7 +42,7 @@ const auth = inject("auth");
           <CreateAccount v-if="!account.data" />
 
           <div
-            class="text-xs mt-3 mx-0 font-semibold flex align-items-center mt-4 gap-2"
+            class="text-xs mt-3 mx-0 font-semibold flex align-items-center gap-2 border-1 surface-border px-3 py-2 border-round-lg w-fit"
             v-if="account.data"
           >
             <span class="text-md">{{ account.data.accountNumber }}</span>
@@ -101,7 +101,7 @@ const auth = inject("auth");
             v-if="account.data"
             icon="pi pi-eye"
             rounded
-            class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-8"
+            class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-7"
             variant="text"
           />
         </div>
