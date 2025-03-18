@@ -55,4 +55,9 @@ export class GatewaysController {
   remove(@Param('id', new ParseIntPipe()) id: string) {
     return this.gatewaysService.remove(+id);
   }
+
+  @Post(':id/qrcode')
+  async generateQrCode(@Param('id', new ParseIntPipe()) id: string) {
+    return await this.gatewaysService.generateQrCode(+id)
+  }
 }

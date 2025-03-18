@@ -17,7 +17,12 @@ export class HomeModulesSiswaService {
                 siswaId: userId,
             },
             include: {
-                session: true
+                session: true,
+                gateway: {
+                    select: {
+                        location: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: 'desc'

@@ -112,6 +112,31 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     async handleHttpScanned(data: ScanDto): Promise<void | presences | presences_pegawai | { message: string }> {
         return await this.gatewaysService.handleScanned(data, this.server)
     }
+    async handleHttpPresenceQr(data: Pick<ScanDto, 'ip' | 'token'> & { ref: number }): Promise<void | presences | presences_pegawai | { message: string }> {
+        const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+            where: {
+                // ip: data.ip,
+                token: data.token
+            },
+        })
+
+        try {
+            const presence = await this.presenceService.createPresenceByQR(data, gateway, this.server);
+            this.server.emit(`PRESENCE_UPDATED_${presence.presence_sessionsId}`, presence)
+            return presence
+        } catch (e) {
+            if (e instanceof NotFoundException) {
+                throw new NotFoundException({ message: e.message })
+            } else if (e instanceof Error) {
+                const errorPayload = JSON.parse(e.message) as any
+                if (errorPayload.error) {
+                    throw new BadRequestException({ message: errorPayload.error })
+                }
+            } else {
+                throw new InternalServerErrorException('Internal server error')
+            }
+        }
+    }
 
     // presence by manual
     async handleHttpPresenceManual(createPresenceByManual: CreatePresenceByManual) {

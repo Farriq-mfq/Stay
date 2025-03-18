@@ -42,6 +42,15 @@ const handleScan = async (code) => {
               data.data.data
             );
             break;
+          case "PRESENCE":
+            toast.add({
+              severity: "success",
+              summary: "Success",
+              detail: "Presensi Berhasil",
+              life: 3000,
+            });
+            drawer.closeDrawer();
+            break;
           default:
             toast.add({
               severity: "error",
@@ -53,12 +62,31 @@ const handleScan = async (code) => {
         }
       },
       onError: (err) => {
-        toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: "Terjadi kendala",
-          life: 3000,
-        });
+        const response = err.response;
+        if (response.status === 400) {
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: response.data.message,
+            life: 3000,
+          });
+          return;
+        } else if (response.status === 404) {
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: response.data.message,
+            life: 3000,
+          });
+          return;
+        } else {
+          toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Terjadi Kendala",
+            life: 3000,
+          });
+        }
       },
       onSettled: () => {
         result.value = "";

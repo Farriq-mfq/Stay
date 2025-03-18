@@ -12,6 +12,7 @@ import * as xlsx from 'xlsx';
 // import { CreatePresenceByNisDto } from './dto/create-presence.dto';
 import * as JSZip from 'jszip';
 import { CreatePresenceByManual } from './dto/create-presence.dto';
+import { ScanDto } from 'src/events/dto/scan.dto';
 type FilterDate = {
   start_date?: string,
   end_date?: string
@@ -1003,7 +1004,7 @@ export class PresenceService {
               updateAt: presence.updatedAt,
               hasPresence: presence.hasPresence,
               detailPresence: presence.detailPresence,
-              gateway:  presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-',
+              gateway: presence.hasPresence ? `${presence.detailPresence.gateway ? presence.detailPresence.gateway.name : '-'}-${presence.detailPresence.gateway ? presence.detailPresence.gateway.location : '-'}` : '-',
             }
           })
         }
@@ -1376,4 +1377,243 @@ export class PresenceService {
     }
 
   }
+
+  async createPresenceByQR(scanned: Pick<ScanDto, 'ip' | 'token'> & { ref: number }, gateway: gateways, client: Server): Promise<presences | presences_pegawai> {
+
+    if (!gateway.status) throw new NotFoundException("QRCODE TIDAK AKTIF");
+    if (gateway.presence_sessionsId) {
+      // presence
+      const session = await this.prismaService.client.presence_sessions.findUnique({
+        where: {
+          id: gateway.presence_sessionsId,
+        },
+        include: {
+          meeting_session: true
+        }
+      })
+
+      if (!session) {
+        throw new NotFoundException("SESI TIDAK DITEMUKAN")
+      }
+
+      // presence siswa
+      if (session.session_role_type === 'SISWA') {
+        const siswa = await this.prismaService.client.siswa.findUnique({
+          where: {
+            id: scanned.ref
+          },
+        })
+
+        if (!siswa) throw new NotFoundException("KARTU TDK TERDAFTAR");
+
+        const now = format(Date.now(), "yyyy-MM-dd");
+        const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        // check session have start_time and end_time
+        // range check
+        if (session.start_time && session.end_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (session.allow_twice) {
+            if (isAfter(current_time, parseStartTime)) {
+              return await this.createPresence({
+                gateway,
+                session,
+                siswa,
+                client,
+                method: 'qrcode'
+              })
+            } else {
+              this.handlingPresenceError({
+                error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                  locale: id
+                })}`,
+                siswa
+              })
+            }
+          } else {
+            if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
+              return await this.createPresence({
+                gateway,
+                session,
+                siswa,
+                client,
+                method: 'qrcode'
+              })
+            } else {
+              this.handlingPresenceError({
+                error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                  locale: id
+                })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                  locale: id
+                })}`,
+                siswa
+              })
+            }
+          }
+          // start time check
+        } else if (session.start_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime)) {
+            return await this.createPresence({
+              gateway,
+              session,
+              siswa,
+              client,
+              method: 'qrcode'
+            })
+          } else {
+            this.handlingPresenceError({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              siswa
+            })
+          }
+          // end time check
+        } else if (session.end_time) {
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isBefore(current_time, parseEndTime)) {
+            return await this.createPresence({
+              gateway,
+              session,
+              siswa,
+              client,
+              method: 'qrcode'
+
+            })
+          } else {
+            this.handlingPresenceError({
+              error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              siswa
+            })
+          }
+
+        } else {
+          // ignore some session start and end times
+          return await this.createPresence({
+            gateway,
+            session,
+            siswa,
+            client,
+            method: 'qrcode'
+          })
+        }
+        // presence pegawai
+      } else if (session.session_role_type === 'PEGAWAI') {
+        const pegawai = await this.prismaService.client.pegawai.findUnique({
+          where: {
+            id: scanned.ref
+          },
+        })
+
+        if (!pegawai) throw new NotFoundException("KARTU TDK TERDAFTAR");
+
+        const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+        const now = format(Date.now(), "yyyy-MM-dd");
+        const current_date = format(new Date(), 'yyyy-MM-dd');
+
+        // if has meeting session
+        if (session.meeting_sessionsId) {
+          // check meeting date
+          if (isBefore(current_date, format(session.meeting_session.date, 'yyyy-MM-dd'))) {
+            this.handlingPresenceErrorPegawai({
+              error: `Rapat di mulai pada ${format(session.meeting_session.date, 'dd MMMM yyyy', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          } if (isAfter(current_date, format(session.meeting_session.date, 'yyyy-MM-dd'))) {
+            this.handlingPresenceErrorPegawai({
+              error: `Rapat sudah selesai pada ${format(session.meeting_session.date, 'dd MMMM yyyy', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+        }
+
+        // check session have start_time and end_time
+        // range check
+        if (session.start_time && session.end_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime) && isBefore(current_time, parseEndTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'qrcode'
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })} dan Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+          // start time check
+        } else if (session.start_time) {
+          const parseStartTime = format(`${now} ${session.start_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isAfter(current_time, parseStartTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'qrcode'
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Mulai pada ${format(parseStartTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+          // end time check
+        } else if (session.end_time) {
+          const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+          if (isBefore(current_time, parseEndTime)) {
+            return await this.createPresencePegawai({
+              gateway,
+              session,
+              pegawai,
+              client,
+              method: 'qrcode'
+
+            })
+          } else {
+            this.handlingPresenceErrorPegawai({
+              error: `Presensi Sudah Selesai pada ${format(parseEndTime, 'HH:mm:ss', {
+                locale: id
+              })}`,
+              pegawai
+            })
+          }
+
+        } else {
+          // ignore some session start and end times
+          return await this.createPresencePegawai({
+            gateway,
+            session,
+            pegawai,
+            client,
+            method: 'qrcode'
+          })
+        }
+      }
+    } else {
+      this.handlingPresenceErrorPegawai({
+        error: "GATEWAY TDK DITEMUKAN",
+        pegawai: null
+      })
+    }
+  }
+
 }

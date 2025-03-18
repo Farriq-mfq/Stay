@@ -1,9 +1,9 @@
-import { Global, Module } from '@nestjs/common';
-import { EventsGateway } from './events.gateway';
+import { Module } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { GatewaysModule } from 'src/gateways/gateways.module';
 import { GatewaysService } from 'src/gateways/gateways.service';
 import { EventController } from './events.controller';
+import { EventsGateway } from './events.gateway';
 @Module({
     imports: [GatewaysModule],
     controllers: [EventController],

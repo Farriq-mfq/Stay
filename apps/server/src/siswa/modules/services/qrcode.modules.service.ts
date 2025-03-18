@@ -1,14 +1,16 @@
-import { BadRequestException, Inject, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountableType } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { QRCodeService } from "src/qrcode/qrcode.service";
 import { ReadQRCodeDto } from "../dto/qrcode.dto";
+import { EventsGateway } from "src/events/events.gateway";
 
 export class QrCodeSiswaModulesService {
     constructor(
         private readonly qrCodeService: QRCodeService,
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+        private readonly eventService: EventsGateway
     ) { }
 
     async createQrCodeTransfer(user: any) {
@@ -59,13 +61,41 @@ export class QrCodeSiswaModulesService {
 
                     return decrypt
                 case 'PRESENCE':
+
+                    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+                        where: {
+                            id: parseInt(user.sub)
+                        }
+                    })
+
+                    const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
+                        where: {
+                            token: decrypt.data.token
+                        }
+                    })
+
+                    await this.eventService.handleHttpPresenceQr({
+                        ip: gateway.ip,
+                        token: gateway.token,
+                        ref: siswa.id,
+                    })
+
+                    delete decrypt.data
+                    return decrypt
+
                 case 'WITHDRAW':
                 default:
                     throw new BadRequestException("invalid action")
             }
 
         } catch (err) {
-            throw new BadRequestException("invalid code")
+            if (err instanceof BadRequestException) {
+                throw new BadRequestException(err.message)
+            } else if (err instanceof NotFoundException) {
+                throw new NotFoundException(err.message)
+            } else {
+                throw new InternalServerErrorException("unknown error")
+            }
         }
 
     }

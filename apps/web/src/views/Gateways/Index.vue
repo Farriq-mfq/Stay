@@ -1,12 +1,13 @@
 <script setup>
-import { useQuery, useMutation } from '@tanstack/vue-query';
+import { useMutation, useQuery } from '@tanstack/vue-query';
+import { useClipboard } from '@vueuse/core';
+import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { capitalize, getCurrentInstance, ref, useModel, watch } from 'vue';
-import { useClipboard } from '@vueuse/core'
-import { useConfirm } from "primevue/useconfirm";
+import { getCurrentInstance, ref, watch } from 'vue';
+import GatewayQrCode from './GatewayQrCode.vue';
 const toast = useToast();
-const { proxy } = getCurrentInstance()
-const axios = proxy.axios
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
 const confirm = useConfirm();
 
 // the datatable queries server side
@@ -15,51 +16,52 @@ const filters = ref(null);
 const first = ref(0);
 const queryParams = ref({
     first: 0,
-    rows: 10,
-})
+    rows: 10
+});
 const totalRecords = ref(0);
-const dt = ref()
-
+const dt = ref();
 
 const getAllGateways = async () => {
     const queries = {
-        page: (queryParams.value.first / queryParams.value.rows) + 1,
+        page: queryParams.value.first / queryParams.value.rows + 1,
         limit: queryParams.value.rows,
-        ...filters.value && { search: filters.value }
-    }
+        ...(filters.value && { search: filters.value })
+    };
 
-    const params = new URLSearchParams(queries)
+    const params = new URLSearchParams(queries);
 
-    return await axios.get(`/gateways?${params}`)
-}
+    return await axios.get(`/gateways?${params}`);
+};
 
-
-const { data: gateways, isLoading, refetch } = useQuery({
+const {
+    data: gateways,
+    isLoading,
+    refetch
+} = useQuery({
     queryKey: ['gateways', queryParams.value],
     queryFn: getAllGateways,
-    keepPreviousData: true,
-})
-
+    keepPreviousData: true
+});
 
 const onPage = (event) => {
     queryParams.value = event;
-    refetch()
+    refetch();
 };
 
 watch(gateways, () => {
     if (gateways.value) {
-        totalRecords.value = gateways.value.data.data.meta.totalCount
+        totalRecords.value = gateways.value.data.data.meta.totalCount;
     }
-})
+});
 
 // mutation for testing connection gateway
 const testingGateway = async (id) => {
-    return await axios.post(`/gateways/${id}/ping`)
-}
+    return await axios.post(`/gateways/${id}/ping`);
+};
 const { mutateAsync: testing, isPending: loadingTesting } = useMutation({
     mutationKey: ['testingGateway'],
     mutationFn: testingGateway
-})
+});
 
 const handleTestConnection = (id) => {
     testing(id, {
@@ -69,7 +71,7 @@ const handleTestConnection = (id) => {
                 summary: 'Success',
                 detail: 'Koneksi gateway berhasil',
                 life: 3000
-            })
+            });
         },
         onError() {
             toast.add({
@@ -77,37 +79,36 @@ const handleTestConnection = (id) => {
                 summary: 'Error',
                 detail: 'Koneksi gateway gagal',
                 life: 3000
-            })
+            });
         }
-    })
-}
+    });
+};
 
 const handleDebounceFilter = (val) => {
     filters.value = val;
-    refetch()
-}
-
+    refetch();
+};
 
 // add gateways
-const addGatewayDialog = ref(false)
+const addGatewayDialog = ref(false);
 
 const addGateway = ref({
     name: '',
     ip: '',
     location: '',
     role: ''
-})
+});
 
-const errorsAddGateways = ref(null)
+const errorsAddGateways = ref(null);
 
 const addGatewayService = async (data) => {
-    return await axios.post('gateways', data)
-}
+    return await axios.post('gateways', data);
+};
 
 const { mutateAsync: mutateGateway, isPending: pendingAddGateway } = useMutation({
     mutationKey: ['addGateway'],
     mutationFn: addGatewayService
-})
+});
 
 const addGatewayStore = () => {
     mutateGateway(addGateway.value, {
@@ -117,84 +118,84 @@ const addGatewayStore = () => {
                 summary: 'Success',
                 detail: 'Gateway berhasil ditambahkan',
                 life: 3000
-            })
-            addGatewayDialog.value = false
+            });
+            addGatewayDialog.value = false;
             addGateway.value = {
                 name: '',
                 ip: '',
                 location: '',
                 role: ''
-            }
-            errorsAddGateways.value = {}
-            refetch()
+            };
+            errorsAddGateways.value = {};
+            refetch();
         },
         onError(err) {
             if (err.response.status === 400) {
-                errorsAddGateways.value = err.response.data
+                errorsAddGateways.value = err.response.data;
             } else if (err.response.status === 409) {
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Gateway sudah ada',
                     life: 3000
-                })
+                });
             } else {
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Gateway gagal ditambahkan',
                     life: 3000
-                })
+                });
             }
         }
-    })
-
-
-}
+    });
+};
 
 // update status
 
 const updateStatusGateway = async (data) => {
-    return await axios.patch(`/gateways/${data.id}`, { status: !data.status })
-}
+    return await axios.patch(`/gateways/${data.id}`, { status: !data.status });
+};
 
 const { mutateAsync: mutateUpdateStatusGateway, isPending: pendingUpdateStatusGateway } = useMutation({
     mutationKey: ['updateStatusGateway'],
     mutationFn: updateStatusGateway
-})
+});
 
 const handleUpdateStatus = (id, status) => {
-    mutateUpdateStatusGateway({ id, status }, {
-        onSuccess() {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Status gateway berhasil diubah',
-                life: 3000
-            })
-            refetch()
-        },
-        onError() {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Status gateway gagal diubah',
-                life: 3000
-            })
+    mutateUpdateStatusGateway(
+        { id, status },
+        {
+            onSuccess() {
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Status gateway berhasil diubah',
+                    life: 3000
+                });
+                refetch();
+            },
+            onError() {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Status gateway gagal diubah',
+                    life: 3000
+                });
+            }
         }
-    })
-}
-
+    );
+};
 
 // remove gateway
 const removeGatewayService = async (data) => {
-    return await axios.delete(`/gateways/${data.id}`)
-}
+    return await axios.delete(`/gateways/${data.id}`);
+};
 
 const { mutateAsync: removeGatewayMutate, isPending: removeGatewayPending } = useMutation({
     mutationKey: ['removeGateway'],
     mutationFn: removeGatewayService
-})
+});
 
 const confirmDeleteGateway = (data) => {
     confirm.require({
@@ -213,8 +214,8 @@ const confirmDeleteGateway = (data) => {
                         summary: 'Success',
                         detail: 'Gateway berhasil dihapus',
                         life: 3000
-                    })
-                    refetch()
+                    });
+                    refetch();
                 },
                 onError() {
                     toast.add({
@@ -222,21 +223,20 @@ const confirmDeleteGateway = (data) => {
                         summary: 'Error',
                         detail: 'Gateway gagal dihapus',
                         life: 3000
-                    })
+                    });
                 }
-            })
-        },
+            });
+        }
     });
 };
 
-
 // update gateways
-const showDialogUpdateGateway = ref(false)
-const newToken = ref(null)
+const showDialogUpdateGateway = ref(false);
+const newToken = ref(null);
 
 const updateGateway = async (data) => {
-    return await axios.patch(`/gateways/${data.id}`, data)
-}
+    return await axios.patch(`/gateways/${data.id}`, data);
+};
 
 const editGateway = ref({
     id: '',
@@ -244,14 +244,14 @@ const editGateway = ref({
     ip: '',
     location: '',
     role: ''
-})
+});
 
-const errorsUpdateGateway = ref(null)
+const errorsUpdateGateway = ref(null);
 
 const { mutateAsync: mutateUpdateGateway, isPending: pendingUpdateGateway } = useMutation({
     mutationKey: ['updateGateway'],
     mutationFn: updateGateway
-})
+});
 
 const updateGatewayAction = () => {
     mutateUpdateGateway(editGateway.value, {
@@ -261,25 +261,25 @@ const updateGatewayAction = () => {
                 summary: 'Success',
                 detail: 'Gateway berhasil diubah',
                 life: 3000
-            })
-            showDialogUpdateGateway.value = false
-            clearUpdateState()
-            refetch()
+            });
+            showDialogUpdateGateway.value = false;
+            clearUpdateState();
+            refetch();
         },
         onError(err) {
             if (err.response.status === 400) {
-                errorsUpdateGateway.value = err.response.data
+                errorsUpdateGateway.value = err.response.data;
             } else {
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Gateway gagal diubah',
                     life: 3000
-                })
+                });
             }
         }
-    })
-}
+    });
+};
 
 const handleShowDialogEditGateway = (data) => {
     editGateway.value = {
@@ -288,9 +288,9 @@ const handleShowDialogEditGateway = (data) => {
         ip: data.ip,
         location: data.location,
         role: data.role
-    }
-    showDialogUpdateGateway.value = true
-}
+    };
+    showDialogUpdateGateway.value = true;
+};
 
 const clearUpdateState = () => {
     editGateway.value = {
@@ -299,19 +299,19 @@ const clearUpdateState = () => {
         ip: '',
         location: '',
         role: ''
-    }
-    errorsUpdateGateway.value = null
-}
+    };
+    errorsUpdateGateway.value = null;
+};
 
 // generate new token
 const generateNewTokenGateway = async (id) => {
-    return await axios.post(`/gateways/${id}/token`)
-}
+    return await axios.post(`/gateways/${id}/token`);
+};
 
 const { mutateAsync: generateNewTokenMutate, isPending: generateNewTokenPending } = useMutation({
     mutationKey: ['generateNewTokenGateway'],
     mutationFn: generateNewTokenGateway
-})
+});
 
 const confirmGenerateNewToken = (data) => {
     confirm.require({
@@ -330,9 +330,9 @@ const confirmGenerateNewToken = (data) => {
                         summary: 'Success',
                         detail: 'Token berhasil diubah',
                         life: 3000
-                    })
-                    newToken.value = data.data.data
-                    refetch()
+                    });
+                    newToken.value = data.data.data;
+                    refetch();
                 },
                 onError() {
                     toast.add({
@@ -340,31 +340,39 @@ const confirmGenerateNewToken = (data) => {
                         summary: 'Error',
                         detail: 'Token gagal diubah',
                         life: 3000
-                    })
+                    });
                 }
-            })
-        },
+            });
+        }
     });
 };
 
-
-
 // copy text
-const { text, copy, copied, isSupported } = useClipboard({ source: newToken.value })
-
-
+const { text, copy, copied, isSupported } = useClipboard({ source: newToken.value });
 
 // show token
-const showToken = ref(false)
-const selectedToken = ref(null)
+const showToken = ref(false);
+const selectedToken = ref(null);
 const handleShowToken = (data) => {
-    showToken.value = true
-    selectedToken.value = data
-}
+    showToken.value = true;
+    selectedToken.value = data;
+};
 
 const handleCloseShowToken = () => {
-    selectedToken.value = null
-}
+    selectedToken.value = null;
+};
+
+const showQrCode = ref(false);
+
+const selectedQrCode = ref(null);
+const handleShowQrCode = (data) => {
+    showQrCode.value = true;
+    selectedQrCode.value = data;
+};
+
+const handleCloseShowQrCode = () => {
+    selectedQrCode.value = null;
+};
 </script>
 
 <template>
@@ -372,46 +380,49 @@ const handleCloseShowToken = () => {
         <div class="col-12">
             <div class="card">
                 <h3>Gateway</h3>
-                <hr>
+                <hr />
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
-                            <Button label="Tambah gateway" icon="pi pi-plus" class="mr-2"
-                                @click.prevent="addGatewayDialog = true" />
+                            <Button label="Tambah gateway" icon="pi pi-plus" class="mr-2" @click.prevent="addGatewayDialog = true" />
                         </div>
                     </template>
                 </Toolbar>
-                <DataTable ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
-                    :loading="isLoading" :value="isLoading ? [] : gateways.data.data.items" dataKey="id" paginator
-                    :rows="10" :filters="filters" lazy
+                <DataTable
+                    ref="dt"
+                    :totalRecords="totalRecords"
+                    v-model:expandedRows="expandedRows"
+                    :loading="isLoading"
+                    :value="isLoading ? [] : gateways.data.data.items"
+                    dataKey="id"
+                    paginator
+                    :rows="10"
+                    :filters="filters"
+                    lazy
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     :rowsPerPageOptions="[10, 25, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} gateways" :first="first"
-                    @page="onPage($event)">
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} gateways"
+                    :first="first"
+                    @page="onPage($event)"
+                >
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
                             <IconField iconPosition="left" class="block mt-2 md:mt-0">
                                 <InputIcon class="pi pi-search" />
-                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
-                                    placeholder="Search..." />
+                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto" placeholder="Search..." />
                             </IconField>
                         </div>
                     </template>
                     <template #empty>
                         <div class="flex justify-content-center p-4 gap-3 align-items-center">
                             <i class="pi pi-folder-open"></i>
-                            <span>
-                                Data gateway masih kosong
-                            </span>
+                            <span> Data gateway masih kosong </span>
                         </div>
                     </template>
                     <Column expander />
-                    <Column field="name" header="Nama">
-                    </Column>
-                    <Column field="ip" alignFrozen="right" :frozen="true" header="IP">
-                    </Column>
-                    <Column field="location" header="Lokasi">
-                    </Column>
+                    <Column field="name" header="Nama"> </Column>
+                    <Column field="ip" alignFrozen="right" :frozen="true" header="IP"> </Column>
+                    <Column field="location" header="Lokasi"> </Column>
                     <Column field="role" header="Role">
                         <template #body="{ data }">
                             <Tag :severity="data.role" :value="data.role.toUpperCase()" />
@@ -427,56 +438,47 @@ const handleCloseShowToken = () => {
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
                                 <Button icon="pi pi-pencil" @click.prevent="handleShowDialogEditGateway(data)" />
-                                <Button outlined :loading="pendingUpdateStatusGateway"
+                                <Button
+                                    outlined
+                                    :loading="pendingUpdateStatusGateway"
                                     :disabled="pendingUpdateStatusGateway"
                                     :severity="data.status ? 'danger' : 'success'"
-                                    @click.prevent="handleUpdateStatus(data.id, data.status)" icon="pi pi-power-off" />
-                                <Button icon="pi pi-eye" outlined severity="info"
-                                    @click.prevent="handleShowToken(data)" />
+                                    @click.prevent="handleUpdateStatus(data.id, data.status)"
+                                    icon="pi pi-power-off"
+                                />
+                                <Button icon="pi pi-eye" outlined severity="info" @click.prevent="handleShowToken(data)" />
+                                <Button icon="pi pi-qrcode" severity="help" @click.prevent="handleShowQrCode(data)" />
                             </div>
                         </template>
                     </Column>
                     <template #expansion="{ data }">
                         <div class="flex gap-3 mt-1">
-                            <Button :disabled="loadingTesting" :loading="loadingTesting"
-                                :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap"
-                                @click.prevent="handleTestConnection(data.id)" />
-                            <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending"
-                                :disabled="generateNewTokenPending" icon="pi pi-key"
-                                @click.prevent="confirmGenerateNewToken(data.id)" />
-                            <Button label="Hapus" outlined severity="danger" @click.prevent="confirmDeleteGateway(data)"
-                                icon="pi pi-trash" />
+                            <Button :disabled="loadingTesting" :loading="loadingTesting" :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap" @click.prevent="handleTestConnection(data.id)" />
+                            <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending" :disabled="generateNewTokenPending" icon="pi pi-key" @click.prevent="confirmGenerateNewToken(data.id)" />
+                            <Button label="Hapus" outlined severity="danger" @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
                         </div>
                     </template>
                 </DataTable>
             </div>
 
-
-            <Dialog v-model:visible="addGatewayDialog" :style="{ width: '450px' }" header="Tambah Gateway Baru"
-                :modal="true" class="p-fluid">
+            <Dialog v-model:visible="addGatewayDialog" :style="{ width: '450px' }" header="Tambah Gateway Baru" :modal="true" class="p-fluid">
                 <div class="field">
-
                     <label for="name">Nama</label>
-                    <InputText id="name" :disabled="pendingAddGateway"
-                        :invalid="errorsAddGateways && errorsAddGateways.name" required="true" autofocus
-                        v-model="addGateway.name" />
+                    <InputText id="name" :disabled="pendingAddGateway" :invalid="errorsAddGateways && errorsAddGateways.name" required="true" autofocus v-model="addGateway.name" />
                     <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.name">
                         {{ errorsAddGateways.name[0] }}
                     </p>
                 </div>
                 <div class="field">
                     <label for="ip">IP</label>
-                    <InputText id="ip" :disabled="pendingAddGateway" required="true"
-                        :invalid="errorsAddGateways && errorsAddGateways.ip" v-model="addGateway.ip" />
+                    <InputText id="ip" :disabled="pendingAddGateway" required="true" :invalid="errorsAddGateways && errorsAddGateways.ip" v-model="addGateway.ip" />
                     <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.ip">
                         {{ errorsAddGateways.ip[0] }}
                     </p>
                 </div>
                 <div class="field">
                     <label for="location">Lokasi</label>
-                    <InputText id="location" :disabled="pendingAddGateway"
-                        :invalid="errorsAddGateways && errorsAddGateways.location" required="true"
-                        v-model="addGateway.location" />
+                    <InputText id="location" :disabled="pendingAddGateway" :invalid="errorsAddGateways && errorsAddGateways.location" required="true" v-model="addGateway.location" />
                     <p class="text-red-500" v-if="errorsAddGateways && errorsAddGateways.location">
                         {{ errorsAddGateways.location[0] }}
                     </p>
@@ -485,52 +487,40 @@ const handleCloseShowToken = () => {
                     <label class="mb-3">Role</label>
                     <div class="formgrid grid">
                         <div class="field-radiobutton col-3">
-                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role"
-                                :disabled="pendingAddGateway" id="presence" v-model="addGateway.role" name="presence"
-                                value="presence" />
+                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role" :disabled="pendingAddGateway" id="presence" v-model="addGateway.role" name="presence" value="presence" />
                             <label for="presence">Presensi</label>
                         </div>
                         <div class="field-radiobutton col-3">
-                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role"
-                                :disabled="pendingAddGateway" id="register" v-model="addGateway.role" name="register"
-                                value="register" />
+                            <RadioButton :invalid="errorsAddGateways && errorsAddGateways.role" :disabled="pendingAddGateway" id="register" v-model="addGateway.role" name="register" value="register" />
                             <label for="register">Register</label>
                         </div>
                     </div>
                 </div>
 
                 <template #footer>
-                    <Button label="Batal" :disabled="pendingAddGateway" severity="danger" icon="pi pi-times" outlined
-                        @click.prevent="addGatewayDialog = false" />
-                    <Button label="Simpan" :loading="pendingAddGateway" :disabled="pendingAddGateway" icon="pi pi-link"
-                        @click="addGatewayStore" />
+                    <Button label="Batal" :disabled="pendingAddGateway" severity="danger" icon="pi pi-times" outlined @click.prevent="addGatewayDialog = false" />
+                    <Button label="Simpan" :loading="pendingAddGateway" :disabled="pendingAddGateway" icon="pi pi-link" @click="addGatewayStore" />
                 </template>
             </Dialog>
             <!-- Testing showdialog update -->
-            <Dialog v-model:visible="showDialogUpdateGateway" @after-hide="clearUpdateState" :style="{ width: '450px' }"
-                header="Edit Gateway" :modal="true" class="p-fluid">
+            <Dialog v-model:visible="showDialogUpdateGateway" @after-hide="clearUpdateState" :style="{ width: '450px' }" header="Edit Gateway" :modal="true" class="p-fluid">
                 <div class="field">
                     <label for="name">Nama</label>
-                    <InputText id="name" :disabled="pendingUpdateGateway"
-                        :invalid="errorsUpdateGateway && errorsUpdateGateway.name" required="true" autofocus
-                        v-model="editGateway.name" />
+                    <InputText id="name" :disabled="pendingUpdateGateway" :invalid="errorsUpdateGateway && errorsUpdateGateway.name" required="true" autofocus v-model="editGateway.name" />
                     <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.name">
                         {{ errorsUpdateGateway.name[0] }}
                     </p>
                 </div>
                 <div class="field">
                     <label for="ip">IP</label>
-                    <InputText id="ip" :disabled="pendingUpdateGateway" required="true"
-                        :invalid="errorsUpdateGateway && errorsUpdateGateway.ip" v-model="editGateway.ip" />
+                    <InputText id="ip" :disabled="pendingUpdateGateway" required="true" :invalid="errorsUpdateGateway && errorsUpdateGateway.ip" v-model="editGateway.ip" />
                     <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.ip">
                         {{ errorsUpdateGateway.ip[0] }}
                     </p>
                 </div>
                 <div class="field">
                     <label for="location">Lokasi</label>
-                    <InputText id="location" :disabled="pendingUpdateGateway"
-                        :invalid="errorsUpdateGateway && errorsUpdateGateway.location" required="true"
-                        v-model="editGateway.location" />
+                    <InputText id="location" :disabled="pendingUpdateGateway" :invalid="errorsUpdateGateway && errorsUpdateGateway.location" required="true" v-model="editGateway.location" />
                     <p class="text-red-500" v-if="errorsUpdateGateway && errorsUpdateGateway.location">
                         {{ errorsUpdateGateway.location[0] }}
                     </p>
@@ -539,50 +529,43 @@ const handleCloseShowToken = () => {
                     <label class="mb-3">Role</label>
                     <div class="formgrid grid">
                         <div class="field-radiobutton col-3">
-                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role"
-                                :disabled="pendingUpdateGateway" id="presence" v-model="editGateway.role"
-                                name="presence" value="presence" />
+                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role" :disabled="pendingUpdateGateway" id="presence" v-model="editGateway.role" name="presence" value="presence" />
                             <label for="presence">Presensi</label>
                         </div>
                         <div class="field-radiobutton col-3">
-                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role"
-                                :disabled="pendingUpdateGateway" id="register" v-model="editGateway.role"
-                                name="register" value="register" />
+                            <RadioButton :invalid="errorsUpdateGateway && errorsUpdateGateway.role" :disabled="pendingUpdateGateway" id="register" v-model="editGateway.role" name="register" value="register" />
                             <label for="register">Register</label>
                         </div>
                     </div>
                 </div>
 
                 <template #footer>
-                    <Button label="Batal" :disabled="pendingUpdateGateway" severity="danger" icon="pi pi-times" outlined
-                        @click.prevent="showDialogUpdateGateway = false" />
-                    <Button label="Update" :loading="pendingUpdateGateway" :disabled="pendingUpdateGateway"
-                        icon="pi pi-link" @click="updateGatewayAction" />
+                    <Button label="Batal" :disabled="pendingUpdateGateway" severity="danger" icon="pi pi-times" outlined @click.prevent="showDialogUpdateGateway = false" />
+                    <Button label="Update" :loading="pendingUpdateGateway" :disabled="pendingUpdateGateway" icon="pi pi-link" @click="updateGatewayAction" />
                 </template>
             </Dialog>
             <Dialog v-model:visible="newToken" :modal="true">
-                <p>
-                    Note : Silahkan masukan token ini ketika script diupload ke device!
-                </p>
+                <p>Note : Silahkan masukan token ini ketika script diupload ke device!</p>
                 <div class="text-lg field grid px-2">
                     <InputText class="flex-1" readonly :value="newToken" />
                 </div>
                 <template #footer>
-                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
-                        @click.prevent="copy(newToken)" v-if="isSupported" />
+                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'" @click.prevent="copy(newToken)" v-if="isSupported" />
                 </template>
             </Dialog>
             <Dialog v-model:visible="showToken" :modal="true" @after-hide="handleCloseShowToken">
-                <p>
-                    Note : Silahkan masukan token ini ketika script diupload ke device!
-                </p>
+                <p>Note : Silahkan masukan token ini ketika script diupload ke device!</p>
                 <div class="text-lg field grid px-2">
                     <InputText class="flex-1" readonly :value="selectedToken.token" />
                 </div>
                 <template #footer>
-                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'"
-                        @click.prevent="copy(selectedToken.token)" v-if="isSupported" />
+                    <Button icon="pi pi-copy" :outlined="copied" :label="copied ? 'Copied' : 'Copy'" @click.prevent="copy(selectedToken.token)" v-if="isSupported" />
                 </template>
+            </Dialog>
+            <!-- show qrCode -->
+
+            <Dialog v-model:visible="showQrCode" @after-hide="handleCloseShowQrCode" :modal="true">
+                <GatewayQrCode :data="selectedQrCode" />
             </Dialog>
         </div>
     </div>

@@ -44,12 +44,32 @@ const mockPresensi = ref([
     <AppHeader :bg="false" />
     <Header />
     <div
-      class="mx-3 p-card shadow-1 h-6rem border-round-xl"
+      class="mx-3 p-card shadow-1  border-round-xl"
       style="margin: -10px; z-index: 99"
     >
       <div class="p-3 overflow-hidden">
-        <h3 class="m-0">Fitur <span class="text-primary">Sistem</span></h3>
-        <p class="text-xs mt-2 font-semibold">Comming soon</p>
+        <h3 class="m-0">Shortcut <span class="text-primary">Aplikasi</span></h3>
+        <p class="text-xs mt-2 font-semibold">
+          Comming soon
+        </p>
+        <!-- <div class="flex flex-wrap gap-3 mt-3 align-items-center">
+          <div class="flex flex-column gap-2 align-items-center">
+            <Button  class="p-button-sm p-button-outlined" rounded icon="pi pi-clock" />
+            <span class="text-xs">Jadwal Pelajaran</span>
+          </div>
+          <div class="flex flex-column gap-2 align-items-center">
+            <Button  class="p-button-sm p-button-outlined" rounded icon="pi pi-clock" />
+            <span class="text-xs">Jadwal Pelajaran</span>
+          </div>
+          <div class="flex flex-column gap-2 align-items-center">
+            <Button  class="p-button-sm p-button-outlined" rounded icon="pi pi-clock" />
+            <span class="text-xs">Jadwal Pelajaran</span>
+          </div>
+          <div class="flex flex-column gap-2 align-items-center">
+            <Button  class="p-button-sm p-button-outlined" rounded icon="pi pi-clock" />
+            <span class="text-xs">Jadwal Pelajaran</span>
+          </div>
+        </div> -->
       </div>
     </div>
     <div class="grid grid-nogutter gap-4">

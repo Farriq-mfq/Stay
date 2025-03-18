@@ -7,9 +7,10 @@ import { TokenService } from 'src/services/token.service';
 import { GatewaysController } from './gateways.controller';
 import { GatewaysService } from './gateways.service';
 import { SiswaService } from 'src/siswa/siswa.service';
+import { QrCodeModule } from 'src/qrcode/qrcode.module';
 
 @Module({
-  imports: [PresenceModule],
+  imports: [PresenceModule, QrCodeModule],
   controllers: [GatewaysController],
   providers: [GatewaysService, TokenService, PresenceService, AccessTokenStrategy, RefreshTokenStrategy, SiswaService],
   exports: [GatewaysService, TokenService, PresenceService]

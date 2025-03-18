@@ -1,6 +1,6 @@
 <script setup>
 import { useDrawer } from "@/store/drawer";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import OpenQrcode from "./drawer/OpenQrcode.vue";
 import OpenCameraSiswa from "./drawer/OpenCameraSiswa.vue";
 const scans = [
@@ -36,8 +36,12 @@ onMounted(() => {
     @update:page="updatePage"
   >
     <template #item="slotProps">
-      <OpenCameraSiswa v-if="slotProps.data.name === 'camera'" />
-      <OpenQrcodeSiswa v-if="slotProps.data.name === 'qrcode'" />
+      <OpenCameraSiswa
+        v-if="slotProps.data.name === 'camera' && slotProps.index === 0"
+      />
+      <OpenQrcodeSiswa
+        v-if="slotProps.data.name === 'qrcode' && slotProps.index === 1"
+      />
     </template>
   </Carousel>
 </template>
