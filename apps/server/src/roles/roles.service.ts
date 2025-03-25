@@ -21,10 +21,7 @@ export class RolesService {
   }
 
   async findAll() {
-    return await this.prismaService.client.roles.paginate().withPages({
-      limit: 1,
-      page: 1
-    });
+    return await this.prismaService.client.roles.findMany();
   }
 
 

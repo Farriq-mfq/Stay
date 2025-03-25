@@ -5,7 +5,6 @@ import LoginView from '@/views/Auth/Login.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { config } from '../config';
 import { inject } from "vue";
-import auth from '@websanova/vue-auth'; 
 
 
 const router = createRouter({
@@ -253,14 +252,7 @@ const router = createRouter({
                 //         auth: 'admin'
                 //     }
                 // },
-                {
-                    path: '/users',
-                    name: 'users',
-                    component: () => import('@/views/Users/Index.vue'),
-                    meta: {
-                        title: "Users"
-                    }
-                },
+                
                 {
                     path: '/siswa',
                     name: 'siswa',
@@ -275,6 +267,22 @@ const router = createRouter({
                     component: () => import('@/views/Pegawai/Index.vue'),
                     meta: {
                         title: "Pegawai",
+                    }
+                },
+                {
+                    path: '/users',
+                    name: 'users',
+                    component: () => import('@/views/Users/Index.vue'),
+                    meta: {
+                        title: "Users"
+                    }
+                },
+                {
+                    path: '/roles',
+                    name: 'roles',
+                    component: () => import('@/views/Roles/Index.vue'),
+                    meta: {
+                        title: "Roles"
                     }
                 },
             ]
@@ -340,8 +348,7 @@ export default (app) => {
             document.title = `${title} - ${config.app_name}`;
         }
         const permission = to.meta.permission;
-        // const auth = inject('auth')
-        console.log(to.meta.auth)
+        const auth = inject('auth')
         if (permission) {
             if (auth.user()) {
                 const permissions = auth.user().permissions;

@@ -22,7 +22,7 @@ export class PresenceController {
 
   @Get('/export/:sessionId')
   @UseGuards(AccessTokenGuard, PermissionGuard)
-  @Permissions('presence:export-all')
+  @Permissions('presences:export-all')
 
   async export(
     @Res() res: Response,
@@ -52,7 +52,7 @@ export class PresenceController {
   }
   @Get('/:sessionId')
   @UseGuards(AccessTokenGuard, PermissionGuard)
-  @Permissions('presence:read')
+  @Permissions('presences:read')
   async findAll(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -71,7 +71,7 @@ export class PresenceController {
   }
   @Get('/:sessionId/daily')
   @UseGuards(AccessTokenGuard,PermissionGuard)
-  @Permissions('presence:read-daily')
+  @Permissions('presences:read-daily')
   async findAllByDaily(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
@@ -89,7 +89,7 @@ export class PresenceController {
 
   @Get('/export/:sessionId/daily')
   @UseGuards(AccessTokenGuard,PermissionGuard)
-  @Permissions('presence:export-daily')
+  @Permissions('presences:export-daily')
   async exportPresenceByRombel(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -122,7 +122,7 @@ export class PresenceController {
   }
   @Get('/:sessionId/:rombel/monthly')
   @UseGuards(AccessTokenGuard,PermissionGuard)
-  @Permissions('presence:read-monthly')
+  @Permissions('presences:read-monthly')
   async findAllPresenceByMonthClass(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
@@ -138,7 +138,7 @@ export class PresenceController {
   @Get('/:sessionId/:rombel/monthly/export')
   @UseGuards(AccessTokenGuard)
   @UseGuards(AccessTokenGuard,PermissionGuard)
-  @Permissions('presence:export-monthly')
+  @Permissions('presences:export-monthly')
   async exportPresenceByMonthClass(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,

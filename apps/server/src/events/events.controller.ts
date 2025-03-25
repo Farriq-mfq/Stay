@@ -49,7 +49,7 @@ export class EventController {
     @Post('/manual')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AccessTokenGuard, PermissionGuard)
-    @Permissions('presence:manual')
+    @Permissions('presences:manual')
 
     async handleHttpPresenceManual(@Body() createPresenceByManual: CreatePresenceByManual) {
         return await this.eventsGateway.handleHttpPresenceManual(createPresenceByManual);

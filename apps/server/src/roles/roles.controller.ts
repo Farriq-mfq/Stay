@@ -13,25 +13,27 @@ export class RolesController {
 
   @Post()
   @Permissions('roles:create')
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
+  async create(@Body() createRoleDto: CreateRoleDto) {
+    return await this.rolesService.create(createRoleDto);
   }
 
   @Get()
   @Permissions('roles:read')
-  findAll() {
-    return this.rolesService.findAll();
+  async findAll() {
+    return await this.rolesService.findAll();
   }
 
   @Patch(':id')
   @Permissions('roles:update')
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(+id, updateRoleDto);
+  async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+    return await this.rolesService.update(+id, updateRoleDto);
   }
 
   @Delete(':id')
   @Permissions('roles:delete')
-  remove(@Param('id') id: string) {
-    return this.rolesService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.rolesService.remove(+id);
   }
+
+
 }

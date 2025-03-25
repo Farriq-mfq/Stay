@@ -55,9 +55,10 @@ const model = ref([
     {
         label: permissions.value.includes('users:read') || permissions.value.includes('siswa:read') || permissions.value.includes('pegawai:read') ? 'Master' : '',
         items: [
-            permissions.value.includes('users:read') ? { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' } : null,
             permissions.value.includes('siswa:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-id-card', to: '/siswa' } : null,
-            permissions.value.includes('pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-users', to: '/pegawai' } : null
+            permissions.value.includes('pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-users', to: '/pegawai' } : null,
+            permissions.value.includes('users:read') ? { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' } : null,
+            permissions.value.includes('roles:read') ? { label: 'Hak Akses', icon: 'pi pi-fw pi-key', to: '/roles' } : null,
         ].filter((menu) => menu != null)
     }
 ]);

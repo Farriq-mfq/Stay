@@ -17,7 +17,7 @@ export class PresencePegawaiController {
 
 
     @Get('export/:sessionId')
-    @Permissions('presence-pegawai:export-all')
+    @Permissions('presences-pegawai:export-all')
     async exportAll(
         @Res() res: Response,
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -33,7 +33,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId')
-    @Permissions('presence-pegawai:read')
+    @Permissions('presences-pegawai:read')
     async findAll(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -46,7 +46,7 @@ export class PresencePegawaiController {
 
 
     @Get('/:sessionId/daily')
-    @Permissions('presence-pegawai:read-daily')
+    @Permissions('presences-pegawai:read-daily')
 
     async findAllByDaily(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -59,7 +59,7 @@ export class PresencePegawaiController {
 
 
     @Get('/export/:sessionId/daily')
-    @Permissions('presence-pegawai:export-daily')
+    @Permissions('presences-pegawai:export-daily')
     async exportPresenceBygroup(
         @Res() res: Response,
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -92,7 +92,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId/:group/monthly')
-    @Permissions('presence-pegawai:read-monthly')
+    @Permissions('presences-pegawai:read-monthly')
     async findAllPresenceByMonthClass(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query("date") date: string,
@@ -107,7 +107,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId/:group/monthly/export')
-    @Permissions('presence-pegawai:export-monthly')
+    @Permissions('presences-pegawai:export-monthly')
     //   @UseGuards(AccessTokenGuard)
     async exportPresenceByMonthClass(
         @Res() res: Response,
@@ -129,7 +129,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:meetingSessionId/meeting')
-    @Permissions('presence-pegawai:read-meeting')
+    @Permissions('presences-pegawai:read-meeting')
     async findByMeetingSession(
         @Param('meetingSessionId', new ParseIntPipe()) meetingSessionId: string,
     ) {

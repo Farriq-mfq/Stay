@@ -9,10 +9,11 @@
     "rombel",
     "detail",
     "update",
+    "mport",
     "rfid-register",
     "rfid-reset",
-    "rfid-import",
-    "rombel-update"
+    "rombel-update",
+    "update-password"
   ],
   "pegawai": [
     "create",
@@ -22,10 +23,11 @@
     "download",
     "group",
     "detail",
+    "import",
     "update",
     "rfid-register",
     "rfid-reset",
-    "rfid-import"
+    "update-password"
   ],
   "gateways": ["create", "read", "update", "delete", "ping", "token", "qrcode"],
   "backup": ["database"],

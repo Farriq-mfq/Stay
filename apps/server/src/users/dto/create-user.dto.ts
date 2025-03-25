@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumberString, IsString } from "class-validator"
+import { IsNotEmpty, IsNumber, IsString } from "class-validator"
 import { IsEqualTo } from "src/decorators/match.decorator"
 
 export class CreateUserDto {
@@ -26,9 +26,9 @@ export class CreateUserDto {
     })
     confirmation_password: string
 
-    @IsNumberString()
+    @IsNumber()
     @IsNotEmpty({
-        message: "Role Tidak Boleh Kosong"
+        message: "Hak Akses Tidak Boleh Kosong"
     })
-    role_id: string
+    roles: string
 }

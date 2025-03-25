@@ -1,5 +1,5 @@
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import { createApp } from 'vue';
+import { createApp, inject } from 'vue';
 import vueDebounce from 'vue-debounce';
 import App from './App.vue';
 import auth from './plugins/auth';
@@ -27,6 +27,12 @@ import '@/assets/styles.scss';
 const app = createApp(App);
 
 app.provide("APP_NAME", import.meta.env.VITE_APP_NAME);
+
+app.config.globalProperties.$can = (permission) => {
+    const auth = inject('auth');
+    const permissions = auth.user().permissions;
+    return permissions.includes(permission);
+};
 
 app.use(http);
 app.use(router);

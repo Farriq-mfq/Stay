@@ -33,7 +33,7 @@ export class UsersService {
         refreshToken: true,
         createdAt: true,
         updatedAt: true,
-        rolesId: true
+        rolesId: true,
       }
     })
   }
@@ -79,6 +79,13 @@ export class UsersService {
         },
         id: {
           not: parseInt(userId)
+        },
+      },
+      include: {
+        roles: {
+          select: {
+            name: true
+          }
         }
       }
     }).withPages({
@@ -103,7 +110,7 @@ export class UsersService {
   async create(CreateUserDto: CreateUserDto) {
     const role = await this.prismaService.client.roles.findUniqueOrThrow({
       where: {
-        id: +CreateUserDto.role_id
+        id: +CreateUserDto.roles
       }
     })
     return await this.prismaService.client.users.create({
@@ -118,7 +125,7 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const role = await this.prismaService.client.roles.findUniqueOrThrow({
       where: {
-        id: +updateUserDto.role_id
+        id: +updateUserDto.roles
       }
     })
     return await this.prismaService.client.users.update({

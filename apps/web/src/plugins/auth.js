@@ -24,6 +24,10 @@ export default (app) => {
 
                 },
                 response: function (res) {
+                    if (res.status === 403) {
+                        app.router.replace({ name: 'forbidden' })
+                        return;
+                    }
                     if ('data' in res.data) {
                         const { accessToken, refreshToken } = res.data.data
                         if (accessToken && refreshToken) return JSON.stringify({
@@ -60,7 +64,6 @@ export default (app) => {
             stores: ['storage'],
             tokenDefaultKey: config.token_key,
             rolesKey: 'role',
-            permissionsKey: "permissions",
             notFoundRedirect: { name: 'not-found' },
         },
     }));
