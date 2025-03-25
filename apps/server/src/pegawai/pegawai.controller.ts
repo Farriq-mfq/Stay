@@ -7,15 +7,19 @@ import { CreatePegawaiDto, UpdatePasswordPegawaiDto } from './dto/create-pegawai
 import { UpdatePegawaiTokenDto } from './dto/update-pegawai-token.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { PegawaiService } from './pegawai.service';
+import { PermissionGuard } from 'src/guards/permissions.guard';
+import { Permissions } from 'src/decorators/permission.decorator';
 
 
 @Controller('pegawai')
 // @ApiTags("Pegawai")
+@UseGuards(AccessTokenGuard, PermissionGuard)
 export class PegawaiController {
   constructor(private readonly pegawaiService: PegawaiService) { }
 
-  @UseGuards(AccessTokenGuard)
+
   @Post()
+  @Permissions('pegawai:create')
   @UseInterceptors(FileFieldsInterceptor([{
     name: 'sign_picture',
     maxCount: 1,
@@ -42,8 +46,9 @@ export class PegawaiController {
     return await this.pegawaiService.create(createPegawaiDto, files);
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Get()
+  @Permissions('pegawai:read')
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
@@ -52,35 +57,39 @@ export class PegawaiController {
     return await this.pegawaiService.findAll(page, limit, search);
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Get('/download')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
+  @Permissions('pegawai:download')
   async downloadFileTemplate(@Res() res: Response) {
     const file = await this.pegawaiService.downloadTemplate();
     res.send(file);
   }
 
-  @Get("/:sessionId/all")
-  async findWithoutPaginate(
-    @Param('sessionId') sessionId: string
-  ) {
-    return await this.pegawaiService.findWithoutPaginate(sessionId)
-  }
+  // @Get("/:sessionId/all")
+  // async findWithoutPaginate(
+  //   @Param('sessionId') sessionId: string
+  // ) {
+  //   return await this.pegawaiService.findWithuoutPaginate(sessionId)
+  // }
 
-  @UseGuards(AccessTokenGuard)
+
   @Get("/group")
+  @Permissions('pegawai:group')
   async getSiswaClass() {
     return await this.pegawaiService.getGroup()
   }
 
   @Get(':id')
-  @UseGuards(AccessTokenGuard)
+  @Permissions('pegawai:detail')
+
   async findOne(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.findOne(+id);
   }
 
   @Patch(':id')
+  @Permissions('pegawai:update')
   @UseInterceptors(FileFieldsInterceptor([{
     name: 'sign_picture',
     maxCount: 1,
@@ -111,33 +120,40 @@ export class PegawaiController {
   //   throw new ServiceUnavailableException()
   // }
   @Post(':id/reset-password')
+  @Permissions('pegawai:reset-password')
+
   async resetPassword(@Param('id', new ParseIntPipe()) id: string, @Body() updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
     return await this.pegawaiService.resetPassword(+id, updatePasswordPegawaiDto)
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Delete(':id')
+  @Permissions('pegawai:delete')
   async remove(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.remove(+id);
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Post(':id/rfid-token')
+  @Permissions('pegawai:rfid-register')
 
   async registerRfid(@Param('id', new ParseIntPipe()) id: string, @Body() updateToken: UpdatePegawaiTokenDto) {
     return await this.pegawaiService.registerRfid(+id, updateToken)
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Delete(':id/rfid-token')
+  @Permissions('pegawai:rfid-reset')
   async resetTokenRFID(@Param('id', new ParseIntPipe()) id: string) {
     return await this.pegawaiService.resetTokenRFID(+id)
   }
 
-  @UseGuards(AccessTokenGuard)
+
   @Post('/import')
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
+  @Permissions('pegawai:import')
+
   async import(@UploadedFile(
     new ParseFilePipeBuilder()
       .addFileTypeValidator({

@@ -60,6 +60,7 @@ export default (app) => {
             stores: ['storage'],
             tokenDefaultKey: config.token_key,
             rolesKey: 'role',
+            permissionsKey: "permissions",
             notFoundRedirect: { name: 'not-found' },
         },
     }));

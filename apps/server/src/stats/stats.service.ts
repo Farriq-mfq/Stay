@@ -28,11 +28,7 @@ export class StatsService {
       this.prismaService.client.gateways.count(),
       this.prismaService.client.presence_sessions.count(),
       this.prismaService.client.siswa.count(),
-      this.prismaService.client.users.count({
-        where: {
-          role: 'user'
-        }
-      }),
+      this.prismaService.client.users.count(),
       this.prismaService.client.pegawai.count()
     ])
 

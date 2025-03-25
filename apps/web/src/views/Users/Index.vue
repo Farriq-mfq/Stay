@@ -384,6 +384,11 @@ const clearUpdateUserPassword = () => {
             </p>
           </div>
 
+          <div class="field">
+            <select>
+              <option value="">--Pilih Role--</option>
+            </select>
+          </div>
           <template #footer>
             <Button label="Batal" :disabled="addUserLoading" severity="danger" icon="pi pi-times" outlined
               @click.prevent="showDialogUser = false" />

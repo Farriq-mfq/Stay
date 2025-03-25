@@ -3,6 +3,9 @@ import { GatewaysHttpGuard } from "src/gateways/gateways.http.guard";
 import { CreatePresenceByManual } from "src/presence/dto/create-presence.dto";
 import { ScanDto } from "./dto/scan.dto";
 import { EventsGateway } from "./events.gateway";
+import { PermissionGuard } from "src/guards/permissions.guard";
+import { AccessTokenGuard } from "src/guards/accessToken.guard";
+import { Permissions } from "src/decorators/permission.decorator";
 
 @Controller('events')
 export class EventController {
@@ -45,7 +48,10 @@ export class EventController {
 
     @Post('/manual')
     @HttpCode(HttpStatus.OK)
-    async httpManualByNIS(@Body() createPresenceByManual:CreatePresenceByManual) {
+    @UseGuards(AccessTokenGuard, PermissionGuard)
+    @Permissions('presence:manual')
+
+    async handleHttpPresenceManual(@Body() createPresenceByManual: CreatePresenceByManual) {
         return await this.eventsGateway.handleHttpPresenceManual(createPresenceByManual);
     }
     // @Post('/nis')

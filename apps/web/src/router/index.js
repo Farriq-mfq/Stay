@@ -4,6 +4,8 @@ import NotFoundView from '@/views/Errors/NotFound.vue';
 import LoginView from '@/views/Auth/Login.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { config } from '../config';
+import { inject } from "vue";
+import auth from '@websanova/vue-auth'; 
 
 
 const router = createRouter({
@@ -30,6 +32,7 @@ const router = createRouter({
                     component: () => import('@/views/Gateways/Index.vue'),
                     meta: {
                         title: "Gateways",
+                        permission: 'gateways:read'
                     }
                 },
                 {
@@ -38,6 +41,7 @@ const router = createRouter({
                     component: () => import('@/views/Sessions/Index.vue'),
                     meta: {
                         title: "Sessions",
+                        permission: 'sessions:read'
                     }
                 },
                 {
@@ -60,7 +64,7 @@ const router = createRouter({
                     path: '/presences',
                     name: 'presences',
                     redirect: {
-                        name: 'presences-all'
+                        name: 'presences-all',
                     },
                     component: () => import('@/views/Presences/Index.vue'),
                     children: [
@@ -70,6 +74,7 @@ const router = createRouter({
                             component: () => import('@/views/Presences/All.vue'),
                             meta: {
                                 title: "All Presences",
+                                permission: 'presences:read'
                             },
                         },
                         {
@@ -78,6 +83,7 @@ const router = createRouter({
                             component: () => import('@/views/Presences/Daily.vue'),
                             meta: {
                                 title: "Rombel Presences Harian",
+                                permission: 'presences:read-daily'
                             },
                         },
                         {
@@ -86,6 +92,7 @@ const router = createRouter({
                             component: () => import('@/views/Presences/Monthly.vue'),
                             meta: {
                                 title: "Rekap Presences Bulanan",
+                                permission: 'presences:read-monthly'
                             },
                         },
                     ]
@@ -251,8 +258,7 @@ const router = createRouter({
                     name: 'users',
                     component: () => import('@/views/Users/Index.vue'),
                     meta: {
-                        title: "Users",
-                        auth: "admin"
+                        title: "Users"
                     }
                 },
                 {
@@ -333,8 +339,19 @@ export default (app) => {
         if (title) {
             document.title = `${title} - ${config.app_name}`;
         }
+        const permission = to.meta.permission;
+        // const auth = inject('auth')
+        console.log(to.meta.auth)
+        if (permission) {
+            if (auth.user()) {
+                const permissions = auth.user().permissions;
+                permissions.includes(permission) ? next() : next({ name: 'forbidden' });
+            }
+        }
+
         next();
     });
+
     app.router = router
     app.config.globalProperties.$router = router;
 

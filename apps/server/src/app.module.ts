@@ -21,6 +21,7 @@ import { ConnectedClientModule } from './connected-client/connected-client.modul
 import { PegawaiModulesModule } from './pegawai/modules/pegawai.modules.module';
 import { SiswaModulesModule } from './siswa/modules/siswa.modules.module';
 import { QrCodeModule } from './qrcode/qrcode.module';
+import { RolesModule } from './roles/roles.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -71,7 +72,8 @@ import { QrCodeModule } from './qrcode/qrcode.module';
     ConnectedClientModule,
     PegawaiModulesModule,
     SiswaModulesModule,
-    QrCodeModule
+    QrCodeModule,
+    RolesModule
   ],
 })
 export class AppModule { }

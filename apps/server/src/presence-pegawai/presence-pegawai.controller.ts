@@ -4,10 +4,12 @@ import { PresencePegawaiService } from "./presence-pegawai.service";
 import { Response } from "express";
 import { format } from "date-fns";
 import { AccessTokenGuard } from "src/guards/accessToken.guard";
+import { Permissions } from "src/decorators/permission.decorator";
+import { PermissionGuard } from "src/guards/permissions.guard";
 
 @Controller('presence-pegawai')
 @ApiTags('prensence-pegawai')
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, PermissionGuard)
 export class PresencePegawaiController {
     constructor(
         private readonly presencePegawaiService: PresencePegawaiService
@@ -15,6 +17,7 @@ export class PresencePegawaiController {
 
 
     @Get('export/:sessionId')
+    @Permissions('presence-pegawai:export-all')
     async exportAll(
         @Res() res: Response,
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -30,6 +33,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId')
+    @Permissions('presence-pegawai:read')
     async findAll(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -42,6 +46,8 @@ export class PresencePegawaiController {
 
 
     @Get('/:sessionId/daily')
+    @Permissions('presence-pegawai:read-daily')
+
     async findAllByDaily(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query("date") date: string,
@@ -53,6 +59,7 @@ export class PresencePegawaiController {
 
 
     @Get('/export/:sessionId/daily')
+    @Permissions('presence-pegawai:export-daily')
     async exportPresenceBygroup(
         @Res() res: Response,
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -85,6 +92,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId/:group/monthly')
+    @Permissions('presence-pegawai:read-monthly')
     async findAllPresenceByMonthClass(
         @Param('sessionId', new ParseIntPipe()) sessionId: string,
         @Query("date") date: string,
@@ -99,6 +107,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:sessionId/:group/monthly/export')
+    @Permissions('presence-pegawai:export-monthly')
     //   @UseGuards(AccessTokenGuard)
     async exportPresenceByMonthClass(
         @Res() res: Response,
@@ -120,6 +129,7 @@ export class PresencePegawaiController {
     }
 
     @Get('/:meetingSessionId/meeting')
+    @Permissions('presence-pegawai:read-meeting')
     async findByMeetingSession(
         @Param('meetingSessionId', new ParseIntPipe()) meetingSessionId: string,
     ) {

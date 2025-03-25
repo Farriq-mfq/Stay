@@ -53,26 +53,27 @@ model pegawai {
   account                   account?            @relation(fields: [accountId], references: [id])
 }
 
-enum RoleUser {
-  admin
-  user
-}
+// enum RoleUser {
+//   admin
+//   user
+// }
 
 // users system
 
 model users {
-  id                 Int                @id @default(autoincrement())
+  id                 Int      @id @default(autoincrement())
   name               String
-  username           String             @unique @db.VarChar(255)
-  password           String             @db.VarChar(255)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  refreshToken       String?            @db.Text
-  role               RoleUser           @default(user)
-  telegram_accountId Int?               @unique
-  accountId          Int?               @unique
-  account            account?           @relation(fields: [accountId], references: [id])
-  role_permissions   role_permissions[] @relation("UserPermissions")
+  username           String   @unique @db.VarChar(255)
+  password           String   @db.VarChar(255)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  refreshToken       String?  @db.Text
+  // role               RoleUser @default(user)
+  telegram_accountId Int?     @unique
+  accountId          Int?     @unique
+  account            account? @relation(fields: [accountId], references: [id])
+  roles              roles    @relation(fields: [rolesId], references: [id])
+  rolesId            Int
 }
 
 // fitur data
@@ -320,19 +321,22 @@ model detail_transactions {
 }
 
 model roles {
-  id               Int                @id @default(autoincrement())
-  name             String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  role_permissions role_permissions[]
+  id          Int                @id @default(autoincrement())
+  name        String             @unique
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  permissions role_permissions[]
+  users       users[]
 }
 
 model permissions {
   id               Int                @id @default(autoincrement())
-  name             String
+  name             String             @unique
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   role_permissions role_permissions[]
+
+  @@index([name])
 }
 
 model role_permissions {
@@ -341,10 +345,8 @@ model role_permissions {
   roleId       Int
   permission   permissions @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   permissionId Int
-  user         users?      @relation("UserPermissions", fields: [usersId], references: [id])
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-  usersId      Int?
 }
 
 // connected client socket io

@@ -9,14 +9,17 @@ import { siswa } from '@prisma/client';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
+import { PermissionGuard } from 'src/guards/permissions.guard';
+import { Permissions } from 'src/decorators/permission.decorator';
 
 @Controller('siswa')
 @ApiTags("Siswa")
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, PermissionGuard)
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) { }
 
   @Post()
+  @Permissions('siswa:create')
   @UseInterceptors(FileInterceptor('file'))
   async create(
     @UploadedFile(
@@ -37,6 +40,7 @@ export class SiswaController {
   }
 
   @Get()
+  @Permissions('siswa:read')
   async findAll(
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
@@ -48,23 +52,27 @@ export class SiswaController {
   @Get('/download')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')
+  @Permissions('siswa:download')
   async downloadFileTemplate(@Res() res: Response) {
     const file = await this.siswaService.downloadTemplate();
     res.send(file);
   }
 
   @Get("/rombel")
+  @Permissions('siswa:rombel')
   async getSiswaClass() {
     return await this.siswaService.getGroupClass()
   }
 
   @Get(':id')
+  @Permissions('siswa:detail')
   async findOne(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.findOne(+id);
   }
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('file'))
+  @Permissions('siswa:update')
   async update(@Param('id', new ParseIntPipe()) id: string, @UploadedFile(
     new ParseFilePipeBuilder()
       .addFileTypeValidator({
@@ -91,16 +99,19 @@ export class SiswaController {
   }
 
   @Delete(':id')
+  @Permissions('siswa:delete')
   async remove(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.remove(+id);
   }
 
   @Post(':id/rfid-token')
+  @Permissions('siswa:rfid-register')
   async registerRfid(@Param('id', new ParseIntPipe()) id: string, @Body() updateToken: UpdateTokenDto) {
     return await this.siswaService.registerRfid(+id, updateToken)
   }
 
   @Delete(':id/rfid-token')
+  @Permissions('siswa:rfid-reset')
   async resetTokenRFID(@Param('id', new ParseIntPipe()) id: string) {
     return await this.siswaService.resetTokenRFID(+id)
   }
@@ -108,6 +119,7 @@ export class SiswaController {
   @Post('/import')
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
+  @Permissions('siswa:import')
   async import(@UploadedFile(
     new ParseFilePipeBuilder()
       .addFileTypeValidator({
@@ -132,6 +144,7 @@ export class SiswaController {
   }
 
   @Patch('rombel/update')
+  @Permissions('siswa:rombel-update')
   async updateRombel(
     @Body() updateRombelDto: UpdateRombelDto
   ) {
