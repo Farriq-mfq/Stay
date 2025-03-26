@@ -1,0 +1,74 @@
+{
+  "users": ["create", "read", "update", "delete", "update-password"],
+  "siswa": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "download",
+    "rombel",
+    "detail",
+    "update",
+    "mport",
+    "rfid-register",
+    "rfid-reset",
+    "rombel-update",
+    "update-password"
+  ],
+  "pegawai": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "download",
+    "group",
+    "detail",
+    "import",
+    "update",
+    "rfid-register",
+    "rfid-reset",
+    "update-password"
+  ],
+  "gateways": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "ping",
+    "token",
+    "qrcode",
+    "on-off"
+  ],
+  "backup": ["database"],
+  "client": ["read", "set-session"],
+  "meeting-session": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "detail",
+    "select",
+    "unselect"
+  ],
+  "presences": [
+    "read",
+    "read-daily",
+    "export-all",
+    "export-daily",
+    "read-monthly",
+    "export-monthly",
+    "manual"
+  ],
+  "presences-pegawai": [
+    "read",
+    "read-daily",
+    "export-all",
+    "export-daily",
+    "read-monthly",
+    "export-monthly",
+    "read-meeting"
+  ],
+  "roles": ["create", "read", "update", "delete"],
+  "sessions": ["create", "read", "update", "delete", "detail"],
+  "profile": ["read"]
+}

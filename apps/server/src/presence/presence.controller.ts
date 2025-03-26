@@ -3,8 +3,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { format } from 'date-fns';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
-import { CreatePresenceByManual, CreatePresenceByQRDTO } from './dto/create-presence.dto';
+import { CreatePresenceByQRDTO } from './dto/create-presence.dto';
 import { PresenceService } from './presence.service';
+import { Permissions } from 'src/decorators/permission.decorator';
+import { PermissionGuard } from 'src/guards/permissions.guard';
 
 @Controller('presence')
 @ApiTags("Presence")
@@ -19,7 +21,9 @@ export class PresenceController {
   }
 
   @Get('/export/:sessionId')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, PermissionGuard)
+  @Permissions('presences:export-all')
+
   async export(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -47,7 +51,8 @@ export class PresenceController {
     })
   }
   @Get('/:sessionId')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, PermissionGuard)
+  @Permissions('presences:read')
   async findAll(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
@@ -65,7 +70,8 @@ export class PresenceController {
     )
   }
   @Get('/:sessionId/daily')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard,PermissionGuard)
+  @Permissions('presences:read-daily')
   async findAllByDaily(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
@@ -82,7 +88,8 @@ export class PresenceController {
   }
 
   @Get('/export/:sessionId/daily')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard,PermissionGuard)
+  @Permissions('presences:export-daily')
   async exportPresenceByRombel(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
@@ -114,7 +121,8 @@ export class PresenceController {
     res.send(buffer);
   }
   @Get('/:sessionId/:rombel/monthly')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard,PermissionGuard)
+  @Permissions('presences:read-monthly')
   async findAllPresenceByMonthClass(
     @Param('sessionId', new ParseIntPipe()) sessionId: string,
     @Query("date") date: string,
@@ -129,6 +137,8 @@ export class PresenceController {
   }
   @Get('/:sessionId/:rombel/monthly/export')
   @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard,PermissionGuard)
+  @Permissions('presences:export-monthly')
   async exportPresenceByMonthClass(
     @Res() res: Response,
     @Param('sessionId', new ParseIntPipe()) sessionId: string,

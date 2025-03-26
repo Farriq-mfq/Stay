@@ -643,11 +643,11 @@ const downloadTemplateService = async () => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2 gap-1 flex flex-wrap">
-                            <Button label="Tambah Pegawai" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddPegawai = true" />
-                            <Button label="Import Pegawai" icon="pi pi-arrow-up" severity="success" class="mr-2" @click.prevent="showDialogImportPegawai = true" />
+                            <Button label="Tambah Pegawai" v-if="$can('pegawai:create')" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddPegawai = true" />
+                            <Button label="Import Pegawai" v-if="$can('pegawai:import')" icon="pi pi-arrow-up" severity="success" class="mr-2" @click.prevent="showDialogImportPegawai = true" />
                             <!-- <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
-                            <Button label="Download Format" @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
+                            <Button label="Download Format" v-if="$can('pegawai:download')" @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
                         </div>
                     </template>
                 </Toolbar>
@@ -708,9 +708,9 @@ const downloadTemplateService = async () => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" @click.prevent="handleshowDialogUpdatePegawai(data)" />
-                                <Button severity="danger" icon="pi pi-trash" :loading="removePegawaiPending" :disabled="removePegawaiPending" @click.prevent="confirmRemovePegawai(data)" />
-                                <Button icon="pi pi-id-card" @click.prevent="handleShowDialogRegisterCard(data)" />
+                                <Button icon="pi pi-pencil" v-if="$can('pegawai:update')" @click.prevent="handleshowDialogUpdatePegawai(data)" />
+                                <Button severity="danger" icon="pi pi-trash" v-if="$can('pegawai:delete')" :loading="removePegawaiPending" :disabled="removePegawaiPending" @click.prevent="confirmRemovePegawai(data)" />
+                                <Button icon="pi pi-id-card" v-if="$can('pegawai:rfid-register')" @click.prevent="handleShowDialogRegisterCard(data)" />
                                 <!-- <Button icon="pi pi-key" severity="warning" @click.prevent="handleShowDialogRegisterCard(data)" /> -->
                             </div>
                         </template>
@@ -728,7 +728,7 @@ const downloadTemplateService = async () => {
                             </template>
                             <template #footer>
                                 <div class="flex gap-2" v-if="data.rfid_token">
-                                    <Button label="Reset Kartu" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined severity="danger" />
+                                    <Button label="Reset Kartu" v-if="$can('pegawai:rfid-reset')" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined severity="danger" />
                                 </div>
                             </template>
                         </Card>

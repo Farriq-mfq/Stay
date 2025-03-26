@@ -3,13 +3,16 @@ import { Response } from 'express';
 import { createReadStream, existsSync, ReadStream, unlinkSync } from 'fs';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { BackupService } from './backup.service';
+import { PermissionGuard } from 'src/guards/permissions.guard';
+import { Permissions } from 'src/decorators/permission.decorator';
 @Controller("backup")
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, PermissionGuard)
 export class BackupController {
     constructor(
         private readonly backupService: BackupService,
     ) { }
     @Get("database")
+    @Permissions('backup:database')
     async backupDatabase(
         @Res() res: Response
     ) {

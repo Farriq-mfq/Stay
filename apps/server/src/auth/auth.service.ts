@@ -1,18 +1,20 @@
-import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
 import { UsersService } from 'src/users/users.service';
 import { JwtPayload } from './accessToken.strategy';
 import { AuthDto } from './dto/auth.dto';
-import { RoleUser } from '@prisma/client';
 import { changePasswordDto } from './dto/change-password.dto';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from 'src/prisma.extension';
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UsersService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) {
 
     }
@@ -29,7 +31,7 @@ export class AuthService {
 
         const tokens = await this.getTokens(user.id.toString(), {
             username: user.username,
-            role: user.role
+            role: user.rolesId
         })
 
         await this.userService.updateToken(user.id.toString(), tokens.refreshToken)
@@ -45,7 +47,7 @@ export class AuthService {
         role
     }: {
         username: string,
-        role: RoleUser
+        role: string | number
     }): Promise<
         {
             accessToken: string,
@@ -97,14 +99,31 @@ export class AuthService {
         // if (!refreshTokenMatches) throw new UnauthorizedException();
         const tokens = await this.getTokens(user.id.toString(), {
             username: user.username,
-            role: user.role
+            role: user.rolesId,
         });
         await this.userService.updateToken(user.id.toString(), tokens.refreshToken);
         return tokens;
     }
 
     async getMe(payload: JwtPayload) {
-        return await this.userService.find(payload.sub.toString())
+        const user = await this.userService.find(payload.sub.toString())
+        const role = await this.prismaService.client.roles.findUniqueOrThrow({
+            where: {
+                id: user.rolesId
+            },
+            include: {
+                permissions: {
+                    select: {
+                        permission: true
+                    }
+                }
+            }
+        })
+        return {
+            ...user,
+            role: role.name,
+            permissions: role.permissions.map(permission => permission.permission.name)
+        }
     }
 
     async changePassword(userId: string, changePasswordDto: changePasswordDto) {

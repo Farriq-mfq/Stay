@@ -30,10 +30,10 @@ export class UsersService {
         id: true,
         name: true,
         username: true,
-        role: true,
         refreshToken: true,
         createdAt: true,
         updatedAt: true,
+        rolesId: true,
       }
     })
   }
@@ -59,10 +59,12 @@ export class UsersService {
   }
 
   async findAllUsers(
+    user: any,
     page?: number,
     limit?: number,
     search?: string,
   ) {
+    const userId = user.sub
     const [items, meta] = await this.prismaService.client.users.paginate({
       where: {
         ...search && {
@@ -75,7 +77,16 @@ export class UsersService {
             }
           ]
         },
-        role: 'user'
+        id: {
+          not: parseInt(userId)
+        },
+      },
+      include: {
+        roles: {
+          select: {
+            name: true
+          }
+        }
       }
     }).withPages({
       limit: limit ?? 10,
@@ -97,24 +108,34 @@ export class UsersService {
     })
   }
   async create(CreateUserDto: CreateUserDto) {
+    const role = await this.prismaService.client.roles.findUniqueOrThrow({
+      where: {
+        id: +CreateUserDto.roles
+      }
+    })
     return await this.prismaService.client.users.create({
       data: {
         name: CreateUserDto.name,
         username: CreateUserDto.username,
         password: await hash(CreateUserDto.password),
-        role: 'user'
+        rolesId: role.id
       }
     })
   }
   async update(id: number, updateUserDto: UpdateUserDto) {
+    const role = await this.prismaService.client.roles.findUniqueOrThrow({
+      where: {
+        id: +updateUserDto.roles
+      }
+    })
     return await this.prismaService.client.users.update({
       where: {
         id: id,
-        role: 'user'
       },
       data: {
         name: updateUserDto.name,
         username: updateUserDto.username,
+        rolesId: role.id
       },
     })
   }
@@ -122,7 +143,6 @@ export class UsersService {
     return await this.prismaService.client.users.update({
       where: {
         id: id,
-        role: 'user'
       },
       data: {
         password: await hash(updateUserPasswordDto.password),
