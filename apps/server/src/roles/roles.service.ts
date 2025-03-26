@@ -10,33 +10,84 @@ export class RolesService {
     @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) { }
   async create(createRoleDto: CreateRoleDto) {
-    return await this.prismaService.client.roles.create({
+    const role = await this.prismaService.client.roles.create({
       data: {
         name: createRoleDto.name,
-        permissions: {
-          connect: createRoleDto.permissions.map(permission => ({ id: +permission }))
-        }
       }
     });
+    await this.prismaService.client.role_permissions.createMany({
+      data: createRoleDto.permissions.map(permission => ({
+        roleId: role.id,
+        permissionId: +permission
+      }))
+    })
+    return role
   }
 
-  async findAll() {
-    return await this.prismaService.client.roles.findMany();
+  async findAll(page?: number,
+    limit?: number,
+    search?: string) {
+    const [items, meta] = await this.prismaService.client.roles.paginate({
+      where: {
+        ...search && {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: 'insensitive'
+              },
+            },
+          ],
+        },
+      },
+      include: {
+        permissions: {
+          select: {
+            permission: true
+          }
+        }
+      }
+    }).withPages({
+      limit: limit ?? 10,
+      includePageCount: true,
+      page: page ?? 1
+    });
+    return {
+      items,
+      meta
+    };
   }
 
 
   async update(id: number, updateRoleDto: UpdateRoleDto) {
-    return await this.prismaService.client.roles.update({
+    const role = await this.prismaService.client.roles.findUniqueOrThrow({
+      where: {
+        id: id
+      }
+    })
+    const roleUpdated = await this.prismaService.client.roles.update({
       where: {
         id: id
       },
       data: {
         name: updateRoleDto.name,
-        permissions: {
-          connect: updateRoleDto.permissions.map(permission => ({ id: +permission }))
-        }
       }
     })
+
+    await this.prismaService.client.role_permissions.deleteMany({
+      where: {
+        roleId: role.id
+      }
+    })
+
+    await this.prismaService.client.role_permissions.createMany({
+      data: updateRoleDto.permissions.map(permission => ({
+        roleId: role.id,
+        permissionId: +permission
+      }))
+    })
+
+    return roleUpdated
   }
 
   async remove(id: number) {
@@ -50,5 +101,9 @@ export class RolesService {
         id: role.id
       }
     })
+  }
+
+  async findAllWithoutPagination() {
+    return await this.prismaService.client.roles.findMany();
   }
 }

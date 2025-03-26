@@ -29,7 +29,16 @@
     "rfid-reset",
     "update-password"
   ],
-  "gateways": ["create", "read", "update", "delete", "ping", "token", "qrcode"],
+  "gateways": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "ping",
+    "token",
+    "qrcode",
+    "on-off"
+  ],
   "backup": ["database"],
   "client": ["read", "set-session"],
   "meeting-session": [

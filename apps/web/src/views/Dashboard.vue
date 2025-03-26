@@ -24,10 +24,6 @@ const auth = inject('auth')
 </script>
 <template>
   <div class="grid">
-    <pre>
-      {{auth.user().permissions}}
-
-    </pre>
     <div class="col-12 lg:col-6 xl:col-3" v-if="!statsCountLoading">
       <div class="card mb-0">
         <div class="flex justify-content-between mb-3">

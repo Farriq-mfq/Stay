@@ -67,7 +67,6 @@ const userAddData = ref({
 });
 const errorsAddUser = ref({});
 const addUserService = async (data) => {
-    console.log(data);
     return await axios.post('/users', {
         name: data.name,
         username: data.username,
@@ -299,7 +298,7 @@ const clearUpdateUserPassword = () => {
 };
 
 const getRolesService = async () => {
-    return await axios.get('/roles');
+    return await axios.get('/roles/without-pagination');
 };
 
 const { data: roles, isLoading: rolesLoading } = useQuery({

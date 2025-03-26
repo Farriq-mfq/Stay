@@ -384,7 +384,7 @@ const handleCloseShowQrCode = () => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
-                            <Button label="Tambah gateway" icon="pi pi-plus" class="mr-2" @click.prevent="addGatewayDialog = true" />
+                            <Button label="Tambah gateway" v-if="$can('gateways:create')" icon="pi pi-plus" class="mr-2" @click.prevent="addGatewayDialog = true" />
                         </div>
                     </template>
                 </Toolbar>
@@ -437,7 +437,7 @@ const handleCloseShowQrCode = () => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogEditGateway(data)" />
+                                <Button icon="pi pi-pencil" v-if="$can('gateways:update')" @click.prevent="handleShowDialogEditGateway(data)" />
                                 <Button
                                     outlined
                                     :loading="pendingUpdateStatusGateway"
@@ -445,17 +445,18 @@ const handleCloseShowQrCode = () => {
                                     :severity="data.status ? 'danger' : 'success'"
                                     @click.prevent="handleUpdateStatus(data.id, data.status)"
                                     icon="pi pi-power-off"
+                                    v-if="$can('gateways:on-off')"
                                 />
-                                <Button icon="pi pi-eye" outlined severity="info" @click.prevent="handleShowToken(data)" />
-                                <Button icon="pi pi-qrcode" severity="help" @click.prevent="handleShowQrCode(data)" />
+                                <Button icon="pi pi-eye" outlined severity="info" v-if="$can('gateways:token')" @click.prevent="handleShowToken(data)" />
+                                <Button icon="pi pi-qrcode" severity="help" v-if="$can('gateways:qrcode')" @click.prevent="handleShowQrCode(data)" />
                             </div>
                         </template>
                     </Column>
                     <template #expansion="{ data }">
                         <div class="flex gap-3 mt-1">
-                            <Button :disabled="loadingTesting" :loading="loadingTesting" :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap" @click.prevent="handleTestConnection(data.id)" />
-                            <Button label="Generate Token Baru" outlined :loading="generateNewTokenPending" :disabled="generateNewTokenPending" icon="pi pi-key" @click.prevent="confirmGenerateNewToken(data.id)" />
-                            <Button label="Hapus" outlined severity="danger" @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
+                            <Button :disabled="loadingTesting" :loading="loadingTesting" v-if="$can('gateways:ping')" :label="loadingTesting ? 'Loading...' : 'Ping'" icon="pi pi-sitemap" @click.prevent="handleTestConnection(data.id)" />
+                            <Button label="Generate Token Baru" v-if="$can('gateways:token')" outlined :loading="generateNewTokenPending" :disabled="generateNewTokenPending" icon="pi pi-key" @click.prevent="confirmGenerateNewToken(data.id)" />
+                            <Button label="Hapus" outlined severity="danger" v-if="$can('gateways:delete')" @click.prevent="confirmDeleteGateway(data)" icon="pi pi-trash" />
                         </div>
                     </template>
                 </DataTable>

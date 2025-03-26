@@ -117,7 +117,7 @@ const handleFilter = () => {
         <div class="field">
             <select-session role="SISWA" @input="handleChangeSelectSession" />
             <div class="flex gap-2">
-                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId" />
+                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && $can('presences:export-all')" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId" />
             </div>
         </div>

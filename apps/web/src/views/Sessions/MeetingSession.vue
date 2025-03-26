@@ -363,7 +363,7 @@ const handleUnSelectedMeetingSession = (data) => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
-                            <Button label="Buat sesi rapat baru" icon="pi pi-plus" class="mr-2" @click.prevent="addSessionDialog = true" />
+                            <Button label="Buat sesi rapat baru" icon="pi pi-plus" v-if="$can('meeting-session:create')" class="mr-2" @click.prevent="addSessionDialog = true" />
                         </div>
                     </template>
                 </Toolbar>
@@ -408,18 +408,18 @@ const handleUnSelectedMeetingSession = (data) => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogUpdateSesion(data)" />
-                                <Button :loading="deleteSessionPending" :disabled="deleteSessionPending" severity="danger" @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
+                                <Button icon="pi pi-pencil" v-if="$can('meeting-session:update')" @click.prevent="handleShowDialogUpdateSesion(data)" />
+                                <Button :loading="deleteSessionPending" v-if="$can('meeting-session:delete')" :disabled="deleteSessionPending" severity="danger" @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
                                 <!-- session.meeting_session.id !== data.id -->
                                 <Button
-                                    v-if="data.presence_sessions && data.presence_sessions.id === session.id"
+                                    v-if="data.presence_sessions && data.presence_sessions.id === session.id && $can('meeting-session:unselect')"
                                     icon="pi pi-times-circle"
                                     outlined
                                     severity="danger"
                                     :loading="unSelectedMeetingLoading"
                                     @click.prevent="handleUnSelectedMeetingSession(data)"
                                 />
-                                <Button v-else icon="pi pi-check-circle" severity="contrast" :loading="selectedMeetingLoading" @click.prevent="handleSelectedMeetingSession(data)" />
+                                <Button v-if="!data.presence_sessions && $can('meeting-session:select')" icon="pi pi-check-circle" severity="contrast" :loading="selectedMeetingLoading" @click.prevent="handleSelectedMeetingSession(data)" />
                             </div>
                         </template>
                     </Column>

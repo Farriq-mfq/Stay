@@ -412,7 +412,7 @@ const onCloseDialogMeetingSession = () => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
-                            <Button label="Buat sesi presensi baru" icon="pi pi-plus" class="mr-2" @click.prevent="addSessionDialog = true" />
+                            <Button label="Buat sesi presensi baru" v-if="$can('sessions:create')" icon="pi pi-plus" class="mr-2" @click.prevent="addSessionDialog = true" />
                         </div>
                     </template>
                 </Toolbar>
@@ -513,9 +513,9 @@ const onCloseDialogMeetingSession = () => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" @click.prevent="handleShowDialogUpdateSesion(data)" />
-                                <Button :loading="deleteSessionPending" :disabled="deleteSessionPending" severity="danger" @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
-                                <Button icon="pi pi-paperclip" severity="info" @click="showDialogMeetingSession(data)" v-if="data.session_role_type === 'PEGAWAI'" />
+                                <Button icon="pi pi-pencil" v-if="$can('sessions:update')" @click.prevent="handleShowDialogUpdateSesion(data)" />
+                                <Button :loading="deleteSessionPending" v-if="$can('sessions:delete')" :disabled="deleteSessionPending" severity="danger" @click.prevent="confirmDeleteSession(data.id)" icon="pi pi-trash" />
+                                <Button icon="pi pi-paperclip" severity="info" @click="showDialogMeetingSession(data)" v-if="data.session_role_type === 'PEGAWAI' && $can('meeting-session:read')" />
                                 <!-- <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
                 <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" /> -->
                             </div>

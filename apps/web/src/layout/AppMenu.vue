@@ -29,11 +29,11 @@ const model = ref([
                       label: 'Data Presensi',
                       icon: 'pi pi-fw pi-server',
                       items: [
-                          { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' },
-                          { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' },
-                          { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' },
+                          permissions.value.includes('presences:manual') ? { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' } : null,
+                          permissions.value.includes('presences:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' } : null,
+                          permissions.value.includes('presences-pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' } : null,
                           { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' }
-                      ]
+                      ].filter((menu) => menu != null)
                   }
                 : null,
             // { label: 'Payment', icon: 'pi pi-fw pi-wallet', to: '/payment' },
@@ -58,7 +58,7 @@ const model = ref([
             permissions.value.includes('siswa:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-id-card', to: '/siswa' } : null,
             permissions.value.includes('pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-users', to: '/pegawai' } : null,
             permissions.value.includes('users:read') ? { label: 'Users', icon: 'pi pi-fw pi-users', to: '/users' } : null,
-            permissions.value.includes('roles:read') ? { label: 'Hak Akses', icon: 'pi pi-fw pi-key', to: '/roles' } : null,
+            permissions.value.includes('roles:read') ? { label: 'Hak Akses', icon: 'pi pi-fw pi-key', to: '/roles' } : null
         ].filter((menu) => menu != null)
     }
 ]);

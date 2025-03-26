@@ -152,7 +152,7 @@ const generatePdf = () => {
             <Dropdown :loading="loadingRombel" v-model="selectedRombel" :options="dataRombels ? dataRombels.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih Rombel" class="w-full mt-3" showClear />
 
             <div class="flex gap-2">
-                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && filterDate" />
+                <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-file-excel" label="Export" @click.prevent="handleExportService" class="mt-3" v-if="sessionId && filterDate && $can('presences:export-daily')" />
                 <Button severity="info" :disabled="isLoading" :loading="isLoading" icon="pi pi-print" label="Print" @click.prevent="handlePrint" class="mt-3" v-if="sessionId && filterDate" />
                 <Button severity="help" :disabled="isLoading" :loading="isLoading" icon="pi pi-file-pdf" label="Download PDF" @click.prevent="generatePdf" class="mt-3" v-if="sessionId && filterDate" />
                 <Button :disabled="isLoading || loadingExport" :loading="isLoading || loadingExport" icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="sessionId && filterDate" />

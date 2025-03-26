@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe, Query } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -19,8 +19,19 @@ export class RolesController {
 
   @Get()
   @Permissions('roles:read')
-  async findAll() {
-    return await this.rolesService.findAll();
+  async findAll(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+  ) {
+    return await this.rolesService.findAll(page, limit, search);
+  }
+
+  @Get('without-pagination')
+  @Permissions('roles:read')
+  async findAllWithoutPagination(
+  ) {
+    return await this.rolesService.findAllWithoutPagination();
   }
 
   @Patch(':id')
