@@ -28,7 +28,7 @@ export class RolesController {
   }
 
   @Get('without-pagination')
-  @Permissions('roles:read')
+  @Permissions('users:read')
   async findAllWithoutPagination(
   ) {
     return await this.rolesService.findAllWithoutPagination();

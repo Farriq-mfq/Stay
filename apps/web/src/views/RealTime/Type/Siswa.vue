@@ -27,7 +27,6 @@ const focusRow = (id) => {
     if (rowRefs.value[id]) {
         rowRefs.value[id].scrollIntoView({ behavior: 'smooth', block: 'start' });
         focusedRow.value = id;
-        lastFocusedRow.value = id;
     }
 };
 
@@ -103,7 +102,10 @@ const handlePresenceUpdate = (data) => {
     setTimeout(turnOnListener, 100);
     nextTick(() => {
         // scrollToBottom();
-        focusRow(data.siswaId);
+        if (dataPresences.value.length > 7) {
+            focusRow(data.siswaId);
+        }
+        lastFocusedRow.value = data.siswaId;
         setTimeout(() => {
             successPresence.value = null;
         }, 1000);
@@ -199,65 +201,70 @@ onUnmounted(() => {
     <div>
         <div class="mx-3 flex gap-2 align-items-center justify-content-center lg:justify-content-start">
             <Button label="Reload" icon="pi pi-refresh" @click.prevent="handleRefresh" size="small" />
-            <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger" @click.prevent="clearSession" />
+            <Button label="Close" icon="pi pi-times" outlined size="small" severity="danger"
+                @click.prevent="clearSession" />
         </div>
         <div class="flex flex-wrap">
-            <div class="xl:col-5 col-12" style="z-index: 999 !important">
+            <div class="col-12">
                 <div
-                    class="surface-card border-2 shadow-2 border-round-top-xl lg:border-round-xl py-4 flex align-items-center flex-column relative"
-                    :class="{ 'border-red-500': errorMessage, 'border-green-500': successPresence, 'surface-border': !successPresence && !errorMessage }"
-                    style="height: fit-content"
-                >
+                    class="flex-wrap justify-content-between align-items-center border-round-top flex py-5">
                     <div class="absolute top-0 right-0 m-3 text-xs flex items-center" v-if="reloadText">
                         <i class="pi pi-spinner text-primary pi-spin"></i>
                         <span class="ml-2">{{ reloadText }}</span>
                     </div>
-                    <v-lazy-image src="/logo.png" style="width: 250px; height: 250px; object-fit: cover" />
-                    <div class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
+                    <div
+                        class="w-full h-full text-center flex flex-column align-items-center pt-4 mb-4 justify-content-center">
                         <CurrentDay />
                         <clock />
                     </div>
-                    <span class="text-3xl font-bold text-center" v-if="errorMessage"> {{ errorMessage }} </span>
-                    <i class="pi pi-times text-red-500" v-if="errorMessage" style="font-size: 200px; font-weight: 100"></i>
-                    <span class="text-3xl font-bold text-center" v-if="successPresence"> Terimakasih </span>
-                    <i class="pi pi-check text-primary" v-if="successPresence" style="font-size: 200px; font-weight: 100"></i>
-                    <!-- <span class="text-3xl font-bold text-center" v-if="!errorMessage && !successPresence"> SILAHKAN TAP
-                        KARTU
-                    </span> -->
-                    <!-- <Vue3Lottie :animationData="RfidJson" class="lg:w-30rem lg:h-30rem" v-if="!errorMessage && !successPresence" /> -->
-                </div>
-                <div class="flex flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round-bottom lg:hidden">
-                    <div>
-                        <div class="font-semibold lg:text-xl text-lg">{{ detailSession.name }}</div>
-                        <div class="mt-2 text-md">Aktifitas Presensi secara realtime</div>
+                    <div class="flex justify-content-center align-items-center w-full flex-column gap-3 mb-5">
+                        <div class="h-20rem w-15rem border-round-xl border-1 surface-border overflow-hidden" :class="{
+                            'bg-red-500': errorMessage,
+                            'bg-primary': successPresence && !successPresence.siswa.profile_picture,
+                            'surface-card': !errorMessage && !successPresence,
+                        }">
+                            <v-lazy-image :src="successPresence.siswa.profile_picture" class="w-full h-full"
+                                style="object-fit: cover" v-if="successPresence" />
+                        </div>
+
+                        <h2 class="text-3xl m-0 font-semibold" v-if="successPresence">
+                            {{ successPresence.siswa.name }}
+                        </h2>
+                        <div class="text-center" v-if="successPresence">
+                            <i class="pi pi-check-circle text-4xl text-green-500"></i>
+                            <p class="mt-2">Terimakasih</p>
+                        </div>
+                        <p v-if="errorMessage" class="text-red-500">
+                            {{ errorMessage }}
+                        </p>
+                        <p v-if="!errorMessage && !successPresence">
+                            Silahkan Tap Kartu Anda
+                        </p>
+                        <!-- <v-lazy-image src="/logo.png"
+                            style="width: 50px; height: 50px; object-fit: cover;left: 1rem;top: 1rem;"
+                            class="absolute" /> -->
                     </div>
-                    <div class="flex flex-column gap-2">
-                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{ allPresences.size }}</div>
-                        <!-- <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div> -->
-                    </div>
-                </div>
-            </div>
-            <div class="xl:col-7 col-12">
-                <div class="flex-wrap justify-content-between py-4 px-3 shadow-2 align-items-center bg-primary border-round-top hidden lg:flex">
-                    <div>
-                        <div class="font-semibold lg:text-xl text-lg">{{ detailSession.name }}</div>
-                        <div class="mt-2 text-md">Aktifitas Presensi secara realtime</div>
-                    </div>
-                    <div class="flex flex-column gap-2">
-                        <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{ allPresences.size }}</div>
-                        <!-- <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div> -->
+
+                    <div class="bg-primary w-full py-4 px-3 border-round-bottom">
+                        <div>
+                            <div class="font-semibold lg:text-xl text-lg">{{ detailSession.name }}</div>
+                            <div class="mt-2 text-md">Aktifitas Presensi secara realtime</div>
+                        </div>
+                        <div class="flex flex-column gap-2">
+                            <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">Jumlah Presensi : {{
+                                allPresences.size }}</div>
+                            <!-- <div class="font-semibold lg:text-lg text-lg md:mt-0 mt-3">{{ currentDate }}</div> -->
+                        </div>
                     </div>
                 </div>
                 <DataView :value="dataPresences.reverse()">
                     <template #list="slotProps">
-                        <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2" style="max-height: 75vh; height: fit-content">
+                        <div class="border-solid border-1 surface-border p-3 overflow-y-auto border-round mt-2 flex flex-column gap-2"
+                            style="max-height: 75vh; height: fit-content">
                             <TransitionGroup name="list" tag="div" class="flex flex-column gap-3">
-                                <div
-                                    v-for="item in slotProps.items"
-                                    :key="item.siswa.id"
+                                <div v-for="item in slotProps.items" :key="item.siswa.id"
                                     :class="`${lastFocusedRow === item.siswa.id ? 'border-primary border-2' : 'surface-border border-1 '} border-solid p-3 border-round shadow-1`"
-                                    :ref="(el) => setRowRef(el, item.siswa.id)"
-                                >
+                                    :ref="(el) => setRowRef(el, item.siswa.id)">
                                     <div class="flex justify-content-between align-items-center relative">
                                         <div>
                                             <div class="font-semibold text-xl mb-2">
@@ -268,31 +275,28 @@ onUnmounted(() => {
                                             </div>
                                         </div>
                                         <div style="z-index: 50 !important" class="absolute right-0 top-0 bottom-0">
-                                            <v-lazy-image class="shadow-xl w-7rem h-11rem object-cover" v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" />
+                                            <v-lazy-image class="shadow-xl w-7rem h-11rem object-cover"
+                                                v-if="item.siswa.profile_picture" :src="item.siswa.profile_picture" />
                                             <div v-else style="height: 100px; width: 100px"></div>
                                         </div>
                                     </div>
                                     <Divider />
-                                    <div class="text-md mb-2"><b>Lokasi</b> : {{ item.gateway ? item.gateway.location : '-' }}</div>
-                                    <div
-                                        class="text-md mb-2"
-                                        v-html="
-                                            `${detailSession.allow_twice ? '<b>Masuk</b> : ' : '<b>Waktu</b> : '}${
-                                                item.enter_time
-                                                    ? format(item.enter_time, 'HH:mm:ss', {
-                                                          locale: id
-                                                      })
-                                                    : '-'
-                                            }`
-                                        "
-                                    ></div>
+                                    <div class="text-md mb-2"><b>Lokasi</b> : {{ item.gateway ? item.gateway.location :
+                                        '-' }}</div>
+                                    <div class="text-md mb-2" v-html="`${detailSession.allow_twice ? '<b>Masuk</b> : ' : '<b>Waktu</b> : '}${item.enter_time
+                                        ? format(item.enter_time, 'HH:mm:ss', {
+                                            locale: id
+                                        })
+                                        : '-'
+                                        }`
+                                        "></div>
                                     <div class="text-md mb-2" v-if="detailSession.allow_twice">
                                         <b>Keluar</b> :
                                         {{
                                             item.exit_time
                                                 ? format(item.exit_time, 'HH:mm:ss', {
-                                                      locale: id
-                                                  })
+                                                    locale: id
+                                                })
                                                 : '-'
                                         }}
                                     </div>

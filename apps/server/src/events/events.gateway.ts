@@ -38,7 +38,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
 
     }
     async handleConnection(client: any, ...args: any[]) {
-        const address = client.handshake.address;
+        const address = client.handshake.headers['x-forwarded-for'] || client.conn.remoteAddress.split(":")[3];
         const userAgent = client.handshake.headers['user-agent'];
         const authToken = client.handshake.auth;
         const queries = client.handshake.query

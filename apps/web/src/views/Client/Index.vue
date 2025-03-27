@@ -112,7 +112,7 @@ const sendMessage = () => {};
                             <td class="p-column-body">{{ client.socketId }}</td>
                             <td class="p-column-body flex flex-column gap-3">
                                 <Button icon="pi pi-refresh" class="p-button-sm" severity="warning" label="Ubah sesi Presensi" @click="handleShowDialogChangeSession(client)" />
-                                <Button icon="pi pi-send" class="p-button-sm" severity="info" label="Kirim Pengumuman" @click="handleShowMessage(client)" />
+                                <!-- <Button icon="pi pi-send" class="p-button-sm" severity="info" label="Kirim Pengumuman" @click="handleShowMessage(client)" /> -->
                             </td>
                         </tr>
                     </tbody>

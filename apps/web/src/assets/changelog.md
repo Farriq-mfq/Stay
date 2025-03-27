@@ -1,18 +1,21 @@
-## [1.5.1] - 2025-21-25
+## [1.6.1] - 2025-03-27
+### Added
+-   menambah fitur hak akses
+## [1.5.1] - 2025-02-25
 ### Added
 -   menambah field lokasi,agenda dan waktu pada sesi rapat
 -   menambah endpoint public yang bisa di akses public (security reason)
 -   menambah ubah sesi secara realtime
 ### Change
 -   selalu connected client
-## [1.5.1] - 2025-21-25
+## [1.5.1] - 2025-02-25
 ### Added
 -   menambah fitur input presensi
 -   menambah fitur upload foto profile di bagian menu pegawai
 -   menambah sesi rapat
 ### Change
 -   mengubah tampilan realtime presensi ketika ada sesi rapat maka kan menampilkan realtime dengan tanda tanggan ketika tidak maka akan tampil orang yang presensi
-## [1.4.1] - 2025-21-25
+## [1.4.1] - 2025-02-25
 ### Added
 -   menambah fitur manajemen pegawai
 -   menambah tipe sesi presensi
@@ -22,7 +25,7 @@
 ### FIX 
 -   memperbaiki security login
 -   memperbaiki halaman not found
-## [1.4.0] - 2025-21-25
+## [1.4.0] - 2025-02-25
 ### Added
 -   menambah menu statistik
 -   menambah statistik berdasarkan rombel

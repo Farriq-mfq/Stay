@@ -67,12 +67,12 @@ export class PegawaiController {
     res.send(file);
   }
 
-  // @Get("/:sessionId/all")
-  // async findWithoutPaginate(
-  //   @Param('sessionId') sessionId: string
-  // ) {
-  //   return await this.pegawaiService.findWithuoutPaginate(sessionId)
-  // }
+  @Get("/:sessionId/all")
+  async findWithoutPaginate(
+    @Param('sessionId') sessionId: string
+  ) {
+    // return await this.pegawaiService.findWithuoutPaginate(sessionId)
+  }
 
 
   @Get("/group")

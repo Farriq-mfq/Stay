@@ -16,6 +16,7 @@
         "@chenfengyuan/vue-qrcode": "^2.0.0",
         "@tanstack/vue-query": "^5.53.2",
         "@vueuse/core": "^10.11.1",
+        "@vueuse/integrations": "^12.5.0",
         "@websanova/vue-auth": "^4.2.1",
         "axios": "^1.7.7",
         "chart.js": "3.3.2",
