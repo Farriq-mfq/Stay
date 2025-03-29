@@ -1,56 +1,128 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import { account } from "@prisma/client";
+import { account, AccountableType, users } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { v4 as uuidv4 } from 'uuid';
 import { DepositTransactionDto, PaymentMethodType, PaymentTransactionDto, TransferTransactionDto } from "./dto/transaction.dto";
+import { ROLE_CODE } from "src/config";
 @Injectable()
 export class TransactionService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
     ) { }
 
-    // async Deposit(from: account, to: account, paymentMethod: PaymentMethodType, depositTransactionDto: DepositTransactionDto) {
-    //     const transcation = this.prismaService.client.$transaction(async (prisma) => {
+    async deposit(from: string | number, depositTransactionDto: DepositTransactionDto) {
+        const fromAccount = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: +from,
+                accountableType: "USER"
+            }
+        })
 
-    //         const account = await prisma.account.findUniqueOrThrow({
-    //             where: {
-    //                 id: to.id
-    //             }
-    //         })
+        if (!fromAccount) throw new BadRequestException("Account not found")
 
-    //         const updateAccount = await prisma.account.update({
-    //             where: {
-    //                 id: to.id
-    //             },
-    //             data: {
-    //                 balance: account.balance + depositTransactionDto.amount
-    //             }
-    //         })
+        const toAccount = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: +depositTransactionDto.toAccountId,
+                accountableType: depositTransactionDto.toAccountType
+            }
+        })
 
-    //         if (!updateAccount) {
-    //             throw new BadRequestException("Deposit failed")
-    //         }
+        if (!toAccount) throw new BadRequestException("Account not found")
 
-    //         await prisma.transactions.create({
-    //             data: {
-    //                 amount: depositTransactionDto.amount,
-    //                 code: uuidv4(),
-    //                 flow: 'UP',
-    //                 payment_method: paymentMethod,
-    //                 fromAccountId: from.id,
-    //                 toAccountId: to.id,
-    //                 status: 'SUCCESS',
-    //                 type: "DEPOSIT",
-    //                 title: `Deposit untuk ${to.name}`,
-    //                 note: depositTransactionDto.note
-    //             }
-    //         })
-    //     })
+        await this.prismaService.client.transactions.create({
+            data: {
+                amount: depositTransactionDto.amount,
+                code: uuidv4(),
+                flow: 'UP',
+                payment_method: 'CASH',
+                fromAccountId: fromAccount.id,
+                toAccountId: toAccount.id,
+                status: 'SUCCESS',
+                type: "DEPOSIT",
+                title: `Deposit untuk ${toAccount.name}`,
+                fromAccountType: fromAccount.accountableType,
+                toAccountType: toAccount.accountableType
+            }
+        })
 
-    //     return transcation;
-    // }
 
+
+        const updateBalance = await this.prismaService.client.account.update({
+            where: {
+                id: toAccount.id
+            },
+            data: {
+                balance: toAccount.balance + depositTransactionDto.amount
+            }
+        })
+
+        if (!updateBalance) {
+            throw new BadRequestException("Deposit failed")
+        }
+
+        const toTransaction = await this.prismaService.client.transactions.create({
+            data: {
+                amount: depositTransactionDto.amount,
+                code: uuidv4(),
+                flow: 'DOWN',
+                payment_method: 'CASH',
+                fromAccountId: fromAccount.id,
+                toAccountId: toAccount.id,
+                status: 'SUCCESS',
+                type: "DEPOSIT",
+                title: `Deposit berhasil untuk ${toAccount.name}`,
+                fromAccountType: fromAccount.accountableType,
+                toAccountType: toAccount.accountableType,
+                note: depositTransactionDto.note
+            }
+        })
+
+        await this.prismaService.client.transactions.create({
+            data: {
+                amount: depositTransactionDto.amount,
+                code: uuidv4(),
+                flow: 'UP',
+                payment_method: 'CASH',
+                fromAccountId: toAccount.id,
+                toAccountId: fromAccount.id,
+                status: 'SUCCESS',
+                type: "DEPOSIT",
+                title: `Deposit berhasil untuk ${toAccount.name}`,
+                fromAccountType: toAccount.accountableType,
+                toAccountType: fromAccount.accountableType,
+                note: depositTransactionDto.note
+            }
+        })
+
+        return toTransaction
+    }
+
+    async createAccountUser(userId: string) {
+        const user = await this.prismaService.client.users.findUniqueOrThrow({
+            where: {
+                id: +userId
+            }
+        })
+        const account = await this.prismaService.client.account.create({
+            data: {
+                name: user.name,
+                accountNumber: this.generateAccountNumber(user),
+                accountableId: user.id,
+                accountableType: "USER"
+            }
+        })
+        return account
+    }
+
+
+    protected generateAccountNumber(user: users) {
+        const createYear = new Date(user.createdAt).getFullYear().toString().substring(2)
+        const userId = user.id.toString()
+        const checkDigit = userId.length
+
+        return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.USER]}`
+    }
 
     async Transfer(from: account, paymentMethod: PaymentMethodType, transferTransactionDto: TransferTransactionDto) {
         const transcation = this.prismaService.client.$transaction(async (prisma) => {

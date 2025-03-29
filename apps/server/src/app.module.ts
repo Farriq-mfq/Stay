@@ -23,6 +23,7 @@ import { SiswaModulesModule } from './siswa/modules/siswa.modules.module';
 import { QrCodeModule } from './qrcode/qrcode.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { TransactionModule } from './transaction/transaction.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -75,7 +76,8 @@ import { PermissionsModule } from './permissions/permissions.module';
     SiswaModulesModule,
     QrCodeModule,
     RolesModule,
-    PermissionsModule
+    PermissionsModule,
+    TransactionModule
   ],
 })
 export class AppModule { }

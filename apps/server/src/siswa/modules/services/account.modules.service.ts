@@ -7,6 +7,7 @@ import { ExtendedPrismaClient } from "src/prisma.extension";
 import { TransactionService } from "src/transaction/transaction.service";
 import { formattedErrors } from "src/utils/error";
 import { SearchAccountSiswaDto, TransferAccountSiswaDto } from "../dto/account.dto";
+import { ROLE_CODE } from "src/config";
 
 @Injectable()
 export class SiswaAccountModuleService {
@@ -75,12 +76,6 @@ export class SiswaAccountModuleService {
         const createYear = new Date(siswa.createdAt).getFullYear().toString().substring(2)
         const userId = siswa.id.toString()
         const checkDigit = userId.length
-
-        const ROLE_CODE = {
-            "PEGAWAI": "01",
-            "SISWA": "02",
-            "USER": "03",
-        }
 
         return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.SISWA]}`
     }

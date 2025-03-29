@@ -26,7 +26,7 @@ const { role, multiple, defaultValue, inputValue } = defineProps({
 });
 const emit = defineEmits(['input']);
 
-const getAllSiswa = async ({ pageParam = 1 }) => {
+const getAllPegawai = async ({ pageParam = 1 }) => {
     const queries = {
         page: pageParam,
         limit: 50,
@@ -35,28 +35,28 @@ const getAllSiswa = async ({ pageParam = 1 }) => {
     };
 
     const params = new URLSearchParams(queries);
-    return await axios.get(`/siswa/public?${params}`);
+    return await axios.get(`/pegawai/public?${params}`);
 };
 
-const selectSiswa = ref();
+const SelectPegawai = ref();
 const items = ref([]);
 const {
-    data: siswa,
+    data: pegawai,
     isLoading,
     refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
 } = useInfiniteQuery({
-    queryKey: ['selectSiswa', filters.value],
-    queryFn: getAllSiswa,
+    queryKey: ['selectPegawai', filters.value],
+    queryFn: getAllPegawai,
     getNextPageParam: (lastPage) => {
         return lastPage.data.data.meta.nextPage;
     }
 });
 
 watch(
-    () => siswa.value,
+    () => pegawai.value,
     (val) => {
         if (val) {
             const itemMap = new Map();
@@ -73,7 +73,7 @@ watch(
 );
 
 watch(
-    () => selectSiswa.value,
+    () => SelectPegawai.value,
     (val) => {
         if (val) {
             emit('input', val);
@@ -85,7 +85,7 @@ watch(
     () => inputValue,
     (val) => {
         if (!val) {
-            selectSiswa.value = null;
+            SelectPegawai.value = null;
         }
     }
 );
@@ -98,26 +98,26 @@ const handleFilter = (events) => {
 
 onMounted(() => {
     if (defaultValue) {
-        selectSiswa.value = defaultValue;
+        SelectPegawai.value = defaultValue;
     } else {
-        selectSiswa.value = null;
+        SelectPegawai.value = null;
     }
 });
 </script>
 <template>
     <div>
-        <Dropdown v-if="!multiple" v-model="selectSiswa" :loading="isLoading" filter @filter="handleFilter" showClear :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Siswa" id="dropdown-siswa" class="w-full">
+        <Dropdown v-if="!multiple" v-model="SelectPegawai" :loading="isLoading" filter @filter="handleFilter" showClear :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Pegawai" id="dropdown-pegawai" class="w-full">
             <template #option="slotProps">
-                {{ `${slotProps.option.name} - ${slotProps.option.rombel}` }}
+                {{ `${slotProps.option.name} - ${slotProps.option.group}` }}
             </template>
             <template #footer>
                 <Button v-if="hasNextPage" link label="Load More" size="small" class="mt-2" :disabled="!hasNextPage || isFetchingNextPage" :loading="isFetchingNextPage" @click="fetchNextPage" />
             </template>
         </Dropdown>
 
-        <MultiSelect v-if="multiple" display="chip" v-model="selectSiswa" :loading="isLoading" filter @filter="handleFilter" showClear :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Siswa" class="w-full">
+        <MultiSelect v-if="multiple" display="chip" v-model="SelectPegawai" :loading="isLoading" filter @filter="handleFilter" showClear :options="isLoading ? [] : items" optionLabel="name" placeholder="Pilih Pegawai" class="w-full">
             <template #option="slotProps">
-                {{ `${slotProps.option.name} - ${slotProps.option.rombel}` }}
+                {{ `${slotProps.option.name} - ${slotProps.option.group}` }}
             </template>
             <template #footer>
                 <Button v-if="hasNextPage" link label="Load More" size="small" class="mt-2" :disabled="!hasNextPage || isFetchingNextPage" :loading="isFetchingNextPage" @click="fetchNextPage" />

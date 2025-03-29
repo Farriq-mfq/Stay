@@ -83,21 +83,10 @@ watch(filter, (val) => {
   <div>
     <AppHeader />
     <div class="flex flex-column mt-8">
-      <div
-        class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1"
-        style="top: 5rem"
-      >
-        <InputText
-          class="w-full flex-1"
-          v-model="filter"
-          placeholder="Cari transaksi"
-        />
-        <Button
-          icon="pi pi-filter"
-          :disabled="filter == null || filter == '' || loading"
-          :loading="loading"
-          @click.prevent="handleSearch"
-        />
+      <div class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1" style="top: 5rem">
+        <InputText class="w-full flex-1" v-model="filter" placeholder="Cari transaksi" />
+        <Button icon="pi pi-filter" :disabled="filter == null || filter == '' || loading" :loading="loading"
+          @click.prevent="handleSearch" />
       </div>
       <div class="p-card shadow-none p-3 w-full">
         <DataView :value="items" v-if="!loading">
@@ -105,24 +94,14 @@ watch(filter, (val) => {
             <div class="flex flex-column gap-2">
               <div v-for="(item, index) in slotProps.items" :key="index">
                 <div class="flex flex-column">
-                  <div
-                    class="flex justify-content-between align-items-center px-1"
-                  >
+                  <div class="flex justify-content-between align-items-center px-1">
                     <h3 class="text-lg">
                       {{ format(item.date, "dd MMMM yyyy", { locale: id }) }}
                     </h3>
-                    <div
-                      class="text-sm flex align-items-center justify-content-center gap-1"
-                    >
+                    <div class="text-sm flex align-items-center justify-content-center gap-1">
                       <!-- <i class="pi pi-minus text-red-500 text-xs"></i> -->
-                      <i
-                        class="pi pi-arrow-up-right text-primary text-xs"
-                        v-if="item.total.in > item.total.out"
-                      ></i>
-                      <i
-                        class="pi pi-arrow-down-left text-red-500 text-xs"
-                        v-if="item.total.out > item.total.in"
-                      ></i>
+                      <i class="pi pi-arrow-up-right text-primary text-xs" v-if="item.total.in > item.total.out"></i>
+                      <i class="pi pi-arrow-down-left text-red-500 text-xs" v-if="item.total.out > item.total.in"></i>
                       <span class="text-color-secondary">
                         {{
                           rupiahFormat(Math.abs(item.total.in - item.total.out))
@@ -130,9 +109,7 @@ watch(filter, (val) => {
                       </span>
                     </div>
                   </div>
-                  <div class="px-3 p-card shadow-1 border-round-xl py-2">
-                    <ListTransaction :items="item.transactions" />
-                  </div>
+                  <ListTransaction :items="item.transactions" />
                 </div>
               </div>
             </div>
@@ -149,16 +126,8 @@ watch(filter, (val) => {
           <Skeleton height="10rem"></Skeleton>
           <Skeleton height="10rem"></Skeleton>
         </div>
-        <Button
-          @click="fetchNextPage"
-          text
-          size="small"
-          :loading="isFetchingNextPage"
-          :disabled="isFetchingNextPage"
-          v-if="hasNextPage"
-          class="w-full mt-4"
-          :label="isFetchingNextPage ? 'Memuat...' : 'Tampilkan lebih banyak'"
-        />
+        <Button @click="fetchNextPage" text size="small" :loading="isFetchingNextPage" :disabled="isFetchingNextPage"
+          v-if="hasNextPage" class="w-full mt-4" :label="isFetchingNextPage ? 'Memuat...' : 'Tampilkan lebih banyak'" />
       </div>
     </div>
   </div>

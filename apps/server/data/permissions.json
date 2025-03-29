@@ -71,5 +71,5 @@
   "roles": ["create", "read", "update", "delete"],
   "sessions": ["create", "read", "update", "delete", "detail"],
   "profile": ["read"],
-  "payment": ["deposit", "withdraw", "read-queue", "create-queue"]
+  "transaction": ["deposit", "withdraw", "read-queue", "create-queue"]
 }

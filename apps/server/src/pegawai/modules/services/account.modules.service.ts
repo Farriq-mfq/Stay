@@ -7,6 +7,7 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { formattedErrors } from "src/utils/error";
 import { TransactionService } from "src/transaction/transaction.service";
+import { ROLE_CODE } from "src/config";
 
 @Injectable()
 export class PegawaiAccountModuleService {
@@ -76,11 +77,6 @@ export class PegawaiAccountModuleService {
         const userId = pegawai.id.toString()
         const checkDigit = userId.length
 
-        const ROLE_CODE = {
-            "PEGAWAI": "01",
-            "SISWA": "02",
-            "USER": "03",
-        }
 
         return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.PEGAWAI]}`
     }

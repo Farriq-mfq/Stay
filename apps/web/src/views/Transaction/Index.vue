@@ -1,13 +1,16 @@
 <script setup>
 import { ref } from 'vue';
 const items = ref([
-    { label: 'History Payment', route: '/payment/all' },
+    { label: 'Deposit', route: '/transaction/deposit' },
+    { label: 'Tarik Tunai', route: '/transaction/withdraw' },
+    { label: 'History Transaksi', route: '/transaction/history' },
+    { label: 'Informasi Akun', route: '/transaction/account' },
 ]);
 </script>
 <template>
     <Card>
         <template #title>
-            Payment
+            Transaksi
         </template>
         <template #content>
             <TabMenu :model="items">

@@ -40,6 +40,9 @@ export class HomeModulesSiswaService {
                 accountableType: AccountableType.SISWA
             }
         })
+
+        if (!account) return []
+
         return await this.prismaService.client.transactions.findMany({
             where: {
                 fromAccountId: account.id

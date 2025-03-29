@@ -49,6 +49,15 @@ export class SiswaController {
     return await this.siswaService.findAll(page, limit, search);
   }
 
+  @Get('public')
+  async findAllWithoutPermission(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+  ) {
+    return await this.siswaService.findAll(page, limit, search);
+  }
+
   @Get('/download')
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=siswa-template.xlsx"')

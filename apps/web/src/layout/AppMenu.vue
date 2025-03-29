@@ -13,11 +13,11 @@ const model = ref([
     {
         label:
             permissions.value.includes('gateways:read') ||
-            permissions.value.includes('seesions:read') ||
-            permissions.value.includes('presences:read') ||
-            permissions.value.includes('profile:read') ||
-            permissions.value.includes('backup:database') ||
-            permissions.value.includes('client:read')
+                permissions.value.includes('seesions:read') ||
+                permissions.value.includes('presences:read') ||
+                permissions.value.includes('profile:read') ||
+                permissions.value.includes('backup:database') ||
+                permissions.value.includes('client:read')
                 ? 'Fitur'
                 : '',
         items: [
@@ -26,17 +26,20 @@ const model = ref([
             // { label: 'Scan QRcode', icon: 'pi pi-fw pi-qrcode', to: '/camera' },
             permissions.value.includes('presences:read')
                 ? {
-                      label: 'Data Presensi',
-                      icon: 'pi pi-fw pi-server',
-                      items: [
-                          permissions.value.includes('presences:manual') ? { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' } : null,
-                          permissions.value.includes('presences:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' } : null,
-                          permissions.value.includes('presences-pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' } : null,
-                          { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' }
-                      ].filter((menu) => menu != null)
-                  }
+                    label: 'Data Presensi',
+                    icon: 'pi pi-fw pi-server',
+                    items: [
+                        permissions.value.includes('presences:manual') ? { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' } : null,
+                        permissions.value.includes('presences:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' } : null,
+                        permissions.value.includes('presences-pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' } : null,
+                        { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' }
+                    ].filter((menu) => menu != null)
+                }
                 : null,
-            // { label: 'Payment', icon: 'pi pi-fw pi-wallet', to: '/payment' },
+
+            {
+                label: 'Transaksi', icon: 'pi pi-fw pi-ticket', to: '/transaction',
+            },
             permissions.value.includes('profile:read') ? { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' } : null,
             permissions.value.includes('backup:database') ? { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' } : null,
             permissions.value.includes('client:read') ? { label: 'Client', icon: 'pi pi-fw pi-bolt', to: '/connected-client' } : null

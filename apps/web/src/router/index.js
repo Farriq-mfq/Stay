@@ -173,19 +173,35 @@ const router = createRouter({
                     ]
                 },
                 {
-                    path: '/payment',
-                    name: 'payment',
+                    path: '/transaction',
+                    name: 'transaction',
                     redirect: {
-                        name: 'payment-all'
+                        name: 'transaction-deposit'
                     },
-                    component: () => import('@/views/Payment/Index.vue'),
+                    component: () => import('@/views/Transaction/Index.vue'),
                     children: [
                         {
-                            path: '/payment/all',
-                            name: 'payment-all',
-                            component: () => import('@/views/Payment/All.vue'),
+                            path: '/transaction/deposit',
+                            name: 'transaction-deposit',
+                            component: () => import('@/views/Transaction/Deposit.vue'),
                             meta: {
-                                title: "Payment",
+                                title: "Deposit",
+                            },
+                        },
+                        {
+                            path: '/transaction/withdraw',
+                            name: 'transaction-withdraw',
+                            component: () => import('@/views/Transaction/Withdraw.vue'),
+                            meta: {
+                                title: "Withdraw",
+                            },
+                        },
+                        {
+                            path: '/transaction/account',
+                            name: 'transaction-account',
+                            component: () => import('@/views/Transaction/Account.vue'),
+                            meta: {
+                                title: "Account",
                             },
                         },
                     ]
@@ -252,7 +268,7 @@ const router = createRouter({
                 //         auth: 'admin'
                 //     }
                 // },
-                
+
                 {
                     path: '/siswa',
                     name: 'siswa',

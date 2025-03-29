@@ -1,13 +1,14 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { verify } from 'argon2';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { UsersService } from 'src/users/users.service';
 import { JwtPayload } from './accessToken.strategy';
 import { AuthDto } from './dto/auth.dto';
 import { changePasswordDto } from './dto/change-password.dto';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'src/prisma.extension';
+import { AccountableType } from '@prisma/client';
 @Injectable()
 export class AuthService {
     constructor(
@@ -116,13 +117,21 @@ export class AuthService {
                     select: {
                         permission: true
                     }
-                }
+                },
+            }
+        })
+
+        const account = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: user.id,
+                accountableType: AccountableType.USER
             }
         })
         return {
             ...user,
             role: role.name,
-            permissions: role.permissions.map(permission => permission.permission.name)
+            permissions: role.permissions.map(permission => permission.permission.name),
+            account: account
         }
     }
 

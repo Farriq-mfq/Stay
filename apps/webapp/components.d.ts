@@ -55,5 +55,6 @@ declare module 'vue' {
   }
   export interface ComponentCustomProperties {
     BadgeDirective: typeof import('primevue/badgedirective')['default']
+    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

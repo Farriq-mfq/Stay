@@ -1,11 +1,19 @@
+import { AccountableType } from "@prisma/client";
 import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, IsNumberString, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsIn, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class DepositTransactionDto {
+    @IsNotEmpty()
+    @IsNumber()
+    toAccountId: number;
+    @IsNotEmpty()
+    @IsString()
+    @IsIn(['USER', 'SISWA', 'PEGAWAI'])
+    toAccountType: AccountableType;
     @IsNotEmpty({
         message: "jumlah uang harus diisi"
     })
-    @IsNumberString()
+    @IsNumber()
     amount: number;
     @IsOptional()
     @IsString()

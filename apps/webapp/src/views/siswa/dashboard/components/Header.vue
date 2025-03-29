@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/vue-query";
 import Banner from "./Banner.vue";
 import { rupiahFormat } from "@/utils/money";
 import CreateAccount from "./CreateAccount.vue";
+import { useToast } from "primevue/usetoast";
+import { useClipboard } from '@vueuse/core';
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const showSaldo = ref(true);
@@ -22,90 +25,114 @@ const { data: account, isLoading: accountLoading } = useQuery({
 });
 
 const auth = inject("auth");
+
+const toast = useToast();
+const { copy } = useClipboard();
+
+const copyAccountNumber = async (accountNumber) => {
+  await copy(accountNumber);
+  toast.add({
+    severity: 'success',
+    summary: 'Berhasil',
+    detail: 'Nomor rekening berhasil disalin',
+    life: 2000
+  });
+};
 </script>
 
 <template>
-  <div class="relative px-3 pt-3" style="z-index: 99">
-    <div class="mt-4">
-      <div
-        class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-8"
-      >
-        <div class="text-white pt-4 px-4 pb-2 flex-1" v-if="account">
-          <h4
-            class="text-md mx-0 mb-3 mt-1 white-space-nowrap overflow-hidden text-overflow-ellipsis"
-          >
-            Hai, {{ account.data.name }}
-          </h4>
-          <h2 class="text-3xl mx-0 mb-0 mt-1" v-if="account.data">
-            {{ showSaldo ? rupiahFormat(account.data.balance) : "***" }}
-          </h2>
-          <CreateAccount v-if="!account.data" />
-
-          <div
-            class="text-xs mt-3 mx-0 font-semibold flex align-items-center gap-2 border-1 surface-border px-3 py-2 border-round-lg w-fit"
-            v-if="account.data"
-          >
-            <span class="text-md">{{ account.data.accountNumber }}</span>
-            <i class="pi pi-copy cursor-pointer"></i>
+  <div class="relative px-2 md:px-3 pt-3" style="z-index: 99">
+    <div class="m-2">
+      <div class="glass-container border-round-2xl relative shadow-2 mt-8">
+        <div class="p-4 md:p-3" v-if="account">
+          <!-- User greeting -->
+          <div class="flex align-items-center justify-content-between mb-3">
+            <span class="text-base md:text-lg font-medium text-white">
+              Hai, {{ account.data.name }}
+            </span>
+            <Button
+              @click="toggleShowSaldo"
+              v-if="account.data"
+              :icon="showSaldo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              rounded
+              class="p-button-text p-button-rounded text-white custom-icon-button"
+              size="small"
+            />
           </div>
-          <div
-            class="mt-4 flex gap-4 align-items-center justify-content-evenly"
-          >
-            <div>
+
+          <!-- Balance card -->
+          <div class="mb-3">
+            <span class="text-white text-xs md:text-sm font-medium block mb-1">Saldo Tersedia</span>
+            <h2 class="text-2xl md:text-3xl font-bold text-white m-0" v-if="account.data">
+              {{ showSaldo ? rupiahFormat(account.data.balance) : "••••••" }}
+            </h2>
+            
+            <!-- Account number section update -->
+            <div class="account-number-container mt-3" v-if="account.data">
+              <div class="account-number-card glass-card-light border-round-xl p-3">
+                <div class="flex align-items-center justify-content-between">
+                  <div>
+                    <span class="text-white text-xs block mb-1 opacity-70">Nomor Rekening</span>
+                    <div class="flex align-items-center gap-2">
+                      <span class="account-number text-white font-medium text-base md:text-lg">
+                        {{ account.data.accountNumber.match(/.{1,4}/g).join(' ') }}
+                      </span>
+                      <div 
+                        class="copy-button flex align-items-center cursor-pointer"
+                        @click="copyAccountNumber(account.data.accountNumber)"
+                        v-tooltip.bottom="'Salin nomor rekening'"
+                      >
+                        <i class="pi pi-copy text-white text-xs opacity-70 hover:opacity-100"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="action-buttons-container mt-3">
+            <div class="action-button">
               <Button
                 icon="pi pi-plus"
-                size="small"
-                class="shadow-none"
                 rounded
-                variant="outlined"
+                class="glass-button custom-icon-button-sm mb-1"
                 @click="$router.push({ name: 'transactions-topup' })"
               />
-              <p class="text-xs mt-2 mx-0 text-center">Top up</p>
+              <p class="text-xs font-medium text-white m-0">Top up</p>
             </div>
-            <div>
+            <div class="action-button">
               <Button
                 icon="pi pi-arrow-up"
-                size="small"
-                class="shadow-none"
                 rounded
-                variant="outlined"
+                class="glass-button custom-icon-button-sm mb-1"
                 @click="$router.push({ name: 'transactions-transfer' })"
               />
-              <p class="text-xs mt-2 mx-0 text-center">Transfer</p>
+              <p class="text-xs font-medium text-white m-0">Transfer</p>
             </div>
-            <div>
+            <div class="action-button">
               <Button
                 icon="pi pi-arrow-down"
-                size="small"
-                class="shadow-none"
                 rounded
-                variant="outlined"
+                class="glass-button custom-icon-button-sm mb-1"
                 @click="$router.push({ name: 'transactions-withdraw' })"
               />
-              <p class="text-xs mt-2 mx-0 text-center">Tarik</p>
+              <p class="text-xs font-medium text-white m-0">Tarik</p>
             </div>
-            <div>
+            <div class="action-button">
               <Button
                 icon="pi pi-history"
-                size="small"
-                class="shadow-none"
                 rounded
-                variant="outlined"
+                class="glass-button custom-icon-button-sm mb-1"
                 @click="$router.push({ name: 'transactions' })"
               />
-              <p class="text-xs mt-2 mx-0 text-center">Riwayat</p>
+              <p class="text-xs font-medium text-white m-0">Riwayat</p>
             </div>
           </div>
-          <Button
-            @click="toggleShowSaldo"
-            v-if="account.data"
-            icon="pi pi-eye"
-            rounded
-            class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-7"
-            variant="text"
-          />
         </div>
-        <div class="text-white pt-4 px-4 pb-2 flex-1" v-if="!account">
+
+        <div class="p-3" v-if="!account">
           <div class="h-12rem">
             <CreateAccount />
           </div>
@@ -117,7 +144,213 @@ const auth = inject("auth");
 </template>
 
 <style scoped>
-.bg-opacity {
+.glass-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  transition: all 0.2s ease;
+}
+
+.glass-button:hover {
   background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.custom-icon-button {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+.custom-icon-button-sm {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+.custom-icon-button-sm .p-button-icon {
+  font-size: 1rem;
+}
+
+@media screen and (max-width: 576px) {
+  .action-buttons-container {
+    gap: 0.25rem;
+    padding: 0;
+  }
+
+  .action-button {
+    min-width: 60px;
+  }
+
+  .custom-icon-button-sm {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .custom-icon-button-sm .p-button-icon {
+    font-size: 0.875rem;
+  }
+
+  .action-button p {
+    font-size: 0.65rem;
+    margin-top: 0.25rem;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .action-buttons-container {
+    gap: 0.15rem;
+  }
+
+  .action-button {
+    min-width: 50px;
+  }
+
+  .custom-icon-button-sm {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+
+  .custom-icon-button-sm .p-button-icon {
+    font-size: 0.75rem;
+  }
+
+  .action-button p {
+    font-size: 0.6rem;
+  }
+}
+
+.action-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+/* Optimize spacing for mobile */
+@media screen and (max-width: 640px) {
+  .grid {
+    gap: 0.5rem;
+  }
+  
+  .p-3 {
+    padding: 0.75rem !important;
+  }
+  
+  .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+}
+
+.account-number-container {
+  position: relative;
+}
+
+.account-number-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.account-number-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.2) 50%,
+    rgba(255,255,255,0) 100%
+  );
+}
+
+.account-number {
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.copy-button {
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.copy-button:active {
+  transform: translateY(0);
+}
+
+.bank-logo {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 576px) {
+  .account-number {
+    font-size: 0.875rem;
+  }
+  
+  .copy-button {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .bank-logo {
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .bank-logo span {
+    font-size: 0.625rem;
+  }
+}
+
+/* Add shimmer effect on hover */
+.account-number-card:hover::before {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 </style>
