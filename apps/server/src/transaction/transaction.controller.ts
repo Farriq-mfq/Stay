@@ -4,13 +4,16 @@ import { TransactionService } from "./transaction.service";
 import { Request } from "express";
 import { AccessTokenGuard } from "src/guards/accessToken.guard";
 import { AccountGuard } from "src/guards/account.guard";
+import { PermissionGuard } from "src/guards/permissions.guard";
+import { Permissions } from "src/decorators/permission.decorator";
 
 @Controller('transaction')
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, PermissionGuard)
 export class TransactionController {
     constructor(private readonly transactionService: TransactionService) { }
     @Post('deposit')
     @UseGuards(AccountGuard)
+    // @Permissions('transaction:deposit')
     async deposit(
         @Req() req: Request,
         @Body() depositTransactionDto: DepositTransactionDto,

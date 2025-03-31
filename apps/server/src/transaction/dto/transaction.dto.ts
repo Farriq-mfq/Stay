@@ -3,20 +3,30 @@ import { Type } from "class-transformer";
 import { IsArray, IsIn, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class DepositTransactionDto {
-    @IsNotEmpty()
-    @IsNumber()
+    @IsNotEmpty({
+        message: "akun tujuan harus diisi"
+    })
+    @IsNumber({}, {
+        message: "akun tujuan harus berupa angka"
+    })
     toAccountId: number;
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "tipe akun tujuan harus diisi"
+    })
     @IsString()
     @IsIn(['USER', 'SISWA', 'PEGAWAI'])
     toAccountType: AccountableType;
     @IsNotEmpty({
         message: "jumlah uang harus diisi"
     })
-    @IsNumber()
+    @IsNumber({}, {
+        message: "jumlah uang harus berupa angka"
+    })
     amount: number;
     @IsOptional()
-    @IsString()
+    @IsString({
+        message: "catatan harus berupa string"
+    })
     note: string
 
 }

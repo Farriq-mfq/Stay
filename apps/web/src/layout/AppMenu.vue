@@ -39,6 +39,12 @@ const model = ref([
 
             {
                 label: 'Transaksi', icon: 'pi pi-fw pi-ticket', to: '/transaction',
+                items: [
+                    { label: 'Penjualan', icon: 'pi pi-fw pi-shopping-cart', to: '/transaction/sales' },
+                    { label: 'Deposit', icon: 'pi pi-fw pi-credit-card', to: '/transaction/deposit' },
+                    { label: 'Tarik Tunai', icon: 'pi pi-fw pi-credit-card', to: '/transaction/withdraw' },
+                    { label: 'History Transaksi', icon: 'pi pi-fw pi-credit-card', to: '/transaction/history' },
+                ].filter((menu) => menu != null)
             },
             permissions.value.includes('profile:read') ? { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' } : null,
             permissions.value.includes('backup:database') ? { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' } : null,

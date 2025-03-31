@@ -52,7 +52,7 @@ const handleCreateAccount = async () => {
             v-if="auth.user().account == null" />
 
         <div v-else>
-            <Card class="account-card mt-3">
+            <Card class="account-card mt-3 shadow-none border-1 surface-border">
                 <template #content>
                     <div class="surface-ground p-4 border-round-xl">
                         <div class="account-header mb-4">

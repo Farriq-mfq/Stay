@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 const auth = inject("auth")
 import ChangePassword from "./ChangePassword.vue"
+import Account from "./Account.vue"
 </script>
 <template>
     <div class="flex flex-column gap-3">
@@ -31,6 +32,14 @@ import ChangePassword from "./ChangePassword.vue"
                         {{ format(new Date(auth.user().createdAt), 'EEEE, d MMMM yyyy', { locale: id }) }}
                     </div>
                 </div>
+            </template>
+        </Card>
+        <Card>
+            <template #title>
+                Informasi Akun Rekening
+            </template>
+            <template #content>
+                <Account />
             </template>
         </Card>
 

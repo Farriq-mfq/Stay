@@ -2,12 +2,15 @@
 import { ref, getCurrentInstance } from 'vue';
 import SelectSiswa from '@/components/SelectSiswa.vue';
 import SelectPegawai from '@/components/SelectPegawai.vue';
+import SelectUser from '@/components/SelectUser.vue';
 import { useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
 const toast = useToast();
+
+const info = ref(null)
 
 const form = ref({
     toAccountId: null,
@@ -37,12 +40,15 @@ const handleSubmit = async () => {
                 detail: 'Deposit berhasil',
                 life: 3000
             });
-            form.value = {
-                toAccountId: null,
-                toAccountType: null,
-                amount: null,
-                note: null,
+
+            form.value.amount = null;
+            form.value.note = null;
+            info.value = {
+                severity: 'success',
+                message: 'Deposit berhasil',
             }
+
+            errorForm.value = null;
         },
         onError: (error) => {
             if (error) {
@@ -56,6 +62,11 @@ const handleSubmit = async () => {
                             detail: "Sebelum melakukan deposit, silahkan buat akun terlebih dahulu",
                             life: 3000
                         });
+                    } else if (error.response.data.message === 'SEARCH_ACCOUNT_FAILED') {
+                        info.value = {
+                            severity: 'error',
+                            message: "Rekening tidak ditemukan",
+                        }
                     } else {
                         errorForm.value = error.response.data
                     }
@@ -66,6 +77,10 @@ const handleSubmit = async () => {
                         detail: "Akun tidak ditemukan",
                         life: 3000
                     });
+                    info.value = {
+                        severity: 'error',
+                        message: "Akun tidak ditemukan",
+                    }
                 } else {
                     toast.add({
                         severity: 'error',
@@ -73,6 +88,10 @@ const handleSubmit = async () => {
                         detail: "Terjadi kesalahan",
                         life: 3000
                     });
+                    info.value = {
+                        severity: 'error',
+                        message: "Terjadi kesalahan",
+                    }
                 }
 
 
@@ -83,6 +102,10 @@ const handleSubmit = async () => {
                     detail: 'Gagal deposit',
                     life: 3000
                 });
+                info.value = {
+                    severity: 'error',
+                    message: "Gagal deposit",
+                }
             }
         }
     });
@@ -97,46 +120,65 @@ const handleSelectPegawai = (value) => {
     form.value.toAccountId = value.id;
     form.value.toAccountType = 'PEGAWAI';
 }
+
+const handleSelectUser = (value) => {
+    form.value.toAccountId = value.id;
+    form.value.toAccountType = 'USER';
+}
 </script>
 
 <template>
-    <div>
-        <h3>Deposit</h3>
-        <div class="card flex justify-content-center">
-            <div class="flex flex-wrap gap-3">
-                <div class="flex align-items-center">
-                    <RadioButton v-model="form.toAccountType" inputId="siswa" name="accountType" value="SISWA" />
-                    <label for="siswa" class="ml-2">Siswa</label>
+    <Card>
+        <template #title>
+            Deposit / Top Up
+        </template>
+        <template #content>
+            <div>
+                <div class="card flex justify-content-center">
+                    <div class="flex flex-wrap gap-3">
+                        <div class="flex align-items-center">
+                            <RadioButton v-model="form.toAccountType" inputId="siswa" name="accountType"
+                                value="SISWA" />
+                            <label for="siswa" class="ml-2">Siswa</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <RadioButton v-model="form.toAccountType" inputId="pegawai" name="accountType"
+                                value="PEGAWAI" />
+                            <label for="pegawai" class="ml-2">Pegawai</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <RadioButton v-model="form.toAccountType" inputId="user" name="accountType" value="USER" />
+                            <label for="user" class="ml-2">Admin / Pengguna Sistem</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex align-items-center">
-                    <RadioButton v-model="form.toAccountType" inputId="pegawai" name="accountType" value="PEGAWAI" />
-                    <label for="pegawai" class="ml-2">Pegawai</label>
-                </div>
-                <div class="flex align-items-center">
-                    <RadioButton v-model="form.toAccountType" inputId="user" name="accountType" value="USER" />
-                    <label for="user" class="ml-2">Admin / Pengguna Sistem</label>
-                </div>
+                <Message v-if="info" :severity="info.severity">
+                    {{ info.message }}
+                </Message>
+                <form @submit.prevent="handleSubmit" method="post" v-if="form.toAccountType">
+                    <div class="field" v-if="form.toAccountType === 'SISWA'">
+                        <select-siswa @input="handleSelectSiswa" />
+                    </div>
+                    <div class="field" v-if="form.toAccountType === 'PEGAWAI'">
+                        <select-pegawai @input="handleSelectPegawai" />
+                    </div>
+                    <div class="field" v-if="form.toAccountType === 'USER'">
+                        <select-user @input="handleSelectUser" />
+                    </div>
+                    <p v-if="errorForm && errorForm.toAccountId" class="text-red-500">{{ errorForm.toAccountId[0] }}</p>
+                    <div class="field">
+                        <InputNumber v-model="form.amount" :invalid="errorForm && errorForm.amount" class="w-full"
+                            :disabled="isPending" placeholder="Jumlah Uang" :min="0" mode="currency" currency="IDR" />
+                        <p v-if="errorForm && errorForm.amount" class="text-red-500">{{ errorForm.amount[0] }}</p>
+                    </div>
+                    <div class="field">
+                        <Textarea v-model="form.note" :invalid="errorForm && errorForm.note" class="w-full"
+                            :disabled="isPending" placeholder="Catatan" />
+                        <p v-if="errorForm && errorForm.note" class="text-red-500">{{ errorForm.note[0] }}</p>
+                    </div>
+                    <Button type="submit" :disabled="isPending" :loading="isPending" label="Deposit" />
+                </form>
             </div>
-        </div>
-        <form @submit.prevent="handleSubmit" method="post" v-if="form.toAccountType">
-            <div class="field" v-if="form.toAccountType === 'SISWA'">
-                <select-siswa @input="handleSelectSiswa" />
-            </div>
-            <div class="field" v-if="form.toAccountType === 'PEGAWAI'">
-                <select-pegawai @input="handleSelectPegawai" />
-            </div>
-            <p v-if="errorForm && errorForm.toAccountId" class="text-red-500">{{ errorForm.toAccountId[0] }}</p>
-            <div class="field">
-                <InputNumber v-model="form.amount" :invalid="errorForm && errorForm.amount" class="w-full"
-                    :disabled="isPending" placeholder="Jumlah Uang" :min="0" mode="currency" currency="IDR" />
-                <p v-if="errorForm && errorForm.amount" class="text-red-500">{{ errorForm.amount[0] }}</p>
-            </div>
-            <div class="field">
-                <Textarea v-model="form.note" :invalid="errorForm && errorForm.note" class="w-full"
-                    :disabled="isPending" placeholder="Catatan" />
-                <p v-if="errorForm && errorForm.note" class="text-red-500">{{ errorForm.note[0] }}</p>
-            </div>
-            <Button type="submit" :disabled="isPending" :loading="isPending" label="Deposit" />
-        </form>
-    </div>
+        </template>
+    </Card>
 </template>

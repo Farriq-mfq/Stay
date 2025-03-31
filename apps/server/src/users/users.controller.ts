@@ -24,6 +24,15 @@ export class UsersController {
   ) {
     return await this.usersService.findAllUsers(req.user, page, limit, search)
   }
+  @Get('/public')
+  async findAllPublic(
+    @Req() req: Request,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+  ) {
+    return await this.usersService.findAllUsers(req.user, page, limit, search)
+  }
 
   @Post('/')
   @Permissions('users:create')

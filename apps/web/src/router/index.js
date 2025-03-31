@@ -178,7 +178,6 @@ const router = createRouter({
                     redirect: {
                         name: 'transaction-deposit'
                     },
-                    component: () => import('@/views/Transaction/Index.vue'),
                     children: [
                         {
                             path: '/transaction/deposit',
@@ -197,11 +196,11 @@ const router = createRouter({
                             },
                         },
                         {
-                            path: '/transaction/account',
-                            name: 'transaction-account',
-                            component: () => import('@/views/Transaction/Account.vue'),
+                            path: '/transaction/sales',
+                            name: 'transaction-sales',
+                            component: () => import('@/views/Transaction/Sales/Index.vue'),
                             meta: {
-                                title: "Account",
+                                title: "Sales",
                             },
                         },
                     ]

@@ -21,6 +21,10 @@ export class TransactionService {
 
         if (!fromAccount) throw new BadRequestException("Account not found")
 
+        if (depositTransactionDto.toAccountType === 'USER' && depositTransactionDto.toAccountId === +from) {
+            throw new BadRequestException("You can't deposit to yourself")
+        }
+
         const toAccount = await this.prismaService.client.account.findFirst({
             where: {
                 accountableId: +depositTransactionDto.toAccountId,
@@ -28,7 +32,7 @@ export class TransactionService {
             }
         })
 
-        if (!toAccount) throw new BadRequestException("Account not found")
+        if (!toAccount) throw new BadRequestException("SEARCH_ACCOUNT_FAILED")
 
         await this.prismaService.client.transactions.create({
             data: {
