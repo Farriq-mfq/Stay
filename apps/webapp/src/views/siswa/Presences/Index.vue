@@ -83,7 +83,7 @@ watch(filter, (val) => {
     <div class="flex flex-column mt-8">
       <div
         class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1"
-        style="top: 5rem"
+        style="top: 5rem;z-index: 1000;"
       >
         <InputText
           class="w-full flex-1"
@@ -110,7 +110,7 @@ watch(filter, (val) => {
                       {{ format(item.date, "dd MMMM yyyy", { locale: id }) }}
                     </h3>
                   </div>
-                  <div class="px-3 p-card shadow-none border-1 surface-border border-round-lg py-2">
+                  <div class="p-card shadow-none">
                     <ListPresence :items="item.presences" />
                   </div>
                 </div>

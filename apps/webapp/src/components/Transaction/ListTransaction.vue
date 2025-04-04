@@ -59,7 +59,9 @@ const { items } = defineProps({
 
 <style scoped>
 .transaction-item {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--surface-border);
+
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.05);
   background: white;

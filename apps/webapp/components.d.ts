@@ -14,6 +14,8 @@ declare module 'vue' {
     Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
     Camera: typeof import('./src/components/Camera.vue')['default']
+    CardExample: typeof import('./src/components/CardExample.vue')['default']
+    CardLayout: typeof import('./src/components/drawer/CardLayout.vue')['default']
     Carousel: typeof import('primevue/carousel')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     copy: typeof import('./src/components/DrawerContent copy.vue')['default']
@@ -26,6 +28,7 @@ declare module 'vue' {
     FloatLabel: typeof import('primevue/floatlabel')['default']
     Iconfield: typeof import('primevue/iconfield')['default']
     IconField: typeof import('primevue/iconfield')['default']
+    IdCard: typeof import('./src/components/drawer/IdCard.vue')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
@@ -52,6 +55,7 @@ declare module 'vue' {
     TransferConfirmation: typeof import('./src/components/drawer/TransferConfirmation.vue')['default']
     TransferConfirmationSiswa: typeof import('./src/components/drawer/TransferConfirmationSiswa.vue')['default']
     TransferScanSiswa: typeof import('./src/components/drawer/TransferScanSiswa.vue')['default']
+    Unavailable: typeof import('./src/components/Unavailable.vue')['default']
   }
   export interface ComponentCustomProperties {
     BadgeDirective: typeof import('primevue/badgedirective')['default']

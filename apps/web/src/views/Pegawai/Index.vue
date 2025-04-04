@@ -822,7 +822,7 @@ const downloadTemplateService = async () => {
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>
             <div class="field">
-                <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
+                <label for="sign_picture">Foto Profile (Optional)</label>
                 <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>

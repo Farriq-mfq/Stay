@@ -2,6 +2,7 @@
 import { useWindowScroll } from "@vueuse/core";
 import { computed } from "vue";
 import { inject, onMounted, useTemplateRef, watch } from "vue";
+import { useRouter } from "vue-router";
 
 const { x, y } = useWindowScroll();
 const { bg } = defineProps({
@@ -33,36 +34,29 @@ const auth = inject("auth");
 const profilePict = computed(() => {
   return auth.user().profile_picture;
 });
+
+const router = useRouter();
+const goToNotification = () => {
+  router.push({ name: 'unavailable' });
+}
+
 </script>
 
 <template>
-  <div
-    ref="app-header"
+  <div ref="app-header"
     class="flex justify-content-between align-items-center fixed left-0 right-0 top-0 px-3 py-3 mx-auto app-header"
-    :class="{ 'bg-primary': bg, 'bg-transparent': !bg }"
-    style="z-index: 999"
-  >
-    <Avatar
-      v-if="profilePict"
-      :image="profilePict"
-      size="large"
-      shape="circle"
-    />
-    <Avatar
-      v-if="!profilePict"
-      icon="pi pi-user"
-      style="background-color: transparent !important; color: white"
-      size="large"
-      shape="circle"
-    />
+    :class="{ 'bg-primary': bg, 'bg-transparent': !bg }" style="z-index: 999">
 
-    <img src="@/assets/logo.png" alt="" class="w-7rem" />
-    <Button
-      rounded
-      variant="outlined"
-      class="border-none text-white shadow-none"
-      text
-    >
+    <router-link :to="{ name: 'setting-account' }" class="d-inline-block">
+      <Avatar v-if="profilePict" :image="profilePict" size="large" shape="circle" />
+    </router-link>
+    <Avatar v-if="!profilePict" icon="pi pi-user" style="background-color: transparent !important; color: white"
+      size="large" shape="circle" />
+
+    <router-link :to="{ name: 'dashboard' }" class="d-inline-block">
+      <img src="@/assets/logo.png" alt="" class="w-7rem" />
+    </router-link>
+    <Button rounded variant="outlined" class="border-none text-white shadow-none" text @click="goToNotification">
       <template #icon>
         <i v-badge.danger="'5'" class="pi pi-bell"></i>
       </template>
@@ -74,6 +68,7 @@ const profilePict = computed(() => {
 .bg-opacity {
   background: rgba(255, 255, 255, 0.2) !important;
 }
+
 .app-header {
   max-width: 414px;
   margin: auto 0;

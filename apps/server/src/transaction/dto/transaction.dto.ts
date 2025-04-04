@@ -92,3 +92,9 @@ export class PaymentTransactionDetailDto {
 }
 
 export type PaymentMethodType = "CARD" | "CASH" | "QRCODE" | "BALANCE";
+
+
+export class WithdrawTransactionDto {
+    @IsNotEmpty({ message: "Kode Penarikan Tidak Kosong" })
+    transaction_code: string
+}

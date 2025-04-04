@@ -8,7 +8,7 @@ const auth = inject("auth");
 const toast = useToast();
 
 const getLatestService = async () => {
-  const response = await axios.get("/siswa/modules/home/latest/presence");
+  const response = await axios.get("/pegawai/modules/home/latest/presence");
   return response.data;
 };
 

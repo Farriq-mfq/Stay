@@ -44,35 +44,28 @@ const logout = () => {
             class="p-card shadow-1 flex flex-column justify-content-center p-2 border-round-xl"
           >
             <router-link
-              :to="{ name: 'dashboard' }"
+              :to="{ name: 'setting-account' }"
               class="p-3 no-underline text-color font-semibold flex gap-2 align-items-center hover:surface-ground"
             >
               <i class="pi pi-user text-primary"></i>
               <span class="ml-2">Akun</span>
             </router-link>
             <router-link
-              :to="{ name: 'dashboard' }"
-              class="p-3 no-underline text-color font-semibold flex gap-2 align-items-center hover:surface-ground"
-            >
-              <i class="pi pi-sun text-primary"></i>
-              <span class="ml-2">Tampilan</span>
-            </router-link>
-            <router-link
-              :to="{ name: 'dashboard' }"
+              :to="{ name: 'setting-security' }"
               class="p-3 no-underline text-color font-semibold flex gap-2 align-items-center hover:surface-ground"
             >
               <i class="pi pi-key text-primary"></i>
               <span class="ml-2">Ubah Password</span>
             </router-link>
             <router-link
-              :to="{ name: 'dashboard' }"
+              :to="{ name: 'contact' }"
               class="p-3 no-underline text-color font-semibold flex gap-2 align-items-center hover:surface-ground"
             >
               <i class="pi pi-phone text-primary"></i>
               <span class="ml-2">Kontak Kami</span>
             </router-link>
             <router-link
-              :to="{ name: 'dashboard' }"
+              :to="{ name: 'about' }"
               class="p-3 no-underline text-color font-semibold flex gap-2 align-items-center hover:surface-ground"
             >
               <i class="pi pi-exclamation-circle text-primary"></i>

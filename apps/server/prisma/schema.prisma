@@ -294,7 +294,7 @@ model transactions {
   status              TransactionStatus     @default(PENDING)
   code                String
   note                String?
-  payment_method      String
+  payment_method      String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   detail_transactions detail_transactions[]

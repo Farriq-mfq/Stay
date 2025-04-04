@@ -1,11 +1,47 @@
 <script setup>
+import { useDrawer } from "@/store/drawer";
+import { rupiahFormat } from "@/utils/money";
+import { useQuery } from "@tanstack/vue-query";
 import { useQRCode } from "@vueuse/integrations/useQRCode";
-import { ref } from "vue";
-const qrcode = useQRCode("text-to-encode");
-const showSaldo = ref(false);
+import { getCurrentInstance, ref, shallowRef, watch } from "vue";
+
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
+
+const qrValue = shallowRef("");
+const qrcode = useQRCode(qrValue);
+const showSaldo = ref(true);
+const drawer = useDrawer();
 const toggleShowSaldo = () => {
   showSaldo.value = !showSaldo.value;
 };
+
+const getQrCodeService = async () => {
+  const response = await axios.get(`/pegawai/modules/qrcode`);
+  return response.data;
+};
+
+const { data: qrCodeData, isPending: qrCodePending } = useQuery({
+  queryKey: ["qrcode"],
+  queryFn: getQrCodeService,
+});
+
+watch(qrCodeData, () => {
+  if (qrCodeData.value) {
+    qrValue.value = qrCodeData.value.data;
+  }
+});
+
+const getAccount = async () => {
+  const response = await axios.get("/pegawai/modules/account");
+  return response.data;
+};
+
+const { data: account, isLoading: accountLoading } = useQuery({
+  queryKey: ["account"],
+  queryFn: getAccount,
+});
+
 </script>
 
 <template>
@@ -15,16 +51,22 @@ const toggleShowSaldo = () => {
     >
       <div class="relative px-3 pt-3">
         <div class="flex justify-content-center mb-3">
-            <img src="@/assets/logo.png" alt="" class="w-5rem" />
+          <img src="@/assets/logo.png" alt="" class="w-5rem" />
         </div>
         <div
           class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-2"
         >
-          <div class="text-white pt-4 px-4 pb-2 flex-1">
+          <div class="text-white px-4 py-4 flex-1">
             <h2 class="text-2xl mx-0 mb-0 mt-1">
-              {{ showSaldo ? "Rp. 1.000.000" : "Rp.***.***" }}
+              {{ showSaldo ? rupiahFormat(account.data.balance) : "***" }}
             </h2>
-            <p class="text-xs mt-3 mx-0 font-semibold">Saldo saat ini</p>
+            <div
+              class="text-xs mx-0 font-semibold flex align-items-center mt-2 gap-2"
+              v-if="account.data"
+            >
+              <span class="text-md">{{ account.data.accountNumber }}</span>
+              <i class="pi pi-copy cursor-pointer"></i>
+            </div>
             <Button
               @click="toggleShowSaldo"
               icon="pi pi-eye"
@@ -45,16 +87,22 @@ const toggleShowSaldo = () => {
         ></div>
         <div
           class="bg-primary-reverse opacity-10 h-30rem w-30rem absolute border-circle"
-          style="left: -20rem; top: -15rem;"
+          style="left: -20rem; top: -15rem"
         ></div>
       </div>
-      <p class="mt-4 mx-0 text-center text-xs text-white font-semibold" style="font-style: italic;">
+      <p
+        class="mt-4 mx-0 text-center text-xs text-white font-semibold"
+        style="font-style: italic"
+      >
         SMK Negeri 1 Pekalongan
       </p>
       <div
         class="flex justify-content-center items-center mx-auto h-14rem w-14rem p-card border-round-2xl relative overflow-hidden mt-3"
       >
-        <img :src="qrcode" alt="QR Code" class="h-full w-full" />
+        <div class="flex align-items-center" v-if="qrCodePending">
+          <ProgressSpinner class="h-4rem w-4rem" />
+        </div>
+        <img :src="qrcode" class="h-full w-full" v-if="!qrCodePending" />
       </div>
     </div>
   </div>

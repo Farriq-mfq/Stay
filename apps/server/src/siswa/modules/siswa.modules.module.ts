@@ -13,11 +13,13 @@ import { QrCodeModule } from "src/qrcode/qrcode.module";
 import { QRCodeService } from "src/qrcode/qrcode.service";
 import { QrCodeSiswaModulesService } from "./services/qrcode.modules.service";
 import { EventsModule } from "src/events/events.module";
+import { ProfileModulesService } from "./services/profile.modules.service";
+import { ProfileModulesController } from "./controllers/profile.modules.controller";
 
 @Module({
     imports: [TransactionModule, QrCodeModule, EventsModule],
-    controllers: [SiswaAccountModuleController, SiswaModulesPresenceController, TransactionSiswaModuleController, HomeModulesSiswaController, QrCodeSiswaModulesController],
-    providers: [SiswaAccountModuleService, SiswaModulesPresenceService, TransactionSiswaModuleService, HomeModulesSiswaService, QRCodeService, QrCodeSiswaModulesService],
+    controllers: [SiswaAccountModuleController, SiswaModulesPresenceController, TransactionSiswaModuleController, HomeModulesSiswaController, QrCodeSiswaModulesController, ProfileModulesController],
+    providers: [SiswaAccountModuleService, SiswaModulesPresenceService, TransactionSiswaModuleService, HomeModulesSiswaService, QRCodeService, QrCodeSiswaModulesService, ProfileModulesService],
 })
 export class SiswaModulesModule {
 

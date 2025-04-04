@@ -1,11 +1,10 @@
 <script setup>
-import { ref, computed, watch, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 
-import { QrcodeStream } from "vue-qrcode-reader";
 import { useDrawer } from "@/store/drawer";
-import { useToast } from "primevue/usetoast";
 import { useMutation } from "@tanstack/vue-query";
-import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
+import { QrcodeStream } from "vue-qrcode-reader";
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -66,7 +65,7 @@ const handleScan = async (code) => {
         if (response.status === 400) {
           toast.add({
             severity: "error",
-            summary: "Error",
+            summary: "Gagal",
             detail: response.data.message,
             life: 3000,
           });
@@ -74,7 +73,7 @@ const handleScan = async (code) => {
         } else if (response.status === 404) {
           toast.add({
             severity: "error",
-            summary: "Error",
+            summary: "Gagal",
             detail: response.data.message,
             life: 3000,
           });
@@ -82,7 +81,7 @@ const handleScan = async (code) => {
         } else {
           toast.add({
             severity: "error",
-            summary: "Error",
+            summary: "Gagal",
             detail: "Terjadi Kendala",
             life: 3000,
           });

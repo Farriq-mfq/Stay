@@ -23,125 +23,140 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
 </script>
 
 <template>
-  <div>
+  <div class="min-h-screen bg-surface-ground">
     <AppHeaderBack title="Detail Presensi" />
-    <div
-      class="bg-primary h-13rem w-full flex justify-content-center align-items-center flex-column"
-      v-if="!presenceLoading"
-    >
-      <h3 class="m-0 text-3xl mt-3">
-        {{ presence.data.session.name }}
-      </h3>
-      <span class="text-sm mt-2">
-        {{
-          format(new Date(presence.data.createdAt), "dd MMMM yyyy", {
-            locale: id,
-          })
-        }}
-      </span>
-    </div>
-    <div
-      class="bg-primary h-13rem w-full flex justify-content-center align-items-center flex-column"
-      v-if="presenceLoading"
-    >
-      <Skeleton height="3rem" width="90%"></Skeleton>
-      <Skeleton height="2rem" width="90%" class="mt-3"></Skeleton>
-    </div>
-    <div
-      class="p-card h-auto shadow-1 card-detail-presences border-round-lg p-3"
-      v-if="!presenceLoading"
-    >
-      <div class="flex flex-column gap-3">
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-        >
-          <span class="m-0 font-semibold text-sm">Presensi 2x</span>
-          <span class="text-xs">
-            {{ presence.data.session.allow_twice ? "Ya" : "Tidak" }}
-          </span>
-        </div>
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-        >
-          <span class="m-0 font-semibold text-sm">Waktu Datang</span>
-          <span class="text-xs">
+
+    <!-- Header Section -->
+    <div class="relative">
+      <div class="bg-primary h-16rem w-full flex justify-content-center align-items-center flex-column">
+        <div class="absolute top-0 left-0 w-full h-full bg-primary-800 opacity-20"></div>
+        <div class="relative text-center">
+          <h2 class="m-0 text-4xl font-bold text-white">
+            {{ presence?.data?.session?.name }}
+          </h2>
+          <span class="text-white-alpha-90 mt-2 block">
             {{
-              format(new Date(presence.data.enter_time), "HH:mm", {
+              format(new Date(presence?.data?.createdAt), "dd MMMM yyyy", {
                 locale: id,
               })
             }}
           </span>
         </div>
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-        >
-          <span class="m-0 font-semibold text-sm">Waktu Pulang</span>
-          <span class="text-xs">
-            {{
-              presence.data.exit_time
-                ? format(new Date(presence.data.exit_time), "HH:mm", {
-                    locale: id,
-                  })
-                : "-"
-            }}
-          </span>
-        </div>
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-          v-if="presence.data.session.allow_twice"
-        >
-          <span class="m-0 font-semibold text-sm">Kelengkapan Presensi</span>
-          <span
-            class="text-xs"
-            :class="{
-              'text-green-500':
-                presence.data.enter_time && presence.data.exit_time,
-              'text-red-500': !(
-                presence.data.enter_time && presence.data.exit_time
-              ),
-            }"
-          >
-            {{
-              presence.data.enter_time && presence.data.exit_time
-                ? "Lengkap"
-                : "Tidak Lengkap"
-            }}
-          </span>
-        </div>
-
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-        >
-          <span class="m-0 font-semibold text-sm">Lokasi</span>
-          <span class="text-xs">
-            {{ presence.data.gateway ? presence.data.gateway.location : "-" }}
-          </span>
-        </div>
-        <div
-          class="flex justify-content-between align-items-center px-2 info-presences border-bottom-1 surface-border pb-2"
-        >
-          <span class="m-0 font-semibold text-sm">Metode Presensi</span>
-          <span class="text-xs">
-            {{ presence.data.method }}
-          </span>
-        </div>
-      </div>
-      <div class="flex flex-column gap-3 mt-3">
-        <i class="text-xs text-center">SMK Negeri 1 Pekalongan</i>
       </div>
     </div>
-    <div class="flex flex-column gap-3 mt-4" v-if="presenceLoading">
+
+    <!-- Main Content -->
+    <div class="px-4 absolute left-0 right-0" style="margin-top: -4rem;">
+      <!-- Status Card -->
+      <div class="surface-card p-4 border-round-xl shadow-2 mb-4">
+        <div class="flex align-items-center gap-3 mb-3">
+          <i class="pi pi-check-circle text-2xl text-green-500"></i>
+          <div>
+            <h3 class="m-0 text-lg font-semibold">Status Presensi</h3>
+            <p class="m-0 text-sm text-500">Detail kehadiran Anda</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div :class="{
+            'col-6': presence?.data?.session?.allow_twice,
+            'col-12': !presence?.data?.session?.allow_twice
+          }">
+            <div class="text-center p-3 border-round-lg bg-green-50">
+              <i class="pi pi-sign-in text-xl text-green-500 mb-2"></i>
+              <div class="text-sm font-medium">Masuk</div>
+              <div class="text-sm font-bold">
+                {{
+                  format(new Date(presence?.data?.enter_time), "HH:mm", {
+                    locale: id,
+                  })
+                }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6" v-if="presence?.data?.session?.allow_twice">
+            <div class="text-center p-3 border-round-lg bg-red-50">
+              <i class="pi pi-sign-out text-xl"
+                :class="presence?.data?.exit_time ? 'text-red-500' : 'text-yellow-500'"></i>
+              <div class="text-sm font-medium">Keluar</div>
+              <div class="text-sm font-bold">
+                {{
+                  presence?.data?.exit_time
+                    ? format(new Date(presence?.data?.exit_time), "HH:mm", {
+                      locale: id,
+                    })
+                    : "Belum Presensi"
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details Card -->
+      <div class="surface-card p-4 border-round-xl shadow-2">
+        <div class="flex align-items-center gap-3 mb-3">
+          <i class="pi pi-info-circle text-2xl text-primary"></i>
+          <div>
+            <h3 class="m-0 text-lg font-semibold">Informasi Detail</h3>
+            <p class="m-0 text-sm text-500">Data lengkap presensi</p>
+          </div>
+        </div>
+
+        <div class="flex flex-column gap-3">
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-clock text-primary"></i>
+              <span class="font-medium">Presensi 2x</span>
+            </div>
+            <span class="text-sm" :class="presence?.data?.session?.allow_twice ? 'text-green-500' : 'text-red-500'">
+              {{ presence?.data?.session?.allow_twice ? "Diizinkan" : "Tidak Diizinkan" }}
+            </span>
+          </div>
+
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-map-marker text-primary"></i>
+              <span class="font-medium">Lokasi</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.gateway ? presence?.data?.gateway.location : "-" }}
+            </span>
+          </div>
+
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-mobile text-primary"></i>
+              <span class="font-medium">Metode Presensi</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.method }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top-1 surface-border">
+          <div class="flex align-items-center justify-content-center gap-2 text-sm text-500">
+            <i class="pi pi-building"></i>
+            <span>SMK Negeri 1 Pekalongan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="presenceLoading" class="flex justify-content-center align-items-center min-h-screen">
       <ProgressSpinner strokeWidth="3" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.card-detail-presences {
-  margin: -3rem 1rem 0;
-  z-index: 99 !important;
+.surface-hover {
+  transition: background-color 0.2s;
 }
-.info-presences:last-child {
-  border-bottom: none !important;
+
+.surface-hover:hover {
+  background-color: var(--surface-hover);
 }
 </style>

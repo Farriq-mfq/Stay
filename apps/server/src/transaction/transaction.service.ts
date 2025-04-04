@@ -12,94 +12,98 @@ export class TransactionService {
     ) { }
 
     async deposit(from: string | number, depositTransactionDto: DepositTransactionDto) {
-        const fromAccount = await this.prismaService.client.account.findFirst({
-            where: {
-                accountableId: +from,
-                accountableType: "USER"
+        const transaction = await this.prismaService.client.$transaction(async (prisma) => {
+            const fromAccount = await prisma.account.findFirst({
+                where: {
+                    accountableId: +from,
+                    accountableType: "USER"
+                }
+            })
+
+            if (!fromAccount) throw new BadRequestException("Account not found")
+
+            if (depositTransactionDto.toAccountType === 'USER' && depositTransactionDto.toAccountId === +from) {
+                throw new BadRequestException("You can't deposit to yourself")
             }
+
+            const toAccount = await prisma.account.findFirst({
+                where: {
+                    accountableId: +depositTransactionDto.toAccountId,
+                    accountableType: depositTransactionDto.toAccountType
+                }
+            })
+
+            if (!toAccount) throw new BadRequestException("SEARCH_ACCOUNT_FAILED")
+
+            await prisma.transactions.create({
+                data: {
+                    amount: depositTransactionDto.amount,
+                    code: uuidv4(),
+                    flow: 'UP',
+                    payment_method: 'CASH',
+                    fromAccountId: fromAccount.id,
+                    toAccountId: toAccount.id,
+                    status: 'SUCCESS',
+                    type: "DEPOSIT",
+                    title: `Deposit untuk ${toAccount.name}`,
+                    fromAccountType: fromAccount.accountableType,
+                    toAccountType: toAccount.accountableType
+                }
+            })
+
+
+
+            const updateBalance = await prisma.account.update({
+                where: {
+                    id: toAccount.id
+                },
+                data: {
+                    balance: toAccount.balance + depositTransactionDto.amount
+                }
+            })
+
+            if (!updateBalance) {
+                throw new BadRequestException("Deposit failed")
+            }
+
+            const toTransaction = await prisma.transactions.create({
+                data: {
+                    amount: depositTransactionDto.amount,
+                    code: uuidv4(),
+                    flow: 'DOWN',
+                    payment_method: 'CASH',
+                    fromAccountId: fromAccount.id,
+                    toAccountId: toAccount.id,
+                    status: 'SUCCESS',
+                    type: "DEPOSIT",
+                    title: `Deposit berhasil untuk ${toAccount.name}`,
+                    fromAccountType: fromAccount.accountableType,
+                    toAccountType: toAccount.accountableType,
+                    note: depositTransactionDto.note
+                }
+            })
+
+            await prisma.transactions.create({
+                data: {
+                    amount: depositTransactionDto.amount,
+                    code: uuidv4(),
+                    flow: 'UP',
+                    payment_method: 'CASH',
+                    fromAccountId: toAccount.id,
+                    toAccountId: fromAccount.id,
+                    status: 'SUCCESS',
+                    type: "DEPOSIT",
+                    title: `Deposit berhasil untuk ${toAccount.name}`,
+                    fromAccountType: toAccount.accountableType,
+                    toAccountType: fromAccount.accountableType,
+                    note: depositTransactionDto.note
+                }
+            })
+
+            return toTransaction
         })
 
-        if (!fromAccount) throw new BadRequestException("Account not found")
-
-        if (depositTransactionDto.toAccountType === 'USER' && depositTransactionDto.toAccountId === +from) {
-            throw new BadRequestException("You can't deposit to yourself")
-        }
-
-        const toAccount = await this.prismaService.client.account.findFirst({
-            where: {
-                accountableId: +depositTransactionDto.toAccountId,
-                accountableType: depositTransactionDto.toAccountType
-            }
-        })
-
-        if (!toAccount) throw new BadRequestException("SEARCH_ACCOUNT_FAILED")
-
-        await this.prismaService.client.transactions.create({
-            data: {
-                amount: depositTransactionDto.amount,
-                code: uuidv4(),
-                flow: 'UP',
-                payment_method: 'CASH',
-                fromAccountId: fromAccount.id,
-                toAccountId: toAccount.id,
-                status: 'SUCCESS',
-                type: "DEPOSIT",
-                title: `Deposit untuk ${toAccount.name}`,
-                fromAccountType: fromAccount.accountableType,
-                toAccountType: toAccount.accountableType
-            }
-        })
-
-
-
-        const updateBalance = await this.prismaService.client.account.update({
-            where: {
-                id: toAccount.id
-            },
-            data: {
-                balance: toAccount.balance + depositTransactionDto.amount
-            }
-        })
-
-        if (!updateBalance) {
-            throw new BadRequestException("Deposit failed")
-        }
-
-        const toTransaction = await this.prismaService.client.transactions.create({
-            data: {
-                amount: depositTransactionDto.amount,
-                code: uuidv4(),
-                flow: 'DOWN',
-                payment_method: 'CASH',
-                fromAccountId: fromAccount.id,
-                toAccountId: toAccount.id,
-                status: 'SUCCESS',
-                type: "DEPOSIT",
-                title: `Deposit berhasil untuk ${toAccount.name}`,
-                fromAccountType: fromAccount.accountableType,
-                toAccountType: toAccount.accountableType,
-                note: depositTransactionDto.note
-            }
-        })
-
-        await this.prismaService.client.transactions.create({
-            data: {
-                amount: depositTransactionDto.amount,
-                code: uuidv4(),
-                flow: 'UP',
-                payment_method: 'CASH',
-                fromAccountId: toAccount.id,
-                toAccountId: fromAccount.id,
-                status: 'SUCCESS',
-                type: "DEPOSIT",
-                title: `Deposit berhasil untuk ${toAccount.name}`,
-                fromAccountType: toAccount.accountableType,
-                toAccountType: fromAccount.accountableType,
-                note: depositTransactionDto.note
-            }
-        })
-
-        return toTransaction
+        return transaction
     }
 
     async createAccountUser(userId: string) {
@@ -126,6 +130,10 @@ export class TransactionService {
         const checkDigit = userId.length
 
         return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.USER]}`
+    }
+
+    async withdraw(transaction_code: string) {
+
     }
 
     async Transfer(from: account, paymentMethod: PaymentMethodType, transferTransactionDto: TransferTransactionDto) {

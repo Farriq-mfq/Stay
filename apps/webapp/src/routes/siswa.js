@@ -82,6 +82,42 @@ const routes = [
         meta: {
             layout: 'SiswaMainLayout',
             auth: true
+        },
+    },
+    {
+        path: "/account",
+        name: "setting-account",
+        component: () => import("@/views/siswa/Setting/Account.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/security",
+        name: "setting-security",
+        component: () => import("@/views/siswa/Setting/Security.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/about",
+        name: "about",
+        component: () => import("@/views/Common/About.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/contact",
+        name: "contact",
+        component: () => import("@/views/Common/Contact.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
         }
     },
     {
@@ -103,10 +139,22 @@ const routes = [
             auth: false
         }
     },
+
     {
         path: '/:pathNotFound(.*)*',
         name: 'not-found',
         component: () => import('@/views/Errors/NotFound.vue'),
+        meta: {
+            layout: 'SiswaMainLayout',
+        }
+    },
+    {
+        path: '/unavailable',
+        name: 'unavailable',
+        component: () => import('@/views/Errors/Unvailable.vue'),
+        meta: {
+            layout: 'SiswaMainLayout',
+        }
     }
 ]
 

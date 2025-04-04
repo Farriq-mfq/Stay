@@ -67,8 +67,24 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
       v-if="!transactionLoading"
     >
       <div class="flex flex-column gap-4 p-4">
+        <!-- Transaction Type Badge -->
+        <div class="flex justify-content-center">
+          <div 
+            class="px-3 py-2 border-round-lg text-white font-medium"
+            :class="{
+              'bg-green-500': transaction.data.type === 'DEPOSIT',
+              'bg-red-500': transaction.data.type === 'WITHDRAW',
+              'bg-blue-500': transaction.data.type === 'TRANSFER',
+              'bg-purple-500': transaction.data.type === 'PAYMENT'
+            }"
+          >
+            {{ transaction.data.type }}
+          </div>
+        </div>
+
         <!-- Note Section -->
         <div class="text-center p-3 bg-surface-100 border-round">
+          <i class="pi pi-info-circle text-primary mr-2"></i>
           <h4 class="m-0 text-sm font-medium line-height-4">
             {{ transaction.data.note ?? "tidak ada catatan" }}
           </h4>
@@ -78,8 +94,11 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
         <div
           class="flex justify-content-between align-items-center bg-primary p-4 border-round-lg"
         >
-          <h4 class="m-0 font-semibold text-white">Total Bayar</h4>
-          <span class="text-lg font-bold text-white">{{
+          <div class="flex flex-column">
+            <h4 class="m-0 font-semibold text-white">Total Transaksi</h4>
+            <span class="text-xs text-white-alpha-90">Jumlah yang {{ transaction.data.flow === 'UP' ? 'dikirim' : 'diterima' }}</span>
+          </div>
+          <span class="text-xl font-bold text-white">{{
             rupiahFormat(transaction.data.amount)
           }}</span>
         </div>
@@ -88,40 +107,51 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
 
         <!-- Account Details -->
         <div class="flex flex-column gap-3">
-          <h3 class="m-0 text-sm font-medium">
-            Akun {{ transaction.data.flow === "UP" ? "Pengirim" : "Penerima" }}
-          </h3>
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-user text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">
+              Akun {{ transaction.data.flow === "UP" ? "Pengirim" : "Penerima" }}
+            </h3>
+          </div>
           <div class="surface-card p-3 border-round-lg">
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Nama</span>
-              <span class="text-sm">{{ transaction.data.to.name }}</span>
+              <span class="text-sm font-semibold">{{ transaction.data.to.name }}</span>
             </div>
             <div class="flex justify-content-between align-items-center">
               <span class="text-sm font-medium">Nomer Rekening</span>
-              <span class="text-sm">{{ transaction.data.to.accountNumber }}</span>
+              <span class="text-sm font-semibold">{{ transaction.data.to.accountNumber }}</span>
             </div>
           </div>
         </div>
 
         <!-- Transaction Details -->
         <div class="flex flex-column gap-3">
-          <h3 class="m-0 text-sm font-medium">Detail Transaksi</h3>
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-info-circle text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">Detail Transaksi</h3>
+          </div>
           <div class="surface-card p-3 border-round-lg">
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Status</span>
-              <span class="text-sm">{{ transaction.data.status }}</span>
+              <span 
+                class="text-sm px-2 py-1 border-round"
+                :class="{
+                  'bg-green-100 text-green-700': transaction.data.status === 'SUCCESS',
+                  'bg-yellow-100 text-yellow-700': transaction.data.status === 'PENDING',
+                  'bg-red-100 text-red-700': transaction.data.status === 'FAILED'
+                }"
+              >
+                {{ transaction.data.status }}
+              </span>
             </div>
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Kode Transaksi</span>
-              <span class="text-sm">{{ transaction.data.code }}</span>
+              <span class="text-sm font-semibold">{{ transaction.data.code }}</span>
             </div>
             <div class="flex justify-content-between align-items-center mb-3">
-              <span class="text-sm font-medium">Tipe Transaksi</span>
-              <span class="text-sm">{{ transaction.data.type }}</span>
-            </div>
-            <div class="flex justify-content-between align-items-center mb-3">
-              <span class="text-sm font-medium">Tanggal Transaksi</span>
-              <span class="text-sm">
+              <span class="text-sm font-medium">Tanggal</span>
+              <span class="text-sm font-semibold">
                 {{
                   format(new Date(transaction.data.createdAt), "dd MMMM yyyy", {
                     locale: id,
@@ -130,8 +160,8 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
               </span>
             </div>
             <div class="flex justify-content-between align-items-center">
-              <span class="text-sm font-medium">Waktu Transaksi</span>
-              <span class="text-sm">
+              <span class="text-sm font-medium">Waktu</span>
+              <span class="text-sm font-semibold">
                 {{
                   format(new Date(transaction.data.createdAt), "HH:mm", {
                     locale: id,

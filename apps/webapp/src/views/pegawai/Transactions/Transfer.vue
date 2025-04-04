@@ -22,7 +22,7 @@ const confirmation = () => {
     });
   } else {
     drawer.openDrawer(
-      "TransferConfirmation",
+      "TransferConfirmationSiswa",
       "Konfirmasi Transfer",
       ()=>{},
       {

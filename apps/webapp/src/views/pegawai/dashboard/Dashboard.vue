@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from "vue";
 import Header from "./components/Header.vue";
+import LatestPresence from "./components/LatestPresence.vue";
+import LatestTransaction from "./components/LatestTransaction.vue";
 const mockPresensi = ref([
   {
     id: 1,
@@ -35,81 +37,67 @@ const mockPresensi = ref([
     method: "card",
   },
 ]);
-
-
 </script>
 
 <template>
   <div class="flex flex-column gap-4" ref="el">
     <AppHeader :bg="false" />
     <Header />
-    <div
-      class="mx-3 p-card shadow-1 h-6rem border-round-xl"
-      style="margin: -10px; z-index: 99"
-    >
+    <div class="mx-3 p-card shadow-1  border-round-xl" style="margin: -10px; z-index: 99">
       <div class="p-3 overflow-hidden">
-        <h3 class="m-0">Fitur <span class="text-primary">Sistem</span></h3>
-        <p class="text-xs mt-2 font-semibold">
-          Comming soon
-        </p>
+        <div class="flex align-items-center justify-content-between mb-3">
+          <div>
+            <h3 class="m-0 text-900">Shortcut <span class="text-primary font-medium">Menu</span></h3>
+            <p class="text-600 text-sm mt-1 mb-0">Akses cepat ke fitur utama</p>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col-3 p-1">
+            <div class="cursor-pointer transition-all transition-duration-300">
+              <div class="p-2 flex flex-column align-items-center">
+                <div class="border-1 border-primary-100 bg-primary-50/50 p-2 border-circle w-3rem h-3rem flex align-items-center justify-content-center">
+                  <i class="pi pi-calendar text-base text-primary-600"></i>
+                </div>
+                <span class="text-900 font-medium text-xs text-center mt-2">Jadwal</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-3 p-1">
+            <div class="cursor-pointer transition-all transition-duration-300">
+              <div class="p-2 flex flex-column align-items-center">
+                <div class="border-1 border-blue-100 bg-blue-50/50 p-2 border-circle w-3rem h-3rem flex align-items-center justify-content-center">
+                  <i class="pi pi-clock text-base text-blue-600"></i>
+                </div>
+                <span class="text-900 font-medium text-xs text-center mt-2">Presensi</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-3 p-1">
+            <div class="cursor-pointer transition-all transition-duration-300">
+              <div class="p-2 flex flex-column align-items-center">
+                <div class="border-1 border-orange-100 bg-orange-50/50 p-2 border-circle w-3rem h-3rem flex align-items-center justify-content-center">
+                  <i class="pi pi-wallet text-base text-orange-600"></i>
+                </div>
+                <span class="text-900 font-medium text-xs text-center mt-2">Bayar</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-3 p-1">
+            <div class="cursor-pointer transition-all transition-duration-300">
+              <div class="p-2 flex flex-column align-items-center">
+                <div class="border-1 border-green-100 bg-green-50/50 p-2 border-circle w-3rem h-3rem flex align-items-center justify-content-center">
+                  <i class="pi pi-book text-base text-green-600"></i>
+                </div>
+                <span class="text-900 font-medium text-xs text-center mt-2">Nilai</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="grid grid-nogutter gap-4">
-      <div class="p-card shadow-1 border-round-xl p-3 mx-3 w-full">
-        <div
-          class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-2"
-        >
-          <h4 class="m-0 text-xl">Presensi Hari Ini</h4>
-          <a href="" class="text-xs no-underline text-primary">Lihat semua</a>
-        </div>
-        <DataView :value="mockPresensi" class="mt-2">
-          <template #list="slotProps">
-            <div class="flex flex-column gap-2 px-1">
-              <div v-for="(item, index) in slotProps.items" :key="index">
-                <div
-                  class="flex flex-column py-2 border-bottom-1 surface-border"
-                >
-                  <h4 class="m-0 mb-2">Presensi Rapat Sekolah</h4>
-                  <div class="text-xs my-1 font-semibold">
-                    <span class="text-primary">Lokasi : </span>
-                    <span class="text-color-secondary">Pos Satpam</span>
-                  </div>
-                  <div class="text-xs my-1 font-semibold">
-                    <span class="text-primary">Tanggal dan Waktu : </span>
-                    <span class="text-color-secondary">18:00</span>
-                  </div>
-                  <div class="text-xs my-1 font-semibold">
-                    <span class="text-primary">Metode : </span>
-                    <span class="text-color-secondary">Card</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-          <template #empty>
-            <p>Presensi Kosong</p>
-          </template>
-        </DataView>
-      </div>
-
-      <div class="p-card shadow-1 border-round-xl p-3 mx-3 w-full">
-        <div
-          class="flex align-items-center justify-content-between border-bottom-1 border-200 pb-3"
-        >
-          <h4 class="m-0 text-xl">Transaksi Hari Ini</h4>
-          <a href="" class="text-xs no-underline text-primary">Lihat semua</a>
-        </div>
-        <DataView :value="mockPresensi" class="mt-2">
-          <template #list="slotProps">
-            <div class="flex flex-column gap-2">
-              <!-- <ListTransaction :items="slotProps.items" /> -->
-            </div>
-          </template>
-          <template #empty>
-            <p>Presensi Kosong</p>
-          </template>
-        </DataView>
-      </div>
+      <LatestTransaction />
+      <LatestPresence />
     </div>
   </div>
 </template>
