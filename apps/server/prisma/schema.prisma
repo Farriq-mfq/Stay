@@ -298,12 +298,12 @@ model transactions {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   detail_transactions detail_transactions[]
-  from                account               @relation("asFromtransactions", fields: [fromAccountId], references: [id])
-  to                  account               @relation("asTotransactions", fields: [toAccountId], references: [id])
-  fromAccountId       Int
-  toAccountId         Int
-  fromAccountType     AccountableType
-  toAccountType       AccountableType
+  from                account?              @relation("asFromtransactions", fields: [fromAccountId], references: [id])
+  to                  account?              @relation("asTotransactions", fields: [toAccountId], references: [id])
+  fromAccountId       Int?
+  toAccountId         Int?
+  fromAccountType     AccountableType?
+  toAccountType       AccountableType?
 
   @@index([code])
 }
@@ -312,8 +312,8 @@ model detail_transactions {
   id            Int          @id @default(autoincrement())
   transaction   transactions @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   transactionId Int
-  title         String
-  amount        Float
+  name          String
+  price         Float
   quantity      Int
   subtotal      Float
   createdAt     DateTime     @default(now())

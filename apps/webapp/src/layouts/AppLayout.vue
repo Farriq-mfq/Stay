@@ -1,7 +1,7 @@
 <script setup>
 // import { useScreenOrientation } from "@vueuse/core";
 import { useToast } from "primevue/usetoast";
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, inject } from "vue";
 
 // const { lockOrientation } = useScreenOrientation();
 
@@ -40,17 +40,15 @@ watch(isOnline, (val) => {
     });
   }
 });
+const auth = inject("auth");
+
 </script>
 <template>
   <div class="surface-ground relative min-h-screen">
     <component :is="$route.meta.layoutComponent">
-      <slot></slot>
+      <slot v-if="auth.ready()"></slot>
     </component>
-    <Toast
-      position="top-center"
-      class="px-3"
-      style="z-index: 9999 !important"
-    />
+    <Toast position="top-center" class="px-3" style="z-index: 9999 !important" />
     <ConfirmDialog class="px-3"></ConfirmDialog>
   </div>
 </template>

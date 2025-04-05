@@ -1,13 +1,16 @@
-import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AccountableType } from "@prisma/client";
 import { format } from "date-fns";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
+import { QRCodeService } from "src/qrcode/qrcode.service";
+import { CreateWithdrawDto } from "../dto/transaction.dto";
 
 @Injectable()
 export class TransactionSiswaModuleService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+        private readonly qrcodeService: QRCodeService
     ) { }
     async listTransaction(user: any, limit: string, after: string, before: string, search: string) {
         if (!user) throw new UnauthorizedException()
@@ -50,7 +53,7 @@ export class TransactionSiswaModuleService {
             },
             orderBy: {
                 createdAt: 'desc'
-            }
+            },
         }).withCursor({
             limit: 20,
             after: after ?? null,
@@ -91,8 +94,122 @@ export class TransactionSiswaModuleService {
                 fromAccountId: account.id,
             },
             include: {
-                to: true
+                to: true,
+                detail_transactions: true
             }
         })
     }
+
+    async createWithdrawTransaction(user: any, body: CreateWithdrawDto) {
+        return await this.prismaService.client.$transaction(async (prisma) => {
+            const account = await prisma.account.findFirstOrThrow({
+                where: {
+                    accountableId: parseInt(user.sub),
+                    accountableType: AccountableType.SISWA
+                }
+            })
+
+            if (!account) throw new BadRequestException()
+
+            if (account.balance < body.amount) {
+                throw new BadRequestException("Saldo tidak cukup")
+            }
+
+            const transaction = await prisma.transactions.create({
+                data: {
+                    amount: body.amount,
+                    code: `WD-${account.id}-${format(new Date(), 'yyyyMMddHHmmss')}`,
+                    flow: 'DOWN',
+                    payment_method: 'CASH',
+                    fromAccountId: account.id,
+                    fromAccountType: AccountableType.SISWA,
+                    type: 'WITHDRAW',
+                    status: 'PENDING',
+                }
+            })
+            const dataQrCode = {
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                code: transaction.code,
+                timestamp: Date.now()
+            }
+            const qrcode = await this.qrcodeService.createQrCode(dataQrCode, 'WITHDRAW')
+            return {
+                transaction,
+                qrcode
+            }
+        })
+    }
+
+    async listTransactionWithdraw(user: any, limit: string, after: string, before: string, search: string) {
+        if (!user) throw new UnauthorizedException()
+
+        const userId = parseInt(user.sub)
+
+        const account = await this.prismaService.client.account.findFirstOrThrow({
+            where: {
+                accountableId: userId,
+                accountableType: AccountableType.SISWA
+            }
+        })
+
+        if (!account) throw new BadRequestException()
+
+        const transactions = await this.prismaService.client.transactions.paginate({
+            where: {
+                fromAccountId: account.id,
+                fromAccountType: AccountableType.SISWA,
+                type: 'WITHDRAW',
+                ...search && {
+                    OR: [
+                        {
+                            to: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                        {
+                            from: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                    ]
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+        }).withCursor({
+            limit: 20,
+            after: after ?? null,
+            before: before ?? null,
+        })
+
+        const data = transactions[0];
+
+
+        const parseData = await Promise.all(data.map(async (dt) => {
+            const dataQrCode = {
+                transactionId: dt.id,
+                amount: dt.amount,
+                code: dt.code,
+                timestamp: Date.now()
+            }
+            return {
+                ...dt,
+                qrcode: await this.qrcodeService.createQrCode(dataQrCode, 'WITHDRAW')
+            }
+        }))
+
+        return [
+            parseData,
+            transactions[1]
+        ]
+    }
+
 }

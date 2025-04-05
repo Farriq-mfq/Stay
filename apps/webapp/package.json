@@ -23,6 +23,7 @@
     "primevue": "3.49.1",
     "qrcode": "^1",
     "unplugin-vue-components": "^0.27.4",
+    "v-lazy-image": "^2.1.1",
     "vue": "^3.5.13",
     "vue-qrcode-reader": "^5.7.0",
     "vue-router": "^4.4.3"

@@ -39,9 +39,13 @@ const { items } = defineProps({
         <div class="text-xs sm:text-sm flex align-items-center mt-1 sm:mt-2 gap-2">
           <div
             class="status-badge flex justify-content-center align-items-center gap-1 sm:gap-2 px-2 py-1 border-round-lg"
-            :class="item.status === 'SUCCESS' ? 'bg-primary-50 text-primary' : 'bg-red-50 text-red-500'">
-            <i class="pi pi-check-circle text-xs sm:text-sm"></i>
-            <span class="font-medium"> Berhasil</span>
+            :class="item.status === 'SUCCESS' ? 'bg-primary-50 text-primary' : item.status === 'PENDING' ? 'bg-yellow-50 text-yellow-500' : item.status === 'FAILED' ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-500'">
+            <i class="pi pi-check-circle text-xs sm:text-sm" v-if="item.status === 'SUCCESS'"></i>
+            <i class="pi pi-clock text-xs sm:text-sm" v-if="item.status === 'PENDING'"></i>
+            <i class="pi pi-times-circle text-xs sm:text-sm" v-if="item.status === 'FAILED'"></i>
+            <span class="font-medium"> 
+              {{ item.status }}
+            </span>
           </div>
         </div>
       </div>

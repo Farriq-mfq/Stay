@@ -1,5 +1,5 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
-import { DepositTransactionDto } from "./dto/transaction.dto";
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { DepositTransactionDto, WithdrawTransactionDto } from "./dto/transaction.dto";
 import { TransactionService } from "./transaction.service";
 import { Request } from "express";
 import { AccessTokenGuard } from "src/guards/accessToken.guard";
@@ -13,7 +13,7 @@ export class TransactionController {
     constructor(private readonly transactionService: TransactionService) { }
     @Post('deposit')
     @UseGuards(AccountGuard)
-    // @Permissions('transaction:deposit')
+    @Permissions('transaction:deposit')
     async deposit(
         @Req() req: Request,
         @Body() depositTransactionDto: DepositTransactionDto,
@@ -26,5 +26,20 @@ export class TransactionController {
     async createAccount(@Req() req: Request) {
         const user = req.user as any;
         return this.transactionService.createAccountUser(user.sub);
+    }
+
+    @Get('withdraw')
+    @UseGuards(AccountGuard)
+    @Permissions('transaction:withdraw')
+    async searchWithdrawTransaction(@Query() withdrawTransactionDto: WithdrawTransactionDto) {
+        return await this.transactionService.searchWithdrawTransaction(withdrawTransactionDto.transaction_code);
+    }
+
+    @Post('withdraw')
+    @UseGuards(AccountGuard)
+    @Permissions('transaction:withdraw')
+    async withdraw(@Req() req: Request, @Body() withdrawTransactionDto: WithdrawTransactionDto) {
+        const user = req.user as any;
+        return await this.transactionService.withdraw(user.sub, withdrawTransactionDto.transaction_code);
     }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { account, AccountableType, users } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
@@ -35,19 +35,21 @@ export class TransactionService {
 
             if (!toAccount) throw new BadRequestException("SEARCH_ACCOUNT_FAILED")
 
-            await prisma.transactions.create({
+
+            const toTransaction = await prisma.transactions.create({
                 data: {
                     amount: depositTransactionDto.amount,
-                    code: uuidv4(),
-                    flow: 'UP',
+                    code: uuidv4().replace(/-/g, ''),
+                    flow: 'DOWN',
                     payment_method: 'CASH',
                     fromAccountId: fromAccount.id,
                     toAccountId: toAccount.id,
                     status: 'SUCCESS',
                     type: "DEPOSIT",
-                    title: `Deposit untuk ${toAccount.name}`,
+                    title: `Deposit berhasil untuk ${toAccount.name}`,
                     fromAccountType: fromAccount.accountableType,
-                    toAccountType: toAccount.accountableType
+                    toAccountType: toAccount.accountableType,
+                    note: depositTransactionDto.note
                 }
             })
 
@@ -66,27 +68,10 @@ export class TransactionService {
                 throw new BadRequestException("Deposit failed")
             }
 
-            const toTransaction = await prisma.transactions.create({
-                data: {
-                    amount: depositTransactionDto.amount,
-                    code: uuidv4(),
-                    flow: 'DOWN',
-                    payment_method: 'CASH',
-                    fromAccountId: fromAccount.id,
-                    toAccountId: toAccount.id,
-                    status: 'SUCCESS',
-                    type: "DEPOSIT",
-                    title: `Deposit berhasil untuk ${toAccount.name}`,
-                    fromAccountType: fromAccount.accountableType,
-                    toAccountType: toAccount.accountableType,
-                    note: depositTransactionDto.note
-                }
-            })
-
             await prisma.transactions.create({
                 data: {
                     amount: depositTransactionDto.amount,
-                    code: uuidv4(),
+                    code: uuidv4().replace(/-/g, ''),
                     flow: 'UP',
                     payment_method: 'CASH',
                     fromAccountId: toAccount.id,
@@ -130,10 +115,6 @@ export class TransactionService {
         const checkDigit = userId.length
 
         return `${userId}${checkDigit}${createYear}${ROLE_CODE[AccountableType.USER]}`
-    }
-
-    async withdraw(transaction_code: string) {
-
     }
 
     async Transfer(from: account, paymentMethod: PaymentMethodType, transferTransactionDto: TransferTransactionDto) {
@@ -225,6 +206,91 @@ export class TransactionService {
         })
         return transcation;
 
+    }
+
+    async searchWithdrawTransaction(transaction_code: string) {
+        const transaction = await this.prismaService.client.transactions.findFirst({
+            where: {
+                code: transaction_code,
+                type: "WITHDRAW",
+                status: "PENDING",
+            },
+            include: {
+                to: true, // source account
+                from: true // process account
+            }
+        })
+
+        if (!transaction) {
+            throw new NotFoundException("Kode transaksi tidak ditemukan")
+        }
+
+        return transaction
+    }
+
+    async withdraw(userId: string, transaction_code: string) {
+        const transaction = await this.prismaService.client.transactions.findFirst({
+            where: {
+                code: transaction_code,
+                type: "WITHDRAW",
+                status: "PENDING",
+            }
+        })
+
+        if (!transaction) {
+            throw new NotFoundException("Kode transaksi tidak ditemukan")
+        }
+
+        const account = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: transaction.fromAccountId,
+                accountableType: transaction.fromAccountType
+            }
+        })
+
+
+        const toAccount = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: +userId,
+                accountableType: "USER"
+            }
+        })
+
+
+        if (!account || !toAccount) {
+            throw new NotFoundException("Akun tidak ditemukan")
+        }
+
+        if (account.balance < transaction.amount) {
+            throw new BadRequestException("Saldo tidak cukup")
+        }
+
+        const updateAccount = await this.prismaService.client.account.update({
+            where: {
+                id: account.id,
+                accountableType: account.accountableType
+            },
+            data: {
+                balance: account.balance - transaction.amount
+            }
+        })
+
+        if (!updateAccount) {
+            throw new BadRequestException("Penarikan gagal")
+        }
+
+        return await this.prismaService.client.transactions.update({
+            where: {
+                id: transaction.id,
+                fromAccountId: account.id,
+                fromAccountType: account.accountableType
+            },
+            data: {
+                toAccountId: toAccount.id,
+                toAccountType: toAccount.accountableType,
+                status: "SUCCESS",
+            }
+        })
     }
 
 

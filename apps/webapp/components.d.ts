@@ -29,6 +29,7 @@ declare module 'vue' {
     Iconfield: typeof import('primevue/iconfield')['default']
     IconField: typeof import('primevue/iconfield')['default']
     IdCard: typeof import('./src/components/drawer/IdCard.vue')['default']
+    Image: typeof import('primevue/image')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']

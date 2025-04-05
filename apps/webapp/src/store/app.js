@@ -3,7 +3,7 @@ import { defineStore } from "pinia"
 export const useApp = defineStore("app", {
     state: () => ({
         showAppNav: true,
-        showRoleDialog: false
+        showRoleDialog: false,
     }),
     actions: {
         setShowAppNav() {

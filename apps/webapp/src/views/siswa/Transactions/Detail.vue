@@ -21,6 +21,16 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
   queryKey: ["detail-transaction", route.params.transaction_id],
   queryFn: getTransactionService,
 });
+
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text);
+  proxy.$toast.add({
+    severity: 'success',
+    summary: 'Berhasil',
+    detail: 'Kode transaksi berhasil disalin',
+    life: 3000
+  });
+};
 </script>
 
 <template>
@@ -41,7 +51,7 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
         <i class="pi pi-arrow-down-right text-3xl" v-if="transaction.data.type === 'TRANSFER'"></i>
         <i class="pi pi-credit-card text-3xl" v-if="transaction.data.type === 'PAYMENT'"></i>
       </div>
-      <h3 class="m-0 text-2xl mt-3 text-white font-medium">
+      <h3 class="m-0 text-2xl mt-3 text-white font-medium title-text">
         {{ transaction.data.title }}
       </h3>
       <span class="text-sm mt-2 text-white-alpha-90">
@@ -85,7 +95,7 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
         <!-- Note Section -->
         <div class="text-center p-3 bg-surface-100 border-round">
           <i class="pi pi-info-circle text-primary mr-2"></i>
-          <h4 class="m-0 text-sm font-medium line-height-4">
+          <h4 class="m-0 text-sm font-medium line-height-4 note-text">
             {{ transaction.data.note ?? "tidak ada catatan" }}
           </h4>
         </div>
@@ -95,8 +105,10 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
           class="flex justify-content-between align-items-center bg-primary p-4 border-round-lg"
         >
           <div class="flex flex-column">
-            <h4 class="m-0 font-semibold text-white">Total Transaksi</h4>
-            <span class="text-xs text-white-alpha-90">Jumlah yang {{ transaction.data.flow === 'UP' ? 'dikirim' : 'diterima' }}</span>
+            <h4 class="m-0 font-semibold text-white">
+              {{ transaction.data.type === 'WITHDRAW' ? 'Total Penarikan' : 'Total Transaksi' }}
+            </h4>
+            <span class="text-xs text-white-alpha-90" v-if="transaction.data.type != 'WITHDRAW'">Jumlah yang {{ transaction.data.flow === 'UP' ? 'dikirim' : 'diterima' }}</span>
           </div>
           <span class="text-xl font-bold text-white">{{
             rupiahFormat(transaction.data.amount)
@@ -106,7 +118,7 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
         <Divider class="m-0" />
 
         <!-- Account Details -->
-        <div class="flex flex-column gap-3">
+        <div class="flex flex-column gap-3" v-if="transaction.data.type !== 'WITHDRAW'">
           <div class="flex align-items-center gap-2">
             <i class="pi pi-user text-primary"></i>
             <h3 class="m-0 text-sm font-medium">
@@ -124,6 +136,25 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
             </div>
           </div>
         </div>
+        <div class="flex flex-column gap-3" v-if="transaction.data.type === 'WITHDRAW' && transaction.data.to">
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-user text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">
+              Admin yang menyetujui
+            </h3>
+          </div>
+          <div class="surface-card p-3 border-round-lg">
+            <div class="flex justify-content-between align-items-center mb-3">
+              <span class="text-sm font-medium">Nama</span>
+              <span class="text-sm font-semibold">{{ transaction.data.to.name }}</span>
+            </div>
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-sm font-medium">Nomer Rekening</span>
+              <span class="text-sm font-semibold">{{ transaction.data.to.accountNumber }}</span>
+            </div>
+          </div>
+        </div>
+
 
         <!-- Transaction Details -->
         <div class="flex flex-column gap-3">
@@ -144,10 +175,6 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
               >
                 {{ transaction.data.status }}
               </span>
-            </div>
-            <div class="flex justify-content-between align-items-center mb-3">
-              <span class="text-sm font-medium">Kode Transaksi</span>
-              <span class="text-sm font-semibold">{{ transaction.data.code }}</span>
             </div>
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Tanggal</span>
@@ -172,6 +199,55 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
           </div>
         </div>
 
+        <!-- Transaction Code Section -->
+        <div class="flex flex-column gap-3">
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-hashtag text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">Kode Transaksi</h3>
+          </div>
+          <div class="surface-card p-3 border-round-lg">
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-sm font-semibold">{{ transaction.data.code }}</span>
+              <Button
+                icon="pi pi-copy"
+                class="p-button-text p-button-rounded p-button-sm"
+                @click="copyToClipboard(transaction.data.code)"
+                v-tooltip.top="'Salin kode transaksi'"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Transaction Items -->
+        <div class="flex flex-column gap-3" v-if="transaction.data.detail_transactions.length > 0">
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-shopping-cart text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">Detail Pembayaran</h3>
+          </div>
+          <div class="surface-card p-3 border-round-lg">
+            <div v-if="transaction.data.detail_transactions && transaction.data.detail_transactions.length > 0">
+              <div v-for="(item, index) in transaction.data.detail_transactions" :key="item.id" class="mb-3">
+                <div class="flex justify-content-between align-items-center">
+                  <div class="flex flex-column">
+                    <span class="text-sm font-medium">{{ item.name }}</span>
+                    <span class="text-xs text-500">{{ item.quantity }} x {{ rupiahFormat(item.price) }}</span>
+                  </div>
+                  <span class="text-sm font-semibold">{{ rupiahFormat(item.quantity * item.price) }}</span>
+                </div>
+                <Divider v-if="index !== transaction.data.detail_transactions.length - 1" class="my-2" />
+              </div>
+              <Divider class="my-2" />
+              <div class="flex justify-content-between align-items-center">
+                <span class="text-sm font-medium">Total</span>
+                <span class="text-sm font-semibold">{{ rupiahFormat(transaction.data.amount) }}</span>
+              </div>
+            </div>
+            <div v-else class="text-center p-3">
+              <span class="text-sm text-500">Tidak ada detail barang</span>
+            </div>
+          </div>
+        </div>
+
         <div class="text-center mt-3">
           <span class="text-xs text-500">SMK Negeri 1 Pekalongan</span>
         </div>
@@ -186,6 +262,18 @@ const { data: transaction, isLoading: transactionLoading } = useQuery({
   position: relative;
   z-index: 99;
 }
+
+.title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90%;
+}
+.note-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 
 @media screen and (max-width: 576px) {
   .card-detail-transaction {
