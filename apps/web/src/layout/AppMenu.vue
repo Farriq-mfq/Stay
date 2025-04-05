@@ -37,14 +37,15 @@ const model = ref([
                 }
                 : null,
 
-            {
-                label: 'Transaksi', icon: 'pi pi-fw pi-ticket', to: '/transaction',
+            permissions.value.includes('transaction:deposit') || permissions.value.includes('transaction:withdraw') || permissions.value.includes('transaction:read') ? {
+                label: 'Transaksi',
+                icon: 'pi pi-fw pi-ticket',
                 items: [
-                    { label: 'Deposit', icon: 'pi pi-fw pi-credit-card', to: '/transaction/deposit' },
-                    { label: 'Tarik Tunai', icon: 'pi pi-fw pi-credit-card', to: '/transaction/withdraw' },
-                    { label: 'History Transaksi', icon: 'pi pi-fw pi-credit-card', to: '/transaction/history' },
+                    permissions.value.includes('transaction:deposit') ? { label: 'Deposit', icon: 'pi pi-fw pi-credit-card', to: '/transaction/deposit' } : null,
+                    permissions.value.includes('transaction:withdraw') ? { label: 'Tarik Tunai', icon: 'pi pi-fw pi-credit-card', to: '/transaction/withdraw' } : null,
+                    permissions.value.includes('transaction:read') ? { label: 'History Transaksi', icon: 'pi pi-fw pi-credit-card', to: '/transaction/history' } : null,
                 ].filter((menu) => menu != null)
-            },
+            } : null,
             permissions.value.includes('profile:read') ? { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' } : null,
             permissions.value.includes('backup:database') ? { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' } : null,
             permissions.value.includes('client:read') ? { label: 'Client', icon: 'pi pi-fw pi-bolt', to: '/connected-client' } : null

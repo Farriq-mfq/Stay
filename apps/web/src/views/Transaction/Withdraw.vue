@@ -45,6 +45,13 @@ const handleSearchWithdrawRequest = async () => {
                 errorSearchTransaction.value = response.data.message
             } else if (response.status === 400) {
                 errorValidate.value = response.data
+                if (response.data.message) {
+                    if (response.data.message === "CREATE_ACCOUNT_FIRST") {
+                        errorSearchTransaction.value = "Silahkan buat akun terlebih dahulu"
+                    } else {
+                        errorSearchTransaction.value = response.data.message
+                    }
+                }
             } else {
                 toast.add({ severity: 'error', summary: 'Error', detail: "Terjadi kesalahan, silahkan coba lagi", life: 3000 })
             }
@@ -120,7 +127,7 @@ const copyCode = () => {
                                     <div class="flex justify-content-between">
                                         <span class="text-color-secondary">Nomor Rekening</span>
                                         <span class="font-medium">{{ dataWithdrawRequest.data.data.from.accountNumber
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                     <div class="flex justify-content-between">
                                         <span class="text-color-secondary">Tanggal Transaksi</span>
