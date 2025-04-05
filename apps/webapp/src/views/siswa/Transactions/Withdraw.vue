@@ -176,9 +176,12 @@ const handleTransactionDetail = (item) => {
         <div class="field">
           <label for="amount" class="block text-sm font-medium mb-2">Jumlah Penarikan</label>
           <InputNumber id="amount" v-model="withdrawAmount" mode="currency" currency="IDR" locale="id-ID" class="w-full"
-            placeholder="Masukkan jumlah penarikan" :invalid="errorCreateWithdraw && errorCreateWithdraw.amount" />
+            placeholder="Masukkan jumlah penarikan" :invalid="errorCreateWithdraw && errorCreateWithdraw.amount || errorCreateWithdrawMessage" />
           <p class="text-red-500 text-sm" v-if="errorCreateWithdraw && errorCreateWithdraw.amount">{{
             errorCreateWithdraw && errorCreateWithdraw.amount[0] }}</p>
+          <p class="text-red-500 text-sm" v-if="errorCreateWithdrawMessage">
+            {{ errorCreateWithdrawMessage }}
+          </p>
           <small class="text-color-secondary">Minimal penarikan Rp 10.000</small>
         </div>
         <Button label="Buat Permintaan" class="w-full" @click="handleWithdraw" :loading="isCreatingWithdraw" />

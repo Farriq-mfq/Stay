@@ -36,6 +36,7 @@ declare module 'vue' {
     ListPresence: typeof import('./src/components/Presence/ListPresence.vue')['default']
     ListTransaction: typeof import('./src/components/Transaction/ListTransaction.vue')['default']
     Loading: typeof import('./src/components/drawer/Loading.vue')['default']
+    Message: typeof import('primevue/message')['default']
     OpenCamera: typeof import('./src/components/drawer/OpenCamera.vue')['default']
     OpenCameraSiswa: typeof import('./src/components/drawer/OpenCameraSiswa.vue')['default']
     OpenQrcode: typeof import('./src/components/drawer/OpenQrcode.vue')['default']
