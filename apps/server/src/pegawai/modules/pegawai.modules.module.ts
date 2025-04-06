@@ -7,11 +7,19 @@ import { TransactionModule } from "src/transaction/transaction.module";
 import { TransactionService } from "src/transaction/transaction.service";
 import { TransactionPegawaiModuleController } from "./controllers/transaction.modules.controller";
 import { TransactionPegawaiModuleService } from "./services/transactions.modules.service";
+import { HomeModulesPegawaiService } from "./services/home.modules.service";
+import { HomeModulesPegawaiController } from "./controllers/home.modules.controller";
+import { QrCodePegawaiModulesController } from "./controllers/qrcode.modules.controller";
+import { QrCodePegawaiModulesService } from "./services/qrcode.modules.service";
+import { QrCodeModule } from "src/qrcode/qrcode.module";
+import { EventsModule } from "src/events/events.module";
+import { ProfileModulesService } from "./services/profile.modules.service";
+import { ProfileModulesController } from "./controllers/profile.modules.controller";
 
 @Module({
-    imports: [TransactionModule],
-    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController],
-    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService],
+    imports: [TransactionModule, QrCodeModule, EventsModule],
+    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController, HomeModulesPegawaiController, QrCodePegawaiModulesController, ProfileModulesController],
+    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService, HomeModulesPegawaiService, QrCodePegawaiModulesService, ProfileModulesService],
 })
 export class PegawaiModulesModule {
 

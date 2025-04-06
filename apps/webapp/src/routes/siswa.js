@@ -139,7 +139,15 @@ const routes = [
             auth: false
         }
     },
-
+    {
+        path: "/theme",
+        name: "theme",
+        component: () => import("@/views/siswa/Setting/Theme.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
+    },
     {
         path: '/:pathNotFound(.*)*',
         name: 'not-found',

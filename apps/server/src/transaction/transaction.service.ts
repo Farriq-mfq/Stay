@@ -134,7 +134,7 @@ export class TransactionService {
 
 
             if (fromAccount.balance < transferTransactionDto.amount) {
-                throw new BadRequestException("Insufficient balance")
+                throw new BadRequestException("Saldo tidak cukup")
             }
 
             // update balance sender
@@ -148,7 +148,7 @@ export class TransactionService {
             })
 
             if (!updateSender) {
-                throw new BadRequestException("Transfer failed")
+                throw new BadRequestException("Transfer gagal")
             }
 
             // update balance receiver

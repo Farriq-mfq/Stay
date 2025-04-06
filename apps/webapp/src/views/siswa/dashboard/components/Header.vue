@@ -43,7 +43,7 @@ const copyAccountNumber = async (accountNumber) => {
   <div class="relative px-2 md:px-3 pt-3" style="z-index: 99">
     <div class="m-2">
       <div class="glass-container border-round-2xl relative shadow-2 mt-8">
-        <div class="p-4 md:p-3" v-if="account">
+        <div class="glass-container-padding" v-if="account">
           <!-- User greeting -->
           <div class="flex align-items-center justify-content-between mb-3">
             <span class="text-base md:text-lg font-medium text-white name-text">
@@ -135,6 +135,10 @@ const copyAccountNumber = async (accountNumber) => {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-container-padding {
+  padding: 1rem 1.4rem 0 1.4rem;
 }
 
 .glass-card-light {

@@ -78,7 +78,7 @@ export class QrCodeSiswaModulesService {
                         ip: gateway.ip,
                         token: gateway.token,
                         ref: siswa.id,
-                    })
+                    }, 'siswa')
 
                     delete decrypt.data
                     return decrypt

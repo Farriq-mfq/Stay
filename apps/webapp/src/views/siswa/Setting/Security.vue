@@ -52,6 +52,11 @@ const handleSubmit = async () => {
                 detail: 'Password berhasil diubah',
                 life: 3000
             });
+            passwordForm.value = {
+                old_password: '',
+                new_password: '',
+                confirm_password: ''
+            }
         },
         onError: (error) => {
             const response = error.response;

@@ -137,9 +137,5 @@ export class PegawaiAccountModuleService {
             amount: transferDto.nominal,
             note: transferDto.note
         })
-
-
-
-        // return await this.transactionService.Transfer()
     }
 }

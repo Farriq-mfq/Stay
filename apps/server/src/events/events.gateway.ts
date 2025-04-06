@@ -112,21 +112,39 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
     async handleHttpScanned(data: ScanDto): Promise<void | presences | presences_pegawai | { message: string }> {
         return await this.gatewaysService.handleScanned(data, this.server)
     }
-    async handleHttpPresenceQr(data: Pick<ScanDto, 'ip' | 'token'> & { ref: number }): Promise<void | presences | presences_pegawai | { message: string }> {
+    async handleHttpPresenceQr(data: Pick<ScanDto, 'ip' | 'token'> & { ref: number }, type: 'siswa' | 'pegawai'): Promise<void | presences | presences_pegawai | { message: string }> {
         const gateway = await this.prismaService.client.gateways.findUniqueOrThrow({
             where: {
                 // ip: data.ip,
                 token: data.token
             },
+            include: {
+                presence_sessions: true
+            }
         })
 
         try {
-            const presence = await this.presenceService.createPresenceByQR(data, gateway, this.server);
-            this.server.emit(`PRESENCE_UPDATED_${presence.presence_sessionsId}`, presence)
-            return presence
+            if (gateway.presence_sessions.session_role_type === 'PEGAWAI' && type === 'pegawai') {
+                const presence = await this.presenceService.createPresenceByQR(data, gateway, this.server, type);
+                this.server.emit(`PRESENCE_UPDATED_${presence.presence_sessionsId}`, presence)
+                return presence
+            } else if (gateway.presence_sessions.session_role_type === 'SISWA' && type === 'siswa') {
+                const presence = await this.presenceService.createPresenceByQR(data, gateway, this.server, type);
+                this.server.emit(`PRESENCE_UPDATED_${presence.presence_sessionsId}`, presence)
+                return presence
+            } else {
+                if (gateway.presence_sessions.session_role_type === 'PEGAWAI') {
+                    throw new BadRequestException({ message: "QRCODE HANYA BISA DIGUNAKAN UNTUK PEGAWAI" })
+                } else {
+                    throw new BadRequestException({ message: "QRCODE HANYA BISA DIGUNAKAN UNTUK SISWA" })
+                }
+            }
+
         } catch (e) {
             if (e instanceof NotFoundException) {
                 throw new NotFoundException({ message: e.message })
+            } else if (e instanceof BadRequestException) {
+                throw new BadRequestException({ message: e.message })
             } else if (e instanceof Error) {
                 const errorPayload = JSON.parse(e.message) as any
                 if (errorPayload.error) {

@@ -1,8 +1,8 @@
 <script setup>
-import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { getCurrentInstance, inject, ref, watch } from "vue";
+import { getCurrentInstance, inject } from "vue";
 import { useRoute } from "vue-router";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -62,8 +62,8 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             'col-6': presence?.data?.session?.allow_twice,
             'col-12': !presence?.data?.session?.allow_twice
           }">
-            <div class="text-center p-3 border-round-lg bg-green-50">
-              <i class="pi pi-sign-in text-xl text-green-500 mb-2"></i>
+            <div class="text-center p-3 border-round-lg bg-green-300">
+              <i class="pi pi-sign-in text-xl text-green-700 mb-2"></i>
               <div class="text-sm font-medium">Masuk</div>
               <div class="text-sm font-bold">
                 {{
@@ -75,9 +75,9 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             </div>
           </div>
           <div class="col-6" v-if="presence?.data?.session?.allow_twice">
-            <div class="text-center p-3 border-round-lg bg-red-50">
+            <div class="text-center p-3 border-round-lg bg-red-300">
               <i class="pi pi-sign-out text-xl"
-                :class="presence?.data?.exit_time ? 'text-red-500' : 'text-yellow-500'"></i>
+                :class="presence?.data?.exit_time ? 'text-red-700' : 'text-yellow-700'"></i>
               <div class="text-sm font-medium">Keluar</div>
               <div class="text-sm font-bold">
                 {{

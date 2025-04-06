@@ -5,7 +5,7 @@ const drawer = useDrawer();
 
 <template>
   <div
-    class="app-nav p-card shadow-2 flex justify-content-evenly align-items-center"
+    class="app-nav surface-ground shadow-2 flex justify-content-evenly align-items-center"
   >
     <router-link
       :to="{ name: 'dashboard' }"

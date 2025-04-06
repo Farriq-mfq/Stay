@@ -1378,7 +1378,7 @@ export class PresenceService {
 
   }
 
-  async createPresenceByQR(scanned: Pick<ScanDto, 'ip' | 'token'> & { ref: number }, gateway: gateways, client: Server): Promise<presences | presences_pegawai> {
+  async createPresenceByQR(scanned: Pick<ScanDto, 'ip' | 'token'> & { ref: number }, gateway: gateways, client: Server, type: 'siswa' | 'pegawai'): Promise<presences | presences_pegawai> {
 
     if (!gateway.status) throw new NotFoundException("QRCODE TIDAK AKTIF");
     if (gateway.presence_sessionsId) {
@@ -1397,7 +1397,7 @@ export class PresenceService {
       }
 
       // presence siswa
-      if (session.session_role_type === 'SISWA') {
+      if (type === 'siswa' && session.session_role_type === 'SISWA') {
         const siswa = await this.prismaService.client.siswa.findUnique({
           where: {
             id: scanned.ref
@@ -1501,7 +1501,7 @@ export class PresenceService {
           })
         }
         // presence pegawai
-      } else if (session.session_role_type === 'PEGAWAI') {
+      } else if (type === 'pegawai' && session.session_role_type === 'PEGAWAI') {
         const pegawai = await this.prismaService.client.pegawai.findUnique({
           where: {
             id: scanned.ref

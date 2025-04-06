@@ -35,7 +35,7 @@ const handleScan = async (code) => {
         switch (data.data.action) {
           case "TRANSFER":
             drawer.openDrawer(
-              "TransferScanSiswa",
+              "TransferScanPegawai",
               "Transfer",
               () => {},
               data.data.data

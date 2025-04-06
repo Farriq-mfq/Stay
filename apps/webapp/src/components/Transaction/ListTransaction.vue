@@ -15,10 +15,10 @@ const { items } = defineProps({
 <template>
   <router-link v-for="item in items" :key="item.id"
     :to="{ name: 'transactions-detail', params: { transaction_id: item.id } }"
-    class="transaction-item flex flex-column sm:flex-row align-items-start sm:align-items-center py-3 px-3 sm:py-4 sm:px-4 border-round-xl surface-card hover:surface-hover no-underline text-color mb-2 sm:mb-3">
+    class="transaction-item flex flex-column sm:flex-row align-items-start sm:align-items-center py-3 px-3 sm:py-4 sm:px-4 border-round-xl surface-card hover:surface-hover no-underline text-color mb-3 sm:mb-3 border-1 surface-border">
     <div class="flex-1 flex align-items-center gap-3 sm:gap-4 w-full sm:w-auto">
       <div
-        class="transaction-icon h-3rem w-3rem border-1 border-round-2xl flex justify-content-center align-items-center"
+        class="transaction-icon surface-ground h-3rem w-3rem border-1 border-round-2xl flex justify-content-center align-items-center"
         :class="{
           'bg-red-50': item.type === 'TRANSFER',
           'bg-primary-50': item.type === 'DEPOSIT' || item.type === 'WITHDRAW' || item.type === 'PAYMENT',
@@ -38,7 +38,7 @@ const { items } = defineProps({
         </p>
         <div class="text-xs sm:text-sm flex align-items-center mt-1 sm:mt-2 gap-2">
           <div
-            class="status-badge flex justify-content-center align-items-center gap-1 sm:gap-2 px-2 py-1 border-round-lg"
+            class="status-badge surface-ground flex justify-content-center align-items-center gap-1 sm:gap-2 px-2 py-1 border-round-lg"
             :class="item.status === 'SUCCESS' ? 'bg-primary-50 text-primary' : item.status === 'PENDING' ? 'bg-yellow-50 text-yellow-500' : item.status === 'FAILED' ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-500'">
             <i class="pi pi-check-circle text-xs sm:text-sm" v-if="item.status === 'SUCCESS'"></i>
             <i class="pi pi-clock text-xs sm:text-sm" v-if="item.status === 'PENDING'"></i>

@@ -86,6 +86,51 @@ const routes = [
         }
     },
     {
+        path: "/account",
+        name: "setting-account",
+        component: () => import("@/views/pegawai/Setting/Account.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/security",
+        name: "setting-security",
+        component: () => import("@/views/pegawai/Setting/Security.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/about",
+        name: "about",
+        component: () => import("@/views/Common/About.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/contact",
+        name: "contact",
+        component: () => import("@/views/Common/Contact.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true
+        }
+    },
+    {
+        path: "/theme",
+        name: "theme",
+        component: () => import("@/views/pegawai/Setting/Theme.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login,
@@ -102,6 +147,14 @@ const routes = [
             title: "404"
         }
     },
+    {
+        path: '/unavailable',
+        name: 'unavailable',
+        component: () => import('@/views/Errors/Unvailable.vue'),
+        meta: {
+            layout: 'PegawaiMainLayout',
+        }
+    }
 ]
 
 export default routes;

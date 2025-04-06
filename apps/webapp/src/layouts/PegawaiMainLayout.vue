@@ -1,13 +1,12 @@
 <script setup>
-import "primevue/resources/themes/lara-light-blue/theme.css";
-
 import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
 import { inject, ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
-import TransferConfirmation from "../components/drawer/TransferConfirmation.vue";
+import TransferConfirmationPegawai from "../components/drawer/TransferConfirmationPegawai.vue";
+import TransferScanPegawai from "../components/drawer/TransferScanPegawai.vue";
 import { useToast } from "primevue/usetoast";
 const drawer = useDrawer();
 const app = useApp();
@@ -22,7 +21,8 @@ watch(
 
 const draweComponents = {
   default: DrawerContent,
-  TransferConfirmation,
+  TransferConfirmationPegawai,
+  TransferScanPegawai,
 };
 
 onMounted(() => {

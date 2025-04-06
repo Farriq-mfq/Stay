@@ -377,6 +377,9 @@ importers:
       unplugin-vue-components:
         specifier: ^0.27.4
         version: 0.27.5(rollup@2.79.2)(vue@3.5.13)
+      v-lazy-image:
+        specifier: ^2.1.1
+        version: 2.1.1
       vue:
         specifier: ^3.5.13
         version: 3.5.13

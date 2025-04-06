@@ -48,6 +48,8 @@ const { data: account, isLoading: accountLoading } = useQuery({
   <div class="p-3">
     <div
       class="w-full h-30rem border-round-2xl overflow-hidden relative shadow-1"
+      v-if="!accountLoading && account"
+
     >
       <div class="relative px-3 pt-3">
         <div class="flex justify-content-center mb-3">

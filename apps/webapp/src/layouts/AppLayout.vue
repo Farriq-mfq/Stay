@@ -1,13 +1,17 @@
 <script setup>
-// import { useScreenOrientation } from "@vueuse/core";
-import { useToast } from "primevue/usetoast";
-import { ref, onMounted, onUnmounted, watch, inject } from "vue";
+// import "primevue/resources/themes/lara-light-green/theme.css";
+// primevue/resources/themes/lara-light-green/theme.css
 
+// import { useScreenOrientation } from "@vueuse/core";
+import { useTheme } from "@/store/theme";
+import { useToast } from "primevue/usetoast";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 // const { lockOrientation } = useScreenOrientation();
 
 // lockOrientation("portrait-primary");
 
 const isOnline = ref(navigator.onLine);
+const theme = useTheme();
 
 const updateOnlineStatus = () => {
   isOnline.value = navigator.onLine;
@@ -16,6 +20,7 @@ const updateOnlineStatus = () => {
 onMounted(() => {
   window.addEventListener("online", updateOnlineStatus);
   window.addEventListener("offline", updateOnlineStatus);
+  console.log(theme.getCurrentTheme);
 });
 
 onUnmounted(() => {
@@ -40,15 +45,16 @@ watch(isOnline, (val) => {
     });
   }
 });
-const auth = inject("auth");
 
 </script>
 <template>
+  <link id="theme-link" rel="stylesheet" :href="`/themes/${theme.getCurrentTheme}/theme.css`" />
   <div class="surface-ground relative min-h-screen">
     <component :is="$route.meta.layoutComponent">
-      <slot v-if="auth.ready()"></slot>
+      <slot></slot>
     </component>
     <Toast position="top-center" class="px-3" style="z-index: 9999 !important" />
     <ConfirmDialog class="px-3"></ConfirmDialog>
+    <!-- <ThemeSwitcher /> -->
   </div>
 </template>

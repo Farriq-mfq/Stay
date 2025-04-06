@@ -1,6 +1,4 @@
 <script setup>
-import "primevue/resources/themes/lara-light-green/theme.css";
-
 import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
 import { ref, watch } from "vue";

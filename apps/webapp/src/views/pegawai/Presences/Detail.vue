@@ -1,8 +1,8 @@
 <script setup>
-import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { getCurrentInstance, inject, ref, watch } from "vue";
+import { getCurrentInstance, inject } from "vue";
 import { useRoute } from "vue-router";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -62,8 +62,8 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             'col-6': presence?.data?.exit_time,
             'col-12': !presence?.data?.exit_time
           }">
-            <div class="text-center p-3 border-round-lg bg-green-50">
-              <i class="pi pi-sign-in text-xl text-green-500 mb-2"></i>
+            <div class="text-center p-3 border-round-lg bg-green-300">
+              <i class="pi pi-sign-in text-xl text-green-700 mb-2"></i>
               <div class="text-sm font-medium">Waktu Masuk</div>
               <div class="text-lg font-bold">
                 {{
@@ -75,9 +75,9 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             </div>
           </div>
           <div class="col-6" v-if="presence?.data?.exit_time">
-            <div class="text-center p-3 border-round-lg bg-red-50">
+            <div class="text-center p-3 border-round-lg bg-red-300">
               <i class="pi pi-sign-out text-xl"
-                :class="presence?.data?.exit_time ? 'text-red-500' : 'text-yellow-500'"></i>
+                :class="presence?.data?.exit_time ? 'text-red-700' : 'text-yellow-700'"></i>
               <div class="text-sm font-medium">Waktu Keluar</div>
               <div class="text-lg font-bold">
                 {{
@@ -131,6 +131,55 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             </div>
             <span class="text-sm">
               {{ presence?.data?.method }}
+            </span>
+          </div>
+        </div>
+        <div class="flex align-items-center gap-3 mt-5 mb-3" v-if="presence?.data?.meeting_session">
+          <i class="pi pi-info-circle text-2xl text-primary"></i>
+          <div>
+            <h3 class="m-0 text-lg font-semibold">Informasi Rapat</h3>
+            <p class="m-0 text-sm text-500">Data lengkap rapat</p>
+          </div>
+        </div>
+
+        <div class="flex flex-column gap-3" v-if="presence?.data?.meeting_session">
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-pencil text-primary"></i>
+              <span class="font-medium">Nama Rapat</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.meeting_session?.name || '-' }}
+            </span>
+          </div>
+
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-calendar text-primary"></i>
+              <span class="font-medium">Tanggal Rapat</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.meeting_session?.date ? format(new Date(presence?.data?.meeting_session?.date), "dd MMMM yyyy", { locale: id }) : '-' }}
+            </span>
+          </div>
+
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-clock text-primary"></i>
+              <span class="font-medium">Waktu Rapat</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.meeting_session?.time }} 
+            </span>
+          </div>
+
+          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-map-marker text-primary"></i>
+              <span class="font-medium">Lokasi Rapat</span>
+            </div>
+            <span class="text-sm">
+              {{ presence?.data?.meeting_session?.location || '-' }}
             </span>
           </div>
         </div>
