@@ -2,9 +2,13 @@ import { IsNotEmpty, IsString } from "class-validator"
 
 export class AuthSiswaDto {
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Username tidak boleh kosong"
+    })
     username: string
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty({
+        message: "Password tidak boleh kosong"
+    })
     password: string
 }
