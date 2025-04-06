@@ -81,7 +81,7 @@ watch(filter, (val) => {
   <div>
     <AppHeader />
     <div class="flex flex-column mt-8">
-      <div class="p-3 flex align-items-center gap-3 sticky bg-white shadow-1" style="top: 5rem">
+      <div class="p-3 flex align-items-center gap-3 sticky surface-ground shadow-1" style="top: 5rem;z-index: 1000;">
         <InputText class="w-full flex-1" v-model="filter" placeholder="Cari Presensi" />
         <Button :disabled="filter == null || filter == '' || loading" :loading="loading" @click.prevent="handleSearch"
           icon="pi pi-search" />
