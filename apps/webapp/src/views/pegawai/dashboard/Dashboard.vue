@@ -66,7 +66,7 @@ import LatestTransaction from "./components/LatestTransaction.vue";
         </div>
       </div>
     </div>
-    <div class="grid grid-nogutter gap-4">
+    <div class="flex flex-column gap-4 p-2">
       <LatestTransaction />
       <LatestPresence />
     </div>

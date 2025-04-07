@@ -8,6 +8,7 @@ import { useToast } from "primevue/usetoast";
 import TransferConfirmationSiswa from "../components/drawer/TransferConfirmationSiswa.vue";
 import DrawerContentSiswa from "../components/DrawerContentSiswa.vue";
 import TransferScanSiswa from "../components/drawer/TransferScanSiswa.vue";
+import PinConfirmationSiswa from "../components/Pin/PinConfirmationSiswa.vue";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
@@ -40,26 +41,16 @@ onUnmounted(() => {
       <Transition>
         <slot></slot>
       </Transition>
+      <PinConfirmationSiswa />
     </div>
     <AppNav v-if="app.getShowAppNav" />
-    <Sidebar
-      v-model:visible="isVisible"
-      :baseZIndex="99999"
-      blockScroll
-      position="bottom"
-      style="
+    <Sidebar v-model:visible="isVisible" :baseZIndex="99999" blockScroll position="bottom" style="
         max-width: 414px;
         margin: 0 auto;
         border-radius: 1rem 1rem 0 0;
         height: auto;
-      "
-      :header="drawer.getTitle"
-      @hide="drawer.closeDrawer()"
-    >
-      <component
-        :is="draweComponents[drawer.getComponentName]"
-        v-if="drawer.getComponentName"
-      ></component>
+      " :header="drawer.getTitle" @hide="drawer.closeDrawer()">
+      <component :is="draweComponents[drawer.getComponentName]" v-if="drawer.getComponentName"></component>
     </Sidebar>
   </div>
 </template>
@@ -81,6 +72,7 @@ onUnmounted(() => {
   min-height: 12rem;
   background: #000;
 }
+
 .main-app {
   padding-bottom: 7rem;
 }

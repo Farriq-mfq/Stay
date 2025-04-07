@@ -147,6 +147,15 @@ const routes = [
             layout: 'SiswaMainLayout',
             auth: true
         }
+    },  
+    {
+        path: '/setting/pin',
+        name: 'setting-pin',
+        component: () => import('@/views/siswa/Setting/Pin.vue'),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true
+        }
     },
     {
         path: '/:pathNotFound(.*)*',

@@ -70,13 +70,14 @@ const handleFileUpload = async (event) => {
                         </label>
                         <input type="file" id="profile-upload" class="hidden" accept="image/*"
                             @change="handleFileUpload" />
-                        </div>
-                        <span class="text-xs text-500 mt-1 text-center text-primary">Foto Profile Maksimal 1.5 MB</span>
+                    </div>
+                    <span class="text-xs text-500 mt-1 text-center text-primary">Foto Profile Maksimal 1.5 MB</span>
                 </div>
 
                 <div class="flex flex-column gap-2">
                     <h3 class="text-lg m-0 text-color px-1">Informasi Akun</h3>
-                    <span class="text-xs text-500 text-muted mb-2 px-1">Update Profile Hanya Bisa Dilakukan Oleh Admin, Kecuali Foto Profile</span>
+                    <span class="text-xs text-500 text-muted mb-2 px-1">Update Profile Hanya Bisa Dilakukan Oleh Admin,
+                        Kecuali Foto Profile</span>
                     <div class="p-card shadow-1 flex flex-column justify-content-center p-3 border-round-xl">
                         <div class="flex flex-column gap-3">
                             <div class="flex flex-column gap-1">
@@ -98,6 +99,11 @@ const handleFileUpload = async (event) => {
                             <div class="flex flex-column gap-1">
                                 <span class="text-sm text-500">Rombel</span>
                                 <span class="text-lg text-color">{{ account.rombel }}</span>
+                            </div>
+                            <div class="flex flex-column gap-1">
+                                <span class="text-sm text-500">Status Kartu RFID</span>
+                                <Badge :severity="account.rfid_token ? 'success' : 'danger'" class="w-fit"
+                                    :value="account.rfid_token ? 'Aktif' : 'Tidak Aktif'" />
                             </div>
                         </div>
                     </div>

@@ -6,8 +6,9 @@ import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { TransactionService } from "src/transaction/transaction.service";
 import { formattedErrors } from "src/utils/error";
-import { SearchAccountSiswaDto, TransferAccountSiswaDto } from "../dto/account.dto";
+import { ConfirmPinSiswaDto, RegisterPinSiswaDto, SearchAccountSiswaDto, TransferAccountSiswaDto } from "../dto/account.dto";
 import { ROLE_CODE } from "src/config";
+import { hash, verify } from "argon2";
 
 @Injectable()
 export class SiswaAccountModuleService {
@@ -141,8 +142,53 @@ export class SiswaAccountModuleService {
             amount: transferDto.nominal,
             note: transferDto.note
         })
+    }
+
+    async confirmPin(user: any, confirmPinDto: ConfirmPinSiswaDto) {
+        if (!user) throw new UnauthorizedException()
+
+        const account = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: parseInt(user.sub),
+                accountableType: AccountableType.SISWA
+            },
+        })
+
+        if (!account) throw new BadRequestException("Account not found")
+
+        if (!await verify(account.pin, confirmPinDto.pin)) throw new BadRequestException("PIN salah")
+
+        return true
+    }
 
 
+    async registerPin(user: any, registerPinDto: RegisterPinSiswaDto) {
+        if (!user) throw new UnauthorizedException()
+        const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+            where: {
+                id: parseInt(user.sub)
+            }
+        })
 
+        if (!await verify(siswa.password, registerPinDto.password)) throw new BadRequestException("Password salah")
+
+        const account = await this.prismaService.client.account.findFirst({
+            where: {
+                accountableId: parseInt(user.sub),
+                accountableType: AccountableType.SISWA
+            },
+
+        })
+
+        if (!account) throw new BadRequestException("Account not found")
+
+        return await this.prismaService.client.account.update({
+            where: {
+                id: account.id
+            },
+            data: {
+                pin: await hash(registerPinDto.pin)
+            }
+        })
     }
 }

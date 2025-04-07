@@ -1,4 +1,4 @@
-<script setup>
+  <script setup>
 import Header from "./components/Header.vue";
 import LatestPresence from "./components/LatestPresence.vue";
 import LatestTransaction from "./components/LatestTransaction.vue";
@@ -66,7 +66,7 @@ import LatestTransaction from "./components/LatestTransaction.vue";
         </div>
       </div>
     </div>
-    <div class="grid grid-nogutter gap-4">
+    <div class="flex flex-column gap-4 p-2">
       <LatestTransaction />
       <LatestPresence />
     </div>

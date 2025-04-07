@@ -17,7 +17,7 @@ const showToast = () => {
   <div>
     <AppHeaderBack title="Topup" />
     <div class="mt-7 p-3">
-      <p>Hubungi tim IT SMKN 1 Pekalongan</p>
+      <p>Hubungi TIM IT SMKN 1 Pekalongan</p>
       <Button
         @click="showToast"
         label="Whatsapp"

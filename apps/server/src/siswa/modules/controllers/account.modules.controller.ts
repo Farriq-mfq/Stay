@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { AccessTokenSiswaGuard } from "src/siswa/guards/accessTokenSiswa.guard";
-import { TransferAccountSiswaDto } from "../dto/account.dto";
+import { ConfirmPinSiswaDto, RegisterPinSiswaDto, TransferAccountSiswaDto } from "../dto/account.dto";
 import { SiswaAccountModuleService } from "../services/account.modules.service";
 
 @Controller('/siswa/modules/account')
@@ -37,5 +37,21 @@ export class SiswaAccountModuleController {
         @Req() req: Request,
         @Body() transferDto: TransferAccountSiswaDto) {
         return await this.siswaAccountModuleService.transfer(req.user, transferDto)
+    }
+
+    @Post('/confirm-pin')
+    async confirmPin(
+        @Req() req: Request,
+        @Body() confirmPinDto: ConfirmPinSiswaDto
+    ) {
+        return await this.siswaAccountModuleService.confirmPin(req.user, confirmPinDto)
+    }
+
+    @Post('/register-pin')
+    async registerPin(
+        @Req() req: Request,
+        @Body() registerPinDto: RegisterPinSiswaDto
+    ) {
+        return await this.siswaAccountModuleService.registerPin(req.user, registerPinDto)
     }
 }   

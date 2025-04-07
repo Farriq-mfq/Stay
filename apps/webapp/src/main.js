@@ -14,10 +14,13 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import { router } from './routes';
 import { VueQueryPlugin } from '@tanstack/vue-query';
+import { driver } from "driver.js";
 
 import '@/assets/style.css';
 import 'primeicons/primeicons.css';
 import '/node_modules/primeflex/primeflex.css';
+import "driver.js/dist/driver.css";
+
 import auth from './plugins/auth';
 import http from './plugins/http';
 
@@ -26,6 +29,7 @@ import http from './plugins/http';
 const app = createApp(App);
 const pinia = createPinia()
 
+// app.config.globalProperties.$driver = driver; // planning to use driver.js
 
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);

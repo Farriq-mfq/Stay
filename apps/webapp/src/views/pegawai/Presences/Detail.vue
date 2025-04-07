@@ -31,7 +31,7 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
       <div class="bg-primary h-16rem w-full flex justify-content-center align-items-center flex-column">
         <div class="absolute top-0 left-0 w-full h-full bg-primary-800 opacity-20"></div>
         <div class="relative text-center">
-          <h2 class="m-0 text-4xl font-bold text-white">
+          <h2 class="m-0 text-2xl font-bold text-white">
             {{ presence?.data?.session?.name }}
           </h2>
           <span class="text-white-alpha-90 mt-2 block">

@@ -6,6 +6,7 @@ import { getCurrentInstance, inject, ref, watch } from "vue";
 import { useMutation } from "@tanstack/vue-query";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import { usePinStore } from "@/store/pin";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -30,58 +31,126 @@ const {
 });
 
 const toast = useToast();
+const pinStore = usePinStore()
+const auth = inject("auth")
+const myAccount = computed(() => auth.user().account)
 
 const handleTransfer = async () => {
-  await transferMutate(
-    {
-      account_number: account.value.accountNumber,
-      nominal: sending.value.nominal,
-      note: sending.value.note,
-    },
-    {
-      onSuccess: (response) => {
+  if (myAccount.value.pin) {
+    pinStore.show({
+      onSuccess: async () => {
+        await transferMutate(
+          {
+            account_number: account.value.accountNumber,
+            nominal: sending.value.nominal,
+            note: sending.value.note,
+          },
+          {
+            onSuccess: (response) => {
+              toast.add({
+                severity: "success",
+                summary: "Success",
+                detail: "Transfer berhasil",
+                life: 3000,
+              });
+
+              router.push({
+                name: "transactions-detail",
+                params: { transaction_id: response.data.data.id },
+              });
+            },
+            onError: (err) => {
+              if (!err.response) return;
+              const status = err.response.status;
+              if (status === 400) {
+                toast.add({
+                  severity: "error",
+                  summary: "Error",
+                  detail: err.response.data.message,
+                  life: 3000,
+                });
+              } else if (status === 404) {
+                toast.add({
+                  severity: "error",
+                  summary: "Error",
+                  detail: err.response.data.message,
+                  life: 3000,
+                });
+              } else {
+                toast.add({
+                  severity: "error",
+                  summary: "Error",
+                  detail: "Terjadi kendala",
+                  life: 3000,
+                });
+              }
+              drawer.closeDrawer();
+            },
+          }
+        );
+        // drawer.callback();
+      },
+      onError: () => {
         toast.add({
-          severity: "success",
-          summary: "Success",
-          detail: "Transfer berhasil",
+          severity: "error",
+          summary: "Error",
+          detail: "Pin salah",
           life: 3000,
         });
+      }
+    })
+  } else {
+    await transferMutate(
+      {
+        account_number: account.value.accountNumber,
+        nominal: sending.value.nominal,
+        note: sending.value.note,
+      },
+      {
+        onSuccess: (response) => {
+          toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "Transfer berhasil",
+            life: 3000,
+          });
 
-        router.push({
-          name: "transactions-detail",
-          params: { transaction_id: response.data.data.id },
-        });
-      },
-      onError: (err) => {
-        if (!err.response) return;
-        const status = err.response.status;
-        if (status === 400) {
-          toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.response.data.message,
-            life: 3000,
+          router.push({
+            name: "transactions-detail",
+            params: { transaction_id: response.data.data.id },
           });
-        } else if (status === 404) {
-          toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.response.data.message,
-            life: 3000,
-          });
-        } else {
-          toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "Terjadi kendala",
-            life: 3000,
-          });
-        }
-        drawer.closeDrawer();
-      },
-    }
-  );
-  // drawer.callback();
+        },
+        onError: (err) => {
+          if (!err.response) return;
+          const status = err.response.status;
+          if (status === 400) {
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: err.response.data.message,
+              life: 3000,
+            });
+          } else if (status === 404) {
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: err.response.data.message,
+              life: 3000,
+            });
+          } else {
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: "Terjadi kendala",
+              life: 3000,
+            });
+          }
+          drawer.closeDrawer();
+        },
+      }
+    );
+    // drawer.callback();
+  }
 };
 
 watch(status, () => {
@@ -119,19 +188,12 @@ watch(status, () => {
       </div>
       <div class="flex justify-content-between align-items-center px-2">
         <span class="m-0 font-semibold text-sm">Catatan</span>
-        <span
-          class="text-xs white-space-nowrap overflow-hidden text-overflow-ellipsis"
-        >
+        <span class="text-xs white-space-nowrap overflow-hidden text-overflow-ellipsis">
           {{ sending.note ?? "-" }}
         </span>
       </div>
     </div>
-    <Button
-      @click="handleTransfer"
-      block
-      class="w-full"
-      :label="`Kirim ${rupiahFormat(sending.nominal)}`"
-    />
+    <Button @click="handleTransfer" block class="w-full" :label="`Kirim ${rupiahFormat(sending.nominal)}`" />
   </div>
   <div class="flex flex-column gap-3" v-if="status === 'pending'">
     <ProgressSpinner />

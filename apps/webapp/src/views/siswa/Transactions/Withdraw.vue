@@ -3,7 +3,8 @@ import { useInfiniteQuery, useMutation } from "@tanstack/vue-query";
 import { useQRCode } from "@vueuse/integrations/useQRCode";
 import { useToast } from "primevue/usetoast";
 import { rupiahFormat } from "@/utils/money";
-import { getCurrentInstance, inject, ref, watch } from "vue";
+import { usePinStore } from "@/store/pin";
+import { computed, getCurrentInstance, inject, ref, watch } from "vue";
 const { proxy } = getCurrentInstance()
 
 const axios = proxy.axios
@@ -11,6 +12,7 @@ const toast = useToast();
 const withdrawAmount = ref('');
 const withdrawCode = ref("");
 const createWithdrawData = ref(null)
+const auth = inject('auth')
 
 const copy = async (text) => {
   try {
@@ -21,8 +23,27 @@ const copy = async (text) => {
   }
 };
 
+const pinStore = usePinStore()
+const myAccount = computed(() => auth.user().account)
 const handleWithdraw = async () => {
-  await createWithdraw({ amount: withdrawAmount.value })
+  if (withdrawAmount.value < 10000) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Minimal penarikan Rp 10.000', life: 3000 });
+    return
+  } else {
+    if (myAccount.value.pin) {
+      pinStore.show({
+        onSuccess: async () => {
+          await createWithdraw({ amount: withdrawAmount.value })
+        },
+        onError: () => {
+          toast.add({ severity: 'error', summary: 'Error', detail: 'Pin salah', life: 3000 });
+        }
+      })
+    } else {
+      await createWithdraw({ amount: withdrawAmount.value })
+    }
+
+  }
 };
 
 const qrcode = useQRCode(withdrawCode);
@@ -96,7 +117,6 @@ const getStatusText = (status) => {
 }
 
 const filter = ref(null);
-const auth = inject('auth')
 const getWithdrawHistory = async ({ pageParam }) => {
   const queries = {
     ...(pageParam && { after: parseInt(pageParam) }),
@@ -176,7 +196,8 @@ const handleTransactionDetail = (item) => {
         <div class="field">
           <label for="amount" class="block text-sm font-medium mb-2">Jumlah Penarikan</label>
           <InputNumber id="amount" v-model="withdrawAmount" mode="currency" currency="IDR" locale="id-ID" class="w-full"
-            placeholder="Masukkan jumlah penarikan" :invalid="errorCreateWithdraw && errorCreateWithdraw.amount || errorCreateWithdrawMessage" />
+            placeholder="Masukkan jumlah penarikan"
+            :invalid="errorCreateWithdraw && errorCreateWithdraw.amount || errorCreateWithdrawMessage" />
           <p class="text-red-500 text-sm" v-if="errorCreateWithdraw && errorCreateWithdraw.amount">{{
             errorCreateWithdraw && errorCreateWithdraw.amount[0] }}</p>
           <p class="text-red-500 text-sm" v-if="errorCreateWithdrawMessage">

@@ -12,6 +12,7 @@ import { onMounted, onUnmounted, ref, watch } from "vue";
 
 const isOnline = ref(navigator.onLine);
 const theme = useTheme();
+const isJavaScriptEnabled = ref(true);
 
 const updateOnlineStatus = () => {
   isOnline.value = navigator.onLine;
@@ -21,6 +22,8 @@ onMounted(() => {
   window.addEventListener("online", updateOnlineStatus);
   window.addEventListener("offline", updateOnlineStatus);
   console.log(theme.getCurrentTheme);
+  // Check if JavaScript is enabled
+  isJavaScriptEnabled.value = true;
 });
 
 onUnmounted(() => {
@@ -48,8 +51,16 @@ watch(isOnline, (val) => {
 
 </script>
 <template>
-  <link id="theme-link" rel="stylesheet" :href="`/themes/${theme.getCurrentTheme}/theme.css`" />
-  <div class="surface-ground relative min-h-screen">
+  <noscript>
+    <div class="surface-ground flex align-items-center justify-content-center min-h-screen">
+      <div class="text-center p-4">
+        <h1 class="text-2xl font-bold mb-2">JavaScript Required</h1>
+        <p>Please enable JavaScript to use this application.</p>
+      </div>
+    </div>
+  </noscript>
+  <div v-if="isJavaScriptEnabled" class="surface-ground relative min-h-screen">
+    <link id="theme-link" rel="stylesheet" :href="`/themes/${theme.getCurrentTheme}/theme.css`" />
     <component :is="$route.meta.layoutComponent">
       <slot></slot>
     </component>

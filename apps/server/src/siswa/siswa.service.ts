@@ -11,6 +11,7 @@ import { CloudinaryService } from 'src/services/cloudinary.service';
 import { CreateSiswaDto, ImportSiswaDto, UpdateRombelDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
+import { AccountableType } from '@prisma/client';
 
 @Injectable()
 export class SiswaService {
@@ -121,11 +122,18 @@ export class SiswaService {
   }
 
   async findOne(id: number) {
-    return await this.prismaService.client.siswa.findUniqueOrThrow({
+    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
       where: {
         id
       }
     });
+    const account = await this.prismaService.client.account.findFirst({
+      where: {
+        accountableId: siswa.id,
+        accountableType: AccountableType.SISWA
+      }
+    })
+    return { ...siswa, account }
   }
 
   async update(id: number, updateSiswaDto: UpdateSiswaDto, file: Express.Multer.File | undefined) {
