@@ -192,10 +192,8 @@ export class GatewaysService {
           try {
             const presence = await this.presenceService.createPresenceByScanned(data, gateway, client)
 
-            if (presence) {
-              client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
-              return presence;
-            }
+            client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
+            return presence;
 
           } catch (e) {
             if (e instanceof NotFoundException) {
@@ -204,7 +202,7 @@ export class GatewaysService {
                 message: e.message
               }
             } else if (e instanceof Error) {
-              console.log(e)
+              Logger.error(e)
               const errorPayload = JSON.parse(e.message) as any
               // check error object 
               if (errorPayload.error) {
@@ -216,6 +214,7 @@ export class GatewaysService {
               }
 
             } else {
+              Logger.error(e)
               throw new InternalServerErrorException('Internal server error')
             }
           }
