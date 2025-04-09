@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as CryptoJS from 'crypto-js';
 import { QrAction } from '../config/qr-actions';
@@ -14,6 +14,7 @@ export class QRCodeService {
         qrActions: QrAction
     ) {
         const encryptData = JSON.stringify({ data, action: qrActions, timestamp: new Date().getTime() })
+        Logger.log(encryptData, "encryptData")
         return CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(encryptData), this.configService.get("APP_KEY")).toString()
     }
 

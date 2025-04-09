@@ -21,7 +21,6 @@ const updateOnlineStatus = () => {
 onMounted(() => {
   window.addEventListener("online", updateOnlineStatus);
   window.addEventListener("offline", updateOnlineStatus);
-  console.log(theme.getCurrentTheme);
   // Check if JavaScript is enabled
   isJavaScriptEnabled.value = true;
 });

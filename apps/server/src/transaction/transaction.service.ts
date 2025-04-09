@@ -286,6 +286,7 @@ export class TransactionService {
                 fromAccountType: account.accountableType
             },
             data: {
+                title: "Penarikan berhasil",
                 toAccountId: toAccount.id,
                 toAccountType: toAccount.accountableType,
                 status: "SUCCESS",

@@ -19,6 +19,7 @@ const getDetailPresence = async () => {
 const { data: presence, isLoading: presenceLoading } = useQuery({
   queryKey: [`${auth.user().id}-detail-presence`, route.params.id],
   queryFn: getDetailPresence,
+  enabled: !!route.params.id
 });
 </script>
 
@@ -27,7 +28,7 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
     <AppHeaderBack title="Detail Presensi" />
 
     <!-- Header Section -->
-    <div class="relative">
+    <div class="relative" v-if="!presenceLoading">
       <div class="bg-primary h-16rem w-full flex justify-content-center align-items-center flex-column">
         <div class="absolute top-0 left-0 w-full h-full bg-primary-800 opacity-20"></div>
         <div class="relative text-center">
@@ -46,7 +47,7 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
     </div>
 
     <!-- Main Content -->
-    <div class="px-4 absolute left-0 right-0" style="margin-top: -4rem;">
+    <div class="px-4 absolute left-0 right-0" style="margin-top: -4rem;" v-if="!presenceLoading">
       <!-- Status Card -->
       <div class="surface-card p-4 border-round-xl shadow-2 mb-4">
         <div class="flex align-items-center gap-3 mb-3">

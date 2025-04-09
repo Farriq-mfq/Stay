@@ -14,7 +14,6 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import { router } from './routes';
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import { driver } from "driver.js";
 
 import '@/assets/style.css';
 import 'primeicons/primeicons.css';
@@ -48,3 +47,18 @@ app.use(auth);
 app.use(pinia)
 app.use(VueQueryPlugin)
 app.mount('#app');
+
+
+// check if production
+const isProduction = import.meta.env.PROD;
+// clear all console.log if production, but preserve error messages
+if (isProduction) {
+    const originalConsoleLog = console.log;
+    console.log = () => { };
+    
+    // Ensure error messages are still shown
+    if (!console.error) {
+        console.error = originalConsoleLog;
+    }
+}
+

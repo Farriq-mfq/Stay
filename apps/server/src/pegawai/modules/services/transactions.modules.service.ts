@@ -115,6 +115,7 @@ export class TransactionPegawaiModuleService {
 
             const transaction = await prisma.transactions.create({
                 data: {
+                    title: "Menunggu Verifikasi Admin",
                     amount: body.amount,
                     code: `WD-${account.id}-${format(new Date(), 'yyyyMMddHHmmss')}`,
                     flow: 'DOWN',

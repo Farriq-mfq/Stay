@@ -36,25 +36,23 @@ const copyToClipboard = (text) => {
 <template>
   <div class="min-h-screen bg-surface-ground">
     <AppHeaderBack title="Detail Transaksi" :bg="false" />
-    
+
     <!-- Header Section -->
-    <div
-      class="bg-primary w-full flex justify-content-center align-items-center flex-column position-relative"
-      :class="{ 'h-20rem': !transactionLoading, 'h-15rem': transactionLoading }"
-    >
+    <div class="bg-primary w-full flex justify-content-center align-items-center flex-column position-relative"
+      :class="{ 'h-20rem': !transactionLoading, 'h-15rem': transactionLoading }">
       <div
+        v-if="!transactionLoading"
         class="text-white w-6rem h-6rem flex justify-content-center align-items-center border-circle border-2 bg-primary-700 shadow-4"
-        :class="{ 'scalein animation-duration-500': !transactionLoading }"
-      >
+        :class="{ 'scalein animation-duration-500': !transactionLoading }">
         <i class="pi pi-arrow-up-right text-3xl" v-if="transaction.data.type === 'DEPOSIT'"></i>
         <i class="pi pi-money-bill text-3xl" v-if="transaction.data.type === 'WITHDRAW'"></i>
         <i class="pi pi-arrow-down-right text-3xl" v-if="transaction.data.type === 'TRANSFER'"></i>
         <i class="pi pi-credit-card text-3xl" v-if="transaction.data.type === 'PAYMENT'"></i>
       </div>
-      <h3 class="m-0 text-2xl mt-3 text-white font-medium title-text">
+      <h3 class="m-0 text-2xl mt-3 text-white font-medium title-text" v-if="!transactionLoading">
         {{ transaction.data.title }}
       </h3>
-      <span class="text-sm mt-2 text-white-alpha-90">
+      <span class="text-sm mt-2 text-white-alpha-90" v-if="!transactionLoading">
         {{
           format(new Date(transaction.data.createdAt), "dd MMMM yyyy", {
             locale: id,
@@ -64,30 +62,21 @@ const copyToClipboard = (text) => {
     </div>
 
     <!-- Loading State -->
-    <div
-      v-if="transactionLoading"
-      class="flex justify-content-center align-items-center p-5"
-    >
+    <div v-if="transactionLoading" class="flex justify-content-center align-items-center p-5">
       <ProgressSpinner strokeWidth="3" />
     </div>
 
     <!-- Content Section -->
-    <div
-      class="p-card h-auto shadow-2 card-detail-transaction border-round-lg mx-3"
-      v-if="!transactionLoading"
-    >
+    <div class="p-card h-auto shadow-2 card-detail-transaction border-round-lg mx-3" v-if="!transactionLoading">
       <div class="flex flex-column gap-4 p-4">
         <!-- Transaction Type Badge -->
         <div class="flex justify-content-center">
-          <div 
-            class="px-3 py-2 border-round-lg text-white font-medium"
-            :class="{
-              'bg-green-500': transaction.data.type === 'DEPOSIT',
-              'bg-red-500': transaction.data.type === 'WITHDRAW',
-              'bg-blue-500': transaction.data.type === 'TRANSFER',
-              'bg-purple-500': transaction.data.type === 'PAYMENT'
-            }"
-          >
+          <div class="px-3 py-2 border-round-lg text-white font-medium" :class="{
+            'bg-green-500': transaction.data.type === 'DEPOSIT',
+            'bg-red-500': transaction.data.type === 'WITHDRAW',
+            'bg-blue-500': transaction.data.type === 'TRANSFER',
+            'bg-purple-500': transaction.data.type === 'PAYMENT'
+          }">
             {{ transaction.data.type }}
           </div>
         </div>
@@ -101,18 +90,18 @@ const copyToClipboard = (text) => {
         </div>
 
         <!-- Amount Section -->
-        <div
-          class="flex justify-content-between align-items-center bg-primary p-4 border-round-lg"
-        >
+        <div class="flex justify-content-between align-items-center bg-primary p-4 border-round-lg">
           <div class="flex flex-column">
             <h4 class="m-0 font-semibold text-white">
               {{ transaction.data.type === 'WITHDRAW' ? 'Total Penarikan' : 'Total Transaksi' }}
             </h4>
-            <span class="text-xs text-white-alpha-90" v-if="transaction.data.type != 'WITHDRAW'">Jumlah yang {{ transaction.data.flow === 'UP' ? 'dikirim' : 'diterima' }}</span>
+            <span class="text-xs text-white-alpha-90" v-if="transaction.data.type != 'WITHDRAW'">Jumlah yang {{
+              transaction.data.flow === 'UP' ? 'dikirim' : 'diterima' }}</span>
           </div>
-          <span class="text-xl font-bold text-white">{{
-            rupiahFormat(transaction.data.amount)
-          }}</span>
+          <span class="text-xl font-bold text-white" v-if="!transactionLoading">
+            {{
+              rupiahFormat(transaction.data.amount)
+              }}</span>
         </div>
 
         <Divider class="m-0" />
@@ -165,14 +154,11 @@ const copyToClipboard = (text) => {
           <div class="surface-card p-3 border-round-lg">
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Status</span>
-              <span 
-                class="text-sm px-2 py-1 border-round"
-                :class="{
-                  'bg-green-100 text-green-700': transaction.data.status === 'SUCCESS',
-                  'bg-yellow-100 text-yellow-700': transaction.data.status === 'PENDING',
-                  'bg-red-100 text-red-700': transaction.data.status === 'FAILED'
-                }"
-              >
+              <span class="text-sm px-2 py-1 border-round" :class="{
+                'bg-green-100 text-green-700': transaction.data.status === 'SUCCESS',
+                'bg-yellow-100 text-yellow-700': transaction.data.status === 'PENDING',
+                'bg-red-100 text-red-700': transaction.data.status === 'FAILED'
+              }">
                 {{ transaction.data.status }}
               </span>
             </div>
@@ -208,12 +194,8 @@ const copyToClipboard = (text) => {
           <div class="surface-card p-3 border-round-lg">
             <div class="flex justify-content-between align-items-center">
               <span class="text-sm font-semibold">{{ transaction.data.code }}</span>
-              <Button
-                icon="pi pi-copy"
-                class="p-button-text p-button-rounded p-button-sm"
-                @click="copyToClipboard(transaction.data.code)"
-                v-tooltip.top="'Salin kode transaksi'"
-              />
+              <Button icon="pi pi-copy" class="p-button-text p-button-rounded p-button-sm"
+                @click="copyToClipboard(transaction.data.code)" v-tooltip.top="'Salin kode transaksi'" />
             </div>
           </div>
         </div>
@@ -269,6 +251,7 @@ const copyToClipboard = (text) => {
   white-space: nowrap;
   max-width: 90%;
 }
+
 .note-text {
   white-space: pre-wrap;
   word-break: break-word;
