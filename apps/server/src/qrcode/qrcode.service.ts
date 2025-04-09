@@ -14,7 +14,7 @@ export class QRCodeService {
         qrActions: QrAction
     ) {
         const encryptData = JSON.stringify({ data, action: qrActions, timestamp: new Date().getTime() })
-        return CryptoJS.AES.encrypt(encryptData, this.configService.get("APP_KEY")).toString()
+        return CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(encryptData), this.configService.get("APP_KEY")).toString()
     }
 
     async decryptQrCode<T>(qrCode): Promise<QrCodeDecodeType<T>> {
