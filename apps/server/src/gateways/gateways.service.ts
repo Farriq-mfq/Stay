@@ -192,8 +192,10 @@ export class GatewaysService {
           try {
             const presence = await this.presenceService.createPresenceByScanned(data, gateway, client)
 
-            client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
-            return presence;
+            if (presence) {
+              client.emit(`PRESENCE_UPDATED_${gateway.presence_sessionsId}`, presence)
+              return presence;
+            }
 
           } catch (e) {
             if (e instanceof NotFoundException) {
