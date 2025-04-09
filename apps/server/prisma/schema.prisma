@@ -138,7 +138,7 @@ enum PresenceMethod {
 }
 
 model presences {
-  id                  String             @id @default(uuid())
+  id                  Int                @id @default(autoincrement())
   siswa               siswa              @relation(fields: [siswaId], references: [id], onDelete: Cascade)
   siswaId             Int
   gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
@@ -155,7 +155,7 @@ model presences {
 }
 
 model presences_pegawai {
-  id                  String             @id @default(uuid())
+  id                  Int                @id @default(autoincrement())
   pegawai             pegawai            @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
   pegawaiId           Int
   gateway             gateways?          @relation(fields: [gatewaysId], references: [id], onDelete: SetNull)
