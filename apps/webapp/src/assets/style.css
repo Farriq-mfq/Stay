@@ -5,4 +5,5 @@ body {
   overflow-y: auto;
   padding: 0 !important;
   overflow-x: hidden !important;
+  /* overscroll-behavior: none; */
 }

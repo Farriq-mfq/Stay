@@ -17,10 +17,10 @@ export const useApp = defineStore("app", {
         },
         hideRoleDialog() {
             this.showRoleDialog = false
-        }
+        },
     },
     getters: {
         getShowAppNav: (state) => state.showAppNav,
-        getShowRoleDialog: (state) => state.showRoleDialog
+        getShowRoleDialog: (state) => state.showRoleDialog,
     }
 })

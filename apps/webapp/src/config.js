@@ -1,5 +1,5 @@
 export const config = {
     backend_host: `${import.meta.env.VITE_API_URL}`,
-    backend_ssl: import.meta.env.VITE_API_SSL,
+    backend_ssl: false,
     STORAGE_KEY: `@webapp`,
 }

@@ -127,14 +127,7 @@ export class PegawaiController {
   //   // return await this.siswaService.reset()
   //   throw new ServiceUnavailableException()
   // }
-  @Post(':id/reset-password')
-  @Permissions('pegawai:reset-password')
-
-  async resetPassword(@Param('id', new ParseIntPipe()) id: string, @Body() updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
-    return await this.pegawaiService.resetPassword(+id, updatePasswordPegawaiDto)
-  }
-
-
+  
   @Delete(':id')
   @Permissions('pegawai:delete')
   async remove(@Param('id', new ParseIntPipe()) id: string) {
@@ -176,6 +169,18 @@ export class PegawaiController {
     const keys = xlsx.utils.sheet_to_json(worksheet, { header: 1 })[0];
     const data = xlsx.utils.sheet_to_json(worksheet);
     return await this.pegawaiService.import(data, keys);
+  }
+
+  @Patch(':id/reset-login')
+  // @Permissions('pegawai:reset-login')
+  async resetLogin(@Param('id', new ParseIntPipe()) id: string) {
+    return await this.pegawaiService.resetLogin(+id)
+  }
+
+  @Patch(':id/reset-password')
+  // @Permissions('pegawai:update-password')
+  async resetPassword(@Param('id', new ParseIntPipe()) id: string, @Body() updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
+    return await this.pegawaiService.resetPassword(+id, updatePasswordPegawaiDto)
   }
 
 }

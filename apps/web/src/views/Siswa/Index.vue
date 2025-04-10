@@ -6,6 +6,8 @@ import SelectGateway from '@/components/SelectGateway.vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useStorage } from '@vueuse/core';
 import VLazyImage from 'v-lazy-image';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -753,6 +755,109 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
     queryKey: ['rombel'],
     queryFn: getRombel
 });
+
+
+// reset password
+const showDialogResetPassword = ref(false);
+const dataResetPassword = ref({
+    id: '',
+    password: '',
+    password_confirmation: ''
+});
+const errorResetPassword = ref({});
+const resetPasswordService = async (data) => {
+    return await axios.patch(`/siswa/${data.id}/reset-password`, {
+        password: data.password,
+        password_confirmation: data.password_confirmation
+    });
+};
+
+const { mutateAsync: resetPassword, isPending: resetPasswordPending } = useMutation({
+    mutationKey: ['resetPassword'],
+    mutationFn: resetPasswordService
+});
+
+const handleShowDialogResetPassword = (data) => {
+    errorResetPassword.value = {};
+    showDialogResetPassword.value = true;
+    dataResetPassword.value.id = data.id;
+}
+
+const handleResetPassword = () => {
+    resetPassword(dataResetPassword.value, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Password berhasil direset',
+                life: 3000
+            });
+            showDialogResetPassword.value = false;
+            dataResetPassword.value = {
+                id: '',
+                password: '',
+                password_confirmation: ''
+            };
+        },
+        onError(err) {
+            if (err.response.status === 400) {
+                errorResetPassword.value = err.response.data;
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Terjadi kesalahan',
+                    life: 3000
+                });
+            }
+        }
+    });
+}
+
+// reset login
+const resetLoginService = async (id) => {
+    return await axios.patch(`/siswa/${id}/reset-login`);
+};
+
+const { mutateAsync: resetLogin, isPending: resetLoginPending } = useMutation({
+    mutationKey: ['resetLogin'],
+    mutationFn: resetLoginService
+});
+const confirmResetLogin = (event, data) => {
+    confirm.require({
+        target: event.currentTarget,
+        header: 'Konfirmasi',
+        message: 'Yakin ingin reset login ?',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-sm p-button-danger',
+        rejectLabel: 'Batalkan',
+        acceptLabel: 'Reset',
+        accept: () => {
+            resetLogin(data.id, {
+                onSuccess() {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Login berhasil direset',
+                        life: 3000
+                    })
+                    refetch();
+                },
+                onError(err) {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Login gagal direset',
+                        life: 3000
+                    })
+                }
+            })
+        }
+    })
+}
+
+
 </script>
 
 <template>
@@ -764,37 +869,33 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2 gap-1 flex flex-wrap">
-                            <Button label="Tambah Siswa" v-if="$can('siswa:create')" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddSiswa = true" />
-                            <Button label="Import Siswa" v-if="$can('siswa:import')" icon="pi pi-arrow-up" severity="success" class="mr-2" @click.prevent="showDialogImportsiswa = true" />
+                            <Button label="Tambah Siswa" v-if="$can('siswa:create')" icon="pi pi-plus" class="mr-2"
+                                @click.prevent="showDialogAddSiswa = true" />
+                            <Button label="Import Siswa" v-if="$can('siswa:import')" icon="pi pi-arrow-up"
+                                severity="success" class="mr-2" @click.prevent="showDialogImportsiswa = true" />
                             <!-- <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
-                            <Button label="Download Format" v-if="$can('siswa:download')" @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
-                            <Button label="Update Rombel" v-if="$can('siswa:rombel-update')" @click.prevent="showDialogUpdateRombel = true" severity="info" icon="pi pi-pencil" class="mr-2" />
+                            <Button label="Download Format" v-if="$can('siswa:download')"
+                                @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
+                            <Button label="Update Rombel" v-if="$can('siswa:rombel-update')"
+                                @click.prevent="showDialogUpdateRombel = true" severity="info" icon="pi pi-pencil"
+                                class="mr-2" />
                         </div>
                     </template>
                 </Toolbar>
-                <DataTable
-                    ref="dt"
-                    :totalRecords="totalRecords"
-                    v-model:expandedRows="expandedRows"
-                    :loading="isLoading"
-                    :value="isLoading ? [] : siswa.data.data.items"
-                    dataKey="id"
-                    paginator
-                    :rows="10"
-                    :filters="filters"
-                    lazy
+                <DataTable ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
+                    :loading="isLoading" :value="isLoading ? [] : siswa.data.data.items" dataKey="id" paginator
+                    :rows="10" :filters="filters" lazy
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     :rowsPerPageOptions="[10, 25, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
-                    :first="first"
-                    @page="onPage($event)"
-                >
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa" :first="first"
+                    @page="onPage($event)">
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
                             <IconField iconPosition="left" class="block mt-2 md:mt-0">
                                 <InputIcon class="pi pi-search" />
-                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto" placeholder="Search..." />
+                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
+                                    placeholder="Search..." />
                             </IconField>
                         </div>
                     </template>
@@ -812,7 +913,8 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
                     <Column field="rombel" header="Rombel"> </Column>
                     <Column field="profile_picture" header="Gambar Profil">
                         <template #body="{ data }">
-                            <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture" style="width: 100px" />
+                            <v-lazy-image v-if="data.profile_picture" :src="data.profile_picture"
+                                style="width: 100px" />
                             <div v-else style="height: 100px; width: 100px"></div>
                         </template>
                     </Column>
@@ -824,12 +926,38 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
                             </Tag>
                         </template>
                     </Column>
+                    <Column field="refreshToken" header="Status Login">
+                        <template #body="{ data }">
+                            <Tag :severity="data.refreshToken ? 'primary' : 'danger'">
+                                <i class="pi pi-sign-in mr-2" v-if="data.refreshToken"></i>
+                                <i class="pi pi-sign-out mr-2" v-else></i>
+                                {{ data.refreshToken ? "Sedang Login" : "Tidak Login" }}
+                            </Tag>
+                        </template>
+                    </Column>
+                    <Column field="updatedAt" header="Terakhir Di Update">
+                        <template #body="{ data }">
+                            {{ format(data.updatedAt, 'dd MMMM yyyy HH:mm:ss', { locale: id }) }}
+                        </template>
+                    </Column>
+
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" v-if="$can('siswa:update')" @click.prevent="handleShowDialogUpdateSiswa(data)" />
-                                <Button severity="danger" icon="pi pi-trash" v-if="$can('siswa:delete')" :loading="removeSiswaPending" :disabled="removeSiswaPending" @click.prevent="confirmRemoveSiswa(data)" />
-                                <Button icon="pi pi-id-card" v-if="$can('siswa:rfid-register')" @click.prevent="handleShowDialogRegisterCard(data)" />
+                                <Button icon="pi pi-pencil" v-if="$can('siswa:update')"
+                                    @click.prevent="handleShowDialogUpdateSiswa(data)" v-tooltip.top="'Edit Siswa'" />
+                                <Button severity="danger" icon="pi pi-trash" v-if="$can('siswa:delete')"
+                                    :loading="removeSiswaPending" :disabled="removeSiswaPending"
+                                    @click.prevent="confirmRemoveSiswa(data)" v-tooltip.top="'Hapus Siswa'" />
+                                <Button icon="pi pi-id-card" v-if="$can('siswa:rfid-register')"
+                                    @click.prevent="handleShowDialogRegisterCard(data)"
+                                    v-tooltip.top="'Register Kartu'" />
+                                <Button icon="pi pi-key" severity="help" v-tooltip.top="'Reset Password'"
+                                    @click.prevent="handleShowDialogResetPassword(data)" />
+                                <Button icon="pi pi-sign-out" severity="warning" v-tooltip.top="'Logout'"
+                                    v-if="data.refreshToken" @click.prevent="confirmResetLogin($event, data)" />
+                                <!-- && $can('siswa:reset-login')/ -->
+                                <!-- v-if="$can('siswa:update-password')" -->
                             </div>
                         </template>
                     </Column>
@@ -873,9 +1001,15 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
                             </template>
                             <template #footer>
                                 <div class="flex gap-2">
-                                    <Button label="Lihat QRCode" icon="pi pi-qrcode" outlined @click.prevent="handleShowDialogQrcode(data)" />
-                                    <Button label="Reset Kartu" v-if="$can('siswa:rfid-reset')" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined severity="danger" />
-                                    <Button label="Reset Telegram" :loading="resetTelegramServicePending" :disabled="resetTelegramServicePending" @click="confirmResetTelegram($event, data)" icon="pi pi-telegram" outlined severity="danger" />
+                                    <Button label="Lihat QRCode" icon="pi pi-qrcode" outlined
+                                        @click.prevent="handleShowDialogQrcode(data)" />
+                                    <Button label="Reset Kartu" v-if="$can('siswa:rfid-reset')"
+                                        @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined
+                                        severity="danger" />
+                                    <Button label="Reset Telegram" :loading="resetTelegramServicePending"
+                                        :disabled="resetTelegramServicePending"
+                                        @click="confirmResetTelegram($event, data)" icon="pi pi-telegram" outlined
+                                        severity="danger" />
                                 </div>
                             </template>
                         </Card>
@@ -883,45 +1017,52 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
                 </DataTable>
             </div>
         </div>
-        <Dialog v-model:visible="showDialogAddSiswa" :style="{ width: '450px' }" header="Tambah Siswa" :modal="true" class="p-fluid">
+        <Dialog v-model:visible="showDialogAddSiswa" :style="{ width: '450px' }" header="Tambah Siswa" :modal="true"
+            class="p-fluid">
             <div class="field">
                 <label for="name">Nama</label>
-                <InputText id="name" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.name" required="true" autofocus v-model="siswaData.name" />
+                <InputText id="name" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.name"
+                    required="true" autofocus v-model="siswaData.name" />
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.name">
                     {{ errorsAddSiswa.name[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="notelp">NoTelp</label>
-                <InputText id="notelp" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.notelp" required="true" autofocus v-model="siswaData.notelp" />
+                <InputText id="notelp" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.notelp"
+                    required="true" autofocus v-model="siswaData.notelp" />
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.notelp">
                     {{ errorsAddSiswa.notelp[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="nisn">NISN</label>
-                <InputText id="nisn" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.nisn" required="true" autofocus v-model="siswaData.nisn" />
+                <InputText id="nisn" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.nisn"
+                    required="true" autofocus v-model="siswaData.nisn" />
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.nisn">
                     {{ errorsAddSiswa.nisn[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="nis">NIS</label>
-                <InputText id="nis" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.nis" required="true" autofocus v-model="siswaData.nis" />
+                <InputText id="nis" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.nis"
+                    required="true" autofocus v-model="siswaData.nis" />
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.nis">
                     {{ errorsAddSiswa.nis[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="rombel">Rombel</label>
-                <InputText id="rombel" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.rombel" required="true" autofocus v-model="siswaData.rombel" />
+                <InputText id="rombel" :disabled="addSiswaPending" :invalid="errorsAddSiswa && errorsAddSiswa.rombel"
+                    required="true" autofocus v-model="siswaData.rombel" />
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.rombel">
                     {{ errorsAddSiswa.rombel[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="profile_picture">Gambar Profil (Optional)</label>
-                <input :disabled="addSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange" class="border p-2 w-full" />
+                <input :disabled="addSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onFileChange" class="border p-2 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
                 <p class="text-red-500" v-if="errorsAddSiswa && errorsAddSiswa.file">
                     {{ errorsAddSiswa.file }}
@@ -929,79 +1070,101 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
             </div>
 
             <template #footer>
-                <Button label="Batal" :disabled="addSiswaPending" severity="danger" icon="pi pi-times" outlined @click.prevent="showDialogAddSiswa = false" />
-                <Button label="Simpan" :loading="addSiswaPending" :disabled="addSiswaPending" icon="pi pi-link" @click="handleSubmitAddSiswa" />
+                <Button label="Batal" :disabled="addSiswaPending" severity="danger" icon="pi pi-times" outlined
+                    @click.prevent="showDialogAddSiswa = false" />
+                <Button label="Simpan" :loading="addSiswaPending" :disabled="addSiswaPending" icon="pi pi-link"
+                    @click="handleSubmitAddSiswa" />
             </template>
         </Dialog>
         <!-- update -->
-        <Dialog v-model:visible="showDialogUpdateSiswa" @after-hide="clearUpdateState" :style="{ width: '450px' }" header="Update Siswa" :modal="true" class="p-fluid">
+        <Dialog v-model:visible="showDialogUpdateSiswa" @after-hide="clearUpdateState" :style="{ width: '450px' }"
+            header="Update Siswa" :modal="true" class="p-fluid">
             <div class="field">
                 <label for="name">Nama</label>
-                <InputText id="name" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.name" required="true" autofocus v-model="dataUpdateSiswa.name" />
+                <InputText id="name" :disabled="updateSiswaPending"
+                    :invalid="errorsUpdateSiswa && errorsUpdateSiswa.name" required="true" autofocus
+                    v-model="dataUpdateSiswa.name" />
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.name">
                     {{ errorsUpdateSiswa.name[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="notelp">NoTelp</label>
-                <InputText id="notelp" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.notelp" required="true" autofocus v-model="dataUpdateSiswa.notelp" />
+                <InputText id="notelp" :disabled="updateSiswaPending"
+                    :invalid="errorsUpdateSiswa && errorsUpdateSiswa.notelp" required="true" autofocus
+                    v-model="dataUpdateSiswa.notelp" />
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.notelp">
                     {{ errorsUpdateSiswa.notelp[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="nisn">NISN</label>
-                <InputText id="nisn" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.nisn" required="true" autofocus v-model="dataUpdateSiswa.nisn" />
+                <InputText id="nisn" :disabled="updateSiswaPending"
+                    :invalid="errorsUpdateSiswa && errorsUpdateSiswa.nisn" required="true" autofocus
+                    v-model="dataUpdateSiswa.nisn" />
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.nisn">
                     {{ errorsUpdateSiswa.nisn[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="nis">NIS</label>
-                <InputText id="nis" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.nis" required="true" autofocus v-model="dataUpdateSiswa.nis" />
+                <InputText id="nis" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.nis"
+                    required="true" autofocus v-model="dataUpdateSiswa.nis" />
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.nis">
                     {{ errorsUpdateSiswa.nis[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="rombel">Rombel</label>
-                <InputText id="rombel" :disabled="updateSiswaPending" :invalid="errorsUpdateSiswa && errorsUpdateSiswa.rombel" required="true" autofocus v-model="dataUpdateSiswa.rombel" />
+                <InputText id="rombel" :disabled="updateSiswaPending"
+                    :invalid="errorsUpdateSiswa && errorsUpdateSiswa.rombel" required="true" autofocus
+                    v-model="dataUpdateSiswa.rombel" />
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.rombel">
                     {{ errorsUpdateSiswa.rombel[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="profile_picture">Gambar Profil (Optional)</label>
-                <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onFileChange" class="border p-2 w-full" />
+                <input :disabled="updateSiswaPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onFileChange" class="border p-2 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
                 <p class="text-red-500" v-if="errorsUpdateSiswa && errorsUpdateSiswa.file">
                     {{ errorsUpdateSiswa.file }}
                 </p>
             </div>
             <template #footer>
-                <Button label="Batal" :disabled="updateSiswaPending" severity="danger" icon="pi pi-times" outlined @click.prevent="showDialogUpdateSiswa = false" />
-                <Button label="Update" :loading="updateSiswaPending" :disabled="updateSiswaPending" icon="pi pi-link" @click="handleSubmitUpdateSiswa" />
+                <Button label="Batal" :disabled="updateSiswaPending" severity="danger" icon="pi pi-times" outlined
+                    @click.prevent="showDialogUpdateSiswa = false" />
+                <Button label="Update" :loading="updateSiswaPending" :disabled="updateSiswaPending" icon="pi pi-link"
+                    @click="handleSubmitUpdateSiswa" />
             </template>
         </Dialog>
 
-        <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }" :modal="true" :closable="false">
+        <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }"
+            :modal="true" :closable="false">
             <Message severity="error" v-if="errorsRegisterCard && errorsRegisterCard.token">
                 {{ errorsRegisterCard.token[0] }}
             </Message>
             <!-- {{ `READER_${selectedGateway.ip}` }} -->
             <SelectGateway v-if="!defaultGateway" role="register" @input="handleSelectedGateway" />
             <div v-else class="flex align-items-center gap-3 border-solid py-3 px-2 border-round border-1 border-200">
-                <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`"></div>
+                <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`">
+                </div>
                 <div class="flex flex-column gap-2">
                     <span>{{ selectedGateway.name }} - {{ selectedGateway.location }}</span>
                     <Tag class="w-fit">{{ selectedGateway.ip }}</Tag>
                 </div>
             </div>
 
-            <Button v-if="!defaultGateway" label="Setel sebagai default gateway" outlined class="my-2" @click.prevent="setDefaultGateway" />
-            <Button v-else label="Pilih gateway" severity="danger" outlined class="my-2" @click.prevent="resetDefaultGateway" />
-            <div v-if="selectedGateway && !scannedToken" class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
-                <span class="text-2xl text-center font-bold"> SILAHKAN SCAN KARTU <i :class="`pi pi-circle bg-red-500 border-circle ml-3 ${isListening ? 'fadeout animation-duration-1000 animation-iteration-infinite' : ''}`"></i> </span>
+            <Button v-if="!defaultGateway" label="Setel sebagai default gateway" outlined class="my-2"
+                @click.prevent="setDefaultGateway" />
+            <Button v-else label="Pilih gateway" severity="danger" outlined class="my-2"
+                @click.prevent="resetDefaultGateway" />
+            <div v-if="selectedGateway && !scannedToken"
+                class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
+                <span class="text-2xl text-center font-bold"> SILAHKAN SCAN KARTU <i
+                        :class="`pi pi-circle bg-red-500 border-circle ml-3 ${isListening ? 'fadeout animation-duration-1000 animation-iteration-infinite' : ''}`"></i>
+                </span>
             </div>
             <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
                 <h3 class="text-white text-lg underline mt-2">Scan Kartu Berhasil</h3>
@@ -1009,12 +1172,15 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
             </div>
             <template #footer>
                 <Button label="Batalkan" severity="danger" outlined @click.prevent="showDialogRegisterCard = false" />
-                <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined @click.prevent="scannedToken = null" />
-                <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending" @click.prevent="handleSubmitRegisterCard" />
+                <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined
+                    @click.prevent="scannedToken = null" />
+                <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
+                    @click.prevent="handleSubmitRegisterCard" />
             </template>
         </Dialog>
         <Dialog v-model:visible="showDialogQrcode" :modal="true" :closable="false">
-            <div class="w-full flex flex-column justify-content-center align-items-center" :id="`qrcode-siswa-${qrCode.nisn}`">
+            <div class="w-full flex flex-column justify-content-center align-items-center"
+                :id="`qrcode-siswa-${qrCode.nisn}`">
                 <h1 class="text-6xl font-bold underline">
                     {{ qrCode.name }}
                 </h1>
@@ -1022,34 +1188,70 @@ const { data: dataRombels, isLoading: loadingRombel } = useQuery({
             </div>
             <template #footer>
                 <Button label="Batalkan" outlined severity="danger" @click="showDialogQrcode = false" />
-                <Button label="Cetak" outlined v-print="`#qrcode-siswa-${qrCode.nisn}`" icon="pi pi-print" :loading="resetTokenPending" :disabled="resetTokenPending" />
+                <Button label="Cetak" outlined v-print="`#qrcode-siswa-${qrCode.nisn}`" icon="pi pi-print"
+                    :loading="resetTokenPending" :disabled="resetTokenPending" />
             </template>
         </Dialog>
-        <Dialog :closable="!importSiswaPending" :header="importSiswaPending ? 'Loading...' : 'Import siswa'" v-model:visible="showDialogImportsiswa" :style="{ width: '450px' }" :modal="true">
-            <Input type="file" :disabled="importSiswaPending" @change="handleChangeImport" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
+        <Dialog :closable="!importSiswaPending" :header="importSiswaPending ? 'Loading...' : 'Import siswa'"
+            v-model:visible="showDialogImportsiswa" :style="{ width: '450px' }" :modal="true">
+            <Input type="file" :disabled="importSiswaPending" @change="handleChangeImport"
+                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
             <template #footer>
-                <Button label="Batalkan" :loading="importSiswaPending" :disabled="importSiswaPending" outlined severity="danger" @click="showDialogImportsiswa = false" />
-                <Button label="Import" :loading="importSiswaPending" :disabled="importSiswaPending" outlined icon="pi pi-upload" @click.prevent="handleImportSiswa" />
+                <Button label="Batalkan" :loading="importSiswaPending" :disabled="importSiswaPending" outlined
+                    severity="danger" @click="showDialogImportsiswa = false" />
+                <Button label="Import" :loading="importSiswaPending" :disabled="importSiswaPending" outlined
+                    icon="pi pi-upload" @click.prevent="handleImportSiswa" />
             </template>
         </Dialog>
-        <Dialog header="Update Rombel" v-model:visible="showDialogUpdateRombel" :style="{ width: '450px' }" :modal="true" class="p-fluid">
+        <Dialog header="Update Rombel" v-model:visible="showDialogUpdateRombel" :style="{ width: '450px' }"
+            :modal="true" class="p-fluid">
             <div class="field">
                 <label for="rombel">Rombel</label>
-                <Dropdown :loading="loadingRombel" filter v-model="dataUpdateRombel.rombel" :options="dataRombels ? dataRombels.data.data.map((item) => ({ value: item })) : []" optionLabel="value" placeholder="Pilih Rombel" class="w-full" />
+                <Dropdown :loading="loadingRombel" filter v-model="dataUpdateRombel.rombel"
+                    :options="dataRombels ? dataRombels.data.data.map((item) => ({ value: item })) : []"
+                    optionLabel="value" placeholder="Pilih Rombel" class="w-full" />
                 <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.rombel">
                     {{ errorUpdateRombel.rombel[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="update_rombel">Rombel baru</label>
-                <InputText id="update_rombel" v-model="dataUpdateRombel.updated_rombel" placeholder="Ketikan rombel baru" />
+                <InputText id="update_rombel" v-model="dataUpdateRombel.updated_rombel"
+                    placeholder="Ketikan rombel baru" />
                 <p class="text-red-500" v-if="errorUpdateRombel && errorUpdateRombel.updated_rombel">
                     {{ errorUpdateRombel.updated_rombel[0] }}
                 </p>
             </div>
             <template #footer>
-                <Button label="Batalkan" :loading="updateRombelPending" :disabled="updateRombelPending" outlined severity="danger" @click="showDialogUpdateRombel = false" />
-                <Button label="Update" :loading="updateRombelPending" :disabled="updateRombelPending" @click.prevent="handleUpdateRombel" />
+                <Button label="Batalkan" :loading="updateRombelPending" :disabled="updateRombelPending" outlined
+                    severity="danger" @click="showDialogUpdateRombel = false" />
+                <Button label="Update" :loading="updateRombelPending" :disabled="updateRombelPending"
+                    @click.prevent="handleUpdateRombel" />
+            </template>
+        </Dialog>
+        <Dialog v-model:visible="showDialogResetPassword" header="Reset Password" :modal="true" :closable="false"
+            class="p-fluid">
+            <div class="field">
+                <label for="password">Password</label>
+                <InputText id="password" v-model="dataResetPassword.password"
+                    :invalid="errorResetPassword && errorResetPassword.password" />
+            </div>
+            <p class="text-red-500" v-if="errorResetPassword && errorResetPassword.password">
+                {{ errorResetPassword.password[0] }}
+            </p>
+            <div class="field">
+                <label for="password_confirmation">Konfirmasi Password</label>
+                <InputText id="password_confirmation" v-model="dataResetPassword.password_confirmation"
+                    :invalid="errorResetPassword && errorResetPassword.password_confirmation" />
+            </div>
+            <p class="text-red-500" v-if="errorResetPassword && errorResetPassword.password_confirmation">
+                {{ errorResetPassword.password_confirmation[0] }}
+            </p>
+            <template #footer>
+                <Button label="Batalkan" :loading="resetPasswordPending" :disabled="resetPasswordPending" outlined
+                    severity="danger" @click="showDialogResetPassword = false" />
+                <Button label="Reset" :loading="resetPasswordPending" :disabled="resetPasswordPending"
+                    @click.prevent="handleResetPassword" />
             </template>
         </Dialog>
     </div>

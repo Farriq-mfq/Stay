@@ -1,5 +1,6 @@
 import { Transform, TransformFnParams } from "class-transformer"
 import { IsNotEmpty, IsNumberString, IsOptional, IsString, IsUppercase, IsUrl } from "class-validator"
+import { IsEqualTo } from "src/decorators/match.decorator"
 
 export class CreateSiswaDto {
     @IsNumberString()
@@ -81,4 +82,21 @@ export class UpdateRombelDto {
         message:"Rombel yang baru harus diisi huruf kapital"
     })
     updated_rombel: string
+}
+
+
+export class ResetPasswordDto {
+    @IsString()
+    @IsNotEmpty({
+        message: "Password harus diisi"
+    })
+    password: string
+    @IsString()
+    @IsNotEmpty({
+        message: "Password harus diisi"
+    })
+    @IsEqualTo('password', {
+        message: "Password harus sama"
+    })
+    password_confirmation: string
 }

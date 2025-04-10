@@ -355,7 +355,7 @@ export class PegawaiService {
   }
 
   async resetPassword(id: number, updatePasswordPegawaiDto: UpdatePasswordPegawaiDto) {
-    await this.prismaService.client.pegawai.findFirstOrThrow({
+    const pegawai = await this.prismaService.client.pegawai.findUniqueOrThrow({
       where: {
         id
       }
@@ -363,10 +363,26 @@ export class PegawaiService {
 
     return await this.prismaService.client.pegawai.update({
       where: {
-        id
+        id: pegawai.id
       },
       data: {
-        password: await hash(updatePasswordPegawaiDto.new_password)
+        password: await hash(updatePasswordPegawaiDto.password)
+      }
+    })
+  }
+
+  async resetLogin(id: number) {
+    const pegawai = await this.prismaService.client.pegawai.findUniqueOrThrow({
+      where: {
+        id
+      }
+    })
+    return await this.prismaService.client.pegawai.update({
+      where: {
+        id: pegawai.id
+      },
+      data: {
+        refreshToken: null
       }
     })
   }

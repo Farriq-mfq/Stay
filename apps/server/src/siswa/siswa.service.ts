@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { hash } from 'argon2';
+import { hash, verify } from 'argon2';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { format } from 'date-fns';
@@ -8,7 +8,7 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { join } from 'path';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
 import { CloudinaryService } from 'src/services/cloudinary.service';
-import { CreateSiswaDto, ImportSiswaDto, UpdateRombelDto } from './dto/create-siswa.dto';
+import { CreateSiswaDto, ImportSiswaDto, ResetPasswordDto, UpdateRombelDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
 import { AccountableType } from '@prisma/client';
@@ -353,5 +353,39 @@ export class SiswaService {
     } else {
       throw new NotFoundException("Rombel tidak ada")
     }
+  }
+
+  async resetPassword(id: number, resetPasswordDto: ResetPasswordDto) {
+
+    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+      where: {
+        id
+      }
+    })
+
+    return await this.prismaService.client.siswa.update({
+      where: {
+        id: siswa.id
+      },
+      data: {
+        password: await hash(resetPasswordDto.password)
+      }
+    })
+  }
+
+  async resetLogin(id: number) {
+    const siswa = await this.prismaService.client.siswa.findUniqueOrThrow({
+      where: {
+        id
+      }
+    })
+    return await this.prismaService.client.siswa.update({
+      where: {
+        id: siswa.id
+      },
+      data: {
+        refreshToken: null
+      }
+    })
   }
 }

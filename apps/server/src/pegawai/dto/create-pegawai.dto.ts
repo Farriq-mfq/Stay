@@ -79,15 +79,10 @@ export class UpdatePasswordPegawaiDto {
     password: string
     @IsString()
     @IsNotEmpty({
-        message: "Password baru harus diisi"
-    })
-    new_password: string
-    @IsString()
-    @IsNotEmpty({
         message: "Konfirmasi password harus diisi"
     })
-    @IsEqualTo('new_password', {
+    @IsEqualTo('password', {
         message: "Konfirmasi password harus sama dengan password"
     })
-    confirmation_password: string
+    password_confirmation: string
 }

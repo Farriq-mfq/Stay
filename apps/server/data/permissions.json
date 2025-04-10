@@ -13,7 +13,8 @@
     "rfid-register",
     "rfid-reset",
     "rombel-update",
-    "update-password"
+    "update-password",
+    "reset-login"
   ],
   "pegawai": [
     "create",
@@ -27,7 +28,8 @@
     "update",
     "rfid-register",
     "rfid-reset",
-    "update-password"
+    "update-password",
+    "reset-login"
   ],
   "gateways": [
     "create",

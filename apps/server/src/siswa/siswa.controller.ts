@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseInterceptors, UploadedFile, HttpCode, ParseFilePipeBuilder, HttpStatus, UseGuards, Res, StreamableFile, Header, ServiceUnavailableException } from '@nestjs/common';
 import { SiswaService } from './siswa.service';
-import { CreateSiswaDto, UpdateRombelDto } from './dto/create-siswa.dto';
+import { CreateSiswaDto, ResetPasswordDto, UpdateRombelDto } from './dto/create-siswa.dto';
 import { UpdateSiswaDto } from './dto/update-siswa.dto';
 import { UpdateTokenDto } from './dto/update-token.dto'
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -160,5 +160,16 @@ export class SiswaController {
     return await this.siswaService.updateRombel(updateRombelDto)
   }
 
+  @Patch(':id/reset-password')
+  // @Permissions('siswa:reset-password')
+  async resetPassword(@Param('id', new ParseIntPipe()) id: string, @Body() resetPasswordDto: ResetPasswordDto) {
+    return await this.siswaService.resetPassword(+id, resetPasswordDto)
+  }
+
+  @Patch(':id/reset-login')
+  // @Permissions('siswa:reset-login')
+  async resetLogin(@Param('id', new ParseIntPipe()) id: string) {
+    return await this.siswaService.resetLogin(+id)
+  }
 
 }

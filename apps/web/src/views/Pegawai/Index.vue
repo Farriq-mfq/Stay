@@ -6,6 +6,8 @@ import SelectGateway from '@/components/SelectGateway.vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useStorage } from '@vueuse/core';
 import VLazyImage from 'v-lazy-image';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const toast = useToast();
@@ -632,6 +634,96 @@ const downloadTemplateService = async () => {
     document.body.appendChild(link);
     link.click();
 };
+// reset password
+const showDialogResetPassword = ref(false);
+const dataResetPassword = ref({
+    id: '',
+    password: '',
+    password_confirmation: ''
+});
+const errorResetPassword = ref({});
+const resetPasswordService = async (data) => {
+    return await axios.patch(`/pegawai/${data.id}/reset-password`, data);
+};
+const { mutateAsync: resetPassword, isPending: resetPasswordPending } = useMutation({
+    mutationKey: ['resetPassword'],
+    mutationFn: resetPasswordService
+});
+
+const handleShowDialogResetPassword = (data) => {
+    errorResetPassword.value = {};
+    showDialogResetPassword.value = true;
+    dataResetPassword.value.id = data.id;
+};
+
+const handleResetPassword = () => {
+    resetPassword(dataResetPassword.value, {
+        onSuccess() {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Password berhasil direset',
+                life: 3000
+            });
+            showDialogResetPassword.value = false;
+            dataResetPassword.value = {
+                id: '',
+                password: '',
+                password_confirmation: ''
+            };
+        },
+        onError(err) {
+            if (err.response.status === 400) {
+                errorResetPassword.value = err.response.data;
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Password gagal direset',
+                    life: 3000
+                });
+            }
+        }
+    });
+}
+
+// reset login
+const resetLoginService = async (id) => {
+    return await axios.patch(`/pegawai/${id}/reset-login`);
+};
+const { mutateAsync: resetLogin, isPending: resetLoginPending } = useMutation({
+    mutationKey: ['resetLogin'],
+    mutationFn: resetLoginService
+});
+
+const confirmResetLogin = (event, data) => {
+    confirm.require({
+        target: event.currentTarget,
+        message: 'Yakin ingin reset login ?',
+        header: 'Konfirmasi',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-sm p-button-danger',
+        rejectLabel: 'Batalkan',
+        acceptLabel: 'Reset',
+        accept: () => {
+            resetLogin(data.id, {
+                onSuccess() {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                    });
+                },
+                onError() {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                    });
+                }
+            });
+        }
+    });
+}
 </script>
 
 <template>
@@ -643,36 +735,30 @@ const downloadTemplateService = async () => {
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2 gap-1 flex flex-wrap">
-                            <Button label="Tambah Pegawai" v-if="$can('pegawai:create')" icon="pi pi-plus" class="mr-2" @click.prevent="showDialogAddPegawai = true" />
-                            <Button label="Import Pegawai" v-if="$can('pegawai:import')" icon="pi pi-arrow-up" severity="success" class="mr-2" @click.prevent="showDialogImportPegawai = true" />
+                            <Button label="Tambah Pegawai" v-if="$can('pegawai:create')" icon="pi pi-plus" class="mr-2"
+                                @click.prevent="showDialogAddPegawai = true" />
+                            <Button label="Import Pegawai" v-if="$can('pegawai:import')" icon="pi pi-arrow-up"
+                                severity="success" class="mr-2" @click.prevent="showDialogImportPegawai = true" />
                             <!-- <Button label="Reset siswa" icon="pi pi-refresh" :loading="resetDataSiswaPending"
                 :disabled="resetDataSiswaPending" severity="danger" class="mr-2" @click.prevent="confirmResetSiswa" /> -->
-                            <Button label="Download Format" v-if="$can('pegawai:download')" @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
+                            <Button label="Download Format" v-if="$can('pegawai:download')"
+                                @click.prevent="downloadTemplateService" icon="pi pi-download" class="mr-2" />
                         </div>
                     </template>
                 </Toolbar>
-                <DataTable
-                    ref="dt"
-                    :totalRecords="totalRecords"
-                    v-model:expandedRows="expandedRows"
-                    :loading="isLoading"
-                    :value="isLoading ? [] : pegawai.data.data.items"
-                    dataKey="id"
-                    paginator
-                    :rows="10"
-                    :filters="filters"
-                    lazy
+                <DataTable ref="dt" :totalRecords="totalRecords" v-model:expandedRows="expandedRows"
+                    :loading="isLoading" :value="isLoading ? [] : pegawai.data.data.items" dataKey="id" paginator
+                    :rows="10" :filters="filters" lazy
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     :rowsPerPageOptions="[10, 25, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} pegawai"
-                    :first="first"
-                    @page="onPage($event)"
-                >
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} pegawai" :first="first"
+                    @page="onPage($event)">
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-end md:align-items-center">
                             <IconField iconPosition="left" class="block mt-2 md:mt-0">
                                 <InputIcon class="pi pi-search" />
-                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto" placeholder="Search..." />
+                                <InputText v-debounce:300ms="handleDebounceFilter" class="w-full sm:w-auto"
+                                    placeholder="Search..." />
                             </IconField>
                         </div>
                     </template>
@@ -689,12 +775,14 @@ const downloadTemplateService = async () => {
                     <Column field="group" header="Kelompok"> </Column>
                     <Column field="sign_picture" header="Tanda Tangan">
                         <template #body="{ data }">
-                            <v-lazy-image :src="data.sign_picture" style="width: 100px; height: 100px; object-fit: cover" />
+                            <v-lazy-image :src="data.sign_picture"
+                                style="width: 100px; height: 100px; object-fit: cover" />
                         </template>
                     </Column>
                     <Column field="profile_picture" header="Foto Profil">
                         <template #body="{ data }">
-                            <v-lazy-image :src="data.profile_picture" style="width: 100px; height: 100px; object-fit: cover" />
+                            <v-lazy-image :src="data.profile_picture"
+                                style="width: 100px; height: 100px; object-fit: cover" />
                         </template>
                     </Column>
                     <Column field="rfid_token" header="Status Kartu">
@@ -705,13 +793,38 @@ const downloadTemplateService = async () => {
                             </Tag>
                         </template>
                     </Column>
+                    <Column field="refreshToken" header="Status Login">
+                        <template #body="{ data }">
+                            <Tag :severity="data.refreshToken ? 'primary' : 'danger'">
+                                <i class="pi pi-sign-in mr-2" v-if="data.refreshToken"></i>
+                                <i class="pi pi-sign-out mr-2" v-else></i>
+                                {{ data.refreshToken ? "Sedang Login" : "Tidak Login" }}
+                            </Tag>
+                        </template>
+                    </Column>
+                    <Column field="updatedAt" header="Terakhir Di Update">
+                        <template #body="{ data }">
+                            {{ format(data.updatedAt, 'dd MMMM yyyy HH:mm:ss', { locale: id }) }}
+                        </template>
+                    </Column>
+
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button icon="pi pi-pencil" v-if="$can('pegawai:update')" @click.prevent="handleshowDialogUpdatePegawai(data)" />
-                                <Button severity="danger" icon="pi pi-trash" v-if="$can('pegawai:delete')" :loading="removePegawaiPending" :disabled="removePegawaiPending" @click.prevent="confirmRemovePegawai(data)" />
-                                <Button icon="pi pi-id-card" v-if="$can('pegawai:rfid-register')" @click.prevent="handleShowDialogRegisterCard(data)" />
-                                <!-- <Button icon="pi pi-key" severity="warning" @click.prevent="handleShowDialogRegisterCard(data)" /> -->
+                                <Button icon="pi pi-pencil" v-if="$can('pegawai:update')"
+                                    @click.prevent="handleshowDialogUpdatePegawai(data)" />
+                                <Button severity="danger" icon="pi pi-trash" v-if="$can('pegawai:delete')"
+                                    :loading="removePegawaiPending" :disabled="removePegawaiPending"
+                                    @click.prevent="confirmRemovePegawai(data)" />
+                                <Button icon="pi pi-id-card" v-if="$can('pegawai:rfid-register')"
+                                    @click.prevent="handleShowDialogRegisterCard(data)" />
+                                <Button icon="pi pi-key" severity="help" v-tooltip.top="'Reset Password'"
+                                    @click.prevent="handleShowDialogResetPassword(data)" />
+                                <Button icon="pi pi-sign-out" severity="warning" v-tooltip.top="'Logout'"
+                                    v-if="data.refreshToken" @click.prevent="confirmResetLogin($event, data)"
+                                    :loading="resetLoginPending" />
+                                <!-- && $can('pegawai:reset-login') -->
+                                <!-- v-if="$can('pegawai:update-password')" -->
                             </div>
                         </template>
                     </Column>
@@ -728,7 +841,9 @@ const downloadTemplateService = async () => {
                             </template>
                             <template #footer>
                                 <div class="flex gap-2" v-if="data.rfid_token">
-                                    <Button label="Reset Kartu" v-if="$can('pegawai:rfid-reset')" @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined severity="danger" />
+                                    <Button label="Reset Kartu" v-if="$can('pegawai:rfid-reset')"
+                                        @click="confirmResetRFID($event, data)" icon="pi pi-id-card" outlined
+                                        severity="danger" />
                                 </div>
                             </template>
                         </Card>
@@ -736,43 +851,53 @@ const downloadTemplateService = async () => {
                 </DataTable>
             </div>
         </div>
-        <Dialog v-model:visible="showDialogAddPegawai" :style="{ width: '450px' }" header="Tambah Pegawai" :modal="true" class="p-fluid" @after-hide="handleHideDialogAddPegawai">
+        <Dialog v-model:visible="showDialogAddPegawai" :style="{ width: '450px' }" header="Tambah Pegawai" :modal="true"
+            class="p-fluid" @after-hide="handleHideDialogAddPegawai">
             <div class="field">
                 <label for="name">Nama</label>
-                <InputText id="name" :disabled="addPegawaiPending" :invalid="errorsAddPegawai && errorsAddPegawai.name" required="true" autofocus v-model="pegawaiData.name" placeholder="Cth: Sibudi" />
+                <InputText id="name" :disabled="addPegawaiPending" :invalid="errorsAddPegawai && errorsAddPegawai.name"
+                    required="true" autofocus v-model="pegawaiData.name" placeholder="Cth: Sibudi" />
                 <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.name">
                     {{ errorsAddPegawai.name[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="username">Username</label>
-                <InputText id="username" :disabled="addPegawaiPending" :invalid="errorsAddPegawai && errorsAddPegawai.username" required="true" autofocus v-model="pegawaiData.username" placeholder="Cth: 1234" />
+                <InputText id="username" :disabled="addPegawaiPending"
+                    :invalid="errorsAddPegawai && errorsAddPegawai.username" required="true" autofocus
+                    v-model="pegawaiData.username" placeholder="Cth: 1234" />
                 <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.username">
                     {{ errorsAddPegawai.username[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="position">Jabatan</label>
-                <InputText id="position" :disabled="addPegawaiPending" :invalid="errorsAddPegawai && errorsAddPegawai.position" required="true" autofocus v-model="pegawaiData.position" placeholder="Cth: Guru" />
+                <InputText id="position" :disabled="addPegawaiPending"
+                    :invalid="errorsAddPegawai && errorsAddPegawai.position" required="true" autofocus
+                    v-model="pegawaiData.position" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.position">
                     {{ errorsAddPegawai.position[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="group">Kelompok</label>
-                <InputText id="group" :disabled="addPegawaiPending" :invalid="errorsAddPegawai && errorsAddPegawai.group" required="true" autofocus v-model="pegawaiData.group" placeholder="Cth: Guru" />
+                <InputText id="group" :disabled="addPegawaiPending"
+                    :invalid="errorsAddPegawai && errorsAddPegawai.group" required="true" autofocus
+                    v-model="pegawaiData.group" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsAddPegawai && errorsAddPegawai.group">
                     {{ errorsAddPegawai.group[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
-                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
+                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>
             <div class="field">
                 <label for="sign_picture">Foto Profile (Optional)</label>
-                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
+                <input :disabled="addPegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>
             <div class="field">
@@ -782,48 +907,61 @@ const downloadTemplateService = async () => {
             </div>
 
             <template #footer>
-                <Button label="Batal" :disabled="addPegawaiPending" severity="danger" icon="pi pi-times" outlined @click.prevent="showDialogAddPegawai = false" />
-                <Button label="Simpan" :loading="addPegawaiPending" :disabled="addPegawaiPending" icon="pi pi-link" @click="handleSubmitAddPegawai" />
+                <Button label="Batal" :disabled="addPegawaiPending" severity="danger" icon="pi pi-times" outlined
+                    @click.prevent="showDialogAddPegawai = false" />
+                <Button label="Simpan" :loading="addPegawaiPending" :disabled="addPegawaiPending" icon="pi pi-link"
+                    @click="handleSubmitAddPegawai" />
             </template>
         </Dialog>
         <!-- update -->
-        <Dialog v-model:visible="showDialogUpdatePegawai" @after-hide="clearUpdateState" :style="{ width: '450px' }" header="Update Pegawai" :modal="true" class="p-fluid">
+        <Dialog v-model:visible="showDialogUpdatePegawai" @after-hide="clearUpdateState" :style="{ width: '450px' }"
+            header="Update Pegawai" :modal="true" class="p-fluid">
             <div class="field">
                 <label for="name">Nama</label>
-                <InputText id="name" :disabled="updatePegawaiPending" :invalid="errorsUpdatePegawai && errorsUpdatePegawai.name" required="true" autofocus v-model="dataUpdatePegawai.name" placeholder="Cth: Sibudi" />
+                <InputText id="name" :disabled="updatePegawaiPending"
+                    :invalid="errorsUpdatePegawai && errorsUpdatePegawai.name" required="true" autofocus
+                    v-model="dataUpdatePegawai.name" placeholder="Cth: Sibudi" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.name">
                     {{ errorsUpdatePegawai.name[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="username">Username</label>
-                <InputText id="username" :disabled="updatePegawaiPending" :invalid="errorsUpdatePegawai && errorsUpdatePegawai.username" required="true" autofocus v-model="dataUpdatePegawai.username" placeholder="Cth: 1234" />
+                <InputText id="username" :disabled="updatePegawaiPending"
+                    :invalid="errorsUpdatePegawai && errorsUpdatePegawai.username" required="true" autofocus
+                    v-model="dataUpdatePegawai.username" placeholder="Cth: 1234" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.username">
                     {{ errorsUpdatePegawai.username[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="position">Jabatan</label>
-                <InputText id="position" :disabled="updatePegawaiPending" :invalid="errorsUpdatePegawai && errorsUpdatePegawai.position" required="true" autofocus v-model="dataUpdatePegawai.position" placeholder="Cth: Guru" />
+                <InputText id="position" :disabled="updatePegawaiPending"
+                    :invalid="errorsUpdatePegawai && errorsUpdatePegawai.position" required="true" autofocus
+                    v-model="dataUpdatePegawai.position" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.position">
                     {{ errorsUpdatePegawai.position[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="group">Kelompok</label>
-                <InputText id="group" :disabled="updatePegawaiPending" :invalid="errorsUpdatePegawai && errorsUpdatePegawai.group" required="true" autofocus v-model="dataUpdatePegawai.group" placeholder="Cth: Guru" />
+                <InputText id="group" :disabled="updatePegawaiPending"
+                    :invalid="errorsUpdatePegawai && errorsUpdatePegawai.group" required="true" autofocus
+                    v-model="dataUpdatePegawai.group" placeholder="Cth: Guru" />
                 <p class="text-red-500" v-if="errorsUpdatePegawai && errorsUpdatePegawai.group">
                     {{ errorsUpdatePegawai.group[0] }}
                 </p>
             </div>
             <div class="field">
                 <label for="sign_picture">Gambar Tanda Tangan (Optional)</label>
-                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
+                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onChangeSignPicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>
             <div class="field">
                 <label for="sign_picture">Foto Profile (Optional)</label>
-                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png" @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
+                <input :disabled="updatePegawaiPending" type="file" accept="image/jpg, image/jpeg, image/png"
+                    @change="onChangeProfilePicture" class="border-1 surface-border border-round p-3 w-full" />
                 <p class="text-muted text-sm">Ukuran File 1.5 MB dengan format .jpg, .jpeg, .png</p>
             </div>
             <div class="field">
@@ -879,29 +1017,38 @@ const downloadTemplateService = async () => {
             </div> -->
 
             <template #footer>
-                <Button label="Batal" :disabled="updatePegawaiPending" severity="danger" icon="pi pi-times" outlined @click.prevent="showDialogUpdatePegawai = false" />
-                <Button label="Update" :loading="updatePegawaiPending" :disabled="updatePegawaiPending" icon="pi pi-link" @click="handleSubmitUpdatePegawai" />
+                <Button label="Batal" :disabled="updatePegawaiPending" severity="danger" icon="pi pi-times" outlined
+                    @click.prevent="showDialogUpdatePegawai = false" />
+                <Button label="Update" :loading="updatePegawaiPending" :disabled="updatePegawaiPending"
+                    icon="pi pi-link" @click="handleSubmitUpdatePegawai" />
             </template>
         </Dialog>
 
-        <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }" :modal="true" :closable="false">
+        <Dialog v-model:visible="showDialogRegisterCard" @after-hide="clearRegisterCard" :style="{ width: '450px' }"
+            :modal="true" :closable="false">
             <Message severity="error" v-if="errorsRegisterCard && errorsRegisterCard.token">
                 {{ errorsRegisterCard.token[0] }}
             </Message>
             <!-- {{ `READER_${selectedGateway.ip}` }} -->
             <SelectGateway v-if="!defaultGateway" role="register" @input="handleSelectedGateway" />
             <div v-else class="flex align-items-center gap-3 border-solid py-3 px-2 border-round border-1 border-200">
-                <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`"></div>
+                <div :class="`${selectedGateway.status ? 'bg-primary' : 'bg-red-500'} h-1rem w-1rem border-circle`">
+                </div>
                 <div class="flex flex-column gap-2">
                     <span>{{ selectedGateway.name }} - {{ selectedGateway.location }}</span>
                     <Tag class="w-fit">{{ selectedGateway.ip }}</Tag>
                 </div>
             </div>
 
-            <Button v-if="!defaultGateway" label="Setel sebagai default gateway" outlined class="my-2" @click.prevent="setDefaultGateway" />
-            <Button v-else label="Pilih gateway" severity="danger" outlined class="my-2" @click.prevent="resetDefaultGateway" />
-            <div v-if="selectedGateway && !scannedToken" class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
-                <span class="text-2xl text-center font-bold"> SILAHKAN SCAN KARTU <i :class="`pi pi-circle bg-red-500 border-circle ml-3 ${isListening ? 'fadeout animation-duration-1000 animation-iteration-infinite' : ''}`"></i> </span>
+            <Button v-if="!defaultGateway" label="Setel sebagai default gateway" outlined class="my-2"
+                @click.prevent="setDefaultGateway" />
+            <Button v-else label="Pilih gateway" severity="danger" outlined class="my-2"
+                @click.prevent="resetDefaultGateway" />
+            <div v-if="selectedGateway && !scannedToken"
+                class="w-full border-round border-dotted h-15rem bg-primary justify-content-center flex align-items-center mt-2">
+                <span class="text-2xl text-center font-bold"> SILAHKAN SCAN KARTU <i
+                        :class="`pi pi-circle bg-red-500 border-circle ml-3 ${isListening ? 'fadeout animation-duration-1000 animation-iteration-infinite' : ''}`"></i>
+                </span>
             </div>
             <div v-if="scannedToken && selectedGateway" class="w-full border-round border-dotted bg-primary p-3 mt-4">
                 <h3 class="text-white text-lg underline mt-2">Scan Kartu Berhasil</h3>
@@ -909,16 +1056,47 @@ const downloadTemplateService = async () => {
             </div>
             <template #footer>
                 <Button label="Batalkan" severity="danger" outlined @click.prevent="showDialogRegisterCard = false" />
-                <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined @click.prevent="scannedToken = null" />
-                <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending" @click.prevent="handleSubmitRegisterCard" />
+                <Button v-if="scannedToken" label="Ulangi" severity="warning" outlined
+                    @click.prevent="scannedToken = null" />
+                <Button label="Register" outlined :disabled="registerCardPending" :loading="registerCardPending"
+                    @click.prevent="handleSubmitRegisterCard" />
             </template>
         </Dialog>
 
-        <Dialog :closable="!importPendingPegawai" :header="importPendingPegawai ? 'Loading...' : 'Import Pegawai'" v-model:visible="showDialogImportPegawai" :style="{ width: '450px' }" :modal="true">
-            <Input type="file" :disabled="importPendingPegawai" @change="handleChangeImport" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
+        <Dialog :closable="!importPendingPegawai" :header="importPendingPegawai ? 'Loading...' : 'Import Pegawai'"
+            v-model:visible="showDialogImportPegawai" :style="{ width: '450px' }" :modal="true">
+            <Input type="file" :disabled="importPendingPegawai" @change="handleChangeImport"
+                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
             <template #footer>
-                <Button label="Batalkan" :loading="importPendingPegawai" :disabled="importPendingPegawai" outlined severity="danger" @click="showDialogImportPegawai = false" />
-                <Button label="Import" :loading="importPendingPegawai" :disabled="importPendingPegawai" outlined icon="pi pi-upload" @click.prevent="handleImportPegawai" />
+                <Button label="Batalkan" :loading="importPendingPegawai" :disabled="importPendingPegawai" outlined
+                    severity="danger" @click="showDialogImportPegawai = false" />
+                <Button label="Import" :loading="importPendingPegawai" :disabled="importPendingPegawai" outlined
+                    icon="pi pi-upload" @click.prevent="handleImportPegawai" />
+            </template>
+        </Dialog>
+        <Dialog v-model:visible="showDialogResetPassword" header="Reset Password" :modal="true" :closable="false"
+            class="p-fluid">
+            <div class="field">
+                <label for="password">Password</label>
+                <InputText id="password" v-model="dataResetPassword.password"
+                    :invalid="errorResetPassword && errorResetPassword.password" />
+            </div>
+            <p class="text-red-500" v-if="errorResetPassword && errorResetPassword.password">
+                {{ errorResetPassword.password[0] }}
+            </p>
+            <div class="field">
+                <label for="password_confirmation">Konfirmasi Password</label>
+                <InputText id="password_confirmation" v-model="dataResetPassword.password_confirmation"
+                    :invalid="errorResetPassword && errorResetPassword.password_confirmation" />
+            </div>
+            <p class="text-red-500" v-if="errorResetPassword && errorResetPassword.password_confirmation">
+                {{ errorResetPassword.password_confirmation[0] }}
+            </p>
+            <template #footer>
+                <Button label="Batalkan" :loading="resetPasswordPending" :disabled="resetPasswordPending" outlined
+                    severity="danger" @click="showDialogResetPassword = false" />
+                <Button label="Reset" :loading="resetPasswordPending" :disabled="resetPasswordPending"
+                    @click.prevent="handleResetPassword" />
             </template>
         </Dialog>
     </div>
