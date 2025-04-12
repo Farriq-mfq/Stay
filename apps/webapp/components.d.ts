@@ -36,6 +36,7 @@ declare module 'vue' {
     Password: typeof import('primevue/password')['default']
     PinConfirmationSiswa: typeof import('./src/components/Pin/PinConfirmationSiswa.vue')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
+    PullToRefreshWrapper: typeof import('./src/components/PullToRefreshWrapper.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('primevue/sidebar')['default']

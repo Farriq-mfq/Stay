@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-
+import {config} from '@/config'
 
 export const useTheme = defineStore('theme', {
     state: () => ({
@@ -360,12 +360,12 @@ export const useTheme = defineStore('theme', {
                 "color": "#9C27B0"
             }
         ],
-        currentTheme: localStorage.getItem('theme') || 'lara-light-green',
+        currentTheme: localStorage.getItem(`${config.STORAGE_KEY}/theme`) || 'aura-light-blue',
     }),
     actions: {
         setTheme(themeName) {
             this.currentTheme = themeName;
-            localStorage.setItem('theme', themeName);
+            localStorage.setItem(`${config.STORAGE_KEY}/theme`, themeName);
         }
     },
     getters: {

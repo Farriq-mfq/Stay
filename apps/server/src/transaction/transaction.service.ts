@@ -194,7 +194,7 @@ export class TransactionService {
                     fromAccountId: toAccount.id,
                     toAccountId: fromAccount.id,
                     status: 'SUCCESS',
-                    type: "DEPOSIT",
+                    type: "TRANSFER",
                     title: `Mendapatkan dari ${fromAccount.name}`,
                     note: transferTransactionDto.note,
                     fromAccountType: toAccount.accountableType,

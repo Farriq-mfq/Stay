@@ -22,3 +22,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android
+android
+# IOS
+ios
+# Web
+web
+# KeyStore
+release-key.jks
+# env
+.env.production
+.env.development
+.env.staging
+.env.android
+.env.ios
+

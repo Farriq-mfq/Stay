@@ -6,9 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:android": "pnpm build --mode android && npx cap sync android && npx cap run android --target emulator",
+    "build:apk:release": "pnpm build --mode android && npx cap sync android && cd android && gradlew assembleRelease",
+    "assets:android": "pnpm exec capacitor-assets generate --android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/app": "^7.0.1",
     "@primevue/auto-import-resolver": "^4.2.5",
     "@primevue/themes": "^4.2.5",
     "@tanstack/vue-query": "^5.53.2",
@@ -22,6 +27,7 @@
     "pinia": "^2.3.1",
     "primeflex": "^3.3.1",
     "primevue": "3.49.1",
+    "pulltorefreshjs": "^0.1.22",
     "qrcode": "^1",
     "unplugin-vue-components": "^0.27.4",
     "v-lazy-image": "^2.1.1",
@@ -30,6 +36,9 @@
     "vue-router": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "vite": "^6.0.5"
   }
