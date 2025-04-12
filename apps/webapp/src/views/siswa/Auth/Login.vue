@@ -10,7 +10,7 @@ const state = reactive({
     },
     remember: false,
     fetchUser: true,
-    staySignedIn: false,
+    staySignedIn: true,
     errors: {},
     loading: false,
     unauthorized: false,
@@ -59,6 +59,8 @@ const handleLogin = () => {
       fetchUser: state.form.fetchUser,
       staySignedIn: state.form.staySignedIn,
       redirect: "/",
+      remember: true,
+      errors: {}
     })
     .then(null, (res) => {
       errors(res.response);
@@ -76,56 +78,33 @@ const handleLogin = () => {
     <Divider align="center" />
     <div class="mb-4 mt-5">
       <FloatLabel>
-        <InputText
-          type="text"
-          class="w-full py-3"
-          placeholder="Masukan username"
-          id="username"
-          v-model="state.form.body.username"
-          :invalid="state.form.errors && state.form.errors.username"
-          :disabled="state.form.loading"
-        />
+        <InputText type="text" class="w-full py-3" placeholder="Masukan username" id="username"
+          v-model="state.form.body.username" :invalid="state.form.errors && state.form.errors.username"
+          :disabled="state.form.loading" />
         <label for="username">Username</label>
       </FloatLabel>
-      <p
-        class="text-left text-xs text-red-500"
-        v-if="state.form.errors && state.form.errors.username"
-      >
+      <p class="text-left text-xs text-red-500" v-if="state.form.errors && state.form.errors.username">
         {{ state.form.errors.username[0] }}
       </p>
     </div>
     <div class="mb-4">
       <FloatLabel>
-        <Password
-          :feedback="false"
-          id="password"
-          placeholder="Masukan password"
-          :toggleMask="true"
-          class="w-full"
-          :invalid="state.form.errors && state.form.errors.password"
-          v-model="state.form.body.password"
-          inputClass="w-full py-3"
-          :disabled="state.form.loading"
-        />
+        <Password :feedback="false" id="password" placeholder="Masukan password" :toggleMask="true" class="w-full"
+          :invalid="state.form.errors && state.form.errors.password" v-model="state.form.body.password"
+          inputClass="w-full py-3" :disabled="state.form.loading" />
         <label for="password">Password </label>
       </FloatLabel>
-      <p
-        class="text-left text-xs text-red-500"
-        v-if="state.form.errors && state.form.errors.password"
-      >
+      <p class="text-left text-xs text-red-500" v-if="state.form.errors && state.form.errors.password">
         {{ state.form.errors.password[0] }}
       </p>
     </div>
     <div class="mb-4">
-      <Button :loading="state.form.loading" type="submit" size="large" :label="state.form.loading ? 'Loading...' : 'Masuk'" class="w-full" rounded />
+      <Button :loading="state.form.loading" type="submit" size="large"
+        :label="state.form.loading ? 'Loading...' : 'Masuk'" class="w-full" rounded />
     </div>
     <div class="mb-4">
-      <span class="text-color-secondary text-sm"
-        >Jika anda lupa password silahkan hubungi admin</span
-      >
-      <router-link href="/" class="text-primary ml-1 text-sm"
-        >Hubungi</router-link
-      >
+      <span class="text-color-secondary text-sm">Jika anda lupa password silahkan hubungi admin</span>
+      <router-link href="/" class="text-primary ml-1 text-sm">Hubungi</router-link>
     </div>
   </form>
 </template>

@@ -10,7 +10,7 @@ const state = reactive({
     },
     remember: false,
     fetchUser: true,
-    staySignedIn: false,
+    staySignedIn: true,
     errors: {},
     loading: false,
     unauthorized: false,
@@ -59,6 +59,8 @@ const handleLogin = () => {
       fetchUser: state.form.fetchUser,
       staySignedIn: state.form.staySignedIn,
       redirect: "/",
+      remember: true,
+      errors: {}
     })
     .then(null, (res) => {
       errors(res.response);
