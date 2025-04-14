@@ -102,9 +102,9 @@ const handlePresenceUpdate = (data) => {
     setTimeout(turnOnListener, 100);
     nextTick(() => {
         // scrollToBottom();
-        if (dataPresences.value.length > 7) {
-            focusRow(data.siswaId);
-        }
+        // if (dataPresences.value.length > 7) {
+        //     focusRow(data.siswaId);
+        // }
         lastFocusedRow.value = data.siswaId;
         setTimeout(() => {
             successPresence.value = null;

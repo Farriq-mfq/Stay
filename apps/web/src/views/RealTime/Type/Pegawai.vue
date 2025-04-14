@@ -92,7 +92,7 @@ const handlePresenceUpdate = (data) => {
     setTimeout(turnOnListener, 100);
 
     nextTick(() => {
-        focusRow(data.pegawaiId);
+        // focusRow(data.pegawaiId);
         setTimeout(() => {
             successPresence.value = null;
         }, 2000);

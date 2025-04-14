@@ -51,6 +51,7 @@ model pegawai {
   presences                 presences_pegawai[]
   accountId                 Int?                @unique
   account                   account?            @relation(fields: [accountId], references: [id])
+  schedules                 schedules[]
 }
 
 // enum RoleUser {
@@ -107,25 +108,27 @@ enum SessionRoleType {
 }
 
 model presence_sessions {
-  id                Int                 @id @default(autoincrement())
-  name              String
-  qrcode            String              @unique @default(cuid())
-  allow_twice       Boolean?            @default(false)
-  start_time        String?
-  end_time          String?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  gateways          gateways[]
-  presences         presences[]
+  id          Int         @id @default(autoincrement())
+  name        String
+  qrcode      String      @unique @default(cuid())
+  allow_twice Boolean?    @default(false)
+  start_time  String?
+  end_time    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  gateways    gateways[]
+  presences   presences[]
   // change to group
   // rombel            String?
-  group             String?
-  // plan by allowed_role
+  group       String?
+
   session_role_type SessionRoleType
   presences_pegawai presences_pegawai[]
 
-  meeting_session    meeting_sessions? @relation(fields: [meeting_sessionsId], references: [id])
-  meeting_sessionsId Int?              @unique
+  meeting_session               meeting_sessions?              @relation(fields: [meeting_sessionsId], references: [id])
+  meeting_sessionsId            Int?                           @unique
+  presence_sessions_by_location presence_sessions_by_location?
+  auto_read_presence            Boolean?                       @default(false) // auto read presence by location
 
   @@index([qrcode])
 }
@@ -271,6 +274,7 @@ enum TransactionType {
   WITHDRAW
   TRANSFER
   PAYMENT
+  AUTODEBET
 }
 
 enum TransactionStatus {
@@ -360,3 +364,84 @@ model connected_clients {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// presence by location
+model presence_sessions_by_location {
+  id                  Int               @id @default(autoincrement())
+  latitude            Float
+  longitude           Float
+  distance            Float
+  presence_sessions   presence_sessions @relation(fields: [presence_sessionsId], references: [id], onDelete: Cascade)
+  presence_sessionsId Int               @unique
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([latitude, longitude])
+}
+
+// academic 
+model subjects {
+  id        Int         @id @default(autoincrement())
+  name      String
+  code      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  schedules schedules[]
+}
+
+model schedules {
+  id          Int      @id @default(autoincrement())
+  subjects    subjects @relation(fields: [subjectsId], references: [id], onDelete: Restrict)
+  subjectsId  Int
+  pegawai     pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+  pegawaiId   Int
+  rombel      String
+  day_of_week Int // 1-7
+  startTime   String
+  endTime     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// // journal employee and teaching
+// model journal_employee {
+//   id          Int      @id @default(autoincrement())
+//   pegawai     pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+//   pegawaiId   Int
+//   description String   @db.Text
+//   date        DateTime
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+
+// model journal_teaching {
+//   id          Int      @id @default(autoincrement())
+//   pegawai     pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+//   pegawaiId   Int
+//   description String   @db.Text // isi uraian kegiatan
+//   rombel      String // rombel yang diajar
+//   start_time  String // waktu mulai
+//   end_time    String // waktu selesai
+//   date        DateTime
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+
+// enum ClassAttendanceStatus {
+//   HADIR
+//   SAKIT
+//   IZIN
+//   ALPHA
+// }
+
+// // class attendance
+// // absen ini di lakukan oleh pegawai (guru)
+// model class_attendance {
+//   id        Int                   @id @default(autoincrement())
+//   siswa     siswa                 @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+//   siswaId   Int
+//   status    ClassAttendanceStatus
+//   date      DateTime
+//   createdAt DateTime              @default(now()) // tanggal absen
+//   updatedAt DateTime              @updatedAt
+// }
