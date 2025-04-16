@@ -137,6 +137,7 @@ enum PresenceMethod {
   card
   qrcode
   manual
+  location
   other
 }
 

@@ -51,9 +51,6 @@ export default (app) => {
     })
 
     router.beforeEach(loadLayoutMiddleware)
-    if (checkRole && role === "PEGAWAI") {
-        router.beforeEach(groupMiddleware)
-    }
     app.router = router
     app.config.globalProperties.$router = router;
 

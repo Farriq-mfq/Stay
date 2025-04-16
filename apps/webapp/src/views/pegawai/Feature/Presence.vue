@@ -1,22 +1,32 @@
 <script setup>
 import Clock from '@/components/Clock.vue';
 import { getDetailLocation, isWithinRange } from '@/utils/location.js';
-import { format } from 'date-fns';
+import { useMutation, useQuery } from '@tanstack/vue-query';
+import { format, isAfter } from 'date-fns';
 import { id } from 'date-fns/locale';
 import Button from 'primevue/button';
-import { computed, onMounted, ref, watch } from 'vue';
-
+import Message from 'primevue/message';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref, watch, getCurrentInstance, onUnmounted } from 'vue';
+const { proxy } = getCurrentInstance()
 const currentDate = new Date();
 const accurate = ref(false)
 const locationLoading = ref(false)
-const locationMessage = ref('Mendeteksi lokasi...')
+const locationMessage = ref('')
 const refreshLocation = ref(false)
 const currentLocation = ref(null)
-
+const axios = proxy.axios
+const toast = useToast()
 const formattedCurrentDate = computed(() => format(currentDate, 'EEEE, dd MMMM yyyy', { locale: id }))
-const dummyLocation = ref({
-    latitude: -6.871341427,
-    longitude: 109.6614411
+
+const getLocationService = async () => {
+    const response = await axios.get('/pegawai/modules/presence/location')
+    return response.data
+}
+
+const { data: sessionLocation, isLoading, refetch } = useQuery({
+    queryKey: ['getLocationService'],
+    queryFn: getLocationService,
 })
 
 const getCurrentLocation = () => {
@@ -78,12 +88,17 @@ const getCurrentLocation = () => {
 }
 
 onMounted(() => {
-    getCurrentLocation()
+    if (!(sessionLocation.value && sessionLocation.value.data && sessionLocation.value.data.presence && sessionLocation.value.data.presence.enter_time && sessionLocation.value.data.presence.exit_time)) {
+        getCurrentLocation()
+    } else {
+        refreshLocation.value = true
+    }
 })
 
-watch(() => currentLocation.value, (location) => {
-    if (location) {
-        if (isWithinRange(dummyLocation.value, currentLocation.value, 500)) {
+watch([() => currentLocation.value, () => sessionLocation.value], ([location, session]) => {
+    if (location && session && session.data) {
+        const compareSession = session.data.session.presence_sessions_by_location
+        if (isWithinRange(compareSession, currentLocation.value, compareSession.distance)) {
             accurate.value = true
         }
     }
@@ -100,6 +115,58 @@ const handlerRefreshLocation = () => {
             }
         });
 }
+const now = format(Date.now(), "yyyy-MM-dd");
+
+const createPresenceService = async (data) => {
+    const response = await axios.post("/pegawai/modules/presence/location", {
+        latitude: +data.latitude,
+        longitude: +data.longitude
+    })
+    return response.data
+}
+const { mutate: createPresence, isPending } = useMutation({
+    mutationKey: ['createPresenceService'],
+    mutationFn: createPresenceService
+})
+const errorMessage = ref('')
+const handleSubmit = async () => {
+    errorMessage.value = ''
+    await createPresence(currentLocation.value, {
+        onSuccess: () => {
+            accurate.value = false
+            getCurrentLocation()
+            refetch()
+            toast.add({
+                summary: "Berhasil",
+                detail: "Kehadiran Tercatat",
+                severity: 'success',
+                life: 2000
+            })
+        },
+        onError: (err) => {
+            const errResponse = err.response
+            if (errResponse.status === 400) {
+                if (errResponse.data.message) {
+                    errorMessage.value = errResponse.data.message
+                } else {
+                    toast.add({
+                        summary: "Terjadi Kendala",
+                        detail: "Sepertinya ada yang perlu dicek lagi",
+                        severity: 'error',
+                        life: 2000
+                    })
+                }
+            } else {
+                toast.add({
+                    summary: "Terjadi Kendala",
+                    detail: "Sepertinya ada yang perlu dicek lagi",
+                    severity: 'error',
+                    life: 2000
+                })
+            }
+        }
+    })
+}
 
 </script>
 
@@ -113,13 +180,42 @@ const handlerRefreshLocation = () => {
                         {{ formattedCurrentDate }}
                     </h2>
                     <Clock />
+                    <div v-if="!isLoading">
+                        <p class="text-sm text-color-secondary">{{ sessionLocation.data.session.name }}</p>
+                        <div class="flex justify-content-center align-items-center flex-column gap-3 mt-3">
+                            <div
+                                class="flex align-items-center gap-2 surface-card border-1 surface-border border-round p-2 px-3">
+                                <i class="pi pi-sign-in text-green-500"></i>
+                                <span class="text-sm">
+                                    <span class="font-medium">Jam Datang : </span>
+                                    <span class="text-primary ml-1">{{ sessionLocation.data.session.start_time }}</span>
+                                </span>
+                            </div>
+                            <div
+                                class="flex align-items-center gap-2 surface-card border-1 surface-border border-round p-2 px-3">
+                                <i class="pi pi-sign-out text-red-500"></i>
+                                <span class="text-sm">
+                                    <span class="font-medium">Jam Pulang : </span>
+                                    <span class="text-primary ml-1">{{ sessionLocation.data.session.end_time }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="isLoading">
+                        <Skeleton class="h-2rem mt-2" />
+                        <Skeleton class="h-2rem mt-2" />
+                        <Skeleton class="h-2rem mt-2" />
+                    </div>
                 </div>
             </div>
-
+            <Message v-if="errorMessage" severity="error" :closable="false">
+                {{ errorMessage }}
+            </Message>
             <div class="surface-ground border-round pb-4 pt-2 px-4 mb-4" :class="{
                 'surface-border border-1': !accurate,
                 'border-green-500 border-2': accurate
-            }">
+            }"
+                v-if="!(sessionLocation && sessionLocation.data && sessionLocation.data.presence && sessionLocation.data.presence.enter_time && sessionLocation.data.presence.exit_time)">
                 <div class="flex flex-column">
 
                     <h3 class="text-lg font-medium text-900 text-center">
@@ -160,37 +256,104 @@ const handlerRefreshLocation = () => {
                     <i class="pi pi-map-marker text-primary text-center text-5xl bounce-animation mt-3"
                         v-if="locationLoading"></i>
                     <Button outlined class="mt-4" v-if="refreshLocation && !locationLoading"
-                        @click="handlerRefreshLocation" label="Muat Ulang" />
+                        @click="handlerRefreshLocation" label="Muat Lokasi" />
                     <Button outlined v-if="currentLocation && !locationLoading && !accurate" class="mt-4"
-                        @click="getCurrentLocation" label="Ulangi" />
+                        @click="getCurrentLocation" label="Muat Ulang Lokasi" />
                 </div>
             </div>
 
-            <div class="fixed bottom-0 left-0 right-0 p-4 surface-ground border-1 surface-border shadow-lg mx-auto w-full"
-                style="max-width: 414px;" v-if="accurate">
-                <Button class="w-full py-4 flex justify-content-center align-items-center gap-2">
-                    <i class="pi pi-map-marker"></i> Check In
+            <div class="fixed bottom-0 left-0 right-0 p-3 surface-ground border-1 surface-border shadow-lg mx-auto w-full"
+                style="max-width: 414px;"
+                v-if="accurate && sessionLocation && sessionLocation.data && !sessionLocation.data.presence">
+                <Button :disabled="locationLoading || isPending" @click.prevent="handleSubmit"
+                    class="w-full p-3 flex justify-content-center align-items-center gap-2">
+                    <i class="pi pi-sign-in"></i> <span>
+                        Datang
+                    </span>
+                </Button>
+            </div>
+            <div class="fixed bottom-0 left-0 right-0 p-3 surface-ground border-1 surface-border shadow-lg mx-auto w-full"
+                style="max-width: 414px;"
+                v-if="accurate && sessionLocation && sessionLocation.data && sessionLocation.data.presence && sessionLocation.data.presence.enter_time && !sessionLocation.data.presence.exit_time">
+                <Button :disabled="locationLoading || isPending" @click.prevent="handleSubmit"
+                    class="w-full p-3 flex justify-content-center align-items-center gap-2">
+                    <i class="pi pi-sign-out"></i>
+                    <span>
+                        Pulang
+                    </span>
                 </Button>
             </div>
 
-            <div class="surface-ground border-1 surface-border border-round pb-4 px-4 pt-2 mb-8">
-                <h3 class="text-lg font-medium text-900 mb-4">Riwayat Kehadiran Hari ini</h3>
+            <div class="surface-ground border-1 surface-border border-round pb-4 px-4 pt-2 mb-8"
+                v-if="sessionLocation && sessionLocation.data && sessionLocation.data.presence">
+                <h3 class="text-lg font-medium text-900 mb-4 flex align-items-center gap-2">
+                    Kehadiran Anda Hari Ini
+                </h3>
                 <div class="flex flex-column gap-3">
-                    <div class="flex align-items-center justify-content-between p-3 surface-card border-round">
-                        <div>
-                            <p class="font-medium text-900">Check In</p>
-                            <p class="text-sm text-600">08:00 - 12 Jan 2024</p>
+                    <div
+                        class="flex flex-column gap-3 justify-content-between p-3 border-1 surface-border border-round">
+                        <div class="flex align-items-center gap-3">
+                            <div class="bg-green-500 border-round p-2">
+                                <i class="pi pi-sign-in text-white"></i>
+                            </div>
+                            <div class="flex gap-2 flex-column">
+                                <p class="font-medium text-900 m-0">Datang</p>
+                                <p class="text-sm text-600 m-0">
+                                    {{ format(new Date(sessionLocation.data.presence.enter_time),
+                                        "HH:mm:ss - dd MMM yyyy",
+                                        {
+                                            locale: id
+                                        })
+                                    }}
+                                </p>
+                                <div class="flex align-items-center gap-1">
+                                    <i :class="[
+                                        isAfter(new Date(sessionLocation.data.presence.enter_time),
+                                            format(`${now} ${sessionLocation.data.session.start_time}`, 'yyyy-MM-dd HH:mm:ss'))
+                                            ? 'pi pi-times-circle text-red-500'
+                                            : 'pi pi-check-circle text-green-500'
+                                    ]"></i>
+                                    <span class="text-sm font-medium" :class="{
+                                        'text-red-500': isAfter(new Date(sessionLocation.data.presence.enter_time),
+                                            format(`${now} ${sessionLocation.data.session.start_time}`, 'yyyy-MM-dd HH:mm:ss')),
+                                        'text-green-500': !isAfter(new Date(sessionLocation.data.presence.enter_time),
+                                            format(`${now} ${sessionLocation.data.session.start_time}`, 'yyyy-MM-dd HH:mm:ss'))
+                                    }">
+                                        {{ isAfter(new Date(sessionLocation.data.presence.enter_time),
+                                            format(`${now} ${sessionLocation.data.session.start_time}`,
+                                                'yyyy-MM-dd HH: mm: ss'))
+                                            ? "Terlambat"
+                                            : "Tepat Waktu" }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="text-green-500">Tepat Waktu</span>
                     </div>
-                    <div class="flex align-items-center justify-content-between p-3 surface-card border-round">
-                        <div>
-                            <p class="font-medium text-900">Check Out</p>
-                            <p class="text-sm text-600">17:00 - 12 Jan 2024</p>
+                    <div class="flex align-items-center justify-content-between  p-3 border-1 surface-border border-round"
+                        v-if="sessionLocation.data.presence.exit_time">
+                        <div class="flex align-items-center gap-3">
+                            <div class="bg-red-500 border-round p-2">
+                                <i class="pi pi-sign-out text-white"></i>
+                            </div>
+                            <div class="flex flex-column gap-2">
+                                <p class="font-medium text-900 m-0">Pulang</p>
+                                <p class="text-sm text-600 m-0">
+                                    {{ format(new Date(sessionLocation.data.presence.exit_time),
+                                        "HH:mm:ss - dd MMM yyyy",
+                                        {
+                                            locale: id
+                                        })
+                                    }}
+                                </p>
+                            </div>
                         </div>
-                        <!-- <span class="text-green-500">Tepat Waktu</span> -->
-                        <span class="text-red-500">Terlambat</span>
                     </div>
+                </div>
+            </div>
+            <div class="surface-ground border-1 surface-border border-round" v-else>
+                <div class="text-center my-4">
+                    <i class="pi pi-folder-open text-primary mr-2"></i>
+                    <span class="text-sm">Tidak ada Riwayat Kehadiran Hari ini</span>
                 </div>
             </div>
         </div>

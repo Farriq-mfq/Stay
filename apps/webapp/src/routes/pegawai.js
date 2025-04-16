@@ -1,4 +1,5 @@
 import Login from "@/views/pegawai/Auth/Login.vue"
+import { groupMiddleware } from "./middleware/groupMiddleware";
 
 /**
  * @type {import('vue-router').RouteRecordRaw[]}
@@ -136,7 +137,8 @@ const routes = [
         component: () => import("@/views/pegawai/Feature/Presence.vue"),
         meta: {
             layout: "PegawaiMainLayout",
-        }
+        },
+        beforeEnter: [groupMiddleware]
     },
     {
         path: '/login',

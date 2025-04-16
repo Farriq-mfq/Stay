@@ -1,7 +1,8 @@
-import { Controller, Get, Param, ParseIntPipe, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { PegawaiModulesPresenceService } from "../services/presence.modules.service";
 import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
 import { Request } from "express";
+import { PresenceLocationDto } from "../dto/presence.dto";
 
 @Controller('pegawai/modules/presence')
 @UseGuards(AccessTokenPegawaiGuard)
@@ -17,11 +18,28 @@ export class PegawaiModulesPresenceController {
     ) {
         return await this.pegawaiModulesPresenceService.findAll(req.user, limit, after, before, search);
     }
+
+    @Get('/location')
+    async readCurrentSessionAndPresence(
+        @Req() req: Request,
+    ) {
+        return await this.pegawaiModulesPresenceService.readCurrentSessionAndPresence(req.user)
+    }
+
     @Get('/:id')
     async getDetailPresence(
         @Req() req: Request,
         @Param('id', new ParseIntPipe()) id: string
     ) {
         return await this.pegawaiModulesPresenceService.find(req.user, id);
+    }
+
+
+    @Post('/location')
+    async createPresenceByLocation(
+        @Req() req: Request,
+        @Body() presenceLocationDto: PresenceLocationDto
+    ) {
+        return await this.pegawaiModulesPresenceService.createPresenceByLocation(req.user, presenceLocationDto)
     }
 }
