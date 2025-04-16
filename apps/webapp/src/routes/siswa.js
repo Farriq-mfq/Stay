@@ -161,17 +161,11 @@ const routes = [
         path: '/:pathNotFound(.*)*',
         name: 'not-found',
         component: () => import('@/views/Errors/NotFound.vue'),
-        meta: {
-            layout: 'SiswaMainLayout',
-        }
     },
     {
         path: '/unavailable',
         name: 'unavailable',
         component: () => import('@/views/Errors/Unvailable.vue'),
-        meta: {
-            layout: 'SiswaMainLayout',
-        }
     }
 ]
 

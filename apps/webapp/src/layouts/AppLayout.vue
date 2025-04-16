@@ -1,18 +1,15 @@
 <script setup>
-// import "primevue/resources/themes/lara-light-green/theme.css";
-// primevue/resources/themes/lara-light-green/theme.css
-
-// import { useScreenOrientation } from "@vueuse/core";
+import { useScreenOrientation } from "@vueuse/core";
 import { useTheme } from "@/store/theme";
 import { useToast } from "primevue/usetoast";
-import { onMounted, onUnmounted, ref, watch } from "vue";
-// const { lockOrientation } = useScreenOrientation();
-
-// lockOrientation("portrait-primary");
+import { inject, onMounted, onUnmounted, ref, watch } from "vue";
+import Splash from '@/components/Splash.vue'
 
 const isOnline = ref(navigator.onLine);
 const theme = useTheme();
 const isJavaScriptEnabled = ref(true);
+const showSplash = ref(true);
+const auth = inject('auth')
 
 const updateOnlineStatus = () => {
   isOnline.value = navigator.onLine;
@@ -21,14 +18,24 @@ const updateOnlineStatus = () => {
 onMounted(() => {
   window.addEventListener("online", updateOnlineStatus);
   window.addEventListener("offline", updateOnlineStatus);
-  // Check if JavaScript is enabled
   isJavaScriptEnabled.value = true;
+  if (auth) {
+    auth.load().then(() => {
+      showSplash.value = false;
+    })
+  } else {
+    setTimeout(() => {
+      showSplash.value = false;
+    }, 1000);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener("online", updateOnlineStatus);
   window.removeEventListener("offline", updateOnlineStatus);
 });
+
+
 const toast = useToast();
 watch(isOnline, (val) => {
   if (val) {
@@ -58,13 +65,38 @@ watch(isOnline, (val) => {
       </div>
     </div>
   </noscript>
-  <div v-if="isJavaScriptEnabled" class="surface-ground relative min-h-screen">
-    <link id="theme-link" rel="stylesheet" :href="`/themes/${theme.getCurrentTheme}/theme.css`" />
-    <component :is="$route.meta.layoutComponent">
-      <slot></slot>
-    </component>
-    <Toast position="top-center" class="px-3" style="z-index: 9999 !important" />
-    <ConfirmDialog class="px-3"></ConfirmDialog>
-    <!-- <ThemeSwitcher /> -->
-  </div>
+  <link id="theme-link" rel="stylesheet" :href="`/themes/${theme.getCurrentTheme}/theme.css`" />
+
+  <Transition name="fade" mode="out-in">
+    <div v-if="showSplash" class="fixed top-0 left-0 w-full h-full z-5">
+      <Splash />
+    </div>
+  </Transition>
+
+  <Transition name="fade" mode="out-in">
+    <div v-if="!showSplash" v-show="isJavaScriptEnabled" class="surface-ground relative min-h-screen">
+      <component :is="$route.meta.layoutComponent">
+        <slot></slot>
+      </component>
+      <Toast position="top-center" class="px-3" style="z-index: 9999 !important" />
+      <ConfirmDialog class="px-3"></ConfirmDialog>
+    </div>
+  </Transition>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+</style>

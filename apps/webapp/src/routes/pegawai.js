@@ -131,6 +131,15 @@ const routes = [
         }
     },
     {
+        path: "/feature/presence",
+        name: "feature-presence",
+        component: () => import("@/views/pegawai/Feature/Presence.vue"),
+        meta: {
+            layout: "PegawaiMainLayout",
+
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login,
@@ -143,17 +152,12 @@ const routes = [
         path: '/:pathNotFound(.*)*',
         name: 'not-found',
         component: () => import('@/views/Errors/NotFound.vue'),
-        meta: {
-            title: "404"
-        }
+
     },
     {
         path: '/unavailable',
         name: 'unavailable',
         component: () => import('@/views/Errors/Unvailable.vue'),
-        meta: {
-            layout: 'PegawaiMainLayout',
-        }
     }
 ]
 

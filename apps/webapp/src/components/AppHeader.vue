@@ -35,7 +35,7 @@ onMounted(() => {
 const auth = inject("auth");
 
 const profilePict = computed(() => {
-  return auth.user().profile_picture;
+  return auth.ready() ? auth.user().profile_picture : null;
 });
 
 const router = useRouter();
