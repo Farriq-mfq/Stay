@@ -13,3 +13,20 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 
 ## Requester
 https://github.com/Farriq-mfq/requester-rfid
+
+
+## CARA INSTALL
+### LINUX 
+#### Server
+1. install g++
+   ```bash
+   apt install g++
+   ```
+2. install nvm
+   ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+   ```
+3. install pnpm
+   ```bash
+   corepack enable
+   ```
