@@ -30,3 +30,7 @@ https://github.com/Farriq-mfq/requester-rfid
    ```bash
    corepack enable
    ```
+3. install build-essential
+   ```bash
+   apt install build-essential
+   ```
