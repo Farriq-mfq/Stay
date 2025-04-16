@@ -136,7 +136,6 @@ const routes = [
         component: () => import("@/views/pegawai/Feature/Presence.vue"),
         meta: {
             layout: "PegawaiMainLayout",
-
         }
     },
     {
@@ -157,7 +156,7 @@ const routes = [
     {
         path: '/unavailable',
         name: 'unavailable',
-        component: () => import('@/views/Errors/Unvailable.vue'),
+        component: () => import('@/views/Errors/Unavailable.vue'),
     }
 ]
 

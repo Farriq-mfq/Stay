@@ -3,9 +3,10 @@
 Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 
 ## TODO
-- [ ] FIX Realtime Presence Card
-- [ ] Add Feature AutoDebet
+- [X] FIX Realtime Presence Card
+- [X] Add Splash Screen webapp
 - [ ] Add Feature Presence By Location
+- [ ] Add Feature AutoDebet
 - [ ] Add Feature Journal Employee and Teaching
 - [ ] Guard Filter Group
 - [ ] Notification firebase

@@ -1,8 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware'
-import { checkRoleSelectedMiddleware, ROLES } from './middleware/role-selected'
-import { config } from '../config';
+import { createRouter, createWebHistory } from 'vue-router';
 import { pegawaiRouter, siswaRouter } from '.';
+import { config } from '../config';
+import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware';
+import { groupMiddleware } from './middleware/groupMiddleware';
+import { ROLES } from './middleware/role-selected';
 
 const role = localStorage.getItem(`${config.STORAGE_KEY}/role`);
 
@@ -43,19 +44,16 @@ if (checkRole && role === "PEGAWAI") {
 
 
 export default (app) => {
-    // router.beforeEach((to, from, next) => {
-    //     const title = to.meta.title;
-    //     if (title) {
-    //         document.title = `${title} - ${config.app_name}`;
-    //     }
-    //     next();
-    // });
+
     const router = createRouter({
         history: createWebHistory(),
         routes
     })
 
     router.beforeEach(loadLayoutMiddleware)
+    if (checkRole && role === "PEGAWAI") {
+        router.beforeEach(groupMiddleware)
+    }
     app.router = router
     app.config.globalProperties.$router = router;
 
