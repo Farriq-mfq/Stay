@@ -141,6 +141,15 @@ const routes = [
         beforeEnter: [groupMiddleware]
     },
     {
+        path: "/feature/leave",
+        name: "feature-leave",
+        component: () => import("@/views/pegawai/Feature/Leave.vue"),
+        meta: {
+            layout: "PegawaiMainLayout",
+        },
+        beforeEnter: [groupMiddleware]
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login,
