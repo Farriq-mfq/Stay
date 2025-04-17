@@ -819,12 +819,10 @@ const confirmResetLogin = (event, data) => {
                                 <Button icon="pi pi-id-card" v-if="$can('pegawai:rfid-register')"
                                     @click.prevent="handleShowDialogRegisterCard(data)" />
                                 <Button icon="pi pi-key" severity="help" v-tooltip.top="'Reset Password'"
-                                    @click.prevent="handleShowDialogResetPassword(data)" />
+                                    @click.prevent="handleShowDialogResetPassword(data)" v-if="$can('pegawai:update-password')" />
                                 <Button icon="pi pi-sign-out" severity="warning" v-tooltip.top="'Logout'"
-                                    v-if="data.refreshToken" @click.prevent="confirmResetLogin($event, data)"
-                                    :loading="resetLoginPending" />
-                                <!-- && $can('pegawai:reset-login') -->
-                                <!-- v-if="$can('pegawai:update-password')" -->
+                                    v-if="data.refreshToken && $can('pegawai:reset-login')" @click.prevent="confirmResetLogin($event, data)"
+                                    :loading="resetLoginPending"  />
                             </div>
                         </template>
                     </Column>

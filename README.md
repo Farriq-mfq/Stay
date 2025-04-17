@@ -5,14 +5,17 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 ## TODO
 - [X] FIX Realtime Presence Card
 - [X] Add Splash Screen webapp
-- [ ] Add Feature Presence By Location
+- [X] Add Feature Presence By Location
+- [ ] Leave Feature (Izin)
+- [ ] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
+- [ ] Trasaction Report
 - [ ] Add Feature Journal Employee and Teaching
 - [ ] Guard Filter Group
 - [ ] Notification firebase
-- [ ] Update Menu
+- [X] Update Menu
 
-## Requester
+## REQUESTER RFID READER
 https://github.com/Farriq-mfq/requester-rfid
 
 

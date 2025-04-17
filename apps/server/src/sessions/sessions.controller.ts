@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, UseGuards, ParseEnumPipe } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
-import { CreateSessionDto } from './dto/create-session.dto';
+import { CreateSessionDto, SelectLocationDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { ApiTags } from '@nestjs/swagger';
@@ -41,6 +41,22 @@ export class SessionsController {
   @Permissions('sessions:update')
   update(@Param('id') id: string, @Body() updateSessionDto: UpdateSessionDto) {
     return this.sessionsService.update(+id, updateSessionDto);
+  }
+
+  @Patch('/:id/auto-read')
+  // @Permissions('sessions:delete')
+  setAutoRead(@Param('id') id: string) {
+    return this.sessionsService.setAutoRead(+id);
+  }
+  @Post('/:id/select-location')
+  // @Permissions('sessions:delete')
+  selectLocation(@Param('id') id: string, @Body() selectLocationDto: SelectLocationDto) {
+    return this.sessionsService.selectLocation(+id, selectLocationDto);
+  }
+  @Delete('/:id/remove-location')
+  // @Permissions('sessions:delete')
+  removeLocation(@Param('id') id: string) {
+    return this.sessionsService.removeLocation(+id);
   }
 
   @Delete(':id')

@@ -97,7 +97,6 @@ export class PegawaiModulesPresenceService {
 
         const session = await this.prismaService.client.presence_sessions.findFirst({
             where: {
-                allow_twice: true,
                 session_role_type: 'PEGAWAI',
                 auto_read_presence: true,
                 start_time: {
@@ -148,7 +147,6 @@ export class PegawaiModulesPresenceService {
 
             const session = await tx.presence_sessions.findFirst({
                 where: {
-                    allow_twice: true,
                     session_role_type: 'PEGAWAI',
                     auto_read_presence: true,
                     start_time: {
@@ -187,45 +185,49 @@ export class PegawaiModulesPresenceService {
                 })
 
                 if (checkPresence) {
-                    const checkPresenceHaveExitTime = await tx.presences_pegawai.findFirst({
-                        where: {
-                            pegawaiId: pegawai.id,
-                            presence_sessionsId: session.id,
-                            enter_time: {
-                                gte: new Date(new Date().setHours(0, 0, 0, 0))
-                            },
-                            exit_time: {
-                                gte: new Date(new Date().setHours(0, 0, 0, 0))
-                            },
-                            method: 'location'
-                        }
-                    })
+                    if (session.allow_twice) {
+                        const checkPresenceHaveExitTime = await tx.presences_pegawai.findFirst({
+                            where: {
+                                pegawaiId: pegawai.id,
+                                presence_sessionsId: session.id,
+                                enter_time: {
+                                    gte: new Date(new Date().setHours(0, 0, 0, 0))
+                                },
+                                exit_time: {
+                                    gte: new Date(new Date().setHours(0, 0, 0, 0))
+                                },
+                                method: 'location'
+                            }
+                        })
 
-                    if (checkPresenceHaveExitTime) {
-                        throw new BadRequestException("Presensi Anda Sudah Lengkap")
-                    } else {
-                        const parseGroup = session.group ? JSON.parse(session.group) : [];
-                        if (parseGroup.length > 0) {
-                            if (!parseGroup.includes(pegawai.group)) {
-                                throw new BadRequestException("ANDA TIDAK DIIZINKAN PRESENSI")
+                        if (checkPresenceHaveExitTime) {
+                            throw new BadRequestException("Presensi Anda Sudah Lengkap")
+                        } else {
+                            const parseGroup = session.group ? JSON.parse(session.group) : [];
+                            if (parseGroup.length > 0) {
+                                if (!parseGroup.includes(pegawai.group)) {
+                                    throw new BadRequestException("ANDA TIDAK DIIZINKAN PRESENSI")
+                                }
+                            }
+                            const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+                            const now = format(Date.now(), "yyyy-MM-dd");
+                            const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+                            if (isAfter(current_time, parseEndTime)) {
+                                const updateExitTime = await tx.presences_pegawai.update({
+                                    where: {
+                                        id: checkPresence.id,
+                                    },
+                                    data: {
+                                        exit_time: new Date()
+                                    },
+                                })
+                                return updateExitTime
+                            } else {
+                                throw new BadRequestException(`Presensi Pulang Dimulai Pukul ${parseEndTime.split(" ")[1]}`)
                             }
                         }
-                        const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-                        const now = format(Date.now(), "yyyy-MM-dd");
-                        const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
-                        if (isAfter(current_time, parseEndTime)) {
-                            const updateExitTime = await tx.presences_pegawai.update({
-                                where: {
-                                    id: checkPresence.id,
-                                },
-                                data: {
-                                    exit_time: new Date()
-                                },
-                            })
-                            return updateExitTime
-                        } else {
-                            throw new BadRequestException(`Presensi Pulang Dimulai Pukul ${parseEndTime.split(" ")[1]}`)
-                        }
+                    } else {
+                        throw new BadRequestException("Presensi Anda Sudah Lengkap")
                     }
                 } else {
                     const parseGroup = session.group ? JSON.parse(session.group) : [];

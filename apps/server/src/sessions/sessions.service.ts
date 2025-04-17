@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { CreateSessionDto } from './dto/create-session.dto';
+import { CreateSessionDto, SelectLocationDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { SiswaService } from 'src/siswa/siswa.service';
 import { PegawaiService } from 'src/pegawai/pegawai.service';
@@ -130,6 +130,7 @@ export class SessionsService {
       },
       include: {
         meeting_session: true,
+        presence_sessions_by_location: true,
         gateways: {
           select: {
             id: true,
@@ -280,5 +281,94 @@ export class SessionsService {
         id
       }
     });
+  }
+  async setAutoRead(id: number) {
+    return await this.prismaService.client.$transaction(async (tx) => {
+      const session = await tx.presence_sessions.findUniqueOrThrow({
+        where: {
+          id
+        },
+        include: {
+          presence_sessions_by_location: true
+        }
+      })
+
+      if (!session.presence_sessions_by_location) throw new BadRequestException("Tentukan Titik Koordinat Terlebih Dahulu")
+
+      await tx.presence_sessions.updateMany({
+        where: {
+          id: {
+            not: session.id,
+          },
+          session_role_type: session.session_role_type
+        },
+        data: {
+          auto_read_presence: false
+        }
+      })
+
+      return await tx.presence_sessions.update({
+        where: {
+          id: session.id,
+        },
+        data: {
+          auto_read_presence: true
+        }
+      })
+    })
+  }
+  async selectLocation(id: number, selectLocationDto: SelectLocationDto) {
+    return await this.prismaService.client.$transaction(async (tx) => {
+      const session = await tx.presence_sessions.findUniqueOrThrow({
+        where: {
+          id
+        },
+        include: {
+          presence_sessions_by_location: true
+        }
+      })
+
+      if (session.presence_sessions_by_location) {
+        return await tx.presence_sessions_by_location.update({
+          where: {
+            id: session.presence_sessions_by_location.id
+          },
+          data: {
+            latitude: selectLocationDto.latitude,
+            longitude: selectLocationDto.longitude,
+            distance: selectLocationDto.distance
+          },
+        })
+      } else {
+        return await tx.presence_sessions_by_location.create({
+          data: {
+            presence_sessionsId: session.id,
+            latitude: selectLocationDto.latitude,
+            longitude: selectLocationDto.longitude,
+            distance: selectLocationDto.distance
+          },
+        })
+      }
+
+    })
+  }
+  async removeLocation(id: number) {
+    return await this.prismaService.client.$transaction(async (tx) => {
+      const session = await tx.presence_sessions.findUniqueOrThrow({
+        where: {
+          id
+        },
+        include: {
+          presence_sessions_by_location: true
+        }
+      })
+      if (!session.presence_sessions_by_location) throw new BadRequestException()
+
+      return await tx.presence_sessions_by_location.delete({
+        where: {
+          id: session.presence_sessions_by_location.id
+        }
+      })
+    })
   }
 }

@@ -1,6 +1,6 @@
 import { SessionRoleType } from "@prisma/client"
 import { Transform, TransformFnParams } from "class-transformer"
-import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { IsArray, IsBoolean, IsEnum, IsLatitude, IsLongitude, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 import { IsRangeTime } from "src/validators/is-range-time.validator"
 import { IsTime } from "src/validators/is-time.validator"
 
@@ -40,3 +40,23 @@ export class CreateSessionDto {
 }
 
 
+
+export class SelectLocationDto {
+    @IsNotEmpty({
+        message: "Latitude tidak boleh kosong"
+    })
+    @IsNumber()
+    @IsLatitude()
+    latitude: number
+    @IsNotEmpty({
+        message: "longitude tidak boleh kosong"
+    })
+    @IsNumber()
+    @IsLongitude()
+    longitude: number
+    @IsNotEmpty({
+        message: "Jarak tidak boleh kosong"
+    })
+    @IsNumber()
+    distance: number
+}

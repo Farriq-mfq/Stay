@@ -1,12 +1,13 @@
 <script setup>
 import { useQuery, useMutation } from '@tanstack/vue-query';
 import { useToast } from 'primevue/usetoast';
-import { getCurrentInstance, onMounted, ref, watch } from 'vue';
+import { getCurrentInstance, ref, watch } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import Calendar from 'primevue/calendar';
 import Chip from 'primevue/chip';
 import { format } from 'date-fns';
 import MeetingSession from './MeetingSession.vue';
+import SelectLocation from './SelectLocation.vue';
 const toast = useToast();
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -402,6 +403,69 @@ const onCloseDialogMeetingSession = () => {
     dialogMeetingSession.value = false;
     dataMeetingSession.value = null;
 };
+
+// auto read session
+
+const autoReadService = async (id) => {
+    return await axios.patch(`/sessions/${id}/auto-read`);
+};
+
+const { mutate: autoRead, isPending: autoReadPending } = useMutation({
+    mutationFn: autoReadService,
+    mutationKey: ['autoReadService']
+});
+
+const handleAutoRead = async (data) => {
+    await autoRead(data.id, {
+        onSuccess: () => {
+            toast.add({
+                summary: 'Berhasil',
+                detail: 'Berhasil Update Sesi Presensi',
+                severity: 'success',
+                life: 2000
+            });
+            refetch();
+        },
+        onError: (err) => {
+            const response = err.response;
+            if (response.status === 400) {
+                if (response.data.message) {
+                    toast.add({
+                        summary: 'Gagal',
+                        detail: response.data.message,
+                        severity: 'error',
+                        life: 2000
+                    });
+                } else {
+                    toast.add({
+                        detail: 'Terjadi Kesalahan',
+                        summary: 'Gagal',
+                        severity: 'error',
+                        life: 2000
+                    });
+                }
+            } else {
+                toast.add({
+                    detail: 'Terjadi Kesalahan',
+                    summary: 'Gagal',
+                    severity: 'error',
+                    life: 2000
+                });
+            }
+        }
+    });
+};
+// select location
+const dialogSelectLocation = ref(false);
+const dataSelectLocation = ref(false);
+const showDialogLocation = (data) => {
+    dialogSelectLocation.value = true;
+    dataSelectLocation.value = data;
+};
+const onCloseDialogSelectLocation = () => {
+    dialogSelectLocation.value = false;
+    dataSelectLocation.value = null;
+};
 </script>
 <template>
     <div class="grid">
@@ -510,6 +574,40 @@ const onCloseDialogMeetingSession = () => {
                             <p v-else class="text-sm text-red-500">-</p>
                         </template>
                     </Column>
+                    <Column field="auto_read_presence" alignFrozen="right" :frozen="true" header="Otomatis Baca">
+                        <template #body="{ data }">
+                            <i
+                                :class="{
+                                    'pi pi-check-circle text-primary': data.auto_read_presence,
+                                    'pi pi-times-circle text-red-500': !data.auto_read_presence
+                                }"
+                            ></i>
+                        </template>
+                    </Column>
+                    <Column field="presence_sessions_by_location" header="Titik Koordinat Yang DIIzinkan">
+                        <template #body="{ data }">
+                            <div v-if="data.presence_sessions_by_location">
+                                <div class="flex flex-column gap-3">
+                                    <div class="flex align-items-center gap-2">
+                                        <i class="pi pi-compass text-primary"></i>
+                                        <span>Latitude: {{ data.presence_sessions_by_location.latitude }}°</span>
+                                    </div>
+                                    <div class="flex align-items-center gap-2">
+                                        <i class="pi pi-compass text-primary"></i>
+                                        <span>Longitude: {{ data.presence_sessions_by_location.longitude }}°</span>
+                                    </div>
+                                    <div class="flex align-items-center gap-2">
+                                        <i class="pi pi-arrows-alt text-primary"></i>
+                                        <span>Radius: {{ data.presence_sessions_by_location.distance }} meter</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-500">
+                                <i class="pi pi-info-circle mr-2"></i>
+                                <span>Lokasi belum ditentukan</span>
+                            </div>
+                        </template>
+                    </Column>
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
@@ -518,6 +616,8 @@ const onCloseDialogMeetingSession = () => {
                                 <Button icon="pi pi-paperclip" severity="info" @click="showDialogMeetingSession(data)" v-if="data.session_role_type === 'PEGAWAI' && $can('meeting-session:read')" />
                                 <!-- <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
                 <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" /> -->
+                                <Button icon="pi pi-circle" v-if="!data.auto_read_presence && $can('auto-read')" @click.prevent="handleAutoRead(data)" v-tooltip.top="'Baca otomatis'" />
+                                <Button icon=" pi pi-map-marker" v-tooltip.top="'Tentukan Titik Koordinat'" v-if="$can('set-location')" @click="showDialogLocation(data)" severity="info" />
                             </div>
                         </template>
                     </Column>
@@ -748,6 +848,9 @@ const onCloseDialogMeetingSession = () => {
 
             <Dialog v-model:visible="dialogMeetingSession" modal maximizable closeOnEscape header="Sesi Rapat" @after-hide="onCloseDialogMeetingSession">
                 <MeetingSession :session="dataMeetingSession" :parentRefresh="refetch" />
+            </Dialog>
+            <Dialog v-model:visible="dialogSelectLocation" :style="{ width: '90vw' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" modal maximizable closeOnEscape header="Pilih titik Koordinat" @after-hide="onCloseDialogSelectLocation">
+                <select-location v-if="dialogSelectLocation" :session="dataSelectLocation" @clear="onCloseDialogSelectLocation" :parentRefresh="refetch" />
             </Dialog>
         </div>
     </div>

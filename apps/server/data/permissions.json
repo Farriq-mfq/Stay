@@ -92,7 +92,9 @@
     "read",
     "update",
     "delete",
-    "detail"
+    "detail",
+    "auto-read",
+    "set-location"
   ],
   "profile": [
     "read"
