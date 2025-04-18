@@ -7,7 +7,7 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [x] FIX Realtime Presence Card
 - [x] Add Splash Screen webapp
 - [x] Add Feature Presence By Location
-- [ ] Leave Feature (Izin)
+- [X] Leave Feature (Izin)
 - [ ] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
 - [ ] Trasaction Report
