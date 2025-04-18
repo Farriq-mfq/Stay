@@ -74,14 +74,18 @@ export class QrCodeSiswaModulesService {
                         }
                     })
 
-                    await this.eventService.handleHttpPresenceQr({
+                    const presence = await this.eventService.handleHttpPresenceQr({
                         ip: gateway.ip,
                         token: gateway.token,
                         ref: siswa.id,
                     }, 'siswa')
 
-                    delete decrypt.data
-                    return decrypt
+                    return {
+                        action: 'PRESENCE',
+                        data: {
+                            presenceId: presence ? (presence as any).id : null,
+                        }
+                    }
 
                 case 'WITHDRAW':
                 default:

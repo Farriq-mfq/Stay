@@ -5,6 +5,7 @@ import { useDrawer } from "@/store/drawer";
 import { useMutation } from "@tanstack/vue-query";
 import { useToast } from "primevue/usetoast";
 import { QrcodeStream } from "vue-qrcode-reader";
+import { useRouter } from "vue-router";
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
@@ -12,6 +13,7 @@ const axios = proxy.axios;
 const loading = ref(true);
 const torchActive = ref(false);
 const drawer = useDrawer();
+const router = useRouter();
 
 const toast = useToast();
 const scanService = async (data) => {
@@ -24,7 +26,6 @@ const { mutateAsync: scanMutate, isPending: scanPending } = useMutation({
   mutationFn: scanService,
 });
 const result = ref("");
-
 const handleScan = async (code) => {
   await scanMutate(
     {
@@ -47,6 +48,12 @@ const handleScan = async (code) => {
               summary: "Success",
               detail: "Presensi Berhasil",
               life: 3000,
+            });
+            router.push({
+              name: "presences-detail",
+              params: {
+                id: data.data.data.presenceId,
+              },
             });
             drawer.closeDrawer();
             break;

@@ -44,13 +44,24 @@ onUnmounted(() => {
       <PinConfirmationSiswa />
     </div>
     <AppNav v-if="app.getShowAppNav" />
-    <Sidebar v-model:visible="isVisible" :baseZIndex="99999" blockScroll position="bottom" style="
+    <Sidebar
+      v-model:visible="isVisible"
+      :baseZIndex="99999"
+      blockScroll
+      position="bottom"
+      style="
         max-width: 414px;
         margin: 0 auto;
         border-radius: 1rem 1rem 0 0;
         height: auto;
-      " :header="drawer.getTitle" @hide="drawer.closeDrawer()">
-      <component :is="draweComponents[drawer.getComponentName]" v-if="drawer.getComponentName"></component>
+      "
+      :header="drawer.getTitle"
+      @hide="drawer.closeDrawer()"
+    >
+      <component
+        :is="draweComponents[drawer.getComponentName]"
+        v-if="drawer.getComponentName"
+      ></component>
     </Sidebar>
   </div>
 </template>

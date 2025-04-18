@@ -34,7 +34,6 @@ const getStatusSeverity = (status) => {
       return "warning";
   }
 };
-
 </script>
 
 <template>
@@ -45,9 +44,7 @@ const getStatusSeverity = (status) => {
     >
       <div class="flex align-items-center gap-2">
         <i class="pi pi-calendar text-primary text-xl"></i>
-        <h2 class="text-xl md:text-2xl font-semibold m-0">
-          Detail Izin
-        </h2>
+        <h2 class="text-xl md:text-2xl font-semibold m-0">Detail Izin</h2>
       </div>
       <Tag
         :severity="getStatusSeverity(leaveDetail.data.status)"
@@ -107,7 +104,7 @@ const getStatusSeverity = (status) => {
                 class="flex flex-column md:flex-row md:justify-content-between gap-2"
                 :class="{
                   'pb-3 border-bottom-1 surface-border':
-                    leaveDetail.data.approved_at,
+                    leaveDetail.data.processed_at,
                 }"
               >
                 <span class="text-600">Diajukan Tanggal</span>
@@ -125,13 +122,13 @@ const getStatusSeverity = (status) => {
               </div>
               <div
                 class="flex flex-column md:flex-row md:justify-content-between gap-2 pb-3 border-bottom-1 surface-border"
-                v-if="leaveDetail.data.approved_at"
+                v-if="leaveDetail.data.processed_at"
               >
-                <span class="text-600">Disetujui Tanggal</span>
+                <span class="text-600">Diproses Tanggal</span>
                 <span class="font-medium">
                   {{
                     format(
-                      new Date(leaveDetail.data.approved_at),
+                      new Date(leaveDetail.data.processed_at),
                       "dd MMMM yyyy",
                       {
                         locale: id,
@@ -142,11 +139,11 @@ const getStatusSeverity = (status) => {
               </div>
               <div
                 class="flex flex-column md:flex-row md:justify-content-between gap-2"
-                v-if="leaveDetail.data.approver_name"
+                v-if="leaveDetail.data.processed_by"
               >
-                <span class="text-600">Disetujui Oleh</span>
+                <span class="text-600"> Diproses Oleh </span>
                 <span class="font-medium">
-                  {{leaveDetail.data.approver_name}}
+                  {{ leaveDetail.data.processed_by }}
                 </span>
               </div>
             </div>
@@ -173,7 +170,7 @@ const getStatusSeverity = (status) => {
       </div>
 
       <!-- Notes -->
-      <!-- <div class="col-12" v-if="leaveDetail.data.notes">
+      <div class="col-12" v-if="leaveDetail.data.notes">
         <Card unstyled>
           <template #title>
             <div
@@ -189,7 +186,7 @@ const getStatusSeverity = (status) => {
             </div>
           </template>
         </Card>
-      </div> -->
+      </div>
     </div>
 
     <div

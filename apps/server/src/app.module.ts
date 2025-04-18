@@ -24,6 +24,7 @@ import { QrCodeModule } from './qrcode/qrcode.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { LeaveModule } from './leave/leave.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -77,7 +78,8 @@ import { TransactionModule } from './transaction/transaction.module';
     QrCodeModule,
     RolesModule,
     PermissionsModule,
-    TransactionModule
+    TransactionModule,
+    LeaveModule
   ],
 })
 export class AppModule { }

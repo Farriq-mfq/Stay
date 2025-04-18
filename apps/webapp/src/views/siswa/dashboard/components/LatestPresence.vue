@@ -45,7 +45,7 @@ const { data: latest, isPending: loading } = useQuery({
     </DataView>
 
     <div class="flex flex-column align-items-center justify-content-center py-5" v-if="loading">
-      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" class="text-primary" />
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" fill="transparent" class="text-primary" />
       <span class="text-500 mt-2">Memuat data...</span>
     </div>
   </div>

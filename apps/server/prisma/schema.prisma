@@ -389,19 +389,20 @@ enum LeaveStatus {
 }
 
 model leave_requests {
-  id            Int         @id @default(autoincrement())
-  start_date    DateTime
-  end_date      DateTime
-  pegawai       pegawai     @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
-  pegawaiId     Int
-  reason        String      @db.Text
-  status        LeaveStatus @default(Pending)
-  applied_at    DateTime
-  approved_at   DateTime?
-  approver_name String?
-  duration      Int // in days
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           Int         @id @default(autoincrement())
+  start_date   DateTime
+  end_date     DateTime
+  pegawai      pegawai     @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+  pegawaiId    Int
+  reason       String      @db.Text
+  status       LeaveStatus @default(Pending)
+  applied_at   DateTime
+  processed_at DateTime?
+  processed_by String?
+  duration     Int // in days
+  notes        String?     @db.Text
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 // academic 

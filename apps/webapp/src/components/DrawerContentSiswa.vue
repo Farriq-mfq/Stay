@@ -1,7 +1,6 @@
 <script setup>
 import { useDrawer } from "@/store/drawer";
 import { onMounted, ref } from "vue";
-import OpenQrcode from "./drawer/OpenQrcode.vue";
 import OpenCameraSiswa from "./drawer/OpenCameraSiswa.vue";
 const scans = [
   {
@@ -31,7 +30,7 @@ onMounted(() => {
     :numVisible="1"
     :numScroll="2"
     :showNavigators="false"
-    :showIndicators="true"
+    :showIndicators="false"
     :responsiveOptions="responsiveOptions"
     @update:page="updatePage"
   >

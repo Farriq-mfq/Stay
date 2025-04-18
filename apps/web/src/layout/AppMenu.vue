@@ -69,23 +69,23 @@ const model = ref([
                 : '',
         items: [
             permissions.value.includes('transaction:deposit') ? { label: 'Presensi', icon: 'pi pi-fw pi-database    ', to: '/transaction/deposit' } : null,
-            permissions.value.includes('transaction:withdraw') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/transaction/withdraw' } : null,
+            permissions.value.includes('transaction:withdraw') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/employee/leave' } : null,
             permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null,
         ].filter((menu) => menu != null)
     },
-    {
-        label:
-            permissions.value.includes('transaction:deposit') ||
-                permissions.value.includes('transaction:withdraw') ||
-                permissions.value.includes('transaction:read')
-                ? 'Akademis'
-                : '',
-        items: [
-            permissions.value.includes('transaction:deposit') ? { label: 'Mata Pelajaran', icon: 'pi pi-fw pi-pencil', to: '/transaction/deposit' } : null,
-            permissions.value.includes('transaction:withdraw') ? { label: 'Jadwal Pelajaran', icon: 'pi pi-fw pi-calendar', to: '/transaction/withdraw' } : null,
-            permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal Mengajar', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null,
-        ].filter((menu) => menu != null)
-    },
+    // {
+    //     label:
+    //         permissions.value.includes('transaction:deposit') ||
+    //             permissions.value.includes('transaction:withdraw') ||
+    //             permissions.value.includes('transaction:read')
+    //             ? 'Akademis'
+    //             : '',
+    //     items: [
+    //         permissions.value.includes('transaction:deposit') ? { label: 'Mata Pelajaran', icon: 'pi pi-fw pi-pencil', to: '/transaction/deposit' } : null,
+    //         permissions.value.includes('transaction:withdraw') ? { label: 'Jadwal Pelajaran', icon: 'pi pi-fw pi-calendar', to: '/transaction/withdraw' } : null,
+    //         permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal Mengajar', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null,
+    //     ].filter((menu) => menu != null)
+    // },
     {
         label:
             permissions.value.includes('profile:read') ||

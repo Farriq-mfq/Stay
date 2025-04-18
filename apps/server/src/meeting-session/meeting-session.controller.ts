@@ -13,8 +13,8 @@ export class MeetingSessionController {
 
   @Post()
   @Permissions('meeting-session:create')
-  create(@Body() createMeetingSessionDto: CreateMeetingSessionDto) {
-    return this.meetingSessionService.create(createMeetingSessionDto);
+  async create(@Body() createMeetingSessionDto: CreateMeetingSessionDto) {
+    return await this.meetingSessionService.create(createMeetingSessionDto);
   }
 
   @Post(':id/selected/:sessionid')
