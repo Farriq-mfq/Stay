@@ -616,8 +616,8 @@ const onCloseDialogSelectLocation = () => {
                                 <Button icon="pi pi-paperclip" severity="info" @click="showDialogMeetingSession(data)" v-if="data.session_role_type === 'PEGAWAI' && $can('meeting-session:read')" />
                                 <!-- <Button icon="pi pi-camera" @click.prevent="handlePushCamera(data.id)" />
                 <Button icon="pi pi-qrcode" @click.prevent="handleShowQrCode(data)" /> -->
-                                <Button icon="pi pi-circle" v-if="!data.auto_read_presence && $can('auto-read')" @click.prevent="handleAutoRead(data)" v-tooltip.top="'Baca otomatis'" />
-                                <Button icon=" pi pi-map-marker" v-tooltip.top="'Tentukan Titik Koordinat'" v-if="$can('set-location')" @click="showDialogLocation(data)" severity="info" />
+                                <Button icon="pi pi-circle" v-if="!data.auto_read_presence && $can('sessions:auto-read')" @click.prevent="handleAutoRead(data)" v-tooltip.top="'Baca otomatis'" />
+                                <Button icon=" pi pi-map-marker" v-tooltip.top="'Tentukan Titik Koordinat'" v-if="$can('sessions:set-location')" @click="showDialogLocation(data)" severity="info" />
                             </div>
                         </template>
                     </Column>

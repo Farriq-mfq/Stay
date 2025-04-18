@@ -142,11 +142,22 @@ const routes = [
     },
     {
         path: "/feature/leave",
-        name: "feature-leave",
-        component: () => import("@/views/pegawai/Feature/Leave.vue"),
         meta: {
             layout: "PegawaiMainLayout",
         },
+        component: () => import("@/views/pegawai/Feature/Leave/Index.vue"),
+        children: [
+            {
+                name: "feature-leave",
+                path: '',
+                component: () => import("@/views/pegawai/Feature/Leave/List.vue"),
+            },
+            {
+                name: "feature-leave-detail",
+                path: ":id/detail",
+                component: () => import("@/views/pegawai/Feature/Leave/Detail.vue"),
+            }
+        ],
         beforeEnter: [groupMiddleware]
     },
     {

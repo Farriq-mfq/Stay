@@ -3,9 +3,10 @@
 Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 
 ## TODO
-- [X] FIX Realtime Presence Card
-- [X] Add Splash Screen webapp
-- [X] Add Feature Presence By Location
+
+- [x] FIX Realtime Presence Card
+- [x] Add Splash Screen webapp
+- [x] Add Feature Presence By Location
 - [ ] Leave Feature (Izin)
 - [ ] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
@@ -13,15 +14,19 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [ ] Add Feature Journal Employee and Teaching
 - [ ] Guard Filter Group
 - [ ] Notification firebase
-- [X] Update Menu
+- [x] Update Menu
+- [ ] Update State Loading webapp like : presence,transaction (spesificly in detail page)
 
 ## REQUESTER RFID READER
+
 https://github.com/Farriq-mfq/requester-rfid
 
-
 ## CARA INSTALL
-### LINUX 
+
+### LINUX
+
 #### Server
+
 1. install g++
    ```bash
    apt install g++
@@ -34,7 +39,7 @@ https://github.com/Farriq-mfq/requester-rfid
    ```bash
    corepack enable
    ```
-3. install build-essential
+4. install build-essential
    ```bash
    apt install build-essential
    ```

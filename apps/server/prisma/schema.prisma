@@ -52,6 +52,7 @@ model pegawai {
   accountId                 Int?                @unique
   account                   account?            @relation(fields: [accountId], references: [id])
   schedules                 schedules[]
+  leave_requests            leave_requests[]
 }
 
 // enum RoleUser {
@@ -378,6 +379,29 @@ model presence_sessions_by_location {
   updatedAt           DateTime          @updatedAt
 
   @@index([latitude, longitude])
+}
+
+// leave
+enum LeaveStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+model leave_requests {
+  id            Int         @id @default(autoincrement())
+  start_date    DateTime
+  end_date      DateTime
+  pegawai       pegawai     @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+  pegawaiId     Int
+  reason        String      @db.Text
+  status        LeaveStatus @default(Pending)
+  applied_at    DateTime
+  approved_at   DateTime?
+  approver_name String?
+  duration      Int // in days
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 // academic 

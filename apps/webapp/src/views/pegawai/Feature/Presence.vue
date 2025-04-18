@@ -212,7 +212,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen surface-ground">
+  <div>
     <AppHeaderBack title="Kehadiran" />
     <div
       class="container mx-auto px-4 py-6 mt-6 flex flex-column gap-4 align-items-center justify-content-center"
@@ -220,7 +220,7 @@ const handleSubmit = async () => {
       v-if="status === 'error'"
     >
       <div
-        class="p-6 border-round border-1 surface-border flex flex-column align-items-center gap-4"
+        class="p-6 border-round flex flex-column align-items-center gap-4"
         style="max-width: 400px"
       >
         <div class="bg-red-100 border-circle p-4">
@@ -247,7 +247,7 @@ const handleSubmit = async () => {
       </div>
     </div>
     <div class="container mx-auto px-4 py-6 mt-6" v-if="status != 'error'">
-      <div class="surface-ground border-1 surface-border border-round p-4 mb-4">
+      <div class="surface-card border-1 surface-border border-round p-4 mb-4">
         <div class="text-center">
           <h2 class="text-2xl font-semibold text-900">
             {{ formattedCurrentDate }}
@@ -292,11 +292,11 @@ const handleSubmit = async () => {
           </div>
         </div>
       </div>
-      <Message v-if="errorMessage" severity="error" :closable="false">
+      <Message v-if="errorMessage" severity="error">
         {{ errorMessage }}
       </Message>
       <div
-        class="surface-ground border-round pb-4 pt-2 px-4 mb-4"
+        class="surface-card border-round pb-4 pt-2 px-4 mb-4"
         :class="{
           'surface-border border-1': !accurate,
           'border-green-500 border-2': accurate,
@@ -318,7 +318,7 @@ const handleSubmit = async () => {
           </h3>
           <div
             v-if="currentLocation && !locationLoading"
-            class="text-sm text-600 mt-1"
+            class="text-sm text-600 mt-3"
           >
             <div class="flex flex-column gap-2">
               <div class="flex align-items-center gap-2 mb-2">
@@ -367,17 +367,17 @@ const handleSubmit = async () => {
             label="Refresh"
           />
           <Button
-            outlined
             class="mt-4 p-3"
             @click="loadLocation"
             v-if="!refreshLocation"
             :loading="locationLoading"
+            icon="pi pi-map-marker"
             :label="
               locationLoading
                 ? 'Mencari...'
                 : currentLocation
-                  ? 'Verfikasi Ulang Lokasi Anda ?'
-                  : 'Verfikasi Lokasi Anda'
+                  ? 'Verifikasi Ulang Lokasi Anda ?'
+                  : 'Verifikasi Lokasi Anda'
             "
           />
         </div>
@@ -427,7 +427,7 @@ const handleSubmit = async () => {
       </div>
 
       <div
-        class="surface-ground border-1 surface-border border-round pb-4 px-4 pt-2 mb-8"
+        class="mb-8"
         v-if="
           sessionLocation &&
           sessionLocation.data &&
@@ -435,13 +435,14 @@ const handleSubmit = async () => {
         "
       >
         <h3
-          class="text-lg font-medium text-900 mb-4 flex align-items-center gap-2"
+          class="text-lg font-medium text-900 mb-4 flex align-items-center gap-2 border-bottom-1 surface-border pb-3"
         >
-          Detail Kehadiran Anda Hari Ini
+          <i class="pi pi-clock mr-1 text-primary" /> Detail Kehadiran Anda Hari
+          Ini
         </h3>
         <div class="flex flex-column gap-3">
           <div
-            class="flex flex-column gap-3 justify-content-between p-3 border-1 surface-border border-round"
+            class="flex flex-column gap-3 justify-content-between p-3 border-1 surface-border surface-card border-round"
           >
             <div class="flex align-items-center gap-3">
               <div class="bg-green-500 border-round p-2">
@@ -535,10 +536,7 @@ const handleSubmit = async () => {
           </div>
         </div>
       </div>
-      <div
-        class="surface-ground border-1 surface-border border-round mb-8"
-        v-else
-      >
+      <div class="mb-8" v-else>
         <div class="text-center my-4">
           <i class="pi pi-folder-open text-primary mr-2"></i>
           <span class="text-sm">Tidak ada Riwayat Kehadiran Hari ini</span>

@@ -44,17 +44,17 @@ export class SessionsController {
   }
 
   @Patch('/:id/auto-read')
-  // @Permissions('sessions:delete')
+  @Permissions('sessions:auto-read')
   setAutoRead(@Param('id') id: string) {
     return this.sessionsService.setAutoRead(+id);
   }
   @Post('/:id/select-location')
-  // @Permissions('sessions:delete')
+  @Permissions('sessions:set-location')
   selectLocation(@Param('id') id: string, @Body() selectLocationDto: SelectLocationDto) {
     return this.sessionsService.selectLocation(+id, selectLocationDto);
   }
   @Delete('/:id/remove-location')
-  // @Permissions('sessions:delete')
+  @Permissions('sessions:set-location')
   removeLocation(@Param('id') id: string) {
     return this.sessionsService.removeLocation(+id);
   }

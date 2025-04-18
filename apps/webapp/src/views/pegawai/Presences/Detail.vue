@@ -16,10 +16,15 @@ const getDetailPresence = async () => {
   return response.data;
 };
 
-const { data: presence, isLoading: presenceLoading } = useQuery({
+const {
+  data: presence,
+  isLoading: presenceLoading,
+  status,
+  error: detailPresenceError,
+} = useQuery({
   queryKey: [`${auth.user().id}-detail-presence`, route.params.id],
   queryFn: getDetailPresence,
-  enabled: !!route.params.id
+  enabled: !!route.params.id,
 });
 </script>
 
@@ -28,9 +33,13 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
     <AppHeaderBack title="Detail Presensi" />
 
     <!-- Header Section -->
-    <div class="relative" v-if="!presenceLoading">
-      <div class="bg-primary h-16rem w-full flex justify-content-center align-items-center flex-column">
-        <div class="absolute top-0 left-0 w-full h-full bg-primary-800 opacity-20"></div>
+    <div class="relative" v-if="status === 'success'">
+      <div
+        class="bg-primary h-16rem w-full flex justify-content-center align-items-center flex-column"
+      >
+        <div
+          class="absolute top-0 left-0 w-full h-full bg-primary-800 opacity-20"
+        ></div>
         <div class="relative text-center">
           <h2 class="m-0 text-2xl font-bold text-white">
             {{ presence?.data?.session?.name }}
@@ -47,7 +56,11 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
     </div>
 
     <!-- Main Content -->
-    <div class="px-4 absolute left-0 right-0" style="margin-top: -4rem;" v-if="!presenceLoading">
+    <div
+      class="px-4 absolute left-0 right-0"
+      style="margin-top: -4rem"
+      v-if="status === 'success'"
+    >
       <!-- Status Card -->
       <div class="surface-card p-4 border-round-xl shadow-2 mb-4">
         <div class="flex align-items-center gap-3 mb-3">
@@ -59,10 +72,12 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
         </div>
 
         <div class="grid">
-          <div :class="{
-            'col-6': presence?.data?.exit_time,
-            'col-12': !presence?.data?.exit_time
-          }">
+          <div
+            :class="{
+              'col-6': presence?.data?.exit_time,
+              'col-12': !presence?.data?.exit_time,
+            }"
+          >
             <div class="text-center p-3 border-round-lg bg-green-300">
               <i class="pi pi-sign-in text-xl text-green-700 mb-2"></i>
               <div class="text-sm font-medium">Waktu Masuk</div>
@@ -77,15 +92,19 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
           </div>
           <div class="col-6" v-if="presence?.data?.exit_time">
             <div class="text-center p-3 border-round-lg bg-red-300">
-              <i class="pi pi-sign-out text-xl"
-                :class="presence?.data?.exit_time ? 'text-red-700' : 'text-yellow-700'"></i>
+              <i
+                class="pi pi-sign-out text-xl"
+                :class="
+                  presence?.data?.exit_time ? 'text-red-700' : 'text-yellow-700'
+                "
+              ></i>
               <div class="text-sm font-medium">Waktu Keluar</div>
               <div class="text-lg font-bold">
                 {{
                   presence?.data?.exit_time
                     ? format(new Date(presence?.data?.exit_time), "HH:mm", {
-                      locale: id,
-                    })
+                        locale: id,
+                      })
                     : "Belum Keluar"
                 }}
               </div>
@@ -105,27 +124,46 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
         </div>
 
         <div class="flex flex-column gap-3">
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-clock text-primary"></i>
               <span class="font-medium">Presensi 2x</span>
             </div>
-            <span class="text-sm" :class="presence?.data?.session?.allow_twice ? 'text-green-500' : 'text-red-500'">
-              {{ presence?.data?.session?.allow_twice ? "Diizinkan" : "Tidak Diizinkan" }}
+            <span
+              class="text-sm"
+              :class="
+                presence?.data?.session?.allow_twice
+                  ? 'text-green-500'
+                  : 'text-red-500'
+              "
+            >
+              {{
+                presence?.data?.session?.allow_twice
+                  ? "Diizinkan"
+                  : "Tidak Diizinkan"
+              }}
             </span>
           </div>
 
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-map-marker text-primary"></i>
               <span class="font-medium">Lokasi</span>
             </div>
             <span class="text-sm">
-              {{ presence?.data?.gateway ? presence?.data?.gateway.location : "-" }}
+              {{
+                presence?.data?.gateway ? presence?.data?.gateway.location : "-"
+              }}
             </span>
           </div>
 
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-mobile text-primary"></i>
               <span class="font-medium">Metode Presensi</span>
@@ -135,7 +173,10 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
             </span>
           </div>
         </div>
-        <div class="flex align-items-center gap-3 mt-5 mb-3" v-if="presence?.data?.meeting_session">
+        <div
+          class="flex align-items-center gap-3 mt-5 mb-3"
+          v-if="presence?.data?.meeting_session"
+        >
           <i class="pi pi-info-circle text-2xl text-primary"></i>
           <div>
             <h3 class="m-0 text-lg font-semibold">Informasi Rapat</h3>
@@ -143,59 +184,97 @@ const { data: presence, isLoading: presenceLoading } = useQuery({
           </div>
         </div>
 
-        <div class="flex flex-column gap-3" v-if="presence?.data?.meeting_session">
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+        <div
+          class="flex flex-column gap-3"
+          v-if="presence?.data?.meeting_session"
+        >
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-pencil text-primary"></i>
               <span class="font-medium">Nama Rapat</span>
             </div>
             <span class="text-sm">
-              {{ presence?.data?.meeting_session?.name || '-' }}
+              {{ presence?.data?.meeting_session?.name || "-" }}
             </span>
           </div>
 
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-calendar text-primary"></i>
               <span class="font-medium">Tanggal Rapat</span>
             </div>
             <span class="text-sm">
-              {{ presence?.data?.meeting_session?.date ? format(new Date(presence?.data?.meeting_session?.date), "dd MMMM yyyy", { locale: id }) : '-' }}
+              {{
+                presence?.data?.meeting_session?.date
+                  ? format(
+                      new Date(presence?.data?.meeting_session?.date),
+                      "dd MMMM yyyy",
+                      { locale: id }
+                    )
+                  : "-"
+              }}
             </span>
           </div>
 
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-clock text-primary"></i>
               <span class="font-medium">Waktu Rapat</span>
             </div>
             <span class="text-sm">
-              {{ presence?.data?.meeting_session?.time }} 
+              {{ presence?.data?.meeting_session?.time }}
             </span>
           </div>
 
-          <div class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover">
+          <div
+            class="flex justify-content-between align-items-center p-3 border-round-lg surface-hover"
+          >
             <div class="flex align-items-center gap-2">
               <i class="pi pi-map-marker text-primary"></i>
               <span class="font-medium">Lokasi Rapat</span>
             </div>
             <span class="text-sm">
-              {{ presence?.data?.meeting_session?.location || '-' }}
+              {{ presence?.data?.meeting_session?.location || "-" }}
             </span>
           </div>
         </div>
 
         <div class="mt-4 pt-3 border-top-1 surface-border">
-          <div class="flex align-items-center justify-content-center gap-2 text-sm text-500">
+          <div
+            class="flex align-items-center justify-content-center gap-2 text-sm text-500"
+          >
             <i class="pi pi-building"></i>
             <span>SMK Negeri 1 Pekalongan</span>
           </div>
         </div>
       </div>
     </div>
-
+    <div
+      class="flex justify-content-center align-items-center min-h-screen"
+      v-if="status === 'error'"
+    >
+      <div class="flex flex-column align-items-center gap-2">
+        <i class="pi pi-exclamation-triangle text-2xl text-red-500"></i>
+        <span class="text-lg font-semibold">Terjadi Kesalahan</span>
+        <p class="text-sm text-500" v-if="detailPresenceError.status === 404">
+          Data presensi tidak ditemukan.
+        </p>
+        <p class="text-sm text-500" v-else>
+          Terjadi kesalahan saat memuat data presensi. Silakan coba lagi.
+        </p>
+      </div>
+    </div>
     <!-- Loading State -->
-    <div v-if="presenceLoading" class="flex justify-content-center align-items-center min-h-screen">
+    <div
+      v-if="status === 'pending'"
+      class="flex justify-content-center align-items-center min-h-screen"
+    >
       <ProgressSpinner strokeWidth="3" />
     </div>
   </div>
