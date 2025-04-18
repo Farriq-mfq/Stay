@@ -1,11 +1,5 @@
 {
-  "users": [
-    "create",
-    "read",
-    "update",
-    "delete",
-    "update-password"
-  ],
+  "users": ["create", "read", "update", "delete", "update-password"],
   "siswa": [
     "create",
     "read",
@@ -47,13 +41,8 @@
     "qrcode",
     "on-off"
   ],
-  "backup": [
-    "database"
-  ],
-  "client": [
-    "read",
-    "set-session"
-  ],
+  "backup": ["database"],
+  "client": ["read", "set-session"],
   "meeting-session": [
     "create",
     "read",
@@ -81,12 +70,7 @@
     "export-monthly",
     "read-meeting"
   ],
-  "roles": [
-    "create",
-    "read",
-    "update",
-    "delete"
-  ],
+  "roles": ["create", "read", "update", "delete"],
   "sessions": [
     "create",
     "read",
@@ -96,25 +80,9 @@
     "auto-read",
     "set-location"
   ],
-  "profile": [
-    "read"
-  ],
-  "transaction": [
-    "deposit",
-    "withdraw",
-    "read-queue",
-    "create-queue"
-  ],
-  "subjects": [
-    "create",
-    "read",
-    "update",
-    "delete"
-  ],
-  "schedules": [
-    "create",
-    "read",
-    "update",
-    "delete"
-  ]
+  "profile": ["read"],
+  "transaction": ["deposit", "withdraw", "read-queue", "create-queue"],
+  "subjects": ["create", "read", "update", "delete"],
+  "schedules": ["create", "read", "update", "delete"],
+  "leave": ["read", "approve", "reject"]
 }
