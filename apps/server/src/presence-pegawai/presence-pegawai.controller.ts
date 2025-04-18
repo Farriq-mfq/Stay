@@ -16,6 +16,14 @@ export class PresencePegawaiController {
     ) { }
 
 
+    @Get('/auto-read')
+    @Permissions('presences-pegawai:location')
+    async getAllPresenceByAutoReadAndLocation(
+        @Query("date") date: string,
+    ) {
+        return await this.presencePegawaiService.getAllPresenceByAutoReadAndLocation(date)
+    }
+
     @Get('export/:sessionId')
     @Permissions('presences-pegawai:export-all')
     async exportAll(

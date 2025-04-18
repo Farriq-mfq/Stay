@@ -81,6 +81,12 @@ const submitLeaveRequest = async () => {
     },
   });
 };
+
+const handleShowDialog = () => {
+  errorLeaveData.value = null
+  showLeaveDialog.value = true;
+};
+
 </script>
 
 <template>
@@ -90,9 +96,7 @@ const submitLeaveRequest = async () => {
       <Button
         label="Ajukan Izin"
         class="w-full font-bold"
-        size="large"
-        icon="pi pi-plus-circle"
-        @click="showLeaveDialog = true"
+        @click="handleShowDialog"
       />
       <Divider />
       <router-view v-if="showChildren"></router-view>

@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { isJSON } from "class-validator";
-import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
-import { id } from "date-fns/locale";
+import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval, isAfter } from "date-fns";
+import { id, th } from "date-fns/locale";
 import { CustomPrismaService } from "nestjs-prisma";
 import { PegawaiService } from "src/pegawai/pegawai.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
@@ -547,7 +547,6 @@ export class PresencePegawaiService {
 
 
     async findAllPresenceByMonthClass(sessionId: string, date?: string, group?: string) {
-
         const groups = await this.pegawaiService.getGroup();
         if (groups.includes(group)) {
             const parseDateYearMonth = validateAndFormatDateYear(date);
@@ -722,6 +721,105 @@ export class PresencePegawaiService {
         }
 
         return mappingPresences;
+
+    }
+
+    async getAllPresenceByAutoReadAndLocation(date?: string) {
+
+        const parseDateYearMonth = validateAndFormatDateYear(date);
+        if (!parseDateYearMonth) {
+            throw new BadRequestException("date invalid")
+        }
+
+        const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+        const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+        const dateInterval = eachDayOfInterval({
+            start: startDate, end: endDate
+        })
+
+        const session = await this.prismaService.client.presence_sessions.findFirst({
+            where: {
+                session_role_type: 'PEGAWAI',
+                auto_read_presence: true,
+                start_time: {
+                    not: null
+                },
+                end_time: {
+                    not: null
+                }
+            },
+            include: {
+                presence_sessions_by_location: true
+            }
+        })
+
+        if (!(session && session.presence_sessions_by_location)) throw new BadRequestException("session not found")
+
+        const presences = await this.prismaService.client.presences_pegawai.findMany({
+            where: {
+                presence_sessionsId: session.id,
+                createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            }
+        })
+
+        const pegawai = await this.prismaService.client.pegawai.findMany({
+            orderBy: {
+                name: 'asc'
+            }
+        })
+
+        if (!session.start_time && !session.end_time) throw new BadRequestException("session start time and end time not found")
+        const now = format(Date.now(), "yyyy-MM-dd");
+
+        const parseStartTime = format(
+            `${now} ${session.start_time}`,
+            "yyyy-MM-dd HH: mm: ss"
+        );
+        const leaves = await this.prismaService.client.leave_requests.findMany({
+            where: {
+                pegawaiId: {
+                    in: pegawai.map(pg => pg.id),
+                },
+                status: 'Approved',
+                createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            }
+        })
+
+        const mappingPresences = pegawai.map(s => {
+            return {
+                name: s.name,
+                presences: dateInterval.map(d => {
+                    const findPresence = presences.find(presence => presence.pegawaiId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+                    const findLeave = leaves.find(leave => leave.pegawaiId === s.id && format(leave.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+                    return {
+                        [format(d, "dd")]: findPresence ? {
+                            enter_time: findPresence.enter_time ? format(findPresence.enter_time, 'HH:mm:ss', {
+                                locale: id
+                            }) : '-',
+                            exit_time: findPresence.exit_time ? format(findPresence.exit_time, 'HH:mm:ss', {
+                                locale: id
+                            }) : '-',
+                            isLate: isAfter(new Date(findPresence.enter_time), parseStartTime) ? true : false,
+                        } : findLeave ? {
+                            isLeave: true,
+                        } : null
+                    }
+                })
+            }
+        })
+        return {
+            date: {
+                startDate,
+                endDate
+            },
+            presences: mappingPresences
+        }
 
     }
 }

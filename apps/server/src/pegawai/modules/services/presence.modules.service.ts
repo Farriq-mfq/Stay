@@ -4,6 +4,7 @@ import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { PresenceLocationDto } from "../dto/presence.dto";
 import { isWithinRange } from "src/utils/location";
+import { id } from "date-fns/locale";
 
 @Injectable()
 export class PegawaiModulesPresenceService {
@@ -209,9 +210,9 @@ export class PegawaiModulesPresenceService {
                                     throw new BadRequestException("ANDA TIDAK DIIZINKAN PRESENSI")
                                 }
                             }
-                            const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-                            const now = format(Date.now(), "yyyy-MM-dd");
-                            const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss');
+                            const current_time = format(new Date(), 'yyyy-MM-dd HH:mm:ss', { locale: id });
+                            const now = format(Date.now(), "yyyy-MM-dd", { locale: id });
+                            const parseEndTime = format(`${now} ${session.end_time}`, 'yyyy-MM-dd HH:mm:ss', { locale: id });
                             if (isAfter(current_time, parseEndTime)) {
                                 const updateExitTime = await tx.presences_pegawai.update({
                                     where: {

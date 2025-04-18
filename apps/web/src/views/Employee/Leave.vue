@@ -277,8 +277,8 @@ const showRejectLeaveDialog = (data) => {
                     <Column headerStyle="width:4rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 mt-1">
-                                <Button v-if="data.status === 'Pending'" icon="pi pi-check-circle" @click="showApproveLeaveDialog(data)" />
-                                <Button v-if="data.status === 'Pending'" severity="danger" icon="pi pi-times-circle" @click="showRejectLeaveDialog(data)" />
+                                <Button v-if="data.status === 'Pending' && $can('leave:approve')" icon="pi pi-check-circle" @click="showApproveLeaveDialog(data)" />
+                                <Button v-if="data.status === 'Pending' && $can('leave:reject')" severity="danger" icon="pi pi-times-circle" @click="showRejectLeaveDialog(data)" />
                             </div>
                         </template>
                     </Column>

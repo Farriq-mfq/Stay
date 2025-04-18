@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { account, AccountableType, users } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
+import { ROLE_CODE } from "src/config";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { v4 as uuidv4 } from 'uuid';
-import { DepositTransactionDto, PaymentMethodType, PaymentTransactionDto, TransferTransactionDto } from "./dto/transaction.dto";
-import { ROLE_CODE } from "src/config";
+import { DepositTransactionDto, PaymentMethodType, TransferTransactionDto } from "./dto/transaction.dto";
 @Injectable()
 export class TransactionService {
     constructor(
@@ -46,7 +46,7 @@ export class TransactionService {
                     toAccountId: toAccount.id,
                     status: 'SUCCESS',
                     type: "DEPOSIT",
-                    title: `Deposit berhasil untuk ${toAccount.name}`,
+                    title: `${toAccount.name}`,
                     fromAccountType: fromAccount.accountableType,
                     toAccountType: toAccount.accountableType,
                     note: depositTransactionDto.note
@@ -78,7 +78,7 @@ export class TransactionService {
                     toAccountId: fromAccount.id,
                     status: 'SUCCESS',
                     type: "DEPOSIT",
-                    title: `Deposit berhasil untuk ${toAccount.name}`,
+                    title: `${fromAccount.name}`,
                     fromAccountType: toAccount.accountableType,
                     toAccountType: fromAccount.accountableType,
                     note: depositTransactionDto.note
@@ -178,7 +178,7 @@ export class TransactionService {
                     toAccountId: toAccount.id,
                     status: 'SUCCESS',
                     type: "TRANSFER",
-                    title: `Kirim untuk ${toAccount.name}`,
+                    title: `${toAccount.name}`,
                     note: transferTransactionDto.note,
                     fromAccountType: fromAccount.accountableType,
                     toAccountType: toAccount.accountableType
@@ -195,7 +195,7 @@ export class TransactionService {
                     toAccountId: fromAccount.id,
                     status: 'SUCCESS',
                     type: "TRANSFER",
-                    title: `Mendapatkan dari ${fromAccount.name}`,
+                    title: `${fromAccount.name}`,
                     note: transferTransactionDto.note,
                     fromAccountType: toAccount.accountableType,
                     toAccountType: fromAccount.accountableType

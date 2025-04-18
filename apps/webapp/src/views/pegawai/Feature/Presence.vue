@@ -98,7 +98,7 @@ const loadLocation = () => {
     async (error) => {
       switch (error.code) {
         case error.PERMISSION_DENIED:
-          locationMessage.value = "Akses lokasi ditolak";
+          locationMessage.value = "Mohon Aktifkan Lokasi";
           refreshLocation.value = true;
           break;
         case error.POSITION_UNAVAILABLE:

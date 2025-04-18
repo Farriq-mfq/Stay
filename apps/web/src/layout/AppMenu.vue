@@ -13,10 +13,10 @@ const model = ref([
     {
         label:
             permissions.value.includes('gateways:read') ||
-                permissions.value.includes('seesions:read') ||
-                permissions.value.includes('presences:read') ||
-                permissions.value.includes('presences:manual') ||
-                permissions.value.includes('presences-pegawai:read')
+            permissions.value.includes('seesions:read') ||
+            permissions.value.includes('presences:read') ||
+            permissions.value.includes('presences:manual') ||
+            permissions.value.includes('presences-pegawai:read')
                 ? 'Presensi'
                 : '',
         items: [
@@ -26,15 +26,15 @@ const model = ref([
             permissions.value.includes('presences:manual') ? { label: 'Input Presensi', icon: 'pi pi-fw pi-pencil', to: '/input/presences' } : null,
             permissions.value.includes('presences:read')
                 ? {
-                    label: 'Data Presensi',
-                    icon: 'pi pi-fw pi-server',
-                    items: [
-                        permissions.value.includes('presences:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' } : null,
-                        permissions.value.includes('presences-pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' } : null,
-                        { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' }
-                    ].filter((menu) => menu != null)
-                }
-                : null,
+                      label: 'Data Presensi',
+                      icon: 'pi pi-fw pi-server',
+                      items: [
+                          permissions.value.includes('presences:read') ? { label: 'Siswa', icon: 'pi pi-fw pi-database', to: '/presences' } : null,
+                          permissions.value.includes('presences-pegawai:read') ? { label: 'Pegawai', icon: 'pi pi-fw pi-database', to: '/pegawai-presences' } : null,
+                          { label: 'Statistik', icon: 'pi pi-fw pi-chart-line', to: '/stats' }
+                      ].filter((menu) => menu != null)
+                  }
+                : null
             // {
             //     label: 'Notifications', icon: 'pi pi-fw pi-bell',
             //     items: [
@@ -48,29 +48,19 @@ const model = ref([
         ].filter((menu) => menu != null)
     },
     {
-        label:
-            permissions.value.includes('transaction:deposit') ||
-                permissions.value.includes('transaction:withdraw') ||
-                permissions.value.includes('transaction:read')
-                ? 'Transaksi & Pembayaran'
-                : '',
+        label: permissions.value.includes('transaction:deposit') || permissions.value.includes('transaction:withdraw') || permissions.value.includes('transaction:read') ? 'Transaksi & Pembayaran' : '',
         items: [
             permissions.value.includes('transaction:deposit') ? { label: 'Deposit', icon: 'pi pi-fw pi-credit-card', to: '/transaction/deposit' } : null,
             permissions.value.includes('transaction:withdraw') ? { label: 'Tarik Tunai', icon: 'pi pi-fw pi-credit-card', to: '/transaction/withdraw' } : null,
-            permissions.value.includes('transaction:read') ? { label: 'History Transaksi', icon: 'pi pi-fw pi-credit-card', to: '/transaction/history' } : null,
+            permissions.value.includes('transaction:read') ? { label: 'History Transaksi', icon: 'pi pi-fw pi-credit-card', to: '/transaction/history' } : null
         ].filter((menu) => menu != null)
     },
     {
-        label:
-            permissions.value.includes('transaction:deposit') ||
-                permissions.value.includes('transaction:withdraw') ||
-                permissions.value.includes('transaction:read')
-                ? 'Tata Usaha (TU)'
-                : '',
+        label: permissions.value.includes('leave:read') ? 'Tata Usaha (TU)' : '',
         items: [
-            permissions.value.includes('transaction:deposit') ? { label: 'Presensi', icon: 'pi pi-fw pi-database    ', to: '/transaction/deposit' } : null,
-            permissions.value.includes('transaction:withdraw') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/employee/leave' } : null,
-            permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null,
+            // permissions.value.includes('transaction:deposit') ? { label: 'Presensi', icon: 'pi pi-fw pi-database    ', to: '/transaction/deposit' } : null,
+            permissions.value.includes('leave:read') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/employee/leave' } : null,
+            // permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null
         ].filter((menu) => menu != null)
     },
     // {
@@ -87,12 +77,7 @@ const model = ref([
     //     ].filter((menu) => menu != null)
     // },
     {
-        label:
-            permissions.value.includes('profile:read') ||
-                permissions.value.includes('backup:database') ||
-                permissions.value.includes('client:read')
-                ? 'Umum'
-                : '',
+        label: permissions.value.includes('profile:read') || permissions.value.includes('backup:database') || permissions.value.includes('client:read') ? 'Umum' : '',
         items: [
             permissions.value.includes('profile:read') ? { label: 'Profil', icon: 'pi pi-fw pi-user', to: '/profile' } : null,
             permissions.value.includes('backup:database') ? { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' } : null,
