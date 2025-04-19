@@ -122,7 +122,7 @@ const handleShowDialog = () => {
           <Textarea
             id="description"
             v-model="activityData.description"
-            rows="5"
+            rows="10"
             placeholder="Masukkan uraian kegiatan"
             autoResize
             :invalid="errorActivityData && errorActivityData.description"

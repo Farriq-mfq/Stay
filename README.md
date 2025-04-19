@@ -8,6 +8,7 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [x] Add Splash Screen webapp
 - [x] Add Feature Presence By Location
 - [X] Leave Feature (Izin)
+- [X] Add Activty Journal
 - [ ] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
 - [ ] Trasaction Report
@@ -17,6 +18,8 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [x] Update Menu
 - [ ] Update State Loading webapp like : presence,transaction (spesificly in detail page)
 - [ ] Dynamic Feature and permisson dynamic feature
+- [ ] Adding Version Control
+
 
 ## REQUESTER RFID READER
 

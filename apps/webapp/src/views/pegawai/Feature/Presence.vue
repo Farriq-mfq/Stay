@@ -441,8 +441,12 @@ const handleSubmit = async () => {
           Ini
         </h3>
         <div class="flex flex-column gap-3">
-          <div
-            class="flex flex-column gap-3 justify-content-between p-3 border-1 surface-border surface-card border-round"
+          <router-link
+            :to="{
+              name: 'presences-detail',
+              params: { id: sessionLocation.data.presence.id },
+            }"
+            class="flex flex-column gap-3 justify-content-between p-3 border-1 surface-border surface-card border-round no-underline"
           >
             <div class="flex align-items-center gap-3">
               <div class="bg-green-500 border-round p-2">
@@ -509,9 +513,13 @@ const handleSubmit = async () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            class="flex align-items-center justify-content-between p-3 border-1 surface-border border-round"
+          </router-link>
+          <router-link
+            :to="{
+              name: 'presences-detail',
+              params: { id: sessionLocation.data.presence.id },
+            }"
+            class="flex align-items-center justify-content-between p-3 border-1 surface-border surface-card border-round no-underline"
             v-if="sessionLocation.data.presence.exit_time"
           >
             <div class="flex align-items-center gap-3">
@@ -533,7 +541,7 @@ const handleSubmit = async () => {
                 </p>
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
       <div class="mb-8" v-else>
