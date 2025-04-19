@@ -17,11 +17,13 @@ import { ProfileModulesService } from "./services/profile.modules.service";
 import { ProfileModulesController } from "./controllers/profile.modules.controller";
 import { LeaveModulesPegawaiController } from "./controllers/leave.modules.controller";
 import { PegawaiModulesLeaveService } from "./services/leave.modules.service";
+import { PegawaiModulesActivityService } from "./services/activity.modules.service";
+import { ActiviyModulesPegawaiController } from "./controllers/activity.modules.controller";
 
 @Module({
     imports: [TransactionModule, QrCodeModule, EventsModule],
-    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController, HomeModulesPegawaiController, QrCodePegawaiModulesController, ProfileModulesController, LeaveModulesPegawaiController],
-    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService, HomeModulesPegawaiService, QrCodePegawaiModulesService, ProfileModulesService, PegawaiModulesLeaveService],
+    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController, HomeModulesPegawaiController, QrCodePegawaiModulesController, ProfileModulesController, LeaveModulesPegawaiController, ActiviyModulesPegawaiController],
+    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService, HomeModulesPegawaiService, QrCodePegawaiModulesService, ProfileModulesService, PegawaiModulesLeaveService, PegawaiModulesActivityService],
 })
 export class PegawaiModulesModule {
 

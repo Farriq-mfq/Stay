@@ -161,6 +161,26 @@ const routes = [
         beforeEnter: [groupMiddleware]
     },
     {
+        path: "/feature/journal-activity",
+        meta: {
+            layout: "PegawaiMainLayout",
+        },
+        component: () => import("@/views/pegawai/Feature/Activity/Index.vue"),
+        children: [
+            {
+                name: "feature-journal-activity",
+                path: '',
+                component: () => import("@/views/pegawai/Feature/Activity/List.vue"),
+            },
+            {
+                name: "feature-journal-activity-detail",
+                path: ":id/detail",
+                component: () => import("@/views/pegawai/Feature/Activity/Detail.vue"),
+            }
+        ],
+        beforeEnter: [groupMiddleware]
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login,

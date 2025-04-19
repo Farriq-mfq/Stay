@@ -21,7 +21,7 @@ const featureFilter = features.filter(feature => isArray(feature.group) && featu
                         class="border-1 border-primary-100 bg-primary-50/50 p-2 border-circle w-3rem h-3rem flex align-items-center justify-content-center">
                         <i :class="`${feature.icon} text-base ${feature.iconColor ?? 'text-primary-600'}`"></i>
                     </div>
-                    <span class="text-900 font-medium text-xs text-center mt-2 white-space-nowrap overflow-ellipsis">
+                    <span class="text-900 font-medium text-xs text-center mt-2">
                         {{ feature.title }}
                     </span>
                 </div>

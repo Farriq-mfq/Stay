@@ -4,20 +4,20 @@ export const features = [
         title: "Kehadiran",
         icon: "pi pi-calendar",
         iconColor: "text-blue-500",
-        group: ['TATA USAHA', "GURU_TAMU"]
+        group: ['TATA USAHA', "GURU TAMU"]
     },
     {
-        route: 'dashboard',
+        route: 'feature-journal-activity',
         title: "Jurnal Kegiatan",
         icon: "pi pi-book",
         iconColor: "text-green-500",
-        group: ['TATA USAHA', "GURU_TAMU"]
+        group: ['TATA USAHA', "GURU TAMU"]
     },
     {
         route: 'feature-leave',
         title: "Izin",
         icon: "pi pi-send",
         iconColor: "text-orange-500",
-        group: ['TATA USAHA', "GURU_TAMU"]
+        group: ['TATA USAHA', "GURU TAMU"]
     },
 ];

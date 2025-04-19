@@ -247,7 +247,7 @@ const showRejectLeaveDialog = (data) => {
                         <template #body="{ data }">
                             <div v-if="data.processed_at" class="flex flex-column gap-1">
                                 {{ format(new Date(data.processed_at), 'dd/MM/yyyy', { locale: id }) }}
-                                <span class="text-600">Disetujui oleh {{ data.approver_name }}</span>
+                                <span class="text-600">Disetujui oleh {{ data.processed_by }}</span>
                             </div>
                             <div v-else>-</div>
                         </template>

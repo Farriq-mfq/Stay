@@ -1,28 +1,28 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
-import { PegawaiModulesLeaveService } from "../services/leave.modules.service";
 import { Request } from "express";
-import { CreateLeaveDto } from "src/pegawai/dto/leave.dto";
+import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
+import { CreateActivityDto } from "../dto/activity.dto";
+import { PegawaiModulesActivityService } from "../services/activity.modules.service";
 import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
 import { Groups } from "src/decorators/group.decorator";
 
-@Controller('pegawai/modules/leave')
+@Controller('pegawai/modules/activity')
 @UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
 @Groups('TATA USAHA', 'GURU TAMU')
-export class LeaveModulesPegawaiController {
+export class ActiviyModulesPegawaiController {
     constructor(
-        private readonly pegawaiModulesLeaveService: PegawaiModulesLeaveService
+        private readonly PegawaiModulesActivityService: PegawaiModulesActivityService
     ) { }
 
     @Get('/')
-    async getFindAllLeave(
+    async get(
         @Req() req: Request,
         @Query('limit') limit: string,
         @Query('after') after: string,
         @Query('before') before: string,
         @Query('search') search: string
     ) {
-        return await this.pegawaiModulesLeaveService.getFindAllLeave(req.user, limit, after, before, search)
+        return await this.PegawaiModulesActivityService.getFindAllActivity(req.user, limit, after, before, search)
     }
 
     @Get('/:id')
@@ -30,14 +30,14 @@ export class LeaveModulesPegawaiController {
         @Req() req: Request,
         @Param('id', new ParseIntPipe()) id: number
     ) {
-        return await this.pegawaiModulesLeaveService.getLeaveById(req.user, id)
+        return await this.PegawaiModulesActivityService.getActivityById(req.user, id)
     }
 
     @Post('/')
     async createLeave(
         @Req() req: Request,
-        @Body() createLeaveDto: CreateLeaveDto
+        @Body() createActivityDto: CreateActivityDto
     ) {
-        return await this.pegawaiModulesLeaveService.createLeave(req.user, createLeaveDto)
+        return await this.PegawaiModulesActivityService.createActivity(req.user, createActivityDto)
     }
 }

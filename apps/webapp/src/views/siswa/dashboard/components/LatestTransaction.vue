@@ -58,7 +58,6 @@ const { data: latest, isPending: loading } = useQuery({
         fill="transparent"
         class="text-primary"
       />
-      <span class="text-500 mt-2">Memuat data...</span>
     </div>
   </div>
 </template>

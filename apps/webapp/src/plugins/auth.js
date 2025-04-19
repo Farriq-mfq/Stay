@@ -93,6 +93,10 @@ export default (app) => {
 
                 },
                 response: function (res) {
+                    if (res.status === 503) {
+                        app.router.replace({ name: 'unavailable' })
+                        return;
+                    }
                     if ('data' in res.data) {
                         const { accessToken, refreshToken } = res.data.data
                         if (accessToken && refreshToken) return JSON.stringify({

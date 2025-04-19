@@ -12,10 +12,11 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [ ] Add Feature AutoDebet
 - [ ] Trasaction Report
 - [ ] Add Feature Journal Employee and Teaching
-- [ ] Guard Filter Group
+- [X] Guard Filter Group
 - [ ] Notification firebase
 - [x] Update Menu
 - [ ] Update State Loading webapp like : presence,transaction (spesificly in detail page)
+- [ ] Dynamic Feature and permisson dynamic feature
 
 ## REQUESTER RFID READER
 

@@ -34,25 +34,26 @@ model siswa {
 
 // employees
 model pegawai {
-  id                        Int                 @id @default(autoincrement())
-  name                      String              @db.VarChar()
-  username                  String              @unique @db.VarChar() // di isi dengan NIP 
+  id                        Int                  @id @default(autoincrement())
+  name                      String               @db.VarChar()
+  username                  String               @unique @db.VarChar() // di isi dengan NIP 
   password                  String
   refreshToken              String?
-  rfid_token                String?             @unique
+  rfid_token                String?              @unique
   position                  String?
   group                     String
   sign_picture              String? // gambar tanda tangan
   sign_picture_public_id    String?
   profile_picture           String? // profile
   profile_picture_public_id String?
-  createdAt                 DateTime            @default(now())
-  updatedAt                 DateTime            @updatedAt
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
   presences                 presences_pegawai[]
-  accountId                 Int?                @unique
-  account                   account?            @relation(fields: [accountId], references: [id])
+  accountId                 Int?                 @unique
+  account                   account?             @relation(fields: [accountId], references: [id])
   schedules                 schedules[]
   leave_requests            leave_requests[]
+  journal_activities        journal_activities[]
 }
 
 // enum RoleUser {
@@ -405,6 +406,16 @@ model leave_requests {
   updatedAt    DateTime    @updatedAt
 }
 
+model journal_activities {
+  id          Int      @id @default(autoincrement())
+  pegawai     pegawai  @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+  pegawaiId   Int
+  description String   @db.Text
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // academic 
 model subjects {
   id        Int         @id @default(autoincrement())
@@ -423,8 +434,8 @@ model schedules {
   pegawaiId   Int
   rombel      String
   day_of_week Int // 1-7
-  startTime   String
-  endTime     String
+  start_time  String
+  end_time    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -467,7 +478,20 @@ model schedules {
 //   siswa     siswa                 @relation(fields: [siswaId], references: [id], onDelete: Cascade)
 //   siswaId   Int
 //   status    ClassAttendanceStatus
-//   date      DateTime
 //   createdAt DateTime              @default(now()) // tanggal absen
 //   updatedAt DateTime              @updatedAt
 // }
+
+// features
+
+model features {
+  id        Int             @id @default(autoincrement())
+  title     String
+  route     String
+  icon      String?         @db.VarChar(255)
+  status    Boolean         @default(true)
+  role      SessionRoleType
+  group     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}

@@ -94,7 +94,7 @@ const handleShowDialog = () => {
     <AppHeaderBack title="Izin" />
     <div class="p-3 md:p-4 mt-8">
       <Button
-        label="Ajukan Izin"
+        label="Mengajukan Izin"
         class="w-full font-bold"
         @click="handleShowDialog"
       />

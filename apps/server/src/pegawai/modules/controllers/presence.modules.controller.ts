@@ -3,9 +3,11 @@ import { PegawaiModulesPresenceService } from "../services/presence.modules.serv
 import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
 import { Request } from "express";
 import { PresenceLocationDto } from "../dto/presence.dto";
+import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
+import { Groups } from "src/decorators/group.decorator";
 
 @Controller('pegawai/modules/presence')
-@UseGuards(AccessTokenPegawaiGuard)
+@UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
 export class PegawaiModulesPresenceController {
     constructor(private readonly pegawaiModulesPresenceService: PegawaiModulesPresenceService) { }
     @Get('/')
@@ -20,6 +22,7 @@ export class PegawaiModulesPresenceController {
     }
 
     @Get('/location')
+    @Groups('TATA USAHA', 'GURU TAMU')
     async readCurrentSessionAndPresence(
         @Req() req: Request,
     ) {
@@ -36,6 +39,7 @@ export class PegawaiModulesPresenceController {
 
 
     @Post('/location')
+    @Groups('TATA USAHA', 'GURU TAMU')
     async createPresenceByLocation(
         @Req() req: Request,
         @Body() presenceLocationDto: PresenceLocationDto
