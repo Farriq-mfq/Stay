@@ -4,7 +4,7 @@ import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.g
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { isDate } from "util/types";
 import { CreateLeaveDto } from "../../dto/leave.dto";
-import { isValid, parseISO, differenceInDays } from "date-fns";
+import { isValid, parseISO, differenceInDays, startOfDay, isAfter, isBefore } from "date-fns";
 
 @Injectable()
 @UseGuards(AccessTokenPegawaiGuard)
@@ -50,15 +50,21 @@ export class PegawaiModulesLeaveService {
         const parsedStartDate = parseISO(start_date);
         const parsedEndDate = parseISO(end_date);
 
+        const today = startOfDay(new Date());
+        const startDate = startOfDay(new Date(parsedStartDate));
+        const endDate = startOfDay(new Date(parsedEndDate));
+
         if (!isValid(parsedStartDate) || !isValid(parsedEndDate)) {
             throw new BadRequestException("Invalid start_date or end_date");
         }
-
-        if (parsedStartDate > parsedEndDate) {
-            throw new BadRequestException("start_date must be before or equal to end_date");
+        if (isBefore(startDate, today) || isBefore(endDate, today)) {
+            throw new BadRequestException("Tanggal mulai dan selesai tidak boleh kurang dari hari ini");
         }
 
-        // check if leave has pending status
+        if (isAfter(startDate, endDate)) {
+            throw new BadRequestException("Tanggal mulai tidak boleh lebih besar dari tanggal selesai");
+        }
+
         const leavePending = await this.prismaService.client.leave_requests.findFirst({
             where: {
                 pegawaiId: parseInt(user.sub),
@@ -66,8 +72,23 @@ export class PegawaiModulesLeaveService {
             }
         });
 
+        const leaveActive = await this.prismaService.client.leave_requests.findFirst({
+            where: {
+                pegawaiId: parseInt(user.sub),
+                status: 'Approved',
+                start_date: {
+                    lte: new Date()
+                },
+                end_date: {
+                    gte: new Date()
+                },
+            }
+        });
+
+        if (leaveActive) throw new BadRequestException("Izin tidak dapat diajukan, karena masih ada izin yang aktif");
+
         if (leavePending) {
-            throw new BadRequestException("Izin tidak dapat diajukan, karena masih ada izin yang pending");
+            throw new BadRequestException("Izin tidak dapat diajukan, karena masih ada izin yang pending ");
         }
 
         const totalDays = differenceInDays(parsedEndDate, parsedStartDate) + 1;

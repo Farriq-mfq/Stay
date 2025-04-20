@@ -4,9 +4,11 @@ import { PegawaiModulesLeaveService } from "../services/leave.modules.service";
 import { Request } from "express";
 import { CreateLeaveDto } from "src/pegawai/dto/leave.dto";
 import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
+import { Feature } from "src/decorators/feature.decorator";
 
 @Controller('pegawai/modules/leave')
 @UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
+@Feature('pegawai:feature-leave')
 export class LeaveModulesPegawaiController {
     constructor(
         private readonly pegawaiModulesLeaveService: PegawaiModulesLeaveService

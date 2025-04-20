@@ -237,13 +237,20 @@ const router = createRouter({
                         title: "Connected Client",
                     }
                 },
-                // employee
                 {
                     path: "/employee/leave",
                     name: "employee-leave",
                     component: () => import('@/views/Employee/Leave.vue'),
                     meta: {
                         title: "Leave Request",
+                    }
+                },
+                {
+                    path: "/employee/presences",
+                    name: "employee-presences",
+                    component: () => import('@/views/Employee/Presence.vue'),
+                    meta: {
+                        title: "Presences",
                     }
                 },
                 {

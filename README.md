@@ -9,15 +9,15 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [x] Add Feature Presence By Location
 - [X] Leave Feature (Izin)
 - [X] Add Activty Journal
+- [X] Guard Filter Group
+- [x] Update Menu
+- [X] Dynamic Feature and permisson dynamic feature
 - [ ] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
+- [ ] List Withdraw and Approve
 - [ ] Trasaction Report
-- [ ] Add Feature Journal Employee and Teaching
-- [X] Guard Filter Group
 - [ ] Notification firebase
-- [x] Update Menu
 - [ ] Update State Loading webapp like : presence,transaction (spesificly in detail page)
-- [ ] Dynamic Feature and permisson dynamic feature
 - [ ] Adding Version Control
 
 

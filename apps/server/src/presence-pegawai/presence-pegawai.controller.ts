@@ -16,8 +16,8 @@ export class PresencePegawaiController {
     ) { }
 
 
-    @Get('/auto-read')
-    @Permissions('presences-pegawai:location')
+    @Get('auto-read')
+    @Permissions('presences-pegawai:auto-read')
     async getAllPresenceByAutoReadAndLocation(
         @Query("date") date: string,
     ) {

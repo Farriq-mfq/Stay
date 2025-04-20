@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { isJSON } from "class-validator";
-import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval, isAfter } from "date-fns";
+import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval, isAfter, isWithinInterval } from "date-fns";
 import { id, th } from "date-fns/locale";
 import { CustomPrismaService } from "nestjs-prisma";
 import { PegawaiService } from "src/pegawai/pegawai.service";
@@ -731,8 +731,15 @@ export class PresencePegawaiService {
             throw new BadRequestException("date invalid")
         }
 
-        const startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
-        const endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+        const year = parseInt(parseDateYearMonth.year);
+        const month = parseInt(parseDateYearMonth.month);
+
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+            throw new BadRequestException("Tanggal tidak valid");
+        }
+
+        const startDate = startOfMonth(new Date(year, month - 1));
+        const endDate = endOfMonth(new Date(year, month - 1));
         const dateInterval = eachDayOfInterval({
             start: startDate, end: endDate
         })
@@ -778,36 +785,47 @@ export class PresencePegawaiService {
             `${now} ${session.start_time}`,
             "yyyy-MM-dd HH: mm: ss"
         );
+
         const leaves = await this.prismaService.client.leave_requests.findMany({
             where: {
                 pegawaiId: {
                     in: pegawai.map(pg => pg.id),
                 },
                 status: 'Approved',
-                createdAt: {
-                    gte: startDate,
-                    lte: endDate
-                }
-            }
+                OR: dateInterval.map((day) => ({
+                    start_date: { lte: day },
+                    end_date: { gte: day }
+                }))
+            },
         })
+
 
         const mappingPresences = pegawai.map(s => {
             return {
                 name: s.name,
                 presences: dateInterval.map(d => {
                     const findPresence = presences.find(presence => presence.pegawaiId === s.id && format(presence.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
-                    const findLeave = leaves.find(leave => leave.pegawaiId === s.id && format(leave.createdAt, 'yyyy-MM-dd') === format(d, "yyyy-MM-dd"));
+                    const findLeave = leaves.find(leave =>
+                        leave.pegawaiId === s.id &&
+                        isWithinInterval(d, {
+                            start: new Date(leave.start_date),
+                            end: new Date(leave.end_date),
+                        })
+                    );
+
                     return {
-                        [format(d, "dd")]: findPresence ? {
+                        [format(d, "dd")]: findLeave ? {
+                            leave: findLeave
+                        } : findPresence ? {
                             enter_time: findPresence.enter_time ? format(findPresence.enter_time, 'HH:mm:ss', {
                                 locale: id
                             }) : '-',
                             exit_time: findPresence.exit_time ? format(findPresence.exit_time, 'HH:mm:ss', {
                                 locale: id
                             }) : '-',
-                            isLate: isAfter(new Date(findPresence.enter_time), parseStartTime) ? true : false,
-                        } : findLeave ? {
-                            isLeave: true,
+                            is_late: isAfter(new Date(findPresence.enter_time), parseStartTime) ? true : false,
+                            allow_twice: session.allow_twice,
+
                         } : null
                     }
                 })

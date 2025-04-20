@@ -68,7 +68,8 @@
     "export-daily",
     "read-monthly",
     "export-monthly",
-    "read-meeting"
+    "read-meeting",
+    "auto-read"
   ],
   "roles": ["create", "read", "update", "delete"],
   "sessions": [
@@ -84,6 +85,6 @@
   "transaction": ["deposit", "withdraw", "read-queue", "create-queue"],
   "subjects": ["create", "read", "update", "delete"],
   "schedules": ["create", "read", "update", "delete"],
-  "leave": ["read", "approve", "reject"],
-  "features": ["read", "update"]
+  "features": ["read", "update"],
+  "leave": ["read", "approve", "reject"]
 }

@@ -4,9 +4,11 @@ import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
 import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
 import { CreateActivityDto } from "../dto/activity.dto";
 import { PegawaiModulesActivityService } from "../services/activity.modules.service";
+import { Feature } from "src/decorators/feature.decorator";
 
 @Controller('pegawai/modules/activity')
 @UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
+@Feature('pegawai:feature-journal-activity')
 export class ActiviyModulesPegawaiController {
     constructor(
         private readonly PegawaiModulesActivityService: PegawaiModulesActivityService
