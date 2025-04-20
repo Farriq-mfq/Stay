@@ -12,7 +12,7 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [X] Guard Filter Group
 - [x] Update Menu
 - [X] Dynamic Feature and permisson dynamic feature
-- [ ] Rekap Perbulan Presence By Location
+- [X] Rekap Perbulan Presence By Location
 - [ ] Add Feature AutoDebet
 - [ ] List Withdraw and Approve
 - [ ] Trasaction Report

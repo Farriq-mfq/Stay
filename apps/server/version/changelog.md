@@ -5,6 +5,7 @@
 -   menamabhakan fitur absen lokasi
 -   menambahkan fitur izin
 -   menambahkan jurnal aktivity
+-   menambahkan fitur lihat hasil presensi bulanan
 ### Fix
 -   memperbaiki fitur realtime 
 ## [1.6.1] - 2025-03-27
