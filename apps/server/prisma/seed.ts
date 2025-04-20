@@ -1,4 +1,4 @@
-import { permissions, PrismaClient } from '@prisma/client';
+import { features, permissions, PrismaClient } from '@prisma/client';
 import { hash } from 'argon2';
 import { readFile } from 'fs';
 import * as path from 'path';
@@ -29,7 +29,7 @@ async function main() {
     console.log(chalk.greenBright(figlet.textSync("Konfigurasi Database", { horizontalLayout: "full" })));
     console.log(chalk.gray(`Copyright © ${new Date().getFullYear()} TIM IT SMK Negeri 1 Pekalongan. All rights reserved.\n`));
 
-    const option = await askQuestion(chalk.yellow(`Pilih opsi: \n 1. Buat user superadmin \n 2. Reset Semua User \n 3. Sync Permissions \n 4. Keluar \n`))
+    const option = await askQuestion(chalk.yellow(`Pilih opsi: \n 1. Buat user superadmin \n 2. Reset Semua User \n 3. Sync Permissions \n 4. Sync Features \n 5. Keluar \n`))
 
     if (!isNaN(Number(option))) {
         switch (Number(option)) {
@@ -49,6 +49,11 @@ async function main() {
                 syncPermissions()
                 break;
             case 4:
+                console.clear()
+                console.log(chalk.yellowBright(figlet.textSync("Sync Features", { horizontalLayout: "full" })));
+                syncFeatures()
+                break;
+            case 5:
                 console.log(chalk.red('Keluar...'));
                 readline.close()
                 return;
@@ -393,6 +398,55 @@ async function syncPermissions() {
 
     }
 
+
+}
+
+async function syncFeatures() {
+    await prisma.features.deleteMany()
+    const features = await new Promise<any>((resolve, reject) => {
+        readFile(path.resolve(__dirname, '../data/features.json'), 'utf-8', function (err, data) {
+            if (err) {
+                throw err
+            }
+            resolve(JSON.parse(data))
+        });
+    })
+
+    if (features) {
+        // pegawai 
+        const featuresPegawai = features.pegawai;
+        const featuresSiswa = features.siswa;
+
+        await prisma.features.createMany({
+            data: featuresPegawai.map((feature) => {
+                return {
+                    route: feature.route,
+                    name: `pegawai:${feature.route}`,
+                    title: feature.title,
+                    icon: feature.icon,
+                    iconColor: feature.iconColor,
+                    group: feature.group,
+                    role: 'PEGAWAI'
+                }
+            })
+        })
+
+        await prisma.features.createMany({
+            data: featuresSiswa.map((feature) => {
+                return {
+                    route: feature.route,
+                    name: `siswa:${feature.route}`,
+                    title: feature.title,
+                    icon: feature.icon,
+                    iconColor: feature.iconColor,
+                    group: feature.group,
+                    role: 'SISWA'
+                }
+            })
+        })
+    }
+    console.log(chalk.green('Fitur berhasil diupdate'));
+    readline.close()
 
 }
 

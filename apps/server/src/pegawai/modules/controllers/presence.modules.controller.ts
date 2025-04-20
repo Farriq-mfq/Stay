@@ -4,7 +4,7 @@ import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.g
 import { Request } from "express";
 import { PresenceLocationDto } from "../dto/presence.dto";
 import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
-import { Groups } from "src/decorators/group.decorator";
+import { Feature } from "src/decorators/feature.decorator";
 
 @Controller('pegawai/modules/presence')
 @UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
@@ -22,7 +22,7 @@ export class PegawaiModulesPresenceController {
     }
 
     @Get('/location')
-    @Groups('TATA USAHA', 'GURU TAMU')
+    @Feature('pegawai:feature-presence')
     async readCurrentSessionAndPresence(
         @Req() req: Request,
     ) {
@@ -39,7 +39,8 @@ export class PegawaiModulesPresenceController {
 
 
     @Post('/location')
-    @Groups('TATA USAHA', 'GURU TAMU')
+
+    @Feature('pegawai:feature-presence')
     async createPresenceByLocation(
         @Req() req: Request,
         @Body() presenceLocationDto: PresenceLocationDto

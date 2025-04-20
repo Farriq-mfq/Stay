@@ -26,3 +26,14 @@ export function detectBrowser(userAgent) {
     }
     return "Unknown Browser";
 }
+
+
+export function isJSON(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+

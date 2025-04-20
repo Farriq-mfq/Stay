@@ -1,23 +1,25 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { isJSON } from "class-validator";
 import { CustomPrismaService } from "nestjs-prisma";
-import { GROUP_KEY } from "src/decorators/group.decorator";
 import { ExtendedPrismaClient } from "src/prisma.extension";
+import { isArray } from "src/utils/helpers";
 
 @Injectable()
 export class PegawaiGroupGuard implements CanActivate {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-        private reflector: Reflector,
+        private readonly reflector: Reflector
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const requiredGroups = this.reflector.getAllAndOverride<string[]>(GROUP_KEY, [
+        const featureName = this.reflector.getAllAndMerge('feature', [
             context.getHandler(),
             context.getClass(),
-        ])
+        ]);
 
-        if (!requiredGroups) return true;
+        if (!featureName || isArray(featureName)) return true
+
 
         const request = context.switchToHttp().getRequest();
         const user = request.user;
@@ -28,12 +30,35 @@ export class PegawaiGroupGuard implements CanActivate {
             where: {
                 id: parseInt(user.sub),
             },
+            select: {
+                group: true
+            }
         });
 
         if (!pegawai) return false;
 
-        if (!requiredGroups.includes(pegawai.group)) throw new ServiceUnavailableException()
+        const feature = await this.prismaService.client.features.findFirst({
+            where: {
+                name: featureName as string,
+                status: true,
+                role: "PEGAWAI",
+            },
+        });
+
+        if (!feature) throw new ServiceUnavailableException("You don't have access to this feature");
+
+
+        if (!isJSON(feature.group)) return true;
+
+        const parseJson = JSON.parse(feature.group);
+
+        if (!parseJson) return true;
+
+        const checkFeature = parseJson.includes(pegawai.group);
+        if (!checkFeature) throw new ServiceUnavailableException("You don't have access to this feature");
+
         return true
+
     }
 
 }

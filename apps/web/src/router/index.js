@@ -246,6 +246,14 @@ const router = createRouter({
                         title: "Leave Request",
                     }
                 },
+                {
+                    path: "/apps/features",
+                    name: "features",
+                    component: () => import('@/views/Features/Index.vue'),
+                    meta: {
+                        title: "Features",
+                    }
+                },
                 // {
                 //     path: '/whatsapp',
                 //     name: 'whatsapp',

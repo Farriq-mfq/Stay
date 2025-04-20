@@ -1,5 +1,4 @@
-import Login from "@/views/pegawai/Auth/Login.vue"
-import { groupMiddleware } from "./middleware/groupMiddleware";
+import Login from "@/views/pegawai/Auth/Login.vue";
 
 /**
  * @type {import('vue-router').RouteRecordRaw[]}
@@ -138,7 +137,6 @@ const routes = [
         meta: {
             layout: "PegawaiMainLayout",
         },
-        beforeEnter: [groupMiddleware]
     },
     {
         path: "/feature/leave",
@@ -158,7 +156,6 @@ const routes = [
                 component: () => import("@/views/pegawai/Feature/Leave/Detail.vue"),
             }
         ],
-        beforeEnter: [groupMiddleware]
     },
     {
         path: "/feature/journal-activity",
@@ -178,7 +175,6 @@ const routes = [
                 component: () => import("@/views/pegawai/Feature/Activity/Detail.vue"),
             }
         ],
-        beforeEnter: [groupMiddleware]
     },
     {
         path: '/login',

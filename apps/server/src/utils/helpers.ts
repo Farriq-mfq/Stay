@@ -82,3 +82,8 @@ export function validateAndFormatDateYear(input: string): { year: string, month:
         month: splitDate[1]
     }
 }
+
+// isArray function
+export function isArray(input: any): input is any[] {
+    return Array.isArray(input);
+}

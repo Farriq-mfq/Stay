@@ -5,26 +5,27 @@ import { CustomPrismaModule } from 'nestjs-prisma';
 import { AuthModule } from './auth/auth.module';
 import { BackupModule } from './backup/backup.module';
 import configuration from './config/configuration';
+import { ConnectedClientModule } from './connected-client/connected-client.module';
 import { EventsModule } from './events/events.module';
+import { FeaturesModule } from './features/features.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { LeaveModule } from './leave/leave.module';
 import { MeetingSessionModule } from './meeting-session/meeting-session.module';
+import { PegawaiModulesModule } from './pegawai/modules/pegawai.modules.module';
 import { PegawaiModule } from './pegawai/pegawai.module';
+import { PermissionsModule } from './permissions/permissions.module';
 import { PresencePegawaiModule } from './presence-pegawai/presence-pegawai.module';
 import { PresenceModule } from './presence/presence.module';
 import { extendedPrismaClient } from './prisma.extension';
-import { SessionsModule } from './sessions/sessions.module';
-import { SiswaModule } from './siswa/siswa.module';
-import { StatsModule } from './stats/stats.module';
-import { UsersModule } from './users/users.module';
 import { PublicModule } from './public/public.module';
-import { ConnectedClientModule } from './connected-client/connected-client.module';
-import { PegawaiModulesModule } from './pegawai/modules/pegawai.modules.module';
-import { SiswaModulesModule } from './siswa/modules/siswa.modules.module';
 import { QrCodeModule } from './qrcode/qrcode.module';
 import { RolesModule } from './roles/roles.module';
-import { PermissionsModule } from './permissions/permissions.module';
+import { SessionsModule } from './sessions/sessions.module';
+import { SiswaModulesModule } from './siswa/modules/siswa.modules.module';
+import { SiswaModule } from './siswa/siswa.module';
+import { StatsModule } from './stats/stats.module';
 import { TransactionModule } from './transaction/transaction.module';
-import { LeaveModule } from './leave/leave.module';
+import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -79,7 +80,8 @@ import { LeaveModule } from './leave/leave.module';
     RolesModule,
     PermissionsModule,
     TransactionModule,
-    LeaveModule
+    LeaveModule,
+    FeaturesModule
   ],
 })
 export class AppModule { }

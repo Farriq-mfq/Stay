@@ -19,11 +19,13 @@ import { LeaveModulesPegawaiController } from "./controllers/leave.modules.contr
 import { PegawaiModulesLeaveService } from "./services/leave.modules.service";
 import { PegawaiModulesActivityService } from "./services/activity.modules.service";
 import { ActiviyModulesPegawaiController } from "./controllers/activity.modules.controller";
+import { PegawaiModulesFeatureService } from "./services/feature.modules.service";
+import { PegawaiFeatureModuleServiceController } from "./controllers/feature.modules.controller";
 
 @Module({
     imports: [TransactionModule, QrCodeModule, EventsModule],
-    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController, HomeModulesPegawaiController, QrCodePegawaiModulesController, ProfileModulesController, LeaveModulesPegawaiController, ActiviyModulesPegawaiController],
-    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService, HomeModulesPegawaiService, QrCodePegawaiModulesService, ProfileModulesService, PegawaiModulesLeaveService, PegawaiModulesActivityService],
+    controllers: [PegawaiModulesPresenceController, PegawaiAccountModuleServiceController, TransactionPegawaiModuleController, HomeModulesPegawaiController, QrCodePegawaiModulesController, ProfileModulesController, LeaveModulesPegawaiController, ActiviyModulesPegawaiController, PegawaiFeatureModuleServiceController],
+    providers: [PegawaiModulesPresenceService, PegawaiAccountModuleService, TransactionService, TransactionPegawaiModuleService, HomeModulesPegawaiService, QrCodePegawaiModulesService, ProfileModulesService, PegawaiModulesLeaveService, PegawaiModulesActivityService, PegawaiModulesFeatureService],
 })
 export class PegawaiModulesModule {
 

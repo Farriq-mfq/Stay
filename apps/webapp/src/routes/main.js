@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { pegawaiRouter, siswaRouter } from '.';
 import { config } from '../config';
 import { loadLayoutMiddleware } from './middleware/loadLayoutMiddleware';
-import { groupMiddleware } from './middleware/groupMiddleware';
 import { ROLES } from './middleware/role-selected';
 
 const role = localStorage.getItem(`${config.STORAGE_KEY}/role`);

@@ -59,7 +59,7 @@ const model = ref([
         label: permissions.value.includes('leave:read') ? 'Tata Usaha (TU)' : '',
         items: [
             // permissions.value.includes('transaction:deposit') ? { label: 'Presensi', icon: 'pi pi-fw pi-database    ', to: '/transaction/deposit' } : null,
-            permissions.value.includes('leave:read') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/employee/leave' } : null,
+            permissions.value.includes('leave:read') ? { label: 'Izin', icon: 'pi pi-fw pi-calendar', to: '/employee/leave' } : null
             // permissions.value.includes('transaction:withdraw') ? { label: 'Jurnal', icon: 'pi pi-fw pi-book', to: '/transaction/withdraw' } : null
         ].filter((menu) => menu != null)
     },
@@ -83,6 +83,10 @@ const model = ref([
             permissions.value.includes('backup:database') ? { label: 'Backup', icon: 'pi pi-fw pi-database', to: '/backup' } : null,
             permissions.value.includes('client:read') ? { label: 'Client', icon: 'pi pi-fw pi-bolt', to: '/connected-client' } : null
         ].filter((menu) => menu != null)
+    },
+    {
+        label: permissions.value.includes('features:read') ? 'Apps' : '',
+        items: [permissions.value.includes('features:read') ? { label: 'Fitur Aplikasi', icon: 'pi pi-wrench', to: '/apps/features' } : null].filter((menu) => menu != null)
     },
     {
         label: permissions.value.includes('users:read') || permissions.value.includes('siswa:read') || permissions.value.includes('pegawai:read') ? 'Data' : '',

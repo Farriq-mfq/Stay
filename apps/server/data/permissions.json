@@ -84,5 +84,6 @@
   "transaction": ["deposit", "withdraw", "read-queue", "create-queue"],
   "subjects": ["create", "read", "update", "delete"],
   "schedules": ["create", "read", "update", "delete"],
-  "leave": ["read", "approve", "reject"]
+  "leave": ["read", "approve", "reject"],
+  "features": ["read", "update"]
 }

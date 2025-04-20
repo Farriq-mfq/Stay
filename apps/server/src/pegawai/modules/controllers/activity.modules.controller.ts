@@ -1,14 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
+import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
 import { AccessTokenPegawaiGuard } from "src/pegawai/guards/accessTokenPegawai.guard";
 import { CreateActivityDto } from "../dto/activity.dto";
 import { PegawaiModulesActivityService } from "../services/activity.modules.service";
-import { PegawaiGroupGuard } from "src/guards/pegawai-group.guard";
-import { Groups } from "src/decorators/group.decorator";
 
 @Controller('pegawai/modules/activity')
 @UseGuards(AccessTokenPegawaiGuard, PegawaiGroupGuard)
-@Groups('TATA USAHA', 'GURU TAMU')
 export class ActiviyModulesPegawaiController {
     constructor(
         private readonly PegawaiModulesActivityService: PegawaiModulesActivityService
