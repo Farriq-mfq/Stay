@@ -47,7 +47,7 @@ const { data: features, status: featureStatus } = useQuery({
       <i class="pi pi-folder-open" />
       <span class="ml-2">Tidak Tersedia Fitur Untuk Anda</span>
     </div>
-    <div v-if="featureStatus === 'loading'">
+    <div v-if="featureStatus === 'pending'">
       <Skeleton class="h-5rem w-full" />
     </div>
   </div>

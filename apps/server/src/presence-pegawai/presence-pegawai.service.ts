@@ -772,11 +772,24 @@ export class PresencePegawaiService {
             }
         })
 
-        const pegawai = await this.prismaService.client.pegawai.findMany({
-            orderBy: {
-                name: 'asc'
+        const feature = await this.prismaService.client.features.findUnique({
+            where: {
+                name: "pegawai:feature-presence"
             }
         })
+
+        let pegawai = await this.prismaService.client.pegawai.findMany({
+            orderBy: {
+                name: 'asc',
+            }
+        })
+
+        if(feature){
+            const groups = isJSON(feature.group) ? JSON.parse(feature.group) : null;
+            if (groups && groups.length > 0) {
+                pegawai = pegawai.filter(pg => groups.includes(pg.group))
+            }
+        }
 
         if (!session.start_time && !session.end_time) throw new BadRequestException("session start time and end time not found")
         const now = format(Date.now(), "yyyy-MM-dd");

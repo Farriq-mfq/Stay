@@ -255,10 +255,6 @@ const handleSubmit = () => {
                 <SelectTextColor v-model="updateData.iconColor" />
                 <p class="text-red-500" v-if="errorsUpdate && errorsUpdate.icon">{{ errorsUpdate.icon[0] }}</p>
             </div>
-            <div class="field">
-                <label for="iconColor"> Icon Color </label> <InputText id="iconColor" :disabled="updateFeatureLoading" :invalid="errorsUpdate && errorsUpdate.iconColor" required="true" autofocus v-model="updateData.iconColor" />
-                <p class="text-red-500" v-if="errorsUpdate && errorsUpdate.iconColor">{{ errorsUpdate.iconColor[0] }}</p>
-            </div>
             <div class="field flex flex-column gap-2">
                 <label for="status"> Status </label> <InputSwitch id="status" :disabled="updateFeatureLoading" :invalid="errorsUpdate && errorsUpdate.status" required="true" autofocus v-model="updateData.status" />
                 <p class="text-red-500" v-if="errorsUpdate && errorsUpdate.status">{{ errorsUpdate.status[0] }}</p>

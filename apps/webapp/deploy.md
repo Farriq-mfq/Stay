@@ -27,6 +27,13 @@
         },
     },
     ```
+    - add permission in AndroidManifest.xml
+    ```XML
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    ```
 4. Lanjut Ke Ektensi Ionic
 5. Klik Project > Build
 6. Prepare Release

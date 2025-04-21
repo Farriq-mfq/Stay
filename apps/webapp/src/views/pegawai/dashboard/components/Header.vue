@@ -5,20 +5,23 @@ import Banner from "./Banner.vue";
 import { rupiahFormat } from "@/utils/money";
 import CreateAccount from "./CreateAccount.vue";
 import { useToast } from "primevue/usetoast";
-import { useClipboard } from '@vueuse/core';
+import { useClipboard } from "@vueuse/core";
 import { useBallance } from "@/store/ballance";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const showSaldo = ref(true);
 const ballanceStore = useBallance();
 
-
 const getAccount = async () => {
   const response = await axios.get("/pegawai/modules/account");
   return response.data;
 };
 
-const { data: account, isLoading: accountLoading } = useQuery({
+const {
+  data: account,
+  isLoading: accountLoading,
+  status,
+} = useQuery({
   queryKey: ["account"],
   queryFn: getAccount,
 });
@@ -31,50 +34,81 @@ const { copy } = useClipboard();
 const copyAccountNumber = async (accountNumber) => {
   await copy(accountNumber);
   toast.add({
-    severity: 'success',
-    summary: 'Berhasil',
-    detail: 'Nomor rekening berhasil disalin',
-    life: 2000
+    severity: "success",
+    summary: "Berhasil",
+    detail: "Nomor rekening berhasil disalin",
+    life: 2000,
   });
 };
 </script>
 
 <template>
-  <div class="relative px-2 md:px-3 pt-3" style="z-index: 99">
-    <div class="m-2">
+  <div class="relative px-2" style="z-index: 99">
+    <div class="mx-2">
       <div class="glass-container border-round-2xl relative shadow-2 mt-8">
-        <div class="glass-container-padding" v-if="account">
+        <div class="glass-container-padding" v-if="status === 'success'">
           <!-- User greeting -->
           <div class="flex align-items-center justify-content-between mb-3">
-            <span class="text-base md:text-lg font-medium text-white name-text">
+            <span class="text-base font-medium text-white name-text">
               Hai, {{ account.data.name }}
             </span>
-            <Button @click="ballanceStore.toogleShowBallance()" v-if="!accountLoading && account.data"
-              :icon="ballanceStore.getShowBallance ? 'pi pi-eye-slash' : 'pi pi-eye'" rounded
-              class="p-button-text p-button-rounded text-white custom-icon-button" size="small" />
+            <Button
+              @click="ballanceStore.toogleShowBallance()"
+              v-if="!accountLoading && account.data"
+              :icon="
+                ballanceStore.getShowBallance ? 'pi pi-eye-slash' : 'pi pi-eye'
+              "
+              rounded
+              class="p-button-text p-button-rounded text-white custom-icon-button"
+              size="small"
+            />
           </div>
 
           <!-- Balance card -->
           <div class="mb-3">
-            <span class="text-white text-xs md:text-sm font-medium block mb-1">Saldo Tersedia</span>
-            <h2 class="text-2xl md:text-3xl font-bold text-white m-0" v-if="!accountLoading && account.data">
-              {{ ballanceStore.getShowBallance ? rupiahFormat(account.data.balance) : "••••••" }}
+            <span class="text-white text-xs font-medium block mb-1"
+              >Saldo Tersedia</span
+            >
+            <h2
+              class="text-2xl font-bold text-white m-0"
+              v-if="!accountLoading && account.data"
+            >
+              {{
+                ballanceStore.getShowBallance
+                  ? rupiahFormat(account.data.balance)
+                  : "••••••"
+              }}
             </h2>
 
             <!-- Account number section update -->
-            <div class="account-number-container mt-3" v-if="!accountLoading && account.data">
-              <div class="account-number-card glass-card-light border-round-xl p-3">
+            <div
+              class="account-number-container mt-3"
+              v-if="!accountLoading && account.data"
+            >
+              <div
+                class="account-number-card glass-card-light border-round-xl p-3"
+              >
                 <div class="flex align-items-center justify-content-between">
                   <div>
-                    <span class="text-white text-xs block mb-1 opacity-70">Nomor Rekening</span>
+                    <span class="text-white text-xs block mb-1 opacity-70"
+                      >Nomor Rekening</span
+                    >
                     <div class="flex align-items-center gap-2">
-                      <span class="account-number text-white font-medium text-base md:text-lg">
-                        {{ account.data.accountNumber.match(/.{1,4}/g).join(' ') }}
+                      <span
+                        class="account-number text-white font-medium text-base"
+                      >
+                        {{
+                          account.data.accountNumber.match(/.{1,4}/g).join(" ")
+                        }}
                       </span>
-                      <div class="copy-button flex align-items-center cursor-pointer"
+                      <div
+                        class="copy-button flex align-items-center cursor-pointer"
                         @click="copyAccountNumber(account.data.accountNumber)"
-                        v-tooltip.bottom="'Salin nomor rekening'">
-                        <i class="pi pi-copy text-white text-xs opacity-70 hover:opacity-100"></i>
+                        v-tooltip.bottom="'Salin nomor rekening'"
+                      >
+                        <i
+                          class="pi pi-copy text-white text-xs opacity-70 hover:opacity-100"
+                        ></i>
                       </div>
                     </div>
                   </div>
@@ -86,35 +120,51 @@ const copyAccountNumber = async (accountNumber) => {
           <!-- Action buttons -->
           <div class="action-buttons-container mt-3">
             <div class="action-button">
-              <Button icon="pi pi-plus" rounded class="glass-button custom-icon-button-sm mb-1"
-                @click="$router.push({ name: 'transactions-topup' })" />
+              <Button
+                icon="pi pi-plus"
+                rounded
+                class="glass-button custom-icon-button-sm mb-1"
+                @click="$router.push({ name: 'transactions-topup' })"
+              />
               <p class="text-xs font-medium text-white m-0">Top up</p>
             </div>
             <div class="action-button">
-              <Button icon="pi pi-arrow-up" rounded class="glass-button custom-icon-button-sm mb-1"
-                @click="$router.push({ name: 'transactions-transfer' })" />
+              <Button
+                icon="pi pi-arrow-up"
+                rounded
+                class="glass-button custom-icon-button-sm mb-1"
+                @click="$router.push({ name: 'transactions-transfer' })"
+              />
               <p class="text-xs font-medium text-white m-0">Transfer</p>
             </div>
             <div class="action-button">
-              <Button icon="pi pi-arrow-down" rounded class="glass-button custom-icon-button-sm mb-1"
-                @click="$router.push({ name: 'transactions-withdraw' })" />
+              <Button
+                icon="pi pi-arrow-down"
+                rounded
+                class="glass-button custom-icon-button-sm mb-1"
+                @click="$router.push({ name: 'transactions-withdraw' })"
+              />
               <p class="text-xs font-medium text-white m-0">Tarik</p>
             </div>
             <div class="action-button">
-              <Button icon="pi pi-history" rounded class="glass-button custom-icon-button-sm mb-1"
-                @click="$router.push({ name: 'transactions' })" />
+              <Button
+                icon="pi pi-history"
+                rounded
+                class="glass-button custom-icon-button-sm mb-1"
+                @click="$router.push({ name: 'transactions' })"
+              />
               <p class="text-xs font-medium text-white m-0">Riwayat</p>
             </div>
           </div>
         </div>
 
         <div class="p-3">
-          <div class="h-12rem" v-if="accountLoading">
+          <div class="h-12rem" v-if="status === 'pending'">
             <div class="flex justify-content-center align-items-center h-full">
               <ProgressSpinner class="w-6rem h-6rem" />
             </div>
           </div>
-          <div class="h-12rem" v-if="!accountLoading && !account">
+          <div class="h-12rem" v-if="status === 'error'">
             <CreateAccount />
           </div>
         </div>
@@ -260,16 +310,18 @@ const copyAccountNumber = async (accountNumber) => {
 }
 
 .account-number-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 .account-number {

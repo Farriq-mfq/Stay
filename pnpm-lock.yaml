@@ -420,6 +420,9 @@ importers:
       vite:
         specifier: ^6.0.5
         version: 6.2.6(@types/node@20.17.30)
+      vite-plugin-pwa:
+        specifier: ^0.21.1
+        version: 0.21.2(vite@6.2.6)(workbox-build@7.3.0)(workbox-window@7.3.0)
 
 packages:
 
@@ -12079,6 +12082,28 @@ packages:
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.12
       vite: 4.5.13(sass@1.86.3)
+      workbox-build: 7.3.0
+      workbox-window: 7.3.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /vite-plugin-pwa@0.21.2(vite@6.2.6)(workbox-build@7.3.0)(workbox-window@7.3.0):
+    resolution: {integrity: sha512-vFhH6Waw8itNu37hWUJxL50q+CBbNcMVzsKaYHQVrfxTt3ihk3PeLO22SbiP1UNWzcEPaTQv+YVxe4G0KOjAkg==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@vite-pwa/assets-generator': ^0.2.6
+      vite: ^3.1.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      workbox-build: ^7.3.0
+      workbox-window: ^7.3.0
+    peerDependenciesMeta:
+      '@vite-pwa/assets-generator':
+        optional: true
+    dependencies:
+      debug: 4.4.0
+      pretty-bytes: 6.1.1
+      tinyglobby: 0.2.12
+      vite: 6.2.6(@types/node@20.17.30)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:

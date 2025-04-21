@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You're Offline</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to bottom right, #f4f6f9, #dfe6ec);
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 400px;
+        padding: 30px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .container h1 {
+        font-size: 2em;
+        margin-bottom: 15px;
+        color: #d9534f;
+      }
+
+      .container p {
+        font-size: 1.1em;
+        margin-bottom: 20px;
+      }
+
+      .container button {
+        padding: 10px 20px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .container button:hover {
+        background-color: #0b5ed7;
+      }
+
+      .icon {
+        font-size: 50px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">📡</div>
+      <h1>Kamu Offline</h1>
+      <p>
+        Sepertinya koneksi internet kamu terputus. Silakan periksa
+        koneksi kamu dan coba lagi.
+      </p>
+      <button onclick="location.reload()">Try Again</button>
+    </div>
+  </body>
+</html>
