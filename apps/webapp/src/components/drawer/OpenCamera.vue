@@ -6,6 +6,8 @@ import { useMutation } from "@tanstack/vue-query";
 import { useToast } from "primevue/usetoast";
 import { QrcodeStream } from "vue-qrcode-reader";
 import { useRouter } from "vue-router";
+import { config } from "@/config";
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -24,7 +26,6 @@ const { mutateAsync: scanMutate, isPending: scanPending } = useMutation({
   mutationFn: scanService,
 });
 const result = ref("");
-
 
 const handleScan = async (code) => {
   await scanMutate(
@@ -305,7 +306,7 @@ function switchTorch() {
           class="absolute bottom-0 left-0 right-0 text-center text-white text-xs"
           style="font-style: italic"
         >
-          SMK Negeri 1 Pekalongan
+          {{ config.app_name }}
         </p>
 
         <!-- <div class="animation-qr" v-if="!loading"></div> -->

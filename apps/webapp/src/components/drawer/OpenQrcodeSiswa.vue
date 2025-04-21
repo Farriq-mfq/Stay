@@ -1,27 +1,25 @@
 <script setup>
-import { useDrawer } from "@/store/drawer";
-import { rupiahFormat } from "@/utils/money";
 import { useQuery } from "@tanstack/vue-query";
 import { useQRCode } from "@vueuse/integrations/useQRCode";
 import { getCurrentInstance, ref, shallowRef, watch } from "vue";
+import { config } from "@/config";
 
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
 const qrValue = shallowRef("");
 const qrcode = useQRCode(qrValue);
-const showSaldo = ref(true);
-const drawer = useDrawer();
-const toggleShowSaldo = () => {
-  showSaldo.value = !showSaldo.value;
-};
 
 const getQrCodeService = async () => {
   const response = await axios.get(`/siswa/modules/qrcode`);
   return response.data;
 };
 
-const { data: qrCodeData, isPending: qrCodePending } = useQuery({
+const {
+  data: qrCodeData,
+  isPending: qrCodePending,
+  status,
+} = useQuery({
   queryKey: ["qrcode"],
   queryFn: getQrCodeService,
 });
@@ -31,77 +29,42 @@ watch(qrCodeData, () => {
     qrValue.value = qrCodeData.value.data;
   }
 });
-
-const getAccount = async () => {
-  const response = await axios.get("/siswa/modules/account");
-  return response.data;
-};
-
-const { data: account, isLoading: accountLoading } = useQuery({
-  queryKey: ["account"],
-  queryFn: getAccount,
-});
-
 </script>
 
 <template>
   <div class="p-3">
     <div
-      class="w-full h-30rem border-round-2xl overflow-hidden relative shadow-1"
-      v-if="!accountLoading && account"
-
+      class="w-full h-30rem border-round-2xl overflow-hidden relative shadow-1 flex flex-column justify-content-between py-5"
+      v-if="status === 'success'"
     >
-      <div class="relative px-3 pt-3">
-        <div class="flex justify-content-center mb-3">
-          <img src="@/assets/logo.png" alt="" class="w-5rem" />
-        </div>
-        <div
-          class="bg-opacity h-full w-full border-round-2xl relative shadow-1 mt-2"
+      <div
+        class="flex justify-content-center mb-3 flex flex-column align-items-center"
+      >
+        <img src="@/assets/logo.png" alt="" class="w-5rem" />
+        <p
+          class="mt-3 italic mx-0 text-center text-xs text-100 font-semibold"
+          style="font-style: italic"
         >
-          <div class="text-white px-4 py-4 flex-1">
-            <h2 class="text-2xl mx-0 mb-0 mt-1">
-              {{ showSaldo ? rupiahFormat(account.data.balance) : "***" }}
-            </h2>
-            <div
-              class="text-xs mx-0 font-semibold flex align-items-center mt-2 gap-2"
-              v-if="account.data"
-            >
-              <span class="text-md">{{ account.data.accountNumber }}</span>
-              <i class="pi pi-copy cursor-pointer"></i>
-            </div>
-            <Button
-              @click="toggleShowSaldo"
-              icon="pi pi-eye"
-              rounded
-              class="shadow-none bg-transparent border-none absolute top-0 right-0 bottom-0 mr-2 mt-6"
-              variant="text"
-            />
-          </div>
-        </div>
+          {{ config.app_name }}
+        </p>
       </div>
       <div
-        class="bg-primary h-full absolute top-0 left-0 right-0 w-full overflow-hidden"
+        class="bg-primary h-full absolute top-0 left-0 right-0 w-full overflow-hidden shadow-3"
         style="z-index: -1"
       >
         <div
-          class="bg-primary-reverse opacity-10 h-25rem w-25rem absolute border-circle"
+          class="bubble bg-primary-reverse opacity-10 h-25rem w-25rem absolute border-circle"
           style="right: -15rem; top: 15rem"
         ></div>
         <div
-          class="bg-primary-reverse opacity-10 h-30rem w-30rem absolute border-circle"
+          class="bubble-delay bg-primary-reverse opacity-10 h-30rem w-30rem absolute border-circle"
           style="left: -20rem; top: -15rem"
         ></div>
       </div>
-      <p
-        class="mt-4 mx-0 text-center text-xs text-white font-semibold"
-        style="font-style: italic"
-      >
-        SMK Negeri 1 Pekalongan
-      </p>
       <div
         class="flex justify-content-center items-center mx-auto h-14rem w-14rem p-card border-round-2xl relative overflow-hidden mt-3"
       >
-        <div class="flex align-items-center" v-if="qrCodePending">
+        <div class="flex align-items-center" v-if="status === 'pending'">
           <ProgressSpinner class="h-4rem w-4rem" />
         </div>
         <img :src="qrcode" class="h-full w-full" v-if="!qrCodePending" />
@@ -113,5 +76,25 @@ const { data: account, isLoading: accountLoading } = useQuery({
 <style scoped>
 .bg-opacity {
   background: rgba(255, 255, 255, 0.2) !important;
+}
+.bubble {
+  animation: float 8s ease-in-out infinite;
+}
+
+.bubble-delay {
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-50px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 </style>

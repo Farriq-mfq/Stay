@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { getCurrentInstance, inject } from "vue";
 import { useRoute } from "vue-router";
+import { config } from "@/config";
+
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const auth = inject("auth");
@@ -250,7 +252,9 @@ const {
             class="flex align-items-center justify-content-center gap-2 text-sm text-500"
           >
             <i class="pi pi-building"></i>
-            <span>SMK Negeri 1 Pekalongan</span>
+            <span>
+              {{ config.app_name }}
+            </span>
           </div>
         </div>
       </div>
