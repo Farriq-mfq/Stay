@@ -2,11 +2,13 @@ import { Inject, Injectable } from "@nestjs/common";
 import { SessionRoleType } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ExtendedPrismaClient } from "src/prisma.extension";
+import { DayOffService } from "src/services/day-off.service";
 
 @Injectable()
 export class PublicService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+        private readonly dayOffService: DayOffService,
     ) {
 
     }
@@ -57,5 +59,9 @@ export class PublicService {
             items,
             meta
         }
+    }
+
+    async findDayOff(month?: number, year?: number) {
+        return await this.dayOffService.getDayOffs(month, year);
     }
 }

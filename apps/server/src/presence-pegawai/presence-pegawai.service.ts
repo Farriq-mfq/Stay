@@ -1,13 +1,14 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { isJSON } from "class-validator";
 import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval, isAfter, isWithinInterval } from "date-fns";
-import { id, th } from "date-fns/locale";
+import { da, id, th } from "date-fns/locale";
 import { CustomPrismaService } from "nestjs-prisma";
 import { PegawaiService } from "src/pegawai/pegawai.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { isValidDateString, validateAndFormatDateYear, validateDateRange } from "src/utils/helpers";
 import * as xlsx from 'xlsx';
 import * as JSZip from 'jszip';
+import { DayOffService } from "src/services/day-off.service";
 
 type FilterDate = {
     start_date?: string,
@@ -17,7 +18,8 @@ type FilterDate = {
 export class PresencePegawaiService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-        private readonly pegawaiService: PegawaiService
+        private readonly pegawaiService: PegawaiService,
+        private readonly dayOffService: DayOffService,
     ) { }
     async findAll(sessionId: string,
         page?: number,
@@ -784,7 +786,7 @@ export class PresencePegawaiService {
             }
         })
 
-        if(feature){
+        if (feature) {
             const groups = isJSON(feature.group) ? JSON.parse(feature.group) : null;
             if (groups && groups.length > 0) {
                 pegawai = pegawai.filter(pg => groups.includes(pg.group))
@@ -812,6 +814,7 @@ export class PresencePegawaiService {
             },
         })
 
+        const dayOffs = await this.dayOffService.getDayOffs(parseInt(parseDateYearMonth.month), parseInt(parseDateYearMonth.year))
 
         const mappingPresences = pegawai.map(s => {
             return {
@@ -826,8 +829,12 @@ export class PresencePegawaiService {
                         })
                     );
 
+                    const dayOff = dayOffs.find(day => format(day.tanggal, 'yyyy-MM-dd') === format(d, 'yyyy-MM-dd'))
+
                     return {
-                        [format(d, "dd")]: findLeave ? {
+                        [format(d, "dd")]: dayOff ? {
+                            day_off: dayOff,
+                        } : findLeave ? {
                             leave: findLeave
                         } : findPresence ? {
                             enter_time: findPresence.enter_time ? format(findPresence.enter_time, 'HH:mm:ss', {

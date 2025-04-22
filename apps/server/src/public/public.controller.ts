@@ -22,4 +22,12 @@ export class PublicController {
     ) {
         return await this.publicService.findAllSessions(page, limit, search, role);
     }
+
+    @Get("dayoffs")
+    async dayOffs(
+        @Query('month', new ParseIntPipe({ optional: true })) month?: number,
+        @Query('year', new ParseIntPipe({ optional: true })) year?: number
+    ) {
+        return await this.publicService.findDayOff(month, year);
+    }
 }
