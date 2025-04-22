@@ -1,17 +1,45 @@
 <script setup>
 import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
-import { inject, ref, watch } from "vue";
+import { inject, ref, watch, computed, getCurrentInstance } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import DrawerContent from "../components/DrawerContent.vue";
 import TransferConfirmationPegawai from "../components/drawer/TransferConfirmationPegawai.vue";
 import TransferScanPegawai from "../components/drawer/TransferScanPegawai.vue";
 import { useToast } from "primevue/usetoast";
+import {
+  requestNotificationPermissionAndGetToken,
+  listenToMessages,
+} from "@/utils/firebase";
+import { useMutation } from "@tanstack/vue-query";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
 const toast = useToast();
+const auth = inject("auth");
+const user = computed(() => auth.user());
+
+const { proxy } = getCurrentInstance();
+const axios = proxy.axios;
+
+const updateFcmTokenService = async (token) => {
+  const response = await axios.patch(
+    "/pegawai/modules/notification/fcm-token",
+    {
+      token,
+    }
+  );
+
+  return response.data;
+};
+
+const { mutate: updateFcmToken, isPending: isLoadingUpdateFcmToken } =
+  useMutation({
+    mutationFn: updateFcmTokenService,
+    mutationKey: ["updateFcmToken"],
+  });
+
 watch(
   () => drawer.isDrawer,
   (val) => {
@@ -25,30 +53,27 @@ const draweComponents = {
   TransferScanPegawai,
 };
 
-onMounted(() => {
+onMounted(async () => {
   toast.removeAllGroups();
   isVisible.value = drawer.isDrawer;
+  const token = await requestNotificationPermissionAndGetToken();
+  if (!user.value.fcm_token || user.value.fcm_token !== token) {
+    await updateFcmToken(token);
+  }
+
+  listenToMessages(toast);
 });
 
 onUnmounted(() => {
   isVisible.value = false;
 });
-
-const auth = inject("auth");
 </script>
 <template>
   <div>
     <div :class="{ 'main-app': app.getShowAppNav, 'pb-3': !app.getShowAppNav }">
-      <Transition v-if="auth.ready()">
+      <Transition>
         <slot></slot>
       </Transition>
-      <div
-        v-if="!auth.ready()"
-        class="flex justify-content-center align-items-center h-screen flex-column gap-4"
-      >
-        <ProgressSpinner />
-        <span class="text-sm font-semibold">Tunggu sebentar...</span>
-      </div>
     </div>
     <AppNav v-if="app.getShowAppNav" />
     <Sidebar

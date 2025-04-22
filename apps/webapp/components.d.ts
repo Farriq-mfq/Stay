@@ -32,6 +32,7 @@ declare module 'vue' {
     InputText: typeof import('primevue/inputtext')['default']
     ListPresence: typeof import('./src/components/Presence/ListPresence.vue')['default']
     ListTransaction: typeof import('./src/components/Transaction/ListTransaction.vue')['default']
+    Notification: typeof import('./src/components/Notification.vue')['default']
     OpenCamera: typeof import('./src/components/drawer/OpenCamera.vue')['default']
     OpenCameraSiswa: typeof import('./src/components/drawer/OpenCameraSiswa.vue')['default']
     OpenQrcode: typeof import('./src/components/drawer/OpenQrcode.vue')['default']

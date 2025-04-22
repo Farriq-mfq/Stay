@@ -54,6 +54,8 @@ model pegawai {
   schedules                 schedules[]
   leave_requests            leave_requests[]
   journal_activities        journal_activities[]
+
+  fcm_token String? @db.VarChar(255)
 }
 
 // enum RoleUser {

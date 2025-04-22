@@ -97,11 +97,13 @@ const generatePdf = () => {
     if (componentPrintRef.value) {
         html2pdf()
             .set({
-                margin: 5,
+                margin: 10,
                 filename: `${format(new Date(), 'yyyy-MM-dd')}-presences.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, imageTimeout: 15000 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                html2canvas: { scale: 2, useCORS: true, windowWidth: componentPrintRef.value.scrollWidth },
+                // jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' },
+                jsPDF: { unit: 'mm', format: [1000, 420], orientation: 'landscape' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             })
             .from(componentPrintRef.value)
             .save();
@@ -116,7 +118,7 @@ const generatePdf = () => {
             <Calendar v-model="filterDate" placeholder="Pilih Bulan dan Tahun" view="month" dateFormat="yy/mm" showButtonBar :manualInput="false" class="mt-3 w-full" />
 
             <div class="flex gap-2">
-                <Button icon="pi pi-file-pdf" severity="help" label="Print" @click.prevent="generatePdf" class="mt-3" v-if="status == 'success' && filterDate" />
+                <Button icon="pi pi-file-pdf" severity="help" label="Download PDF" @click.prevent="generatePdf" class="mt-3" v-if="status == 'success' && filterDate" />
                 <Button icon="pi pi-refresh" outlined label="Refresh" @click.prevent="refetch" class="mt-3" v-if="status == 'success' && filterDate" />
                 <Button icon="pi pi-refresh" outlined label="Reset" @click.prevent="resetAll" class="mt-3" severity="danger" v-if="status == 'success' && filterDate" />
             </div>

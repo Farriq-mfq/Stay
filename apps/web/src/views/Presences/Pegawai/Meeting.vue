@@ -25,8 +25,9 @@ const generatePdf = () => {
                 filename: `${selectedMeetingSession.value.name}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, imageTimeout: 15000 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 // pagebreak: { mode: ['css', 'legacy'] }
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             })
             .from(pdfContent.value)
             .save();

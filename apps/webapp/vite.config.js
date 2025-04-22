@@ -18,12 +18,7 @@ export default defineConfig(({ mode }) => {
         resolvers: [PrimeVueResolver()],
       }),
       VitePWA({
-        devOptions: {
-          enabled: true,
-          type: 'module',
-        },
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'offline.html'],
+        // includeAssets: ['favicon.svg', 'offline.html'],
         manifest: {
           name: env.VITE_APP_NAME,
           short_name: env.VITE_APP_NAME,
@@ -39,21 +34,28 @@ export default defineConfig(({ mode }) => {
           //   },
           // ],
         },
-        workbox: {
-          runtimeCaching: [
-            {
-              urlPattern: /\/$/,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'html-cache',
-                expiration: {
-                  maxEntries: 10,
-                },
-              },
-            },
-          ],
-          navigateFallback: '/offline.html',
+        srcDir: 'src',
+        filename: 'sw.js',
+        strategies: 'injectManifest',
+        registerType: 'autoUpdate',
+        devOptions: {
+          enabled: true,
         },
+        // workbox: {
+        //   runtimeCaching: [
+        //     {
+        //       urlPattern: /\/$/,
+        //       handler: 'NetworkFirst',
+        //       options: {
+        //         cacheName: 'html-cache',
+        //         expiration: {
+        //           maxEntries: 10,
+        //         },
+        //       },
+        //     },
+        //   ],
+        //   // navigateFallback: '/offline.html',
+        // },
       })
     ],
     resolve: {
