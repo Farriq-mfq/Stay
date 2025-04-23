@@ -35,6 +35,7 @@ declare module 'vue' {
     Notification: typeof import('./src/components/Notification.vue')['default']
     OpenCamera: typeof import('./src/components/drawer/OpenCamera.vue')['default']
     OpenCameraSiswa: typeof import('./src/components/drawer/OpenCameraSiswa.vue')['default']
+    OpenNotification: typeof import('./src/components/drawer/OpenNotification.vue')['default']
     OpenQrcode: typeof import('./src/components/drawer/OpenQrcode.vue')['default']
     OpenQrcodeSiswa: typeof import('./src/components/drawer/OpenQrcodeSiswa.vue')['default']
     Password: typeof import('primevue/password')['default']

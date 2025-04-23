@@ -26,6 +26,8 @@ import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { UsersModule } from './users/users.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { NotificationModule } from './notification/notification.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -81,7 +83,8 @@ import { UsersModule } from './users/users.module';
     PermissionsModule,
     TransactionModule,
     LeaveModule,
-    FeaturesModule
+    FeaturesModule,
+    NotificationModule
   ],
 })
 export class AppModule { }

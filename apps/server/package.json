@@ -44,6 +44,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "figlet": "^1.8.0",
+    "firebase-admin": "^13.3.0",
     "jszip": "^3.10.1",
     "nestjs-prisma": "^0.23.0",
     "nestjs-telegraf": "^2.7.0",

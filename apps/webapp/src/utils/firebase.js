@@ -17,14 +17,12 @@ const app = initializeApp(firebaseConfig);
 
 const messaging = getMessaging(app);
 
-const VAPID_KEY = "BLMNCdKlTPV_6LR7PdLiSO6d3FYnuPRw_CgcJdwfgq4DqtABgj8f9Ey4wn5IoNGB_8mZ0XM8F0rZUiZD-PiaqrU";
 
-
-const requestNotificationPermissionAndGetToken = async () => {
+const requestNotificationPermissionAndGetToken = async (vapidKey) => {
     try {
-        const permission = await Notification.requestPermission();
+        const permission = await Notification.permission;
         if (permission === 'granted') {
-            const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+            const token = await getToken(messaging, { vapidKey });
             if (token) {
                 return token;
             } else {
@@ -39,11 +37,10 @@ const requestNotificationPermissionAndGetToken = async () => {
 }
 
 const listenToMessages = (toast) => {
-    console.log("load")
     const router = useRouter();
 
     onMessage(messaging, (payload) => {
-        // console.log('Message received in foreground: ', payload);
+        console.log('Message received in foreground: ', payload);
         toast.add({
             severity: 'info',
             summary: payload.notification?.title,

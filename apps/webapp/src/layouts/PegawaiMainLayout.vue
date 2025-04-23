@@ -8,11 +8,10 @@ import DrawerContent from "../components/DrawerContent.vue";
 import TransferConfirmationPegawai from "../components/drawer/TransferConfirmationPegawai.vue";
 import TransferScanPegawai from "../components/drawer/TransferScanPegawai.vue";
 import { useToast } from "primevue/usetoast";
-import {
-  requestNotificationPermissionAndGetToken,
-  listenToMessages,
-} from "@/utils/firebase";
-import { useMutation } from "@tanstack/vue-query";
+import { listenToMessages } from "@/utils/firebase";
+import { useFcmTokenSync } from "@/hooks/useFcmTokenSync";
+import { useMutation, useQuery } from "@tanstack/vue-query";
+import OpenNotification from "../components/drawer/OpenNotification.vue";
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
@@ -34,11 +33,22 @@ const updateFcmTokenService = async (token) => {
   return response.data;
 };
 
-const { mutate: updateFcmToken, isPending: isLoadingUpdateFcmToken } =
-  useMutation({
-    mutationFn: updateFcmTokenService,
-    mutationKey: ["updateFcmToken"],
-  });
+const { mutate: updateFcmToken } = useMutation({
+  mutationFn: updateFcmTokenService,
+  mutationKey: ["updateFcmToken"],
+});
+
+const getVapidKey = async () => {
+  const response = await axios.get("/pegawai/modules/notification/vapid-key");
+  return response.data;
+};
+
+const { data: vapidKey } = useQuery({
+  queryFn: getVapidKey,
+  queryKey: ["getVapidKey"],
+});
+
+useFcmTokenSync(vapidKey, updateFcmToken);
 
 watch(
   () => drawer.isDrawer,
@@ -51,16 +61,19 @@ const draweComponents = {
   default: DrawerContent,
   TransferConfirmationPegawai,
   TransferScanPegawai,
+  OpenNotification,
 };
 
 onMounted(async () => {
   toast.removeAllGroups();
   isVisible.value = drawer.isDrawer;
-  const token = await requestNotificationPermissionAndGetToken();
-  if (!user.value.fcm_token || user.value.fcm_token !== token) {
-    await updateFcmToken(token);
-  }
 
+  if (Notification.permission === "default") {
+    drawer.openDrawer("OpenNotification");
+  } else if (Notification.permission === "denied") {
+    drawer.openDrawer("OpenNotification");
+  }
+  
   listenToMessages(toast);
 });
 

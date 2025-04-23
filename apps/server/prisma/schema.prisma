@@ -23,7 +23,6 @@ model siswa {
   presences         presences[]
   // TODO: remove field telegram
   telegram_account  telegram_account?
-  notifications     notifications[]
   profile_picture   String?
   picture_public_id String?
   accountId         Int?              @unique
@@ -196,16 +195,33 @@ model telegram_account {
   @@index([siswaId, chat_id])
 }
 
-// TODO: plan for firebase notifications
+enum NotificationType {
+  TRANSACTION
+  PRESENCE
+  SCHEDULE
+  LEAVE
+  COMMON
+}
+
+enum VisualType {
+  success
+  error
+  warning
+  info
+}
+
 model notifications {
-  id        Int      @id @default(autoincrement())
-  title     String
-  message   String   @db.Text
-  siswaId   Int
-  status    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  siswa     siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  id              Int              @id @default(autoincrement())
+  title           String
+  body            String           @db.Text
+  accountableId   Int
+  accountableType AccountableType
+  data            String?
+  is_read         Boolean          @default(false)
+  visual_type     VisualType       @default(success)
+  type            NotificationType
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model meeting_sessions {
