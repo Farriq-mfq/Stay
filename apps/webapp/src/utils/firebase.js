@@ -2,15 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { useRouter } from 'vue-router';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBGGfqzCVcLEpz87EeX8hiNvirwh9qqw_4",
-    authDomain: "stay-d3d24.firebaseapp.com",
-    projectId: "stay-d3d24",
-    storageBucket: "stay-d3d24.firebasestorage.app",
-    messagingSenderId: "226508036144",
-    appId: "1:226508036144:web:4ec782dc00fdac470df5f5",
-    measurementId: "G-V59YRC41YR"
-};
+const firebaseConfig = {};
 
 
 const app = initializeApp(firebaseConfig);
