@@ -189,10 +189,10 @@ const copyCode = () => {
                                 <Button label="Cari" icon="pi pi-search" class="w-fit" type="submit"
                                     :loading="isLoadingWithdrawRequest" />
                             </div>
-                            <Divider align="center">
+                            <!-- <Divider align="center">
                                 <span class="text-color-secondary">ATAU</span>
                             </Divider>
-                            <Button label="Scan QR Code" @click="showCamera = true" icon="pi pi-qrcode" class="w-fit" />
+                            <Button label="Scan QR Code" @click="showCamera = true" icon="pi pi-qrcode" class="w-fit" /> -->
                         </div>
                     </form>
                 </div>

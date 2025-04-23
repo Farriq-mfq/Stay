@@ -206,6 +206,22 @@ const router = createRouter({
                     ]
                 },
                 {
+                    path: '/notification',
+                    name: 'notification',
+                    component: () => import('@/views/Notification/Index.vue'),
+                    meta: {
+                        title: "Notification",
+                    }
+                },
+                {
+                    path: '/send-notification',
+                    name: 'notification-send',
+                    component: () => import('@/views/Notification/Send.vue'),
+                    meta: {
+                        title: "Send Notification",
+                    }
+                },
+                {
                     path: '/change-password',
                     name: 'change-password',
                     component: () => import('@/views/Auth/ChangePassword.vue'),

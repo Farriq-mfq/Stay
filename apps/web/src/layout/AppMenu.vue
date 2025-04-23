@@ -56,6 +56,13 @@ const model = ref([
         ].filter((menu) => menu != null)
     },
     {
+        label: permissions.value.includes('notification:read') && permissions.value.includes('notification:send') ? 'Pemberitahuan' : '',
+        items: [
+            permissions.value.includes('notification:read') ? { label: 'Lihat Notifikasi', icon: 'pi pi-fw pi-list', to: '/notification' } : null,
+            permissions.value.includes('notification:send') ? { label: 'Kirim Notifikasi', icon: 'pi pi-fw pi-bell', to: '/send-notification' } : null
+        ].filter((menu) => menu != null)
+    },
+    {
         label: permissions.value.includes('leave:read') ? 'Tata Usaha (TU)' : '',
         items: [
             permissions.value.includes('presences-pegawai:auto-read') ? { label: 'Presensi', icon: 'pi pi-fw pi-database    ', to: '/employee/presences' } : null,
