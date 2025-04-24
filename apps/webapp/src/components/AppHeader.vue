@@ -40,7 +40,7 @@ const profilePict = computed(() => {
 
 const router = useRouter();
 const goToNotification = () => {
-  router.push({ name: 'unavailable' });
+  router.push({ name: 'notification' });
 }
 
 </script>

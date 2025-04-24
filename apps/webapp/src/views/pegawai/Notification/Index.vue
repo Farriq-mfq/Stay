@@ -1,3 +1,5 @@
 <template>
-    <p>Hello world</p>
+    <div>
+        <AppHeaderBack title="Notifikasi" />
+    </div>
 </template>

@@ -8,6 +8,8 @@ import Button from "primevue/button";
 import Message from "primevue/message";
 import { useToast } from "primevue/usetoast";
 import { computed, ref, watch, getCurrentInstance } from "vue";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
 const { proxy } = getCurrentInstance();
 const currentDate = new Date();
 const accurate = ref(false);
@@ -68,60 +70,94 @@ const getCurrentLocation = () => {
 };
 
 const loadLocation = () => {
-  locationLoading.value = true;
-  accurate.value = false;
-  if (!navigator.geolocation) {
-    locationMessage.value = "Fitur Lokasi tidak didukung";
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const { latitude, longitude } = position.coords;
-      refreshLocation.value = false;
-
-      try {
-        const detailLocation = await getDetailLocation(latitude, longitude);
-        currentLocation.value = {
-          latitude: detailLocation.lat,
-          longitude: detailLocation.lon,
-          ...detailLocation,
-        };
-      } catch (e) {
-        currentLocation.value = {
-          latitude,
-          longitude,
-        };
-      }
-      locationLoading.value = false;
-      locationMessage.value = null;
-    },
-    async (error) => {
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          locationMessage.value = "Mohon Aktifkan Lokasi";
-          refreshLocation.value = true;
-          break;
-        case error.POSITION_UNAVAILABLE:
-          locationMessage.value = "Informasi lokasi tidak tersedia";
-          refreshLocation.value = true;
-          break;
-        case error.TIMEOUT:
-          locationMessage.value = "Permintaan lokasi timeout";
-          refreshLocation.value = true;
-          break;
-        default:
-          locationMessage.value = "Terjadi kesalahan saat mengambil lokasi";
-          refreshLocation.value = true;
-          break;
-      }
-
-      locationLoading.value = false;
-    },
-    {
+  if (Capacitor.isNativePlatform()) {
+    locationLoading.value = true;
+    accurate.value = false;
+    Geolocation.getCurrentPosition({
       enableHighAccuracy: true,
       maximumAge: 0,
+      timeout: 10000,
+    })
+      .then(async (position) => {
+        const { latitude, longitude } = position.coords;
+        refreshLocation.value = false;
+
+        try {
+          const detailLocation = await getDetailLocation(latitude, longitude);
+          currentLocation.value = {
+            latitude: detailLocation.lat,
+            longitude: detailLocation.lon,
+            ...detailLocation,
+          };
+        } catch (e) {
+          currentLocation.value = {
+            latitude,
+            longitude,
+          };
+        }
+        locationLoading.value = false;
+        locationMessage.value = null;
+      })
+      .catch(async (error) => {
+        locationMessage.value = "Terjadi kesalahan saat mengambil lokasi";
+        locationLoading.value = false;
+      });
+  } else {
+    locationLoading.value = true;
+    accurate.value = false;
+    if (!navigator.geolocation) {
+      locationMessage.value = "Fitur Lokasi tidak didukung";
+      return;
     }
-  );
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        refreshLocation.value = false;
+
+        try {
+          const detailLocation = await getDetailLocation(latitude, longitude);
+          currentLocation.value = {
+            latitude: detailLocation.lat,
+            longitude: detailLocation.lon,
+            ...detailLocation,
+          };
+        } catch (e) {
+          currentLocation.value = {
+            latitude,
+            longitude,
+          };
+        }
+        locationLoading.value = false;
+        locationMessage.value = null;
+      },
+      async (error) => {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            locationMessage.value = "Mohon Aktifkan Lokasi";
+            refreshLocation.value = true;
+            break;
+          case error.POSITION_UNAVAILABLE:
+            locationMessage.value = "Informasi lokasi tidak tersedia";
+            refreshLocation.value = true;
+            break;
+          case error.TIMEOUT:
+            locationMessage.value = "Permintaan lokasi timeout";
+            refreshLocation.value = true;
+            break;
+          default:
+            locationMessage.value = "Terjadi kesalahan saat mengambil lokasi";
+            refreshLocation.value = true;
+            break;
+        }
+
+        locationLoading.value = false;
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+      }
+    );
+  }
 };
 
 watch(
@@ -148,14 +184,23 @@ watch(
   { immediate: true }
 );
 
-const handlerRefreshLocation = () => {
-  navigator.permissions.query({ name: "geolocation" }).then((result) => {
-    if (result.state === "granted") {
+const handlerRefreshLocation = async () => {
+  if (Capacitor.isNativePlatform()) {
+    const permStatus = await Geolocation.checkPermissions();
+    if (permStatus.location === "granted") {
       loadLocation();
-    } else if (result.state === "denied") {
+    } else if (permStatus.location === "denied") {
       locationMessage.value = "Mohon Aktifkan Lokasi";
     }
-  });
+  } else {
+    navigator.permissions.query({ name: "geolocation" }).then((result) => {
+      if (result.state === "granted") {
+        loadLocation();
+      } else if (result.state === "denied") {
+        locationMessage.value = "Mohon Aktifkan Lokasi";
+      }
+    });
+  }
 };
 const now = format(Date.now(), "yyyy-MM-dd");
 
