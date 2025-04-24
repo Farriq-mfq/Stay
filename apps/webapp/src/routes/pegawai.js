@@ -136,12 +136,14 @@ const routes = [
         component: () => import("@/views/pegawai/Feature/Presence.vue"),
         meta: {
             layout: "PegawaiMainLayout",
+            auth: true,
         },
     },
     {
         path: "/feature/leave",
         meta: {
             layout: "PegawaiMainLayout",
+            auth: true,
         },
         component: () => import("@/views/pegawai/Feature/Leave/Index.vue"),
         children: [
@@ -161,6 +163,7 @@ const routes = [
         path: "/feature/journal-activity",
         meta: {
             layout: "PegawaiMainLayout",
+            auth: true,
         },
         component: () => import("@/views/pegawai/Feature/Activity/Index.vue"),
         children: [
@@ -175,6 +178,15 @@ const routes = [
                 component: () => import("@/views/pegawai/Feature/Activity/Detail.vue"),
             }
         ],
+    },
+    {
+        path: '/notification',
+        name: 'notification',
+        component: () => import("@/views/pegawai/Notification/Index.vue"),
+        meta: {
+            layout: 'PegawaiMainLayout',
+            auth: true,
+        }
     },
     {
         path: '/login',

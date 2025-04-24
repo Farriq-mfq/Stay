@@ -1,9 +1,11 @@
 <script setup>
 import { useDrawer } from "@/store/drawer";
+import { PushNotifications } from "@capacitor/push-notifications";
+
 const drawer = useDrawer();
 const handleRequestNotification = async () => {
-  const permission = await Notification.requestPermission();
-  if (permission === "granted") {
+  const permission = await PushNotifications.requestPermissions();
+  if (permission.receive === "granted") {
     drawer.closeDrawer();
   }
 };

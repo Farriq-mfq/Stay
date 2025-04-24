@@ -16,7 +16,7 @@ export class NotificationController {
             ref_id: 1,
             user_type: AccountableType.PEGAWAI,
             type: NotificationType.COMMON,
-            token: "",
+            token: "cQO_ca8cSISojwfVFtcxY1:APA91bFZj0MmGVCSDvs4k1srwcYNs6MnOKdrvupMyBGxzAWW8U_I5OIAMT_avx9R7_50LLnAtTqISRtUYIvWq0_OrHrQc8IottWS6Nkc-ldfbacq4VGJuIY",
             visual_type: "info",
             data: {}
         })

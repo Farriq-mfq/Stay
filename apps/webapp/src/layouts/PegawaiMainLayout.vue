@@ -1,54 +1,19 @@
 <script setup>
-import { useDrawer } from "@/store/drawer";
 import { useApp } from "@/store/app";
-import { inject, ref, watch, computed, getCurrentInstance } from "vue";
-import { onMounted } from "vue";
-import { onUnmounted } from "vue";
-import DrawerContent from "../components/DrawerContent.vue";
+import { useDrawer } from "@/store/drawer";
+import { usePush } from "@/utils/notification";
+import { useToast } from "primevue/usetoast";
+import { onMounted, onUnmounted, ref, watch } from "vue";
+import OpenNotification from "../components/drawer/OpenNotification.vue";
 import TransferConfirmationPegawai from "../components/drawer/TransferConfirmationPegawai.vue";
 import TransferScanPegawai from "../components/drawer/TransferScanPegawai.vue";
-import { useToast } from "primevue/usetoast";
-import { listenToMessages } from "@/utils/firebase";
-import { useFcmTokenSync } from "@/hooks/useFcmTokenSync";
-import { useMutation, useQuery } from "@tanstack/vue-query";
-import OpenNotification from "../components/drawer/OpenNotification.vue";
+import DrawerContent from "../components/DrawerContent.vue";
+
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
 const toast = useToast();
-const auth = inject("auth");
-const user = computed(() => auth.user());
-
-const { proxy } = getCurrentInstance();
-const axios = proxy.axios;
-
-const updateFcmTokenService = async (token) => {
-  const response = await axios.patch(
-    "/pegawai/modules/notification/fcm-token",
-    {
-      token,
-    }
-  );
-
-  return response.data;
-};
-
-const { mutate: updateFcmToken } = useMutation({
-  mutationFn: updateFcmTokenService,
-  mutationKey: ["updateFcmToken"],
-});
-
-const getVapidKey = async () => {
-  const response = await axios.get("/pegawai/modules/notification/vapid-key");
-  return response.data;
-};
-
-const { data: vapidKey } = useQuery({
-  queryFn: getVapidKey,
-  queryKey: ["getVapidKey"],
-});
-
-useFcmTokenSync(vapidKey, updateFcmToken);
+const { initPush } = usePush();
 
 watch(
   () => drawer.isDrawer,
@@ -67,14 +32,8 @@ const draweComponents = {
 onMounted(async () => {
   toast.removeAllGroups();
   isVisible.value = drawer.isDrawer;
-
-  if (Notification.permission === "default") {
-    drawer.openDrawer("OpenNotification");
-  } else if (Notification.permission === "denied") {
-    drawer.openDrawer("OpenNotification");
-  }
-  
-  listenToMessages(toast);
+  // notification
+  await initPush();
 });
 
 onUnmounted(() => {

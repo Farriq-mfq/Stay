@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "226508036144",
+    "project_id": "stay-d3d24",
+    "storage_bucket": "stay-d3d24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226508036144:android:d1a4d4df60bc356c0df5f5",
+        "android_client_info": {
+          "package_name": "sch.id.smk1pekalongan.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZGp0yU0Oao6NBenJSuMB2QZHtA6toZJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
