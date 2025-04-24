@@ -24,9 +24,9 @@ dist-ssr
 *.sw?
 
 # Android
-android
+# android
 # IOS
-ios
+# ios
 # Web
 web
 # KeyStore

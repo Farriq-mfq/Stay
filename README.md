@@ -14,6 +14,7 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [X] Dynamic Feature and permisson dynamic feature
 - [X] Rekap Perbulan Presence By Location
 - [ ] Notification firebase
+- [ ] Fix response after fcm update
 - [ ] Add Feature AutoDebet
 - [ ] Guard Pin in Backend Server
 - [ ] List Withdraw and Approve

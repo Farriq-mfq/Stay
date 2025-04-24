@@ -18,44 +18,78 @@ export default defineConfig(({ mode }) => {
         resolvers: [PrimeVueResolver()],
       }),
       VitePWA({
-        // includeAssets: ['favicon.svg', 'offline.html'],
+        includeAssets: ['favicon.ico', 'offline.html'],
         manifest: {
           name: env.VITE_APP_NAME,
           short_name: env.VITE_APP_NAME,
           start_url: '/',
           display: 'standalone',
           background_color: '#ffffff',
-          // description: 'My Vue.js App',
-          // icons: [
-          //   {
-          //     src: '/pwa-192x192.png',
-          //     sizes: '192x192',
-          //     type: 'image/png',
-          //   },
-          // ],
+          icons: [
+            {
+              "src": "/icons/icon-48.webp",
+              "type": "image/png",
+              "sizes": "48x48",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-72.webp",
+              "type": "image/png",
+              "sizes": "72x72",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-96.webp",
+              "type": "image/png",
+              "sizes": "96x96",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-128.webp",
+              "type": "image/png",
+              "sizes": "128x128",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-192.webp",
+              "type": "image/png",
+              "sizes": "192x192",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-256.webp",
+              "type": "image/png",
+              "sizes": "256x256",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/icons/icon-512.webp",
+              "type": "image/png",
+              "sizes": "512x512",
+              "purpose": "any maskable"
+            }
+          ],
         },
-        srcDir: 'src',
         filename: 'sw.js',
-        strategies: 'injectManifest',
         registerType: 'autoUpdate',
         devOptions: {
           enabled: true,
         },
-        // workbox: {
-        //   runtimeCaching: [
-        //     {
-        //       urlPattern: /\/$/,
-        //       handler: 'NetworkFirst',
-        //       options: {
-        //         cacheName: 'html-cache',
-        //         expiration: {
-        //           maxEntries: 10,
-        //         },
-        //       },
-        //     },
-        //   ],
-        //   // navigateFallback: '/offline.html',
-        // },
+        workbox: {
+          runtimeCaching: [
+            {
+              urlPattern: /\/$/,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'html-cache',
+                expiration: {
+                  maxEntries: 10,
+                },
+              },
+            },
+          ],
+          // navigateFallback: '/offline.html',
+        },
       })
     ],
     resolve: {
