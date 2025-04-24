@@ -13,7 +13,7 @@ const handleRequestNotification = async () => {
 
 <template>
   <div class="flex flex-column align-items-center justify-content-center gap-3">
-    <h2 class="text-xl md:text-2xl font-semibold m-0">Aktifkan Notifikasi</h2>
+    <!-- <h2 class="text-xl md:text-2xl font-semibold m-0">Aktifkan Notifikasi</h2> -->
     <p class="text-500 text-center">
       Untuk mengaktifkan notifikasi, silahkan klik tombol dibawah ini
     </p>

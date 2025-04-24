@@ -38,7 +38,7 @@ export const usePush = () => {
         const permStatus = await PushNotifications.checkPermissions();
 
         if (permStatus.receive !== 'granted') {
-            drawer.openDrawer("OpenNotification", "Notifikasi", () => { }, {});
+            drawer.openDrawer("OpenNotification", "Aktifkan Notifikasi", () => { }, {});
         }
 
 

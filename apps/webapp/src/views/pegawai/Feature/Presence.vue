@@ -75,7 +75,6 @@ const loadLocation = () => {
     accurate.value = false;
     Geolocation.getCurrentPosition({
       enableHighAccuracy: true,
-      maximumAge: 0,
       timeout: 10000,
     })
       .then(async (position) => {
@@ -154,7 +153,6 @@ const loadLocation = () => {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 0,
       }
     );
   }

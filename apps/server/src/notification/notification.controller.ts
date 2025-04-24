@@ -11,12 +11,12 @@ export class NotificationController {
     @Post('/send')
     async sendNotif() {
         return await this.notificationService.sendPushNotification({
-            body: "Ujian Akan Tiba Tanggal 20 April 2025",
-            title: "Pengumuman",
+            body: "Pengumuman",
+            title: "Hello welcome",
             ref_id: 1,
             user_type: AccountableType.PEGAWAI,
             type: NotificationType.COMMON,
-            token: "c5UP_494SqCCilhacJDqrN:APA91bHGQha3kGUP18b69Ohvvk-cPfDpl_EnEqs6OD96mPEq36NjAHsTu74baE7V3oZpUqdh5QhRcfkkRA9t6fdp9ZyCsBC4qBenAvAwvGmJBHZ_xttPpHo",
+            token: "frbN8rkWTwWPuRB_y9Hw2C:APA91bFVMnng4W3kPvxgfz4A-2NoMiRVdS-EtoPeJx4dm0buYOdd5d7eUqlHq7Hl6_g0SSufwqrFJSJAHWV3vZ1uyvT-zHPbli7y02OE1zGZhWCmm8_5-SA",
             visual_type: "info",
             data: {}
         })
