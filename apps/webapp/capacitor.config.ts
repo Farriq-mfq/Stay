@@ -14,8 +14,8 @@ const config: CapacitorConfig = {
   server: {
     allowNavigation: ['res.cloudinary.com'],
     cleartext: true,
-    // url: 'https://app.smk1pekalongan.sch.id',
-    url: 'http://192.168.117.151:8100',
+    url: 'https://app.smk1pekalongan.sch.id',
+    // url: 'http://192.168.117.151:8100',
   },
 };
 

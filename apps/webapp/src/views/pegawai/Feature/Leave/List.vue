@@ -126,7 +126,9 @@ const getStatusSeverity = (status) => {
         class="flex flex-column align-items-center justify-content-center gap-3"
       >
         <i class="pi pi-calendar text-4xl text-primary"></i>
-        <span class="text-600">Tidak ada data izin</span>
+        <span class="text-600">
+          Belum ada mengajuan izin
+        </span>
       </div>
     </template>
   </Card>

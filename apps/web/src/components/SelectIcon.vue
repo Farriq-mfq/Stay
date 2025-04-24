@@ -23,356 +23,328 @@ import { ref } from 'vue';
 import Dropdown from 'primevue/dropdown';
 const icons = [
     {
-        name: 'Address Book',
-        icon: 'pi pi-address-book'
+        "name": "Address Book",
+        "icon": "pi pi-address-book"
     },
     {
-        name: 'Align Center',
-        icon: 'pi pi-align-center'
+        "name": "Amazon",
+        "icon": "pi pi-amazon"
     },
     {
-        name: 'Align Justify',
-        icon: 'pi pi-align-justify'
+        "name": "Android",
+        "icon": "pi pi-android"
     },
     {
-        name: 'Align Left',
-        icon: 'pi pi-align-left'
+        "name": "Apple",
+        "icon": "pi pi-apple"
     },
     {
-        name: 'Align Right',
-        icon: 'pi pi-align-right'
+        "name": "Arrow Down Left",
+        "icon": "pi pi-arrow-down-left"
     },
     {
-        name: 'Amazon',
-        icon: 'pi pi-amazon'
+        "name": "Arrow Down Right",
+        "icon": "pi pi-arrow-down-right"
     },
     {
-        name: 'Android',
-        icon: 'pi pi-android'
+        "name": "Arrow Up Left",
+        "icon": "pi pi-arrow-up-left"
     },
     {
-        name: 'Angle Double Down',
-        icon: 'pi pi-angle-double-down'
+        "name": "Arrow Up Right",
+        "icon": "pi pi-arrow-up-right"
     },
     {
-        name: 'Angle Double Left',
-        icon: 'pi pi-angle-double-left'
+        "name": "Arrows Horizontal",
+        "icon": "pi pi-arrows-h"
     },
     {
-        name: 'Angle Double Right',
-        icon: 'pi pi-angle-double-right'
+        "name": "Arrows Vertical",
+        "icon": "pi pi-arrows-v"
     },
     {
-        name: 'Angle Double Up',
-        icon: 'pi pi-angle-double-up'
+        "name": "At",
+        "icon": "pi pi-at"
     },
     {
-        name: 'Angle Down',
-        icon: 'pi pi-angle-down'
+        "name": "Backward",
+        "icon": "pi pi-backward"
     },
     {
-        name: 'Angle Left',
-        icon: 'pi pi-angle-left'
+        "name": "Bell",
+        "icon": "pi pi-bell"
     },
     {
-        name: 'Angle Right',
-        icon: 'pi pi-angle-right'
+        "name": "Bolt",
+        "icon": "pi pi-bolt"
     },
     {
-        name: 'Angle Up',
-        icon: 'pi pi-angle-up'
+        "name": "Book",
+        "icon": "pi pi-book"
     },
     {
-        name: 'Apple',
-        icon: 'pi pi-apple'
+        "name": "Bookmark Fill",
+        "icon": "pi pi-bookmark-fill"
     },
     {
-        name: 'Arrow Circle Down',
-        icon: 'pi pi-arrow-circle-down'
+        "name": "Box",
+        "icon": "pi pi-box"
     },
     {
-        name: 'Arrow Circle Left',
-        icon: 'pi pi-arrow-circle-left'
+        "name": "Briefcase",
+        "icon": "pi pi-briefcase"
     },
     {
-        name: 'Arrow Circle Right',
-        icon: 'pi pi-arrow-circle-right'
+        "name": "Building",
+        "icon": "pi pi-building"
     },
     {
-        name: 'Arrow Circle Up',
-        icon: 'pi pi-arrow-circle-up'
+        "name": "Camera",
+        "icon": "pi pi-camera"
     },
     {
-        name: 'Arrow Down',
-        icon: 'pi pi-arrow-down'
+        "name": "Car",
+        "icon": "pi pi-car"
     },
     {
-        name: 'Arrow Left',
-        icon: 'pi pi-arrow-left'
+        "name": "Chart Bar",
+        "icon": "pi pi-chart-bar"
     },
     {
-        name: 'Arrow Right',
-        icon: 'pi pi-arrow-right'
+        "name": "Chart Line",
+        "icon": "pi pi-chart-line"
     },
     {
-        name: 'Arrow Up',
-        icon: 'pi pi-arrow-up'
+        "name": "Chart Pie",
+        "icon": "pi pi-chart-pie"
     },
     {
-        name: 'Asterisk',
-        icon: 'pi pi-asterisk'
+        "name": "Check",
+        "icon": "pi pi-check"
     },
     {
-        name: 'At',
-        icon: 'pi pi-at'
+        "name": "Check Square",
+        "icon": "pi pi-check-square"
     },
     {
-        name: 'Backward',
-        icon: 'pi pi-backward'
+        "name": "Circle",
+        "icon": "pi pi-circle"
     },
     {
-        name: 'Ban',
-        icon: 'pi pi-ban'
+        "name": "Circle Fill",
+        "icon": "pi pi-circle-fill"
     },
     {
-        name: 'Barcode',
-        icon: 'pi pi-barcode'
+        "name": "Code",
+        "icon": "pi pi-code"
     },
     {
-        name: 'Bars',
-        icon: 'pi pi-bars'
+        "name": "Comment",
+        "icon": "pi pi-comment"
     },
     {
-        name: 'Bell',
-        icon: 'pi pi-bell'
+        "name": "Comments",
+        "icon": "pi pi-comments"
     },
     {
-        name: 'Bell Slash',
-        icon: 'pi pi-bell-slash'
+        "name": "Compass",
+        "icon": "pi pi-compass"
     },
     {
-        name: 'Bitcoin',
-        icon: 'pi pi-bitcoin'
+        "name": "Credit Card",
+        "icon": "pi pi-credit-card"
     },
     {
-        name: 'Bolt',
-        icon: 'pi pi-bolt'
+        "name": "Database",
+        "icon": "pi pi-database"
     },
     {
-        name: 'Book',
-        icon: 'pi pi-book'
+        "name": "Desktop",
+        "icon": "pi pi-desktop"
     },
     {
-        name: 'Bookmark',
-        icon: 'pi pi-bookmark'
+        "name": "Directions",
+        "icon": "pi pi-directions"
     },
     {
-        name: 'Box',
-        icon: 'pi pi-box'
+        "name": "Directions Alt",
+        "icon": "pi pi-directions-alt"
     },
     {
-        name: 'Briefcase',
-        icon: 'pi pi-briefcase'
+        "name": "Discord",
+        "icon": "pi pi-discord"
     },
     {
-        name: 'Building',
-        icon: 'pi pi-building'
+        "name": "Dollar",
+        "icon": "pi pi-dollar"
     },
     {
-        name: 'Bullseye',
-        icon: 'pi pi-bullseye'
+        "name": "Eject",
+        "icon": "pi pi-eject"
     },
     {
-        name: 'Calculator',
-        icon: 'pi pi-calculator'
+        "name": "Envelope",
+        "icon": "pi pi-envelope"
     },
     {
-        name: 'Calendar',
-        icon: 'pi pi-calendar'
+        "name": "Euro",
+        "icon": "pi pi-euro"
     },
     {
-        name: 'Calendar Minus',
-        icon: 'pi pi-calendar-minus'
+        "name": "Exclamation Circle",
+        "icon": "pi pi-exclamation-circle"
     },
     {
-        name: 'Calendar Plus',
-        icon: 'pi pi-calendar-plus'
+        "name": "Eye Slash",
+        "icon": "pi pi-eye-slash"
     },
     {
-        name: 'Camera',
-        icon: 'pi pi-camera'
+        "name": "Facebook",
+        "icon": "pi pi-facebook"
     },
     {
-        name: 'Caret Down',
-        icon: 'pi pi-caret-down'
+        "name": "Fast Backward",
+        "icon": "pi pi-fast-backward"
     },
     {
-        name: 'Caret Left',
-        icon: 'pi pi-caret-left'
+        "name": "Fast Forward",
+        "icon": "pi pi-fast-forward"
     },
     {
-        name: 'Caret Right',
-        icon: 'pi pi-caret-right'
+        "name": "File Excel",
+        "icon": "pi pi-file-excel"
     },
     {
-        name: 'Caret Up',
-        icon: 'pi pi-caret-up'
+        "name": "File PDF",
+        "icon": "pi pi-file-pdf"
     },
     {
-        name: 'Cart Minus',
-        icon: 'pi pi-cart-minus'
+        "name": "File O",
+        "icon": "pi pi-file-o"
     },
     {
-        name: 'Cart Plus',
-        icon: 'pi pi-cart-plus'
+        "name": "Filter Fill",
+        "icon": "pi pi-filter-fill"
     },
     {
-        name: 'Chart Bar',
-        icon: 'pi pi-chart-bar'
+        "name": "Filter Slash",
+        "icon": "pi pi-filter-slash"
     },
     {
-        name: 'Chart Line',
-        icon: 'pi pi-chart-line'
+        "name": "Flag",
+        "icon": "pi pi-flag"
     },
     {
-        name: 'Chart Pie',
-        icon: 'pi pi-chart-pie'
+        "name": "Flag Fill",
+        "icon": "pi pi-flag-fill"
     },
     {
-        name: 'Check',
-        icon: 'pi pi-check'
+        "name": "Forward",
+        "icon": "pi pi-forward"
     },
     {
-        name: 'Check Circle',
-        icon: 'pi pi-check-circle'
+        "name": "Github",
+        "icon": "pi pi-github"
     },
     {
-        name: 'Check Square',
-        icon: 'pi pi-check-square'
+        "name": "Google",
+        "icon": "pi pi-google"
     },
     {
-        name: 'Chevron Circle Down',
-        icon: 'pi pi-chevron-circle-down'
+        "name": "Hashtag",
+        "icon": "pi pi-hashtag"
     },
     {
-        name: 'Chevron Circle Left',
-        icon: 'pi pi-chevron-circle-left'
+        "name": "Heart",
+        "icon": "pi pi-heart"
     },
     {
-        name: 'Chevron Circle Right',
-        icon: 'pi pi-chevron-circle-right'
+        "name": "Heart Fill",
+        "icon": "pi pi-heart-fill"
     },
     {
-        name: 'Chevron Circle Up',
-        icon: 'pi pi-chevron-circle-up'
+        "name": "History",
+        "icon": "pi pi-history"
     },
     {
-        name: 'Chevron Down',
-        icon: 'pi pi-chevron-down'
+        "name": "Id Card",
+        "icon": "pi pi-id-card"
     },
     {
-        name: 'Chevron Left',
-        icon: 'pi pi-chevron-left'
+        "name": "Image",
+        "icon": "pi pi-image"
     },
     {
-        name: 'Chevron Right',
-        icon: 'pi pi-chevron-right'
+        "name": "Images",
+        "icon": "pi pi-images"
     },
     {
-        name: 'Chevron Up',
-        icon: 'pi pi-chevron-up'
+        "name": "Instagram",
+        "icon": "pi pi-instagram"
     },
     {
-        name: 'Circle',
-        icon: 'pi pi-circle'
+        "name": "Key",
+        "icon": "pi pi-key"
     },
     {
-        name: 'Circle Fill',
-        icon: 'pi pi-circle-fill'
+        "name": "Link",
+        "icon": "pi pi-link"
     },
     {
-        name: 'Clipboard',
-        icon: 'pi pi-clipboard'
+        "name": "LinkedIn",
+        "icon": "pi pi-linkedin"
     },
     {
-        name: 'Clock',
-        icon: 'pi pi-clock'
+        "name": "List",
+        "icon": "pi pi-list"
     },
     {
-        name: 'Clone',
-        icon: 'pi pi-clone'
+        "name": "Lock Open",
+        "icon": "pi pi-lock-open"
     },
     {
-        name: 'Cloud',
-        icon: 'pi pi-cloud'
+        "name": "Map",
+        "icon": "pi pi-map"
     },
     {
-        name: 'Cloud Download',
-        icon: 'pi pi-cloud-download'
+        "name": "Map Marker",
+        "icon": "pi pi-map-marker"
     },
     {
-        name: 'Cloud Upload',
-        icon: 'pi pi-cloud-upload'
+        "name": "Microsoft",
+        "icon": "pi pi-microsoft"
     },
     {
-        name: 'Code',
-        icon: 'pi pi-code'
+        "name": "Mobile",
+        "icon": "pi pi-mobile"
     },
     {
-        name: 'Cog',
-        icon: 'pi pi-cog'
+        "name": "Money Bill",
+        "icon": "pi pi-money-bill"
     },
     {
-        name: 'Comment',
-        icon: 'pi pi-comment'
+        "name": "Moon",
+        "icon": "pi pi-moon"
     },
     {
-        name: 'Comments',
-        icon: 'pi pi-comments'
+        "name": "Palette",
+        "icon": "pi pi-palette"
     },
     {
-        name: 'Compass',
-        icon: 'pi pi-compass'
+        "name": "Paperclip",
+        "icon": "pi pi-paperclip"
     },
     {
-        name: 'Copy',
-        icon: 'pi pi-copy'
+        "name": "Pause",
+        "icon": "pi pi-pause"
     },
     {
-        name: 'Credit Card',
-        icon: 'pi pi-credit-card'
+        "name": "Paypal",
+        "icon": "pi pi-paypal"
     },
     {
-        name: 'Database',
-        icon: 'pi pi-database'
-    },
-    {
-        name: 'Desktop',
-        icon: 'pi pi-desktop'
-    },
-    {
-        name: 'Discord',
-        icon: 'pi pi-discord'
-    },
-    {
-        name: 'Dollar',
-        icon: 'pi pi-dollar'
-    },
-    {
-        name: 'Download',
-        icon: 'pi pi-download'
-    },
-    {
-        name: 'Eject',
-        icon: 'pi pi-eject'
-    },
-    {
-        name: 'Ellipsis H',
-        icon: 'pi pi-ellipsis-h'
-    },
-    {
-        name: 'Ellipsis V',
-        icon: 'pi pi-ellipsis-v'
+        "name": "Percentage",
+        "icon": "pi pi-percentage"
     }
 ];
 

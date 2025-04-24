@@ -347,6 +347,9 @@ importers:
       '@capacitor/app':
         specifier: ^7.0.1
         version: 7.0.1(@capacitor/core@7.2.0)
+      '@capacitor/camera':
+        specifier: 7.0.1
+        version: 7.0.1(@capacitor/core@7.2.0)
       '@capacitor/geolocation':
         specifier: ^7.1.1
         version: 7.1.1(@capacitor/core@7.2.0)
@@ -1764,6 +1767,14 @@ packages:
       - supports-color
       - typescript
     dev: true
+
+  /@capacitor/camera@7.0.1(@capacitor/core@7.2.0):
+    resolution: {integrity: sha512-gDUFsYlhMra5VVOa4iJV6+MQRhp3VXpTLQY4JDATj7UvoZ8Hv4DG8qplPL9ufUFNoR3QbDDnf8+gbQOsKdkDjg==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+    dependencies:
+      '@capacitor/core': 7.2.0
+    dev: false
 
   /@capacitor/cli@5.7.8:
     resolution: {integrity: sha512-qN8LDlREMhrYhOvVXahoJVNkP8LP55/YPRJrzTAFrMqlNJC18L3CzgWYIblFPnuwfbH/RxbfoZT/ydkwgVpMrw==}
