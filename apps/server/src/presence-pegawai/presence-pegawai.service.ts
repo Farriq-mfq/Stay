@@ -1,14 +1,14 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { isJSON } from "class-validator";
-import { endOfDay, startOfDay, parse, format, startOfMonth, endOfMonth, eachDayOfInterval, isAfter, isWithinInterval } from "date-fns";
-import { da, id, th } from "date-fns/locale";
+import { eachDayOfInterval, endOfDay, endOfMonth, format, isAfter, isWithinInterval, parse, startOfDay, startOfMonth } from "date-fns";
+import { id } from "date-fns/locale";
+import * as JSZip from 'jszip';
 import { CustomPrismaService } from "nestjs-prisma";
 import { PegawaiService } from "src/pegawai/pegawai.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
+import { DayOffService } from "src/services/day-off.service";
 import { isValidDateString, validateAndFormatDateYear, validateDateRange } from "src/utils/helpers";
 import * as xlsx from 'xlsx';
-import * as JSZip from 'jszip';
-import { DayOffService } from "src/services/day-off.service";
 
 type FilterDate = {
     start_date?: string,
@@ -794,12 +794,6 @@ export class PresencePegawaiService {
         }
 
         if (!session.start_time && !session.end_time) throw new BadRequestException("session start time and end time not found")
-        const now = format(Date.now(), "yyyy-MM-dd");
-
-        const parseStartTime = format(
-            `${now} ${session.start_time}`,
-            "yyyy-MM-dd HH: mm: ss"
-        );
 
         const leaves = await this.prismaService.client.leave_requests.findMany({
             where: {
@@ -843,7 +837,7 @@ export class PresencePegawaiService {
                             exit_time: findPresence.exit_time ? format(findPresence.exit_time, 'HH:mm:ss', {
                                 locale: id
                             }) : '-',
-                            is_late: isAfter(new Date(findPresence.enter_time), parseStartTime) ? true : false,
+                            is_late: findPresence && isAfter(parse(format(findPresence.enter_time, "HH:mm:ss"), 'HH:mm:ss', new Date()), parse(session.start_time, 'HH:mm:ss', new Date())) ? true : false,
                             allow_twice: session.allow_twice,
 
                         } : null
