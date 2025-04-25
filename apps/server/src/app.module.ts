@@ -28,6 +28,9 @@ import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { UsersModule } from './users/users.module';
+import { PDFModule } from '@t00nday/nestjs-pdf';
+import * as path from 'path';
+import { AppController } from './app.controller';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -98,6 +101,13 @@ import { UsersModule } from './users/users.module';
       }),
       inject: [ConfigService],
     }),
+    PDFModule.register({
+      view: {
+        root: path.resolve(process.cwd(), 'pdf'),
+        engine: 'ejs',
+      },
+    }),
   ],
+  controllers: [AppController]
 })
 export class AppModule { }

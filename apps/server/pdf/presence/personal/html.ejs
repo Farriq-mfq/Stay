@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rekap Presensi Pegawai</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f1f1f1;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 30px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+      }
+
+      .info {
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .info p {
+        margin: 5px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background-color: #28a745;
+        color: white;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        border: 1px solid #ccc;
+        text-align: center;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-style: italic;
+        text-align: right;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        .container {
+          box-shadow: none;
+        }
+
+        .footer {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../../letterhead.ejs') %>
+    <div class="container">
+      <h2>LAPORAN REKAP PRESENSI</h2>
+
+      <div class="info">
+        <p><strong>Nama:</strong> FARRIQ MUWAFFAQ</p>
+        <p><strong>NIP:</strong> Lorem Ipsum</p>
+        <p><strong>Jabatan:</strong> Hello</p>
+        <p><strong>Periode:</strong> April 2025</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Status</th>
+            <th>Jam Masuk</th>
+            <th>Jam Pulang</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01-04-2025</td>
+            <td>Hadir</td>
+            <td>08:01</td>
+            <td>16:05</td>
+          </tr>
+          <tr>
+            <td>02-04-2025</td>
+            <td>Sakit</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>03-04-2025</td>
+            <td>Hadir</td>
+            <td>07:55</td>
+            <td>16:10</td>
+          </tr>
+          <tr>
+            <td>04-04-2025</td>
+            <td>Izin</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">Dicetak pada: <%= locals.now %></div>
+    </div>
+  </body>
+</html>
