@@ -1,5 +1,5 @@
 <script setup>
-import { computed, getCurrentInstance, ref, watch, onMounted } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 
 import { useDrawer } from "@/store/drawer";
 import { useMutation } from "@tanstack/vue-query";
@@ -7,8 +7,8 @@ import { useToast } from "primevue/usetoast";
 import { QrcodeStream } from "vue-qrcode-reader";
 import { useRouter } from "vue-router";
 import { config } from "@/config";
-import { Camera } from "@capacitor/camera";
-import { Capacitor } from "@capacitor/core";
+// import { Camera } from "@capacitor/camera";
+// import { Capacitor } from "@capacitor/core";
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 
@@ -27,14 +27,14 @@ const { mutateAsync: scanMutate, isPending: scanPending } = useMutation({
   mutationFn: scanService,
 });
 
-async function requestCameraPermission() {
-  if (!Capacitor.isNativePlatform()) return;
-  const permission = await Camera.requestPermissions();
-}
+// async function requestCameraPermission() {
+//   if (!Capacitor.isNativePlatform()) return;
+//   const permission = await Camera.requestPermissions();
+// }
 
-onMounted(() => {
-  requestCameraPermission();
-});
+// onMounted(() => {
+//   requestCameraPermission();
+// });
 
 const result = ref("");
 

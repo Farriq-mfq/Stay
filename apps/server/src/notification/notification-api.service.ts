@@ -31,7 +31,7 @@ export class NotificationApiService {
             await admin.messaging().send({
                 notification: {
                     body: notification.body,
-                    title: this.configService.get('APP_NAME'),
+                    title: notification.type === 'COMMON' ? notification.title : this.configService.get('APP_NAME'),
                 },
                 token,
                 ...data && {
