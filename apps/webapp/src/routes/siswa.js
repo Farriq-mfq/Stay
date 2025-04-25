@@ -121,6 +121,15 @@ const routes = [
         }
     },
     {
+        path: '/notification',
+        name: 'notification',
+        component: () => import("@/views/siswa/Notification/Index.vue"),
+        meta: {
+            layout: 'SiswaMainLayout',
+            auth: true,
+        }
+    },
+    {
         path: '/login',
         name: 'login',
         component: () => import('@/views/siswa/Auth/Login.vue'),
@@ -147,7 +156,7 @@ const routes = [
             layout: 'SiswaMainLayout',
             auth: true
         }
-    },  
+    },
     {
         path: '/setting/pin',
         name: 'setting-pin',

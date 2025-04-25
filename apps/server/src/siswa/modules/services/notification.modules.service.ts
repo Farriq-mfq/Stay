@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { AccountableType } from "@prisma/client";
 
 @Injectable()
-export class PegawaiNotificationModuleService {
+export class SiswaNotificationModuleService {
     constructor(
         @Inject("PrismaService") private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
         private readonly configService: ConfigService
@@ -14,7 +14,7 @@ export class PegawaiNotificationModuleService {
 
     async updateFcmToken(user: any, updateFcmTokenDto: UpdateFCMTokenDto) {
         if (!user) throw new UnauthorizedException()
-        const token = await this.prismaService.client.pegawai.update({
+        const token = await this.prismaService.client.siswa.update({
             where: {
                 id: parseInt(user.sub),
             },
@@ -23,7 +23,6 @@ export class PegawaiNotificationModuleService {
             }
         })
         return token.fcm_token
-
     }
 
     async getAllNotification(user: any, limit: string, after: string, before: string, search: string) {
@@ -31,7 +30,7 @@ export class PegawaiNotificationModuleService {
         return await this.prismaService.client.notifications.paginate({
             where: {
                 accountableId: parseInt(user.sub),
-                accountableType: AccountableType.PEGAWAI,
+                accountableType: AccountableType.SISWA,
                 ...search && {
                     title: search,
                 }
@@ -51,7 +50,7 @@ export class PegawaiNotificationModuleService {
         return await this.prismaService.client.notifications.count({
             where: {
                 accountableId: parseInt(user.sub),
-                accountableType: AccountableType.PEGAWAI,
+                accountableType: AccountableType.SISWA,
                 is_read: false
             }
         })

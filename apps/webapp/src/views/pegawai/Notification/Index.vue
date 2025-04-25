@@ -1,7 +1,5 @@
 <script setup>
 import { useInfiniteQuery } from "@tanstack/vue-query";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { getCurrentInstance, ref, watch } from "vue";
 
 const { proxy } = getCurrentInstance();

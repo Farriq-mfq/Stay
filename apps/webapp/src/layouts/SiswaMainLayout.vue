@@ -5,14 +5,19 @@ import { ref, watch } from "vue";
 import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import { useToast } from "primevue/usetoast";
+import { usePush } from "@/utils/notification";
 import TransferConfirmationSiswa from "../components/drawer/TransferConfirmationSiswa.vue";
 import DrawerContentSiswa from "../components/DrawerContentSiswa.vue";
 import TransferScanSiswa from "../components/drawer/TransferScanSiswa.vue";
 import PinConfirmationSiswa from "../components/Pin/PinConfirmationSiswa.vue";
+import OpenNotification from "../components/drawer/OpenNotification.vue";
+
 const drawer = useDrawer();
 const app = useApp();
 const isVisible = ref(false);
 const toast = useToast();
+const { initPush } = usePush();
+
 watch(
   () => drawer.isDrawer,
   (val) => {
@@ -24,11 +29,14 @@ const draweComponents = {
   default: DrawerContentSiswa,
   TransferConfirmationSiswa,
   TransferScanSiswa,
+  OpenNotification,
 };
 
-onMounted(() => {
+onMounted(async () => {
   toast.removeAllGroups();
   isVisible.value = drawer.isDrawer;
+  // notification
+  await initPush();
 });
 
 onUnmounted(() => {

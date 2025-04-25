@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/vue-query'
 import { inject, computed, getCurrentInstance } from 'vue'
 import { useToast } from "primevue/usetoast";
 import { useRouter } from 'vue-router';
+import { config } from '@/config';
 export const usePush = () => {
     const drawer = useDrawer()
     const auth = inject("auth");
@@ -13,15 +14,27 @@ export const usePush = () => {
     const axios = proxy.axios;
     const toast = useToast()
     const router = useRouter()
+    const role = localStorage.getItem(`${config.STORAGE_KEY}/role`);
     const updateFcmTokenService = async (token) => {
-        const response = await axios.patch(
-            "/pegawai/modules/notification/fcm-token",
-            {
-                token,
-            }
-        );
+        if (role === "PEGAWAI") {
+            const response = await axios.patch(
+                "/pegawai/modules/notification/fcm-token",
+                {
+                    token,
+                }
+            );
 
-        return response.data;
+            return response.data;
+        } else if (role === "SISWA") {
+            const response = await axios.patch(
+                "/siswa/modules/notification/fcm-token",
+                {
+                    token,
+                }
+            );
+
+            return response.data;
+        }
     };
 
     const { mutate: updateFcmToken } = useMutation({
