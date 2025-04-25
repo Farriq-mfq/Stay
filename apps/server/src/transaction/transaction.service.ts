@@ -2,13 +2,16 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { account, AccountableType, users } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
 import { ROLE_CODE } from "src/config";
+import { NotificationApiService } from "src/notification/notification-api.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { v4 as uuidv4 } from 'uuid';
 import { DepositTransactionDto, PaymentMethodType, TransferTransactionDto } from "./dto/transaction.dto";
+import { rupiahFormat } from "src/utils/helpers";
 @Injectable()
 export class TransactionService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+        private readonly notificationService: NotificationApiService
     ) { }
 
     async deposit(from: string | number, depositTransactionDto: DepositTransactionDto) {
@@ -36,22 +39,22 @@ export class TransactionService {
             if (!toAccount) throw new BadRequestException("SEARCH_ACCOUNT_FAILED")
 
 
-            const toTransaction = await prisma.transactions.create({
-                data: {
-                    amount: depositTransactionDto.amount,
-                    code: uuidv4().replace(/-/g, ''),
-                    flow: 'DOWN',
-                    payment_method: 'CASH',
-                    fromAccountId: fromAccount.id,
-                    toAccountId: toAccount.id,
-                    status: 'SUCCESS',
-                    type: "DEPOSIT",
-                    title: `${toAccount.name}`,
-                    fromAccountType: fromAccount.accountableType,
-                    toAccountType: toAccount.accountableType,
-                    note: depositTransactionDto.note
-                }
-            })
+            // const toTransaction = await prisma.transactions.create({
+            //     data: {
+            //         amount: depositTransactionDto.amount,
+            //         code: uuidv4().replace(/-/g, ''),
+            //         flow: 'DOWN',
+            //         payment_method: 'CASH',
+            //         fromAccountId: fromAccount.id,
+            //         toAccountId: toAccount.id,
+            //         status: 'SUCCESS',
+            //         type: "DEPOSIT",
+            //         title: `${toAccount.name}`,
+            //         fromAccountType: fromAccount.accountableType,
+            //         toAccountType: toAccount.accountableType,
+            //         note: depositTransactionDto.note
+            //     }
+            // })
 
 
 
@@ -68,7 +71,7 @@ export class TransactionService {
                 throw new BadRequestException("Deposit failed")
             }
 
-            await prisma.transactions.create({
+            const createTransaction = await prisma.transactions.create({
                 data: {
                     amount: depositTransactionDto.amount,
                     code: uuidv4().replace(/-/g, ''),
@@ -85,7 +88,61 @@ export class TransactionService {
                 }
             })
 
-            return toTransaction
+            // notification
+            if (createTransaction) {
+                if (depositTransactionDto.toAccountType === 'PEGAWAI') {
+                    const pegawai = await this.prismaService.client.pegawai.findUnique({
+                        where: {
+                            id: +depositTransactionDto.toAccountId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (pegawai) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Deposit",
+                                body: `Anda mendapatkan deposit sebesar ${rupiahFormat(depositTransactionDto.amount)}`,
+                                token: pegawai.fcm_token,
+                                ref_id: pegawai.id,
+                                user_type: "PEGAWAI",
+                                type: 'TRANSACTION',
+                                data: createTransaction,
+                                visual_type: "success"
+                            })
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    }
+                } else {
+                    const siswa = await this.prismaService.client.siswa.findUnique({
+                        where: {
+                            id: +depositTransactionDto.toAccountId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (siswa) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Deposit",
+                                body: `Anda mendapatkan deposit sebesar ${rupiahFormat(depositTransactionDto.amount)}`,
+                                token: siswa.fcm_token,
+                                ref_id: siswa.id,
+                                user_type: "SISWA",
+                                type: 'TRANSACTION',
+                                data: createTransaction,
+                                visual_type: "success"
+                            })
+                        } catch { }
+                    }
+                }
+
+            }
+
+            return createTransaction
         })
 
         return transaction
@@ -185,7 +242,7 @@ export class TransactionService {
                 }
             })
             // to account
-            await prisma.transactions.create({
+            const toTransaction = await prisma.transactions.create({
                 data: {
                     amount: transferTransactionDto.amount,
                     code: idTrasaction,
@@ -201,6 +258,105 @@ export class TransactionService {
                     toAccountType: fromAccount.accountableType
                 }
             })
+
+            // notification
+            if (fromTransaction && toTransaction) {
+                if (fromAccount.accountableType === 'PEGAWAI') {
+                    const pegawai = await this.prismaService.client.pegawai.findUnique({
+                        where: {
+                            id: fromAccount.accountableId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (pegawai) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Transfer",
+                                body: `Berhasil melakukan transfer sebesar ${rupiahFormat(fromTransaction.amount)}`,
+                                token: pegawai.fcm_token,
+                                ref_id: pegawai.id,
+                                user_type: "PEGAWAI",
+                                type: 'TRANSACTION',
+                                data: fromTransaction,
+                                visual_type: "success"
+                            })
+                        } catch { }
+                    }
+                } else if (fromAccount.accountableType === 'SISWA') {
+                    const siswa = await this.prismaService.client.siswa.findUnique({
+                        where: {
+                            id: fromAccount.accountableId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (siswa) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Transfer",
+                                body: `Berhasil melakukan transfer sebesar ${rupiahFormat(fromTransaction.amount)}`,
+                                token: siswa.fcm_token,
+                                ref_id: siswa.id,
+                                user_type: "SISWA",
+                                type: 'TRANSACTION',
+                                data: fromTransaction,
+                                visual_type: "success"
+                            })
+                        } catch { }
+                    }
+                }
+
+                if (toAccount.accountableType === 'PEGAWAI') {
+                    const pegawai = await this.prismaService.client.pegawai.findUnique({
+                        where: {
+                            id: toAccount.accountableId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (pegawai) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Transfer",
+                                body: `${fromAccount.name} mengirimkan sebesar ${rupiahFormat(toTransaction.amount)}`,
+                                token: pegawai.fcm_token,
+                                ref_id: pegawai.id,
+                                user_type: "PEGAWAI",
+                                type: 'TRANSACTION',
+                                data: toTransaction,
+                                visual_type: "success"
+                            })
+                        } catch { }
+                    }
+                } else if (toAccount.accountableType === 'SISWA') {
+                    const siswa = await this.prismaService.client.siswa.findUnique({
+                        where: {
+                            id: toAccount.accountableId,
+                            fcm_token: {
+                                not: null
+                            }
+                        }
+                    })
+                    if (siswa) {
+                        try {
+                            await this.notificationService.sendPushNotification({
+                                title: "Transfer",
+                                body: `${fromAccount.name} mengirimkan sebesar ${rupiahFormat(toTransaction.amount)}`,
+                                token: siswa.fcm_token,
+                                ref_id: siswa.id,
+                                user_type: "SISWA",
+                                type: 'TRANSACTION',
+                                data: toTransaction,
+                                visual_type: "success"
+                            })
+                        } catch { }
+                    }
+                }
+            }
 
             return fromTransaction
         })
@@ -241,10 +397,9 @@ export class TransactionService {
             throw new NotFoundException("Kode transaksi tidak ditemukan")
         }
 
-        const account = await this.prismaService.client.account.findFirst({
+        const account = await this.prismaService.client.account.findUnique({
             where: {
-                accountableId: transaction.fromAccountId,
-                accountableType: transaction.fromAccountType
+                id: transaction.fromAccountId,
             }
         })
 
@@ -255,7 +410,6 @@ export class TransactionService {
                 accountableType: "USER"
             }
         })
-
 
         if (!account || !toAccount) {
             throw new NotFoundException("Akun tidak ditemukan")
@@ -279,7 +433,7 @@ export class TransactionService {
             throw new BadRequestException("Penarikan gagal")
         }
 
-        return await this.prismaService.client.transactions.update({
+        const withdrawTransaction = await this.prismaService.client.transactions.update({
             where: {
                 id: transaction.id,
                 fromAccountId: account.id,
@@ -292,6 +446,59 @@ export class TransactionService {
                 status: "SUCCESS",
             }
         })
+
+        // notification
+        if (withdrawTransaction) {
+            if (account.accountableType === 'PEGAWAI') {
+                const pegawai = await this.prismaService.client.pegawai.findUnique({
+                    where: {
+                        id: +account.accountableId,
+                        fcm_token: {
+                            not: null
+                        }
+                    }
+                })
+                console.log(pegawai)
+                if (pegawai) {
+                    try {
+                        await this.notificationService.sendPushNotification({
+                            title: "Withdraw",
+                            body: `Berhasil melakukan penarikan sebesar ${rupiahFormat(withdrawTransaction.amount)}`,
+                            token: pegawai.fcm_token,
+                            ref_id: pegawai.id,
+                            user_type: "PEGAWAI",
+                            type: 'TRANSACTION',
+                            data: withdrawTransaction,
+                            visual_type: "success"
+                        })
+                    } catch { }
+                }
+            } else if (account.accountableType === 'SISWA') {
+                const siswa = await this.prismaService.client.siswa.findUnique({
+                    where: {
+                        id: +account.accountableId,
+                        fcm_token: {
+                            not: null
+                        }
+                    }
+                })
+                if (siswa) {
+                    try {
+                        await this.notificationService.sendPushNotification({
+                            title: "Withdraw",
+                            body: `Berhasil melakukan penarikan sebesar ${rupiahFormat(withdrawTransaction.amount)}`,
+                            token: siswa.fcm_token,
+                            ref_id: siswa.id,
+                            user_type: "SISWA",
+                            type: 'TRANSACTION',
+                            data: withdrawTransaction,
+                            visual_type: "success"
+                        })
+                    } catch { }
+                }
+            }
+        }
+        return withdrawTransaction
     }
 
 

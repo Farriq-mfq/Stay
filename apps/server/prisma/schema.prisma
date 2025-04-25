@@ -27,6 +27,7 @@ model siswa {
   picture_public_id String?
   accountId         Int?              @unique
   account           account?          @relation(fields: [accountId], references: [id])
+  fcm_token         String?
 
   @@index([nis, nisn])
 }

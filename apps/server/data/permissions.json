@@ -87,5 +87,5 @@
   "schedules": ["create", "read", "update", "delete"],
   "features": ["read", "update"],
   "leave": ["read", "approve", "reject"],
-  "notification": ["send", "read"]
+  "notification": ["send"]
 }

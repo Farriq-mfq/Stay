@@ -1,48 +1,91 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import * as admin from 'firebase-admin';
+import { AccountableType } from '@prisma/client';
+import { Queue } from 'bullmq';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
-import { NotificationDto } from './dto/notification.dto';
+import { InputTypeUser, NotificationCreateDto } from './dto/notification.dto';
 
 @Injectable()
 export class NotificationService {
     constructor(
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+        @InjectQueue('notification-queue') private readonly notificationQueue: Queue
     ) { }
-    async sendPushNotification({ title, body, token, ref_id, user_type, type, data }: NotificationDto) {
 
-        const notification = await this.prismaService.client.notifications.create({
-            data: {
-                title,
-                body,
-                accountableId: ref_id,
-                accountableType: user_type,
-                type: type,
-                ...data && {
-                    data: JSON.stringify(data)
-                }
-            }
-        })
-
-        try {
-            await admin.messaging().send({
-                notification: {
-                    body: notification.body,
-                    title: notification.title,
-                },
-                token,
-                ...data && {
-                    webpush: {
-                        data: {
-                            type: notification.type,
-                            ...data
-                        }
+    async createNotification(notificationCreateDto: NotificationCreateDto) {
+        if (notificationCreateDto.user_type === InputTypeUser.PEGAWAI) {
+            if (!notificationCreateDto.refs_id && notificationCreateDto.refs_id.length === 0) throw new BadRequestException("Pegawai harus dipilih");
+            const pegawais = await this.prismaService.client.pegawai.findMany({
+                where: {
+                    id: {
+                        in: notificationCreateDto.refs_id
+                    },
+                    fcm_token: {
+                        not: null
                     }
                 }
-            });
-            return true
-        } catch (err) {
-            throw new BadRequestException(err)
+            })
+
+            if (pegawais.length === 0) throw new BadRequestException("Pegawai yang dipilih tidak memungkinkan untuk mendapatkan notifikasi");
+            for (const pegawai of pegawais) {
+                await this.notificationQueue.add('send-notification', { name: pegawai.name, title: notificationCreateDto.title, body: notificationCreateDto.body, token: pegawai.fcm_token, ref_id: pegawai.id, user_type: notificationCreateDto.user_type, type: notificationCreateDto.type }, {
+                    removeOnComplete: true,
+                    removeOnFail: true
+                })
+            }
+        } else if (notificationCreateDto.user_type === AccountableType.SISWA) {
+            if (!notificationCreateDto.refs_id && notificationCreateDto.refs_id.length === 0) throw new BadRequestException("Siswa harus dipilih");
+            const siswas = await this.prismaService.client.siswa.findMany({
+                where: {
+                    id: {
+                        in: notificationCreateDto.refs_id
+                    },
+                    fcm_token: {
+                        not: null
+                    }
+                }
+            })
+            for (const siswa of siswas) {
+                await this.notificationQueue.add('send-notification', { name: siswa.name, title: notificationCreateDto.title, body: notificationCreateDto.body, token: siswa.fcm_token, ref_id: siswa.id, user_type: AccountableType.SISWA, type: notificationCreateDto.type }, {
+                    removeOnComplete: true,
+                    removeOnFail: true
+                })
+            }
+        } else if (notificationCreateDto.user_type === InputTypeUser.COMMON) {
+            const pegawais = await this.prismaService.client.pegawai.findMany({
+                where: {
+                    fcm_token: {
+                        not: null
+                    }
+                }
+            })
+
+            const siswas = await this.prismaService.client.siswa.findMany({
+                where: {
+                    fcm_token: {
+                        not: null
+                    }
+                }
+            })
+
+            if (pegawais.length === 0 && siswas.length === 0) throw new BadRequestException("Pegawai dan Siswa yang dipilih tidak memungkinkan untuk mendapatkan notifikasi");
+
+            for (const pegawai of pegawais) {
+                await this.notificationQueue.add('send-notification', { name: pegawai.name, title: notificationCreateDto.title, body: notificationCreateDto.body, token: pegawai.fcm_token, ref_id: pegawai.id, user_type: AccountableType.PEGAWAI, type: notificationCreateDto.type }, {
+                    removeOnComplete: true,
+                    removeOnFail: true
+                })
+            }
+
+            for (const siswa of siswas) {
+                await this.notificationQueue.add('send-notification', { name: siswa.name, title: notificationCreateDto.title, body: notificationCreateDto.body, token: siswa.fcm_token, ref_id: siswa.id, user_type: AccountableType.SISWA, type: notificationCreateDto.type }, {
+                    removeOnComplete: true,
+                    removeOnFail: true
+                })
+            }
+        } else {
+            throw new BadRequestException("Please select Pegawai or Siswa")
         }
     }
 }

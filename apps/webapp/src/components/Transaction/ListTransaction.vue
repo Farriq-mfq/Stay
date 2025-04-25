@@ -23,7 +23,8 @@ const { items } = defineProps({
           'bg-red-50': item.type === 'TRANSFER',
           'bg-primary-50': item.type === 'DEPOSIT' || item.type === 'WITHDRAW' || item.type === 'PAYMENT',
         }">
-        <i class="pi pi-arrow-down-left text-red-500 text-lg sm:text-xl" v-if="item.type === 'TRANSFER'"></i>
+        <i class="pi pi-arrow-down-left text-red-500 text-lg sm:text-xl" v-if="item.type === 'TRANSFER' && item.flow === 'DOWN'"></i>
+        <i class="pi pi-arrow-up-right text-primary text-lg sm:text-xl" v-if="item.type === 'TRANSFER' && item.flow === 'UP'"></i>
         <i class="pi pi-arrow-up-right text-primary text-lg sm:text-xl" v-if="item.type === 'DEPOSIT'"></i>
         <i class="pi pi-money-bill text-primary text-lg sm:text-xl" v-if="item.type === 'WITHDRAW'"></i>
         <i class="pi pi-credit-card text-primary text-lg sm:text-xl" v-if="item.type === 'PAYMENT'"></i>

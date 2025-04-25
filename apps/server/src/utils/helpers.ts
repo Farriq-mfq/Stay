@@ -87,3 +87,12 @@ export function validateAndFormatDateYear(input: string): { year: string, month:
 export function isArray(input: any): input is any[] {
     return Array.isArray(input);
 }
+
+export const rupiahFormat = (value: number): string => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+    }).format(value)
+}
+

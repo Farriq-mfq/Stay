@@ -1,3 +1,4 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -11,6 +12,7 @@ import { FeaturesModule } from './features/features.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { LeaveModule } from './leave/leave.module';
 import { MeetingSessionModule } from './meeting-session/meeting-session.module';
+import { NotificationModule } from './notification/notification.module';
 import { PegawaiModulesModule } from './pegawai/modules/pegawai.modules.module';
 import { PegawaiModule } from './pegawai/pegawai.module';
 import { PermissionsModule } from './permissions/permissions.module';
@@ -26,8 +28,6 @@ import { SiswaModule } from './siswa/siswa.module';
 import { StatsModule } from './stats/stats.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { UsersModule } from './users/users.module';
-import { FirebaseModule } from './firebase/firebase.module';
-import { NotificationModule } from './notification/notification.module';
 @Module({
   imports: [
     CustomPrismaModule.forRootAsync({
@@ -84,7 +84,20 @@ import { NotificationModule } from './notification/notification.module';
     TransactionModule,
     LeaveModule,
     FeaturesModule,
-    NotificationModule
+    NotificationModule,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+          ...configService.get<string>('REDIS_PASSWORD') && {
+            password: configService.get<string>('REDIS_PASSWORD'),
+          }
+        }
+      }),
+      inject: [ConfigService],
+    }),
   ],
 })
 export class AppModule { }
