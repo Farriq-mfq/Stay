@@ -165,4 +165,82 @@ export class StatsService {
       stats: mappingRombels
     };
   }
+
+  async getMostSiswa(sessionId: string, date: string) {
+    const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
+      where: {
+        id: +sessionId
+      }
+    })
+
+    let startDate = null;
+    let endDate = null;
+    if (date) {
+      const parseDateYearMonth = validateAndFormatDateYear(date);
+      if (!parseDateYearMonth) {
+        throw new BadRequestException("date invalid")
+      }
+      startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+      endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+    }
+
+    const siswas = await this.prismaService.client.siswa.findMany({
+      select: {
+        name: true,
+        _count: {
+          select: {
+            presences: {
+              where: {
+                ...(startDate && endDate && {
+                  createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                  }
+                }),
+                presence_sessionsId: session.id,
+              },
+            },
+          }
+        },
+        rombel: true,
+      },
+      orderBy: {
+        presences: {
+          _count: "desc"
+        },
+      },
+      where: {
+        ...(startDate && endDate && {
+          presences: {
+            some: {
+              createdAt: {
+                gte: startDate,
+                lte: endDate
+              }
+            }
+          }
+        }),
+        presences: {
+          some: {
+            presence_sessionsId: session.id
+          }
+        }
+      },
+      take: 10
+    })
+
+
+    const mappingSiswa = siswas.map(siswa => {
+      return {
+        key: `${siswa.name} (${siswa.rombel})`,
+        value: siswa._count.presences
+      }
+    })
+
+    return {
+      date: startDate && endDate ? date : null,
+      stats: mappingSiswa
+    };
+
+  }
 }

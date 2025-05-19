@@ -3,6 +3,7 @@ import { ref } from 'vue';
 const items = ref([
     { label: 'Semua Data', route: '/stats' },
     { label: 'Rombel', route: '/stats/rombel' },
+    { label: 'The Most Siswa', route: '/stats/most/siswa' },
 ]);
 </script>
 <template>

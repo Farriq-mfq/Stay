@@ -33,4 +33,12 @@ export class StatsController {
   ) {
     return await this.statsService.getStatsPresenceByRombel(sessionId, date);
   }
+
+  @Get('/presences/most-siswa/:sessionId')
+  async getMostPresenceSiswa(
+    @Param('sessionId') sessionId: string,
+    @Query('date') date?: string
+  ) {
+    return await this.statsService.getMostSiswa(sessionId, date);
+  }
 }

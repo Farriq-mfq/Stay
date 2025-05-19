@@ -170,6 +170,14 @@ const router = createRouter({
                                 title: "Stats Presences By Rombel",
                             },
                         },
+                        {
+                            path: '/stats/most/siswa',
+                            name: 'stats-most/siswa',
+                            component: () => import('@/views/Stats/MostSiswa.vue'),
+                            meta: {
+                                title: "Most Siswa",
+                            },
+                        },
                     ]
                 },
                 {
