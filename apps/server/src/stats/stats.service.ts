@@ -1,6 +1,6 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { endOfMonth, format, isValid, parse, startOfMonth } from 'date-fns';
+import { endOfMonth, endOfYear, format, isValid, parse, startOfMonth, startOfYear } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'src/prisma.extension';
@@ -166,23 +166,21 @@ export class StatsService {
     };
   }
 
-  async getMostSiswa(sessionId: string, date: string) {
+  async getMostSiswa(sessionId: string, year: string) {
     const session = await this.prismaService.client.presence_sessions.findUniqueOrThrow({
       where: {
         id: +sessionId
       }
     })
 
-    let startDate = null;
-    let endDate = null;
-    if (date) {
-      const parseDateYearMonth = validateAndFormatDateYear(date);
-      if (!parseDateYearMonth) {
-        throw new BadRequestException("date invalid")
-      }
-      startDate = startOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
-      endDate = endOfMonth(new Date(parseInt(parseDateYearMonth.year), parseInt(parseDateYearMonth.month) - 1));
+    const validateYear = validateAndFormatDateYear(year);
+    if (!validateYear) {
+      year = new Date().getFullYear().toString();
     }
+
+    const startDate = startOfYear(new Date(parseInt(year), 0, 1))
+    const endDate = endOfYear(new Date(parseInt(year), 0, 1))
+
 
     const siswas = await this.prismaService.client.siswa.findMany({
       select: {
@@ -191,12 +189,10 @@ export class StatsService {
           select: {
             presences: {
               where: {
-                ...(startDate && endDate && {
-                  createdAt: {
-                    gte: startDate,
-                    lte: endDate
-                  }
-                }),
+                createdAt: {
+                  gte: startDate,
+                  lte: endDate
+                },
                 presence_sessionsId: session.id,
               },
             },
@@ -210,24 +206,31 @@ export class StatsService {
         },
       },
       where: {
-        ...(startDate && endDate && {
-          presences: {
-            some: {
-              createdAt: {
-                gte: startDate,
-                lte: endDate
-              }
-            }
-          }
-        }),
         presences: {
           some: {
+            createdAt: {
+              gte: startDate,
+              lte: endDate
+            },
             presence_sessionsId: session.id
-          }
-        }
+          },
+        },
       },
       take: 10
     })
+
+    // const years = [...new Set((await this.prismaService.client.presences.groupBy({
+    //   by: ['createdAt'],
+    //   where: {
+    //     presence_sessionsId: session.id,
+    //   },
+    //   orderBy: {
+    //     createdAt: "asc"
+    //   },
+    // })).map(data => format(data.createdAt, 'yyyy', {
+    //   locale: id
+    // })))]
+
 
 
     const mappingSiswa = siswas.map(siswa => {
@@ -238,7 +241,8 @@ export class StatsService {
     })
 
     return {
-      date: startDate && endDate ? date : null,
+      // years,
+      currentYear: year,
       stats: mappingSiswa
     };
 

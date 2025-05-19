@@ -96,3 +96,19 @@ export const rupiahFormat = (value: number): string => {
     }).format(value)
 }
 
+
+export function validateAndFormatYear(input: string): string | null {
+    const regex = /^\d{4}$/; // Matches 'yyyy' format
+
+    if (!regex.test(input)) {
+        return null;
+    }
+
+    const parsedDate = parse(input, 'yyyy', new Date());
+
+    if (!isValid(parsedDate)) {
+        return null;
+    }
+
+    return format(parsedDate, 'yyyy');
+}

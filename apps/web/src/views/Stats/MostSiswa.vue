@@ -13,12 +13,12 @@ const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const session = ref(null);
 const { isDarkTheme } = useLayout();
-const selectedDate = ref(null);
+const selectedYear = ref(null);
 
 const getChartPresencesService = async () => {
     const queries = {
-        ...(selectedDate.value && {
-            date: format(selectedDate.value, 'yyyy-MM')
+        ...(selectedYear.value && {
+            year: format(selectedYear.value, 'yyyy')
         })
     };
     const queryParams = new URLSearchParams(queries);
@@ -27,13 +27,13 @@ const getChartPresencesService = async () => {
 };
 
 const { data: chartPresences, isLoading: chartPresencesLoading } = useQuery({
-    queryKey: ['getChartMostSiswa', session, selectedDate],
+    queryKey: ['getChartMostSiswa', session, selectedYear],
     queryFn: getChartPresencesService
 });
 
 const handleChangeSelectSession = (val) => {
     session.value = val;
-    selectedDate.value = null;
+    selectedYear.value = null;
 };
 
 const lineData = reactive({
@@ -97,7 +97,7 @@ const applyDarkTheme = () => {
     };
 };
 
-watch([session, chartPresences, selectedDate], ([val, value, date]) => {
+watch([session, chartPresences, selectedYear], ([val, value, date]) => {
     lineData.datasets[0].label = val ? `${val.name} ${date ? '- ' + format(date, 'yyyy-MM') : ''}` : '';
     if (value) {
         let labels = [];
@@ -150,7 +150,8 @@ watch(
     <div>
         <div class="field">
             <select-session @input="handleChangeSelectSession" />
-            <Calendar view="month" dateFormat="mm/yy" v-if="session" v-model="selectedDate" placeholder="Pilih Bulan" class="w-full mt-3" showButtonBar />
+            <Calendar view="year" dateFormat="yy" v-if="session" v-model="selectedYear" placeholder="Pilih Tahun" class="w-full mt-3" showButtonBar />
+            <!-- <Dropdown v-if="session" :options="chartPresences?.data.data.years"  v-model="selectedYear" placeholder="Pilih Tahun" class="w-full mt-3" /> -->
             <div class="flex gap-2 lg:flex-row flex-column">
                 <Button :disabled="chartPresencesLoading" :loading="chartPresencesLoading" icon="pi pi-print" label="Print" class="mt-3" v-if="session" @click="handlePrint" />
             </div>

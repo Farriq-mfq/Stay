@@ -3,7 +3,7 @@ import { AccessTokenGuard } from 'src/guards/accessToken.guard';
 import { StatsService } from './stats.service';
 
 @Controller('stats')
-@UseGuards(AccessTokenGuard)
+// @UseGuards(AccessTokenGuard)
 export class StatsController {
   constructor(private readonly statsService: StatsService) { }
   @Get('/')
@@ -37,8 +37,8 @@ export class StatsController {
   @Get('/presences/most-siswa/:sessionId')
   async getMostPresenceSiswa(
     @Param('sessionId') sessionId: string,
-    @Query('date') date?: string
+    @Query('year') year?: string
   ) {
-    return await this.statsService.getMostSiswa(sessionId, date);
+    return await this.statsService.getMostSiswa(sessionId, year);
   }
 }
