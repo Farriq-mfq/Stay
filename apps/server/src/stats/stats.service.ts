@@ -182,7 +182,7 @@ export class StatsService {
     const endDate = endOfYear(new Date(parseInt(year), 0, 1))
 
 
-    const siswas = await this.prismaService.client.siswa.findMany({
+    const siswas = (await this.prismaService.client.siswa.findMany({
       select: {
         name: true,
         _count: {
@@ -216,8 +216,8 @@ export class StatsService {
           },
         },
       },
-      take: 10
-    })
+      take: 20
+    }))
 
     // const years = [...new Set((await this.prismaService.client.presences.groupBy({
     //   by: ['createdAt'],
@@ -238,7 +238,7 @@ export class StatsService {
         key: `${siswa.name} (${siswa.rombel})`,
         value: siswa._count.presences
       }
-    })
+    }).sort((a, b) => b.value - a.value)
 
     return {
       // years,

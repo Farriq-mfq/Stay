@@ -149,7 +149,7 @@ watch(
 <template>
     <div>
         <div class="field">
-            <select-session @input="handleChangeSelectSession" />
+            <select-session @input="handleChangeSelectSession" role="SISWA" />
             <Calendar view="year" dateFormat="yy" v-if="session" v-model="selectedYear" placeholder="Pilih Tahun" class="w-full mt-3" showButtonBar />
             <!-- <Dropdown v-if="session" :options="chartPresences?.data.data.years"  v-model="selectedYear" placeholder="Pilih Tahun" class="w-full mt-3" /> -->
             <div class="flex gap-2 lg:flex-row flex-column">
@@ -168,8 +168,29 @@ watch(
                 </div>
             </div>
         </Fieldset>
-        <div ref="componentPrintRef" v-if="session" class="p-3">
+        <div ref="componentPrintRef" v-if="session" class="p-3 flex flex-column">
             <Chart type="bar" :data="lineData" :options="lineOptions" />
+            <div class="border-solid p-5 mt-5 border-1 border-round-2xl border-primary" >
+                <h3>Peringkat 20 Besar Tahun {{ chartPresences?.data.data.currentYear }}</h3>
+                <p class="font-semibold text-xl">{{ session.name }}</p>
+                <hr />
+                <table class="w-full p-datatable p-component p-datatable-responsive-scroll">
+                    <thead>
+                        <tr>
+                            <th class="text-left">No.</th>
+                            <th class="text-left">Nama Siswa</th>
+                            <th class="text-left">Jumlah Kehadiran</th>
+                        </tr>
+                    </thead>
+                    <tbody v-if="chartPresences">
+                        <tr v-for="(item, index) in chartPresences.data.data.stats" :key="index">
+                            <td class="text-left">{{ index + 1 }}.</td>
+                            <td class="text-left">{{ item.key }}</td>
+                            <td class="text-left font-bold text-xl">{{ item.value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </template>
