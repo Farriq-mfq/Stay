@@ -4,9 +4,8 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { getCurrentInstance } from "vue";
 import { rupiahFormat } from "@/utils/money";
-import { useRoute, useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router";
 import { config } from "@/config";
-;
 const { proxy } = getCurrentInstance();
 const axios = proxy.axios;
 const route = useRoute();
@@ -125,14 +124,6 @@ const copyToClipboard = (text) => {
                   : "Total Transaksi"
               }}
             </h4>
-            <span
-              class="text-xs text-white-alpha-90"
-              v-if="transaction.data.type != 'WITHDRAW'"
-              >Jumlah yang
-              {{
-                transaction.data.flow === "UP" ? "dikirim" : "diterima"
-              }}</span
-            >
           </div>
           <span class="text-xl font-bold text-white">{{
             rupiahFormat(transaction.data.amount)
@@ -144,7 +135,10 @@ const copyToClipboard = (text) => {
         <!-- Account Details -->
         <div
           class="flex flex-column gap-3"
-          v-if="transaction.data.type !== 'WITHDRAW'"
+          v-if="
+            transaction.data.type !== 'WITHDRAW' &&
+            transaction.data.type !== 'PAYMENT'
+          "
         >
           <div class="flex align-items-center gap-2">
             <i class="pi pi-user text-primary"></i>
@@ -157,13 +151,36 @@ const copyToClipboard = (text) => {
             <div class="flex justify-content-between align-items-center mb-3">
               <span class="text-sm font-medium">Nama</span>
               <span class="text-sm font-semibold">{{
-                transaction.data.to.name
+                transaction.data.to ? transaction.data.to.name : "-"
               }}</span>
             </div>
             <div class="flex justify-content-between align-items-center">
               <span class="text-sm font-medium">Nomer Rekening</span>
               <span class="text-sm font-semibold">{{
-                transaction.data.to.accountNumber
+                transaction.data.to ? transaction.data.to.accountNumber : "-"
+              }}</span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex flex-column gap-3"
+          v-if="transaction.data.type === 'PAYMENT'"
+        >
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-user text-primary"></i>
+            <h3 class="m-0 text-sm font-medium">Akun Yang Membayar</h3>
+          </div>
+          <div class="surface-card p-3 border-round-lg">
+            <div class="flex justify-content-between align-items-center mb-3">
+              <span class="text-sm font-medium">Nama</span>
+              <span class="text-sm font-semibold">{{
+                transaction.data.to ? transaction.data.to.name : "-"
+              }}</span>
+            </div>
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-sm font-medium">Nomer Rekening</span>
+              <span class="text-sm font-semibold">{{
+                transaction.data.to ? transaction.data.to.accountNumber : "-"
               }}</span>
             </div>
           </div>

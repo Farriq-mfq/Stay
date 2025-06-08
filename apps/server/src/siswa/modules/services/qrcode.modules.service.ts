@@ -87,7 +87,102 @@ export class QrCodeSiswaModulesService {
                         }
                     }
 
-                case 'WITHDRAW':
+                // case 'WITHDRAW':
+
+                case 'PAYMENT':
+                    const paymentData = decrypt.data
+                    const fromPayment = await this.prismaService.client.account.findFirst({
+                        where: {
+                            id: paymentData.fromAccountId,
+                            accountableType: AccountableType.PEGAWAI
+                        },
+                    })
+
+                    if (!fromPayment) throw new BadRequestException("Account not found")
+
+                    const siswaAccount = await this.prismaService.client.account.findFirst({
+                        where: {
+                            accountableId: parseInt(user.sub),
+                            accountableType: AccountableType.SISWA
+                        }
+                    })
+
+                    if (!siswaAccount) throw new BadRequestException("Account not found")
+
+                    if (siswaAccount.balance < paymentData.amount) throw new BadRequestException("Saldo tidak mencukupi")
+
+
+                    const transaction = await this.prismaService.client.transactions.findUniqueOrThrow({
+                        where: {
+                            id: paymentData.transactionId,
+                            fromAccountId: paymentData.fromAccountId,
+                            fromAccountType: AccountableType.PEGAWAI,
+                            type: 'PAYMENT',
+                        }
+                    });
+
+                    if (!transaction) throw new BadRequestException("Transaksi tidak ditemukan")
+
+                    if (transaction.status === 'SUCCESS') throw new BadRequestException("Transaksi telah selesai")
+
+                    const toPayment = await this.prismaService.client.transactions.update({
+                        where: {
+                            id: paymentData.transactionId,
+                            fromAccountId: paymentData.fromAccountId,
+                            fromAccountType: AccountableType.PEGAWAI,
+                            type: 'PAYMENT',
+                        },
+                        data: {
+                            toAccountId: siswaAccount.id,
+                            toAccountType: AccountableType.SISWA,
+                            status: 'SUCCESS',
+                        }
+                    });
+
+                    if (!toPayment) throw new BadRequestException("Transaction not found")
+                    // update from account
+                    const [fromPaymentUpdated, siswaAccountUpdated, createTransactionSiswa] = await Promise.all([
+                        await this.prismaService.client.account.update({
+                            where: {
+                                id: paymentData.fromAccountId,
+                            },
+                            data: {
+                                balance: fromPayment.balance + parseInt(paymentData.amount)
+                            }
+                        }),
+                        await this.prismaService.client.account.update({
+                            where: {
+                                id: siswaAccount.id
+                            },
+                            data: {
+                                balance: siswaAccount.balance - parseInt(paymentData.amount)
+                            }
+                        }),
+                        await this.prismaService.client.transactions.create({
+                            data: {
+                                title: "Pembayaran",
+                                amount: paymentData.amount,
+                                code: paymentData.code,
+                                flow: 'DOWN',
+                                payment_method: 'CASH',
+                                toAccountId: paymentData.fromAccountId,
+                                toAccountType: AccountableType.PEGAWAI,
+                                fromAccountId: siswaAccount.id,
+                                fromAccountType: AccountableType.SISWA,
+                                type: 'PAYMENT',
+                                status: 'SUCCESS',
+                            }
+                        })
+                    ])
+
+                    if (!fromPaymentUpdated || !siswaAccountUpdated || !createTransactionSiswa) throw new BadRequestException("Gagal melakukan transaksi")
+
+                    return {
+                        action: 'PAYMENT',
+                        data: {
+                            transactionId: toPayment.id,
+                        }
+                    }
                 default:
                     throw new BadRequestException("invalid action")
             }

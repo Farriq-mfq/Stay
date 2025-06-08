@@ -21,6 +21,13 @@
       "icon": "pi pi-send",
       "iconColor": "text-orange-500",
       "group": null
+    },
+    {
+      "route": "feature-shopping",
+      "title": "Belanja",
+      "icon": "pi pi-cart",
+      "iconColor": "text-red-500",
+      "group": null
     }
   ]
 }

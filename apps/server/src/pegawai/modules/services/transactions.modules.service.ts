@@ -211,4 +211,124 @@ export class TransactionPegawaiModuleService {
             transactions[1]
         ]
     }
+
+
+
+    async createPayment(user: any, body: CreateWithdrawDto) {
+        return await this.prismaService.client.$transaction(async (prisma) => {
+            const account = await prisma.account.findFirstOrThrow({
+                where: {
+                    accountableId: parseInt(user.sub),
+                    accountableType: AccountableType.PEGAWAI
+                }
+            })
+
+            if (!account) throw new BadRequestException()
+
+            if (!(body.amount > 0)) throw new BadRequestException("Pembayaran harus lebih besar dari 0")
+
+            const transaction = await prisma.transactions.create({
+                data: {
+                    title: "Pembayaran",
+                    amount: body.amount,
+                    code: `${account.id}-${format(new Date(), 'yyyyMMddHHmmss')}`,
+                    flow: 'UP',
+                    payment_method: 'CASH',
+                    fromAccountId: account.id,
+                    fromAccountType: AccountableType.PEGAWAI,
+                    type: 'PAYMENT',
+                    status: 'PENDING',
+                }
+            })
+
+            const dataQrCode = {
+                transactionId: transaction.id,
+                amount: transaction.amount,
+                code: transaction.code,
+                fromAccountId: account.id,
+                fromAccountType: AccountableType.PEGAWAI,
+                timestamp: Date.now()
+            }
+            const qrcode = await this.qrcodeService.createQrCode(dataQrCode, 'PAYMENT')
+            return {
+                transaction,
+                qrcode
+            }
+        })
+    }
+
+    async listTransactionPayment(user: any, limit: string, after: string, before: string, search: string) {
+        if (!user) throw new UnauthorizedException()
+
+        const userId = parseInt(user.sub)
+
+        const account = await this.prismaService.client.account.findFirstOrThrow({
+            where: {
+                accountableId: userId,
+                accountableType: AccountableType.PEGAWAI
+            }
+        })
+
+        if (!account) throw new BadRequestException()
+
+        const transactions = await this.prismaService.client.transactions.paginate({
+            where: {
+                fromAccountId: account.id,
+                fromAccountType: AccountableType.PEGAWAI,
+                status: {
+                    in: ['FAILED', 'PENDING']
+                },
+                type: 'PAYMENT',
+                ...search && {
+                    OR: [
+                        {
+                            to: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                        {
+                            from: {
+                                name: {
+                                    contains: search,
+                                    mode: 'insensitive'
+                                }
+                            }
+                        },
+                    ]
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+        }).withCursor({
+            limit: 20,
+            after: after ?? null,
+            before: before ?? null,
+        })
+
+        const data = transactions[0];
+
+        const parseData = await Promise.all(data.map(async (dt) => {
+            const dataQrCode = {
+                transactionId: dt.id,
+                amount: dt.amount,
+                code: dt.code,
+                fromAccountId: account.id,
+                fromAccountType: AccountableType.PEGAWAI,
+                timestamp: Date.now()
+            }
+            return {
+                ...dt,
+                qrcode: await this.qrcodeService.createQrCode(dataQrCode, 'PAYMENT')
+            }
+        }))
+
+        return [
+            parseData,
+            transactions[1]
+        ]
+    }
 }

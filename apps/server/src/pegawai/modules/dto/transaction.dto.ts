@@ -6,3 +6,10 @@ export class CreateWithdrawDto {
     @Min(10000, { message: 'Jumlah penarikan minimal Rp 10.000' })
     amount: number;
 }
+
+
+export class CreatePaymentDto {
+    @IsNotEmpty({ message: 'Jumlah pembayaran tidak boleh kosong' })
+    @IsNumber({}, { message: 'Jumlah pembayaran harus berupa angka' })
+    amount: number;
+}

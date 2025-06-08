@@ -180,6 +180,15 @@ const routes = [
         ],
     },
     {
+        path: "/feature/shopping",
+        meta: {
+            layout: "PegawaiMainLayout",
+            auth: true,
+        },
+        name: "feature-shopping",
+        component: () => import("@/views/pegawai/Feature/Shopping/Index.vue"),
+    },
+    {
         path: '/notification',
         name: 'notification',
         component: () => import("@/views/pegawai/Notification/Index.vue"),

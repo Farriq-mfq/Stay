@@ -14,10 +14,12 @@ Sistem manajemen Sekolah SMK Negeri 1 Pekalongan
 - [X] Dynamic Feature and permisson dynamic feature
 - [X] Rekap Perbulan Presence By Location
 - [X] Fix response after fcm update
-- [ ] Notification firebase
+- [X] Notification firebase
+- [-] Create Transaction Payment
+- [ ] Add Feature AutoDebet
+- [ ] FIX ICON TRANSFER IN AND OUT
 - [ ] Generate Pdf
 - [ ] Setting Presence Schedule Per Employee (TATA USAHA)
-- [ ] Add Feature AutoDebet
 - [ ] Guard Pin in Backend Server
 - [ ] List Withdraw and Approve
 - [ ] Trasaction Report

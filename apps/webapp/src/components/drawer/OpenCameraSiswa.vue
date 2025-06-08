@@ -57,6 +57,22 @@ const handleScan = async (code) => {
             });
             drawer.closeDrawer();
             break;
+          case "PAYMENT":
+            alert(JSON.stringify(data.data.data));
+            // toast.add({
+            //   severity: "success",
+            //   summary: "Success",
+            //   detail: "Presensi Berhasil",
+            //   life: 3000,
+            // });
+            // router.push({
+            //   name: "presences-detail",
+            //   params: {
+            //     id: data.data.data.presenceId,
+            //   },
+            // });
+            // drawer.closeDrawer();
+            break;
           default:
             toast.add({
               severity: "error",
