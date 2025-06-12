@@ -211,4 +211,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection {
             status
         });
     }
+
+    async sendNotificationEmitPayment(key: string, payload: any, status: 'success' | 'failed') {
+        this.server.emit(`send_notification_payment_${key}`, {
+            payload,
+            status
+        });
+    }
 }

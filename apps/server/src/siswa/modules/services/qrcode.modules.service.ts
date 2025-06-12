@@ -1,16 +1,19 @@
 import { BadRequestException, Inject, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AccountableType } from "@prisma/client";
 import { CustomPrismaService } from "nestjs-prisma";
+import { EventsGateway } from "src/events/events.gateway";
+import { NotificationApiService } from "src/notification/notification-api.service";
 import { ExtendedPrismaClient } from "src/prisma.extension";
 import { QRCodeService } from "src/qrcode/qrcode.service";
 import { ReadQRCodeDto } from "../dto/qrcode.dto";
-import { EventsGateway } from "src/events/events.gateway";
 
 export class QrCodeSiswaModulesService {
     constructor(
         private readonly qrCodeService: QRCodeService,
         @Inject('PrismaService') private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-        private readonly eventService: EventsGateway
+        private readonly eventService: EventsGateway,
+        private readonly notificationService: NotificationApiService
+
     ) { }
 
     async createQrCodeTransfer(user: any) {
@@ -121,9 +124,15 @@ export class QrCodeSiswaModulesService {
                         }
                     });
 
-                    if (!transaction) throw new BadRequestException("Transaksi tidak ditemukan")
+                    if (!transaction) {
+                        await this.eventService.sendNotificationEmitPayment(transaction.code, {}, 'failed')
+                        throw new BadRequestException("Transaction not found")
+                    }
 
-                    if (transaction.status === 'SUCCESS') throw new BadRequestException("Transaksi telah selesai")
+                    if (transaction.status === 'SUCCESS') {
+                        await this.eventService.sendNotificationEmitPayment(transaction.code, {}, 'failed')
+                        throw new BadRequestException("Transaksi telah selesai")
+                    }
 
                     const toPayment = await this.prismaService.client.transactions.update({
                         where: {
@@ -139,7 +148,10 @@ export class QrCodeSiswaModulesService {
                         }
                     });
 
-                    if (!toPayment) throw new BadRequestException("Transaction not found")
+                    if (!toPayment) {
+                        await this.eventService.sendNotificationEmitPayment(transaction.code, {}, 'failed')
+                        throw new BadRequestException("Transaction not found")
+                    }
                     // update from account
                     const [fromPaymentUpdated, siswaAccountUpdated, createTransactionSiswa] = await Promise.all([
                         await this.prismaService.client.account.update({
@@ -175,7 +187,28 @@ export class QrCodeSiswaModulesService {
                         })
                     ])
 
-                    if (!fromPaymentUpdated || !siswaAccountUpdated || !createTransactionSiswa) throw new BadRequestException("Gagal melakukan transaksi")
+                    if (!fromPaymentUpdated || !siswaAccountUpdated || !createTransactionSiswa) {
+                        await this.eventService.sendNotificationEmitPayment(toPayment.code, {}, 'failed')
+                        throw new BadRequestException("Gagal melakukan transaksi")
+                    }
+
+                    // if (siswa) {
+                    //     console.log('siswa', siswa);
+                    //     try {
+                    //         await this.notificationService.sendPushNotification({
+                    //             title: "Transfer",
+                    //             body: `Pembayaran sebesar ${rupiahFormat(toPayment.amount)}`,
+                    //             token: siswa.fcm_token,
+                    //             ref_id: siswa.id,
+                    //             user_type: "SISWA",
+                    //             type: 'TRANSACTION',
+                    //             data: toPayment,
+                    //             visual_type: "success"
+                    //         })
+                    //     } catch { }
+                    // }
+
+                    await this.eventService.sendNotificationEmitPayment(toPayment.code, toPayment, 'success')
 
                     return {
                         action: 'PAYMENT',

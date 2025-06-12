@@ -22,6 +22,7 @@ import "driver.js/dist/driver.css";
 
 import auth from './plugins/auth';
 import http from './plugins/http';
+import socket from './plugins/socket';
 
 
 
@@ -42,7 +43,8 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('Toast', Toast);
 app.use(http);
-app.use(router)
+app.use(router);
+app.use(socket);
 app.use(auth);
 app.use(pinia)
 app.use(VueQueryPlugin)

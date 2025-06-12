@@ -21,6 +21,8 @@ const paymentQrValue = ref("");
 const qrcode = useQRCode(paymentQrValue);
 const filter = ref(null);
 
+const statusPembayaran = ref(null);
+
 const createPaymentService = async (data) => {
   const response = await axios.post("/pegawai/modules/transaction/payment", {
     amount: data,
@@ -66,6 +68,7 @@ const { isPending: isCreatingPayment, mutate: createPayment } = useMutation({
 
 const handlePay = async () => {
   errorCreatePayment.value = null;
+  statusPembayaran.value = null;
   await createPayment(amount.value);
 };
 
@@ -89,7 +92,7 @@ const {
   isFetchingNextPage,
   refetch,
 } = useInfiniteQuery({
-  qqueryKey: [`payment-history`, filter.value],
+  queryKey: [`payment-history`, filter.value],
   queryFn: getListPaymentService,
 
   getNextPageParam: (lastPage) => {
@@ -128,6 +131,20 @@ const handleTransactionDetail = (item) => {
     behavior: "smooth",
   });
 };
+// listen socket io
+const socket = proxy.socket;
+
+watch(paymentData, (val) => {
+  if (val) {
+    socket.on(
+      `send_notification_payment_${val.data.transaction.code}`,
+      (data) => {
+        statusPembayaran.value = data.status;
+        refetch();
+      }
+    );
+  }
+});
 </script>
 
 <template>
@@ -179,7 +196,11 @@ const handleTransactionDetail = (item) => {
     >
       <div class="flex flex-column gap-2">
         <h3 class="m-0 text-sm uppercase text-color-secondary">
-          Silahkan scan kode QR di bawah ini
+          {{
+            statusPembayaran === "success"
+              ? "Pembayaran Berhasil"
+              : "Silahkan scan kode QR di bawah ini"
+          }}
         </h3>
         <Divider />
         <div class="flex flex-column gap-2">
@@ -198,7 +219,21 @@ const handleTransactionDetail = (item) => {
         </div>
         <Divider />
         <div class="flex justify-content-center">
-          <img :src="qrcode" alt="" />
+          <img
+            :src="qrcode"
+            alt="QRCODE PEMBAYARAN"
+            v-if="statusPembayaran === null"
+          />
+          <i
+            class="pi pi-check-circle text-green-400 mb-5"
+            style="font-size: 10rem"
+            v-if="statusPembayaran === 'success'"
+          ></i>
+          <i
+            class="pi pi-times-circle text-red-400 mb-5"
+            style="font-size: 10rem"
+            v-if="statusPembayaran === 'failed'"
+          ></i>
         </div>
         <Button label="Kembali" class="w-full" @click="paymentData = null" />
       </div>

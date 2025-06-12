@@ -26,6 +26,7 @@ const { mutateAsync: scanMutate, isPending: scanPending } = useMutation({
   mutationFn: scanService,
 });
 const result = ref("");
+
 const handleScan = async (code) => {
   await scanMutate(
     {
@@ -58,20 +59,14 @@ const handleScan = async (code) => {
             drawer.closeDrawer();
             break;
           case "PAYMENT":
-            alert(JSON.stringify(data.data.data));
-            // toast.add({
-            //   severity: "success",
-            //   summary: "Success",
-            //   detail: "Presensi Berhasil",
-            //   life: 3000,
-            // });
-            // router.push({
-            //   name: "presences-detail",
-            //   params: {
-            //     id: data.data.data.presenceId,
-            //   },
-            // });
-            // drawer.closeDrawer();
+            // must be use pin
+            toast.add({
+              severity: "success",
+              summary: "Success",
+              detail: "Pembayaran Berhasil",
+              life: 3000,
+            });
+            drawer.closeDrawer();
             break;
           default:
             toast.add({
